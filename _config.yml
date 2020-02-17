@@ -6,13 +6,13 @@
 # https://learn-the-web.algonquindesign.ca/topics/markdown-yaml-cheat-sheet/#yaml
 # https://learnxinyminutes.com/docs/yaml/
 
-title: Edit _config.yml to set your title!
-description: This is where the description of your site will go. You should change it by editing the _config.yml file. It can be as long as you like! Happy blogging... ❤
-github_username: jph00
+title: |Making commits each day, towards a better future| 
+description: Hi everyone and welcome to my blog. This is a place where I write freely and try to uncomplicate the complicated through Python code. My journey in Machine Learning started not so long ago, so you and I are both in agreement, that I have plenty to learn. In this blog, I try to explain what I know in a concise language so that someone after me doesn't have to go through the same pain that I went through the first time. If you feel that some ideas can be expressed more clearly, I am very happy to recieve constructive feedback. Please feel free to reach out to me on Twitter or my email.
+github_username: amaarora
 
 # Email and twitter are optional:
-email:
-twitter_username:
+email: aman.arora0210@gmail.com
+twitter_username: amaarora
 
 # Set this to true to get LaTeX math equation support
 use_math:
