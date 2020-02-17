@@ -18,7 +18,7 @@ twitter_username: amaarora
 use_math:
 
 # Add your Google Analytics ID here if you have one and want to use it
-google_analytics: a158677010w223104346p211792372
+google_analytics: UA-158677010-1
 
 # Everything below here can be ignored, unless you want to change the theme entirely
 theme: minima
