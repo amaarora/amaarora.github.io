@@ -1,4 +1,4 @@
-# Aman Arora
+# About
 I am a Data Scientist at [CoreLogic Australia](https://www.corelogic.com.au/) where I spend a lot of my time building SOTA algorithms to predict house and rental prices across all of Australia and NZ. 
 
 I have a passion for deep learning, thanks to [Jeremy Howard](https://twitter.com/jeremyphoward) who made it possible for me through [fast.ai](fast.ai) to begin my journey in this space around 1.5 years ago.
