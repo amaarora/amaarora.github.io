@@ -23,6 +23,20 @@ To understand the GPT-2 model completely, we will first need to take a deep dive
 1. [The Annotated Transformer](https://nlp.seas.harvard.edu/2018/04/03/attention.html) by Harvard NLP 
 1. [Introduction to the Transformer](https://www.youtube.com/watch?v=AFkGPmU16QA&list=PLtmWHNX-gukKocXQOkQjuVxglSDYWsSh9&index=18&t=0s) by Rachel Thomas and Jeremy Howard
 
+
+---
+## Attention is all you need
+
+---
+> Let's first look at Attention.
+
+<div class="img-div" markdown="0">
+  <image src="/images/Transformer-architecture.PNG"/>
+  <br />
+</div>
+
+> The GPT-2 only utilizes the Decoder layer on the right with only 1 Multi Head Attention Layer followed by a FeedForward Network.
+
 ## Imports
 ```python
 import torch
@@ -38,14 +52,12 @@ import logging
 logging.basicConfig(level = logging.INFO)
 logger = logging.getLogger()
 ```
----
-## Attention is all you need
+## Transformer Decoder
+To re-use the terminology used to describe the Transformer, the attention is a function of a query (Q) and set of key (K) and value (V) pairs. To handle longer sequences, we modify the multi-head self-attention of the Transformer to reduce memory usage by limiting the dot products between Q and K in:
 
----
-<div class="img-div" markdown="0">
-  <image src="/images/Transformer-architecture.PNG"/>
-  <br />
-</div>
+\text{Attention}(\mathbf{Q}, \mathbf{K}, \mathbf{V}) = \text{softmax}(\frac{\mathbf{Q}\mathbf{K}^\top}{\sqrt{n}})\mathbf{V}
+
+Local attention: Sequence tokens are divided into blocks of similar length and attention is per- formed in each block independently. As the attention memory cost per block becomes constant, this modification allow us to keep the number of activations linear with respect to the sequence length.
 
 ---
 ## Language Models are Unsupervised Multitask Learners
