@@ -55,11 +55,79 @@ logger = logging.getLogger()
 ## Transformer Decoder
 To re-use the terminology used to describe the Transformer, the attention is a function of a query (Q) and set of key (K) and value (V) pairs. To handle longer sequences, we modify the multi-head self-attention of the Transformer to reduce memory usage by limiting the dot products between Q and K in:
 
-<div class="img-div" markdown="0">
-  <image src="/images/Attention-formula.PNG"/>
-  <br />
-</div>
+![](/images/Attention-formula.PNG "Attention Formula")
 
+```python
+class Conv1D(nn.Module):
+    def __init__(self, nx, nf):
+        super().__init__()
+        self.nf = nf
+        w = torch.empty(nx, nf)
+        nn.init.normal_(w, std=0.02)
+        self.weight = nn.Parameter(w)
+        self.bias = nn.Parameter(torch.zeros(nf))
+
+    def forward(self, x):
+        size_out = x.size()[:-1] + (self.nf,)
+        x = torch.addmm(self.bias, x.view(-1, x.size(-1)), self.weight)
+        x = x.view(*size_out)
+        return x
+
+class FeedForward(nn.Module):
+    def __init__(self, dropout, d_model=768, nx=768*4):
+        super().__init__()
+        self.c_fc    = Conv1D(d_model, nx)
+        self.c_proj  = Conv1D(nx, d_model)
+        self.act     = F.gelu
+        self.dropout = nn.Dropout(dropout)
+        
+    def forward(self, x):
+        return self.dropout(self.c_proj(self.act(self.c_fc(x))))
+
+class Attention(nn.Module):
+    def __init__(self, d_model=768, n_head=12, n_ctx=1024, d_head=64, bias=True, scale=False):
+        super().__init__()
+        self.n_head  = n_head
+        self.d_model = d_model
+        self.c_attn  = Conv1D(d_model, d_model*3)
+        self.scale   = scale
+        self.softmax = nn.Softmax(dim=-1)
+        self.register_buffer("bias", torch.tril(torch.ones(n_ctx, n_ctx)).view(1, 1, n_ctx, n_ctx))
+        self.dropout = nn.Dropout(0.1)
+        self.c_proj  = Conv1D(d_model, d_model)
+        
+    def split_heads(self, x):
+        "return shape [`batch`, `head`, `sequence`, `features`]"
+        new_shape = x.size()[:-1] + (self.n_head, x.size(-1)//self.n_head) 
+        x = x.view(*new_shape)
+        return x.permute(0, 2, 1, 3) 
+    
+    def _attn(self, q, k, v, attn_mask=None):
+        scores  = torch.matmul(q, k.transpose(-2, -1))
+        if self.scale: scores = scores/math.sqrt(v.size(-1))
+        nd, ns  = scores.size(-2), scores.size(-1)
+        bias    = self.bias[:,:, ns-nd:ns, :ns]
+        scores  = scores*bias - 1e4*(1-bias) 
+        if attn_mask is not None: scores = scores + attn_mask
+        scores  = self.softmax(scores)
+        scores  = self.dropout(scores)
+        outputs = torch.matmul(scores, v)
+        return outputs
+    
+    def merge_heads(self, x):
+        x         = x.permute(0, 2, 1, 3).contiguous()
+        new_shape = x.size()[:-2] + (x.size(-2)*x.size(-1),)
+        return x.view(*new_shape)
+        
+    def forward(self, x):
+        x        = self.c_attn(x) #new `x` shape - `[1,3,2304]`
+        q, k, v  = x.split(self.d_model, dim=2)
+        q, k, v  = self.split_heads(q), self.split_heads(k), self.split_heads(v)
+        out      = self._attn(q, k, v)
+        out      = self.merge_heads(out)
+        out      = self.c_proj(out)
+        return out
+```
 ---
 ## Language Models are Unsupervised Multitask Learners
 
