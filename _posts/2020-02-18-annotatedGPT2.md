@@ -10,15 +10,18 @@ One of the most brilliant and well-explained articles I have ever read is [The A
 
 Something I have come to realize with my little experience in Machine Learning, when you write things in code, the implementation and the secrets become clearer. It is not magic anymore. 
 
-Jeffrey Friedl in the book [Mastering Regular Expressions](https://learning.oreilly.com/library/view/mastering-regular-expressions/0596528124/ch01.html) said:
 >  There is nothing magic about magic. The magician merely understands something simple which doesn’t appear to be simple or natural to the untrained audience. Once you learn how to hold a card while making your hand look empty, you only need practice before you, too, can “do magic.”
+>
+> -- Jeffrey Friedl in the book [Mastering Regular Expressions](https://learning.oreilly.com/library/view/mastering-regular-expressions/0596528124/ch01.html)
 
 The **[GPT-2](https://openai.com/blog/better-language-models/)** might seem like magic at first with all it's glitter and beauty too, but hopefully I would have uncovered that magic for you and revealed all the tricks by the time you finish reading this post. That is my goal. To make it as simple as possible for the keen to understand how the **GPT-2** model works underneath. 
 
 **Note:** Pretty much the entirety of the code has been copied, inspired and referenced from [Hugging Face's implementation](https://github.com/huggingface/transformers/blob/master/src/transformers/modeling_gpt2.py) of the GPT-2, keeping merely the essentials for simplicity. If you want to train the GPT-2 model on parallel GPUs, save checkpoints while fine-tuning, run inference tasks on multiple CPUs and much more, I would recommend using the Hugging Face API. A simple tutorial on how to do so was recently released by Hugging Face and can be found [here].
-In this post, I am not trying to reinvent the wheel, but merely bringing together a list of prexisting excellent resources to make it easier for the reader to grasp GPT-2. 
+In this post, I am not trying to reinvent the wheel, but merely bringing together a list of prexisting excellent resources to make it easier for the reader to grasp GPT-2. I leave it up to the reader to further build upon these foundations in any area they choose.
 
-> Enter a quote about once the foundations are laid, building can be built on top.
+> You can't build a great building on a weak foundation. You must have a solid foundation if you're going to have a strong superstructure. 
+>
+> -- Gordon B. Hinckley
 
 ## Prerequisites
 To understand the GPT-2 model completely, we will first need to take a deep dive inside Transformers. The GPT-2 is a Transformer based architecture utilizing the Decoder only part. Here is an excellent list of resources to aid your understanding regarding Transformers: 
