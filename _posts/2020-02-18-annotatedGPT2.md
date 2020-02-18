@@ -15,7 +15,10 @@ Jeffrey Friedl in the book [Mastering Regular Expressions](https://learning.orei
 
 The **[GPT-2](https://openai.com/blog/better-language-models/)** might seem like magic at first with all it's glitter and beauty too, but hopefully I would have uncovered that magic for you and revealed all the tricks by the time you finish reading this post. That is my goal. To make it as simple as possible for the keen to understand how the **GPT-2** model works underneath. 
 
-**Note:** Pretty much the entirety of the code has been copied, inspired and referenced from [Hugging Face's implementation](https://github.com/huggingface/transformers/blob/master/src/transformers/modeling_gpt2.py) of the GPT-2. You can get to know more about Hugging Face [here](https://huggingface.co/). I am not trying to reinvent the wheel, but merely bringing together a list of prexisting excellent resources to make it easier for the reader to grasp GPT-2. 
+**Note:** Pretty much the entirety of the code has been copied, inspired and referenced from [Hugging Face's implementation](https://github.com/huggingface/transformers/blob/master/src/transformers/modeling_gpt2.py) of the GPT-2, keeping merely the essentials for simplicity. If you want to train the GPT-2 model on parallel GPUs, save checkpoints while fine-tuning, run inference tasks on multiple CPUs and much more, I would recommend using the Hugging Face API. A simple tutorial on how to do so was recently released by Hugging Face and can be found [here].
+In this post, I am not trying to reinvent the wheel, but merely bringing together a list of prexisting excellent resources to make it easier for the reader to grasp GPT-2. 
+
+> Enter a quote about once the foundations are laid, building can be built on top.
 
 ## Prerequisites
 To understand the GPT-2 model completely, we will first need to take a deep dive inside Transformers. The GPT-2 is a Transformer based architecture utilizing the Decoder only part. Here is an excellent list of resources to aid your understanding regarding Transformers: 
@@ -69,7 +72,33 @@ class Conv1D(nn.Module):
         x = torch.addmm(self.bias, x.view(-1, x.size(-1)), self.weight)
         x = x.view(*size_out)
         return x
+```
+### CONV1D Layer Explained
+The `CONV1D` layer can be thought of as a LINEAR layer itself. Essentially, it is casting an initial tensor `x` (having the final dimension of `x.size(-1)`) being passed to it to have a final dimension of size `self.nf`. 
 
+Here's an example output of the same: 
+```python
+conv1d = CONV1D(768, 768*3)
+x      = torch.rand(1,4,768) #represents a sequence of batch_size=1, seq_len=4 and embedding_sz=768, something like "Hello how are you"
+x      = conv1d(x)
+x.shape
+
+>> torch.size([1, 4, 768*3])
+```
+As can be seen in the example above, the final dimension of tensor returned by `CONV1D` is 3 times the initial size. We do this to be able to cast the input to query, key and value.
+
+It is possible then to retrieve the query, key and value matrices like so:
+```python
+query, key, value = x.split(768, dim=-1)
+
+query.shape, key.shape, value.shape 
+>> torch.size([1,4,768]), torch.size([1,4,768]), torch.size([1,4,768])
+```
+
+> Another way to do this would have been to have separate `Wq`, `Wk` and `Wv` matrices. I have explained this under the **EXTRA** section of this post at the bottom. 
+
+### FEEDFORWARD Layer Explained
+```python
 class FeedForward(nn.Module):
     def __init__(self, dropout, d_model=768, nx=768*4):
         super().__init__()
@@ -80,7 +109,16 @@ class FeedForward(nn.Module):
         
     def forward(self, x):
         return self.dropout(self.c_proj(self.act(self.c_fc(x))))
+```
+Something, that's just so well explained in Jay Alammar's post - also referenced above, is how the inputs are passed through `ATTENTION` layer first and then on to `FEEDFORWARD` layer. The Feedforward network, is a normal nueral network that accepts the outputs from the `ATTENTION` layer (which are of size 768 - explained in the next section), casts them to `nx` (768*4) dimension, adds an activation function `self.act` (GELU), casts them back to `d_model` (768) and adds dropout (0.1). 
 
+This is also mentioned in the **GPT** research paper referenced below. 
+> For the position-wise feed-forward networks, we used 3072 dimensional inner states
+
+At present, there is active research to use `self.attention` based Decoder networks only, but until now networks with the `feedforward` layer seem to do a better job. ##TODO: Add reference
+
+### ATTENTION Layer Explained
+```python
 class Attention(nn.Module):
     def __init__(self, d_model=768, n_head=12, n_ctx=1024, d_head=64, bias=True, scale=False):
         super().__init__()
@@ -125,6 +163,8 @@ class Attention(nn.Module):
         out      = self.c_proj(out)
         return out
 ```
+
+
 ---
 ## Language Models are Unsupervised Multitask Learners
 
