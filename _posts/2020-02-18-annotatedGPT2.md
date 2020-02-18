@@ -42,8 +42,6 @@ logger = logging.getLogger()
 ## Attention is all you need
 
 ---
-<!-- ![](/images/Transformer-architecture.PNG "The Transformer Architecture") -->
-
 <div class="img-div" markdown="0">
   <image src="/images/Transformer-architecture.PNG"/>
   <br />
