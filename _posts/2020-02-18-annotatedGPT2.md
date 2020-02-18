@@ -55,9 +55,10 @@ logger = logging.getLogger()
 ## Transformer Decoder
 To re-use the terminology used to describe the Transformer, the attention is a function of a query (Q) and set of key (K) and value (V) pairs. To handle longer sequences, we modify the multi-head self-attention of the Transformer to reduce memory usage by limiting the dot products between Q and K in:
 
-\text{Attention}(\mathbf{Q}, \mathbf{K}, \mathbf{V}) = \text{softmax}(\frac{\mathbf{Q}\mathbf{K}^\top}{\sqrt{n}})\mathbf{V}
-
-Local attention: Sequence tokens are divided into blocks of similar length and attention is per- formed in each block independently. As the attention memory cost per block becomes constant, this modification allow us to keep the number of activations linear with respect to the sequence length.
+<div class="img-div" markdown="0">
+  <image src="/images/Attention-formula.PNG"/>
+  <br />
+</div>
 
 ---
 ## Language Models are Unsupervised Multitask Learners
