@@ -24,7 +24,7 @@ To understand the GPT-2 model completely, we will first need to take a deep dive
 1. [Introduction to the Transformer](https://www.youtube.com/watch?v=AFkGPmU16QA&list=PLtmWHNX-gukKocXQOkQjuVxglSDYWsSh9&index=18&t=0s) by Rachel Thomas and Jeremy Howard
 
 ## Imports
-```python
+
 {% highlight python %}
 import torch
 import copy
@@ -39,7 +39,7 @@ import logging
 logging.basicConfig(level = logging.INFO)
 logger = logging.getLogger()
 {% endhighlight %}
-```
+
 ---
 ## Attention is all you need
 
