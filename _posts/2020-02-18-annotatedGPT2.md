@@ -25,7 +25,6 @@ To understand the GPT-2 model completely, we will first need to take a deep dive
 
 ## Imports
 ```python
-{% highlight python %}
 import torch
 import copy
 import torch.nn as nn
@@ -38,7 +37,6 @@ from tqdm import tqdm_notebook, trange
 import logging
 logging.basicConfig(level = logging.INFO)
 logger = logging.getLogger()
-{% endhighlight %}
 ```
 ---
 ## Attention is all you need
