@@ -35,11 +35,11 @@ To understand the GPT-2 model completely, we will first need to take a deep dive
 ## Attention is all you need
 
 ---
-> Let's first look at Attention.
+Before, we can dig deep into GPT-2 model and model architecture, let's do a quick recap on **Attention**. Hopefully, by now you have a good understanding of what Attention is and how it works for longer sequences. The Transformer Architecture, utilizes Attention at three places - inside the Encoder on input embeddings, inside the Decoder on output embeddings, and also on the outputs of Encoder.  
 
 ![](/images/Transformer-architecture.PNG "Transformer Architecture")
 
-> The GPT-2 only utilizes the Decoder layer on the right with only 1 Multi Head Attention Layer followed by a FeedForward Network.
+The GPT-2 in itself utilizes the Transformer Architecture referenced above and is in itself a Decoder only based Network. Before diving deep into the GPT-2, let's first implement Attention.
 
 ## Imports
 ```python
@@ -56,7 +56,7 @@ import logging
 logging.basicConfig(level = logging.INFO)
 logger = logging.getLogger()
 ```
-## Transformer Decoder
+## [Transformer Decoder](https://arxiv.org/abs/1801.10198)
 To re-use the terminology used to describe the Transformer, the attention is a function of a query (Q) and set of key (K) and value (V) pairs. To handle longer sequences, we modify the multi-head self-attention of the Transformer to reduce memory usage by limiting the dot products between Q and K in:
 
 ![](/images/Attention-formula.PNG "Attention as a combination of query, key & value")
@@ -145,8 +145,6 @@ class Attention(nn.Module):
         scores  = torch.matmul(q, k.transpose(-2, -1))
         if self.scale: scores = scores/math.sqrt(v.size(-1))
         nd, ns  = scores.size(-2), scores.size(-1)
-        bias    = self.bias[:,:, ns-nd:ns, :ns]
-        scores  = scores*bias - 1e4*(1-bias) 
         if attn_mask is not None: scores = scores + attn_mask
         scores  = self.softmax(scores)
         scores  = self.dropout(scores)
@@ -167,7 +165,22 @@ class Attention(nn.Module):
         out      = self.c_proj(out)
         return out
 ```
+#### Scaled Dot-Product Attention 
+We call our particular attention "Scaled Dot-Product Attention". The input consists of queries and keys of dimension dk, and values of dimension dv. We compute the dot products of the query with all keys, divide each by √dk, and apply a softmax function to obtain the weights on the values.
 
+![](/images/Attention-dot-product.PNG "Attention Dot Product")
+
+In practice, we compute the attention function on a set of queries simultaneously, packed together into a matrix Q. The keys and values are also packed together into matrices K and V . We compute the matrix of outputs as:
+
+![](/images/Attention-formula.PNG "Output matrix as a combination of `Q`, `K` and `V`")
+	
+The two most commonly used attention functions are additive attention, and dot-product (multiplicative) attention. Dot-product attention is identical to our algorithm, except for the scaling factor of `1/√dk`. Additive attention computes the compatibility function using a feed-forward network with a single hidden layer. While the two are similar in theoretical complexity, dot-product attention is much faster and more space-efficient in practice, since it can be implemented using highly optimized matrix multiplication code. While for small values of dk the two mechanisms perform similarly, additive attention outperforms dot product attention without scaling for larger values of `dk`. We suspect that for large values of `dk`, the dot products grow large in magnitude, pushing the softmax function into regions where it has extremely small gradients. To counteract this effect, we scale the dot products by `1/√dk`.
+
+> The above extract is from the paper [Attention is all you need](https://arxiv.org/abs/1706.03762).
+
+To implement the The Attention layer in code, we first utilize the `CONV1D` layer and get the `q`, `k` and `v` matrices as explained before.
+
+Once we have the `q`, `k` and `v` matrices, we can perform attention. Once we have these matrices, we can compute the matrix of outputs inside the function `_attn`. This function replicates the formula mentioned above inside `Attention Dot Product`.
 
 ---
 ## Language Models are Unsupervised Multitask Learners
