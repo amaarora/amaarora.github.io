@@ -30,10 +30,7 @@ To understand the GPT-2 model completely, we will first need to take a deep dive
 ---
 > Let's first look at Attention.
 
-<div class="img-div" markdown="0">
-  <image src="/images/Transformer-architecture.PNG"/>
-  <br />
-</div>
+![](/images/Transformer-architecture.PNG "Transformer Architecture")
 
 > The GPT-2 only utilizes the Decoder layer on the right with only 1 Multi Head Attention Layer followed by a FeedForward Network.
 
@@ -55,7 +52,7 @@ logger = logging.getLogger()
 ## Transformer Decoder
 To re-use the terminology used to describe the Transformer, the attention is a function of a query (Q) and set of key (K) and value (V) pairs. To handle longer sequences, we modify the multi-head self-attention of the Transformer to reduce memory usage by limiting the dot products between Q and K in:
 
-![](/images/Attention-formula.PNG "Attention Formula")
+![](/images/Attention-formula.PNG "Attention as a combination of query, key & value")
 
 ```python
 class Conv1D(nn.Module):
@@ -144,11 +141,7 @@ We use a [Transformer](https://arxiv.org/abs/1706.03762) (Vaswani et al., 2017) 
 ## Model Specifications (GPT)
 Our model largely follows the original transformer work. We trained a **12-layer decoder-only transformer** with **masked self-attention heads** (768 dimensional states and 12 attention heads). For the position-wise feed-forward networks, we used 3072 dimensional inner states. We used the Adam optimization scheme with a max learning rate of 2.5e-4. The learning rate was increased linearly from zero over the first 2000 updates and annealed to 0 using a cosine schedule. We train for 100 epochs on minibatches of 64 randomly sampled, contiguous sequences of 512 tokens. Since [layernorm](https://arxiv.org/abs/1607.06450) is used extensively throughout the model, a simple weight initialization of **N(0, 0.02)** was sufficient. We used a **bytepair encoding (BPE)** vocabulary with 40,000 merges and residual, embedding, and attention dropouts with a rate of 0.1 for regularization. We also employed a modified version of L2 regularization proposed in, with w = 0.01 on all non bias or gain weights. For the activation function, we used the [Gaussian Error Linear Unit (GELU)](https://arxiv.org/abs/1606.08415). 
 
-<div class="img-div" markdown="0">
-  <image src="/images/gpt-architecture.PNG"/>
-  <br />
-</div>
-
+![](/images/gpt-architecture.PNG "GPT Architecture")
 
 > An excellent resource to further explain the model is written by Jay Alammar - [The illustrated GPT-2](http://jalammar.github.io/illustrated-gpt2/). This would be a good time to read the introduction part of this blog post which very clearly explains The Transformer Block. 
 
