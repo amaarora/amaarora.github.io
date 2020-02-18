@@ -21,7 +21,7 @@ use_math: true
 google_analytics: UA-158677010-1
 
 # Everything below here can be ignored, unless you want to change the theme entirely
-theme: minima
+theme: hyde
 plugins:
   - jekyll-feed
   - jekyll-gist
