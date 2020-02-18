@@ -39,7 +39,7 @@ logging.basicConfig(level = logging.INFO)
 logger = logging.getLogger()
 ```
 ---
-**Attention is all you need**
+## Attention is all you need
 
 ---
 <!-- ![](/images/Transformer-architecture.PNG "The Transformer Architecture") -->
@@ -50,7 +50,7 @@ logger = logging.getLogger()
 </div>
 
 ---
-**Language Models are Unsupervised Multitask Learners**
+## Language Models are Unsupervised Multitask Learners
 
 ---
 
