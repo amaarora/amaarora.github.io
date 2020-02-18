@@ -66,7 +66,7 @@ Our model largely follows the original transformer work. We trained a **12-layer
 > An excellent resource to further explain the model is written by Jay Alammar - [The illustrated GPT-2](http://jalammar.github.io/illustrated-gpt2/). This would be a good time to read the introduction part of this blog post which very clearly explains The Transformer Block. 
 
 
-```Python
+```python
 class GPT2(nn.Module):
     def __init__(self, nlayers=12, n_ctx=1024, d_model=768, vcb_sz=50257):
         super(GPT2, self).__init__()
