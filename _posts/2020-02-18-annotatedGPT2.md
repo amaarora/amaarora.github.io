@@ -428,3 +428,6 @@ The key difference between the implementation above and the one we have used is 
 > Also, a special thanks to [Hugging Face](https://huggingface.co/) for creating an open source NLP library and providing a number of [Pretrained Models](https://huggingface.co/transformers/pretrained_models.html) to use. As mentioned the code in this blog post comes directly from the Hugging Face library.
 > And, [Jay Alammar](http://jalammar.github.io/) for the excellent work that he has been doing to Visualise machine learning concepts. [The Illustrated GPT-2](http://jalammar.github.io/illustrated-gpt2/) is one of the most comprehensive blog posts on GPT-2. 
 > Finally, to Harvard NLP, for [The Annotated Transformer](https://nlp.seas.harvard.edu/2018/04/03/attention.html), a beautiful and easy to follow implementation of Transformers in PyTorch. 
+
+## Feedback 
+<blockquote class="twitter-tweet" data-theme="light"><p lang="en" dir="ltr">This is a really wonderful resource, and draws together many very nice pieces of work. <a href="https://t.co/CM16ByNrbt">https://t.co/CM16ByNrbt</a></p>&mdash; Jeremy Howard (@jeremyphoward) <a href="https://twitter.com/jeremyphoward/status/1230252636256919552?ref_src=twsrc%5Etfw">February 19, 2020</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
