@@ -227,7 +227,9 @@ class TransformerBlock(nn.Module):
 ```
 The `Transformer Block` consists of Attention and FeedForward Layers. As referenced from the GPT-2 Architecture Model Specification,
 >  [Layer normalization](https://arxiv.org/abs/1607.06450) (Ba et al., 2016) was moved to the input of each sub-block
-Here are the sub-blocks are Attention and FeedForward. Thus, inside a Transformer Decoder Block, essentially we first pass the inputs to a `LayerNorm` followed by the first sub-block `Attention`. Next, we pass the outputs of this sub-block to `LayerNorm` again and finally to `FeedForward` layer. 
+Here are the sub-blocks are Attention and FeedForward. 
+
+Thus, inside a Transformer Decoder Block, essentially we first pass the inputs to a `LayerNorm` followed by the first sub-block `Attention`. Next, we pass the outputs of this sub-block to `LayerNorm` again and finally to `FeedForward` layer. 
 
 ## The GPT-2 Architecture Explained
 ```python
