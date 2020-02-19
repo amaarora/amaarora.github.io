@@ -200,6 +200,8 @@ class Attention(nn.Module):
         out      = self.c_proj(out)
         return out
 ```
+> Another way to implement `Attention` is explained in the `Extras` section at the bottom of this blog. I find it to be more intuitive and easy to compare with the research paper. It utilizes Linear layers instead of `CONV1D` to cast inputs to `Q`, `K` and `V` matrices. The reason why we haven't used it is because we use the pretrained weights for `CONV1D` layer from Hugging Face.
+
 #### Multi-Head Attention
 > The below extract is from the paper [Attention is all you need](https://arxiv.org/abs/1706.03762).
 
@@ -373,3 +375,52 @@ tokenizer.decode(out[0])
 
 >> 'The planet earth is the source of all of all the light," says the study that the government will'
 ```
+
+## Extras
+Another way to implement `Attention` as shown in the NLP Course by fast.ai referenced from [here](https://github.com/fastai/course-nlp/blob/master/8-translation-transformer.ipynb), that I find to be more intuitive is as below: 
+
+```python 
+class Attention_FASTAI(nn.Module):
+    def __init__(self, d_model=768, n_head=12, d_head=64, n_ctx=1024, bias=True, scale=False):
+        super().__init__()
+        self.n_head   = n_head
+        self.d_head   = d_head
+        self.softmax  = nn.Softmax(dim=-1)
+        self.scale    = scale
+        self.atn_drop = nn.Dropout(0.1)
+        self.wq, self.wk, self.wv = [nn.Linear(d_model, n_head*d_head, 
+                                               bias=bias) for o in range(3)]
+    
+
+    def split_heads(self, x, layer, bs):
+        x = layer(x)
+        return x.view(bs, x.size(1), self.n_head, self.d_head).permute(0,2,1,3)
+        
+    def _attn(self, q, k, v, attn_mask=None):
+        scores  = torch.matmul(q, k.transpose(-2, -1))
+        if self.scale: scores = scores/math.sqrt(v.size(-1))
+        if attn_mask is not None: 
+            scores = scores.float().masked_fill(attn_mask, -float('inf')).type_as(scores)
+        attn_prob  = self.atn_drop(self.softmax(scores))
+        attn_vec   = attn_prob @ v
+        return attn_vec
+    
+    def merge_heads(self, x, bs, seq_len):
+        x         = x.permute(0, 2, 1, 3).contiguous()
+        return x.view(bs, seq_len, -1)
+        
+    def forward(self, q, k, v, mask=None):
+        bs, seq_len = q.size(0), q.size(1)
+        wq, wk, wv  = map(lambda o:self.split_heads(*o, bs),
+                        zip((q,k,v), (self.wq, self.wk, self.wv)))
+        attn_vec    = self._attn(wq, wk, wv)
+        attn_vec    = self.merge_heads(attn_vec, bs, seq_len)
+        return attn_vec
+```
+The key difference between the implementation above and the one we have used is that this implementation does not use `CONV1D`. Instead, we first pass the input `x` to `self.wq`, `self.wk` and `self.wv` Linear Layers to get `wq`, `wk` and `wv` matrices and then perform attention as before. 
+
+## Credits
+> I just want to take the time to thank [Rachel Thomas](https://twitter.com/math_rachel) and [Jeremy Howard](https://twitter.com/jeremyphoward) for a great [NLP course](https://www.fast.ai/2019/07/08/fastai-nlp/) and the fast.ai course in general, which has helped me bolster my understanding of RNNs, GRUs, AWD-LSTM and Transformers. 
+> Also, a special thanks to [Hugging Face](https://huggingface.co/) for creating an open source NLP library and providing a number of [Pretrained Models](https://huggingface.co/transformers/pretrained_models.html) to use. As mentioned the code in this blog post comes directly from the Hugging Face library.
+> And, [Jay Alammar](http://jalammar.github.io/) for the excellent work that he has been doing to Visualise machine learning concepts. [The Illustrated GPT-2](http://jalammar.github.io/illustrated-gpt2/) is one of the most comprehensive blog posts on GPT-2. 
+> Finally, to Harvard NLP, for [The Annotated Transformer](https://nlp.seas.harvard.edu/2018/04/03/attention.html), a beautiful and easy to follow implementation of Transformers in PyTorch. 
