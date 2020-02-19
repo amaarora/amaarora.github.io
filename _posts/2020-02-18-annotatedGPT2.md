@@ -95,7 +95,7 @@ class Conv1D(nn.Module):
         x = x.view(*size_out)
         return x
 ```
-### **CONV1D** Layer Explained
+### CONV1D Layer Explained
 The `CONV1D` layer can be thought of as a LINEAR layer itself. Essentially, it is casting an initial tensor `x` (having the final dimension of `x.size(-1)`) being passed to it to have a final dimension of size `self.nf`. 
 
 Here's an example output of the same: 
@@ -120,7 +120,7 @@ query.shape, key.shape, value.shape
 
 > Another way to cast the input to `Q`, `K` and `V` matrices would have to been to have separate `Wq`, `Wk` and `Wv` matrices. I have explained this under the **EXTRA** section of this post at the bottom. I find this other approach more intuitive and relatable, but we use the `CONV1D` layer in this post, because we reuse the `CONV1D` pretrained weights from Hugging Face.
 
-### **FEEDFORWARD** Layer Explained
+### FEEDFORWARD Layer Explained
 ```python
 class FeedForward(nn.Module):
     def __init__(self, dropout, d_model=768, nx=768*4):
@@ -138,7 +138,7 @@ Something, that's just so well explained in Jay Alammar's post - also referenced
 This is also mentioned in the **GPT** research paper referenced below. 
 > For the position-wise feed-forward networks, we used 3072 dimensional inner states
 
-### **ATTENTION** Layer Explained
+### ATTENTION Layer Explained
 
 > The below extract is from the paper [Attention is all you need](https://arxiv.org/abs/1706.03762).
 
