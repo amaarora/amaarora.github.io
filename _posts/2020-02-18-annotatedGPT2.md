@@ -202,6 +202,7 @@ class Attention(nn.Module):
 ```
 #### Multi-Head Attention
 > The below extract is from the paper [Attention is all you need](https://arxiv.org/abs/1706.03762).
+
 Instead of performing a single attention function with dmodel-dimensional keys, values and queries, we found it beneficial to linearly project the `queries`, `keys` and `values` h times with different, learned linear projections to `dk`, `dk` and `dv` dimensions, respectively. On each of these projected versions of `queries`, `keys` and `values` we then perform the attention function in parallel, yielding `dv`-dimensional output values. These are **concatenated** and once again projected, resulting in the final values, as depicted in Figure below.
 
 ![](/images/Transformers-multi-head-attention.PNG "Multi Head Attention")
@@ -246,6 +247,11 @@ Here are the sub-blocks are Attention and FeedForward.
 Thus, inside a Transformer Decoder Block, essentially we first pass the inputs to a `LayerNorm` followed by the first sub-block `Attention`. Next, we pass the outputs of this sub-block to `LayerNorm` again and finally to `FeedForward` layer. 
 
 ## The GPT-2 Architecture Explained
+
+As referenced from the GPT paper, 
+>We trained a 12-layer decoder-only transformer with masked self-attention heads (768 dimensional states and 12 attention heads).
+
+
 ```python
 class GPT2(nn.Module):
     def __init__(self, nlayers=12, n_ctx=1024, d_model=768, vcb_sz=50257):
