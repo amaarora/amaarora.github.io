@@ -249,10 +249,15 @@ Thus, inside a Transformer Decoder Block, essentially we first pass the inputs t
 ## The GPT-2 Architecture Explained
 
 As referenced from the GPT paper, 
->We trained a 12-layer decoder-only transformer with masked self-attention heads (768 dimensional states and 12 attention heads).
 
+> We trained a 12-layer decoder-only transformer with masked self-attention heads (768 dimensional states and 12 attention heads).
+
+Thus, the complete GPT-2 architecture is the `TransformerBlock` copied over 12 times. 
 
 ```python
+def _get_clones(module, n):
+    return ModuleList([copy.deepcopy(module) for i in range(n)])
+
 class GPT2(nn.Module):
     def __init__(self, nlayers=12, n_ctx=1024, d_model=768, vcb_sz=50257):
         super(GPT2, self).__init__()
@@ -297,3 +302,74 @@ class GPT2(nn.Module):
         return logits
 ```
 
+> Something I have not mentioned yet is `Positional Encoding` and `Token Embeddings`. Since, we cannot pass words such as "hey" or "hello" directly to the model, we first `Tokenize` our inputs. Next, we use `Embeddings` to represent the tokens as numbers. This [post](http://jalammar.github.io/illustrated-word2vec/) by Jay Alammar again explains Embeddings very well. 
+>
+> Also, since unlike the RNNs where the input words are passed sequentially, Transformers take input matrices in parallel thus losing the sense of position for the words being input. To make up for the loss, before handling the `Token Embeddings` to the model, we add `Positional Encoding` - a signal that indicates the order of the words in the sequence. Since, as mentioned before, the context size of GPT-2 is 1024, the positional encodings are of dimensions `[1024, 768]`.
+
+![](/images/PositionalEncodings.PNG "Positional Encodings referenced from [The Illustrated GPT-2](http://jalammar.github.io/illustrated-gpt2/)")
+
+Thus, the inputs to the GPT-2 architecture is the sum of `Token Embeddings` and `Positional Encodings` passed through a `Dropout`, to add regularization. Once, we have the input matrix, we pass this through each of the 12 Layers of the GPT-2 architecure, where each layer is a `Transformer Decoder Block` that consists of two sublayers - `Attention` and `FeedForward Network`. 
+
+#### Language Modeling or Classification 
+
+When using GPT-2 as a language model, we pass the inputs to a final `LayerNorm` and through a Linear layer with a final dimension of size `[768, vocab_sz]` (50257) and get an output of size `[1, 4, 50257]`. This output represents the next word logits and we can very easily now pass this through a Softmax layer and take `argmax` to get the positional of the word inside the vocabulary with the highest probability.
+
+For classification task, we can pass the outputs received from the GPT-2 architecture through a Linear layer with a dimension of size `[768, n]` to get probabilities for each category (where `n` represents number of categories), pass it through a softmax, get the highest predicted category and use `CrossEntropyLoss` to train the architecture to do classification. 
+
+>And that's really all the magic behind GPT-2. It's a Decoder only Transformer Based architecture that takes inputs parallely with Positional Encodings unlike RNNs, passes them through each of it's 12 Transformer Decoder layers (which consist of Multi head Attention and FeedForward Network) to return the final output.
+>
+>Let's see this model in action in a language model task. 
+
+
+## Sample text generation using Hugging Face Pretrained Weights
+
+First, let's initialize the model with the Pretrained Weights already provided by Hugging Face.
+```python 
+model = GPT2()
+# load pretrained_weights from hugging face
+# download file https://s3.amazonaws.com/models.huggingface.co/bert/gpt2-pytorch_model.bin to `.`
+
+model_dict = model.state_dict() #currently with random initialization
+state_dict = torch.load("./gpt2-pytorch_model.bin") #pretrained weights
+
+old_keys = []
+new_keys = []
+for key in state_dict.keys(): 
+    if "mlp" in key: #The hugging face state dict references the feedforward network as mlp, need to replace to `feedforward` be able to reuse these weights
+        new_key = key.replace("mlp", "feedforward")
+        new_keys.append(new_key)
+        old_keys.append(key)
+
+for old_key, new_key in zip(old_keys, new_keys): 
+    state_dict[new_key]=state_dict.pop(old_key)
+
+pretrained_dict = {k: v for k, v in state_dict.items() if k in model_dict}
+
+model_dict.update(pretrained_dict)
+model.load_state_dict(model_dict)
+model.eval() #model in inference mode as it's now initialized with pretrained weights
+```
+
+Let's now generate text. We will utilize Hugging Face's pretrained `Tokenizer` to convert words to input embeddings. 
+
+```python 
+from transformers import GPT2Tokenizer
+tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
+context   = torch.tensor([tokenizer.encode("The planet earth")])
+
+
+def generate(context, ntok=20):
+    for _ in range(ntok):
+        out = model(context)
+        logits = out[:, -1, :]
+        indices_to_remove = logits < torch.topk(logits, 10)[0][..., -1, None]
+        logits[indices_to_remove] = np.NINF
+        next_tok = torch.multinomial(F.softmax(logits, dim=-1), num_samples=1).squeeze(1)
+        context = torch.cat([context, next_tok.unsqueeze(-1)], dim=-1)
+    return context
+
+out = generate(context, ntok=20)
+tokenizer.decode(out[0])
+
+>> 'The planet earth is the source of all of all the light," says the study that the government will'
+```
