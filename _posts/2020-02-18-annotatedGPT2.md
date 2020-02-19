@@ -200,11 +200,25 @@ class Attention(nn.Module):
         out      = self.c_proj(out)
         return out
 ```
+#### Multi-Head Attention
+> The below extract is from the paper [Attention is all you need](https://arxiv.org/abs/1706.03762).
+Instead of performing a single attention function with dmodel-dimensional keys, values and queries, we found it beneficial to linearly project the `queries`, `keys` and `values` h times with different, learned linear projections to `dk`, `dk` and `dv` dimensions, respectively. On each of these projected versions of `queries`, `keys` and `values` we then perform the attention function in parallel, yielding `dv`-dimensional output values. These are **concatenated** and once again projected, resulting in the final values, as depicted in Figure below.
+
+![](/images/Transformers-multi-head-attention.PNG "Multi Head Attention")
+
+Multi-head attention allows the model to jointly attend to information from different representation subspaces at different positions. With a single attention head, averaging inhibits this.
+
+![](/images/multi-head-attn-formula.PNG "Multi Head Attention as an equation")
+
+In this work we employ h = 8 parallel attention layers, or heads. For each of these we use dk = dv = dmodel/h = 64. Due to the reduced dimension of each head, the total computational cost is similar to that of single-head attention with full dimensionality.
+
+> Not to be confused by this, in essence all that's being done is to add another dimension to the `Q`, `K` and `V` matrices. That is, if the matrices were before of size `[1, 4, 768]` which represents `[bs, seq_len, d_model]`, these matrices are projected to dimension `[1, 12, 4, 64]` which represents `[bs, n_head, seq_len, d_model//n_head]`. GPT-2 utizes 12 parallel heads. We split the `Q`, `K`, `V` matrices inside `split_heads` function. Finally, once we get an output from applying parallel attentions we concatenate it inside `merge_heads` back to matrices of dimension `[bs, seq_len, d_model]`.
+
 ## GPT-2 Model Architecture in Code
 
 ![](/images/gpt-architecture.PNG "GPT Architecture")
 
-So far, we have implemented `Attention` and `FeedForward` layers. The two layers form the building blocks of the `Transformer Decoder` block, shown in the picture above. The GPT-2 consists of 12 of these Transformer Blocks. 
+So far, we have implemented `Multi Head Attention` and `FeedForward` layers. The two layers form the building blocks of the `Transformer Decoder` block, shown in the picture above. The GPT-2 consists of 12 of these Transformer Blocks. 
 
 This has been shown in Jay Alammar's post like so: 
 ![](/images/GPT-transformer-block.PNG "GPT Architecture consisting of 12 Decoder Blocks")
