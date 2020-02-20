@@ -434,26 +434,4 @@ Comments or feedback? Please tweet me at [@amaarora](https://twitter.com/amaaror
 
 <blockquote class="twitter-tweet" data-theme="light"><p lang="en" dir="ltr">This is a really wonderful resource, and draws together many very nice pieces of work. <a href="https://t.co/CM16ByNrbt">https://t.co/CM16ByNrbt</a></p>&mdash; Jeremy Howard (@jeremyphoward) <a href="https://twitter.com/jeremyphoward/status/1230252636256919552?ref_src=twsrc%5Etfw">February 19, 2020</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 
-
-<!-- ## Comments
-<div id="disqus_thread"></div>
-<script>
-
-/**
-*  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
-*  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables*/
-/*
-var disqus_config = function () {
-this.page.url = PAGE_URL;  // Replace PAGE_URL with your page's canonical URL variable
-this.page.identifier = PAGE_IDENTIFIER; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
-};
-*/
-(function() { // DON'T EDIT BELOW THIS LINE
-var d = document, s = d.createElement('script');
-s.src = 'https://https-amaarora-github-io.disqus.com/embed.js';
-s.setAttribute('data-timestamp', +new Date());
-(d.head || d.body).appendChild(s);
-})();
-</script>
-<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-                             -->
+<blockquote class="twitter-tweet"><p lang="en" dir="ltr">Fantastic work!! Looking forward to learning what is it behind the scenes of this language model! <a href="https://t.co/Ml1DY22NxQ">https://t.co/Ml1DY22NxQ</a></p>&mdash; Data Enigma (@EnigmaData) <a href="https://twitter.com/EnigmaData/status/1230279492926611457?ref_src=twsrc%5Etfw">February 19, 2020</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
