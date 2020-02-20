@@ -23,7 +23,7 @@ google_analytics: UA-158677010-1
 # Everything below here can be ignored, unless you want to change the theme entirely
 theme: minima
 plugins:
-  - jekyll-feed
+  # - jekyll-feed
   - jekyll-gist
   - jekyll-octicons
   - jekyll-github-metadata
