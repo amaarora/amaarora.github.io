@@ -430,9 +430,12 @@ The key difference between the implementation above and the one we have used is 
 > Finally, to Harvard NLP, for [The Annotated Transformer](https://nlp.seas.harvard.edu/2018/04/03/attention.html), a beautiful and easy to follow implementation of Transformers in PyTorch. 
 
 ## Feedback 
+Comments or feedback? Please tweet me at [@amaarora](https://twitter.com/amaarora)
+
 <blockquote class="twitter-tweet" data-theme="light"><p lang="en" dir="ltr">This is a really wonderful resource, and draws together many very nice pieces of work. <a href="https://t.co/CM16ByNrbt">https://t.co/CM16ByNrbt</a></p>&mdash; Jeremy Howard (@jeremyphoward) <a href="https://twitter.com/jeremyphoward/status/1230252636256919552?ref_src=twsrc%5Etfw">February 19, 2020</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 
-## Comments
+
+<!-- ## Comments
 <div id="disqus_thread"></div>
 <script>
 
@@ -453,4 +456,4 @@ s.setAttribute('data-timestamp', +new Date());
 })();
 </script>
 <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-                            
+                             -->
