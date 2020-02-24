@@ -22,7 +22,8 @@ use_math: true
 google_analytics: UA-158677010-1
 
 # Everything below here can be ignored, unless you want to change the theme entirely
-theme: minima
+# theme: minima
+remote_theme: poole/hyde
 plugins:
   # - jekyll-feed
   - jekyll-gist
