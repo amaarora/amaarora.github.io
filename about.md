@@ -12,4 +12,4 @@ I am self taught, and an ardent follower of and small contributor to the [fast.a
 
 I also fimly believe in giving back to the community and in that attempt, also run a meetup group called [Applied Data Science](https://www.meetup.com/Applied-Data-Science-Sydney/). The focus in this blog is on writing code as much as it is on explaining the concept in theory. 
 
-If you feel that any of these ideas can be expressed in a better way, I am very happy to receive constructive feedback. Please feel free to reach out to me via [twitter](https://twitter.com/amaarora) or by [email](aman.arora@corelogic.com.au).
+If you feel that any of these ideas can be expressed in a better way, I am very happy to receive constructive feedback. Please feel free to reach out to me via [twitter](https://twitter.com/amaarora).
