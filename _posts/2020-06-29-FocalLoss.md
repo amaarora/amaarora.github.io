@@ -27,7 +27,7 @@ See the difference? This time the model is predicting something for the bike! :)
 ## Q2: So, why did that work? What did Focal Loss do to make it work?
 So now that we have seen an example of what Focal Loss can do, let's try and understand why that worked. The most important bit to understand about Focal Loss is the graph below: 
 
-![](/images/FL_v_CE.PNG "Compare FL with CE")
+![](/images/FL_v_CE.png "Compare FL with CE")
 
 In the graph above, the "blue" line represents the Cross Entropy Loss. The X-axis or 'probability of ground truth class' (let's call it `Pt` for simplicity) is the probability that the model predicts for the object. 
 As an example, let's say the model predicts that something is a bike with probability 0.6 and it actually is a bike. The in this case `Pt` is 0.6. 
@@ -45,22 +45,24 @@ The major difference is that losses from the rare class don't add up anymore in 
 ## Q3: Alpha and Gamma?
 Now that we know what Focal Loss is doing, let's quickly get in to the math. 
 
-![](/images/CE1.PNG "Cross Entropy Loss")
+![](/images/CE1.png "Cross Entropy Loss")
 
 Cross Entropy Loss is negative log likelihood. [Here's]9https://towardsdatascience.com/understanding-binary-cross-entropy-log-loss-a-visual-explanation-a3ac6025181a) an excellent blogpost that explains Cross Entropy Loss.
 
-Therefore, `Pt` or 'probability of ground truth' can be defined as: 
-![](/images/pt.PNG "Probability of Ground Truth")
+Therefore, `Pt` or 'probability of ground truth' can be defined as:
+
+![](/images/pt.png "Probability of Ground Truth")
 
 So after, refactoring: 
-![](/images/CE.PNG "Cross Entropy Loss")
+
+![](/images/CE.png "Cross Entropy Loss")
 
 From the Paper, 
 > A common method for addressing class imbalance is to introduce a weighting factor α ∈ [0, 1] for class 1 and 1−α for class −1.
 
 Therefore, `alpha` are the weights assigned to each class. And so, Weighted CE becomes: 
 
-![](/images/Alpga_CE.PNG "Weighted Cross Entropy Loss")
+![](/images/Alpga_CE.png "Weighted Cross Entropy Loss")
 
 While 'Weighted Cross Entropy Loss' is one way to deal with class imbalance, the paper reports: 
 > The large class imbalance encountered during training of dense detectors overwhelms the cross entropy loss. Easily classified negatives comprise the majority of the loss and dominate the gradient. While α balances the importance of positive/negative examples, it does not differentiate between easy/hard examples.
@@ -72,13 +74,13 @@ From the paper for Focal Loss:
 
 So, all the authors really have done is add `(1 − pt)**γ` to Cross Entropy Loss such that the Final Loss becomes: 
 
-![](/images/FL_no_weight.PNG "Non Weighted Focal Loss")
+![](/images/FL_no_weight.png "Non Weighted Focal Loss")
 
 Now the very first graph will make much more sense. Because for `pt` > 0.5, `1-pt` is less than 0.5 and adding a power of `γ` to it reduces the loss even further when compared to Cross Entropy Loss.
 
 Finally, the Alpha weighted version of Focal Loss is:
 
-![](/images/FL.PNG "Non Weighted Focal Loss")
+![](/images/FL.png "Non Weighted Focal Loss")
 
 ## Q4: How to implement it in PyTorch? 
 
