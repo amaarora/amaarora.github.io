@@ -5,7 +5,7 @@ In this blogpost we will understand what Focal Loss and when is it used. We will
 1. TOC 
 {:toc}
 
-## Q1: Where was Focal Loss introduced and what was it used for? 
+## Where was Focal Loss introduced and what was it used for? 
 Before understanding what Focal Loss is and all the details about it, let's first quickly get an intuitive understanding of what Focal Loss actually does. Focal loss was implemented in [Focal Loss for Dense Object Detection](https://arxiv.org/abs/1708.02002) paper by He et al. 
 
 For years before this paper, Object Detection was actually considered a very difficult problem to solve and it was especially considered very hard to detect small size objects inside images. See example below where the model doesn't predict anything for the motorbike which is of relatively smaller size compared to other images. 
@@ -24,7 +24,7 @@ By the way, here are the predictions of the same model when trained with Focal L
 
 This might be a good time to actually analyse the two and observe the differences. This will help get an intuitive understanding about Focal Loss. 
 
-## Q2: So, why did that work? What did Focal Loss do to make it work?
+## So, why did that work? What did Focal Loss do to make it work?
 So now that we have seen an example of what Focal Loss can do, let's try and understand why that worked. The most important bit to understand about Focal Loss is the graph below: 
 
 ![](/images/FL_v_CE.png "fig-3: Comparing Focal Loss with Cross Entropy Loss")
@@ -51,7 +51,7 @@ The Focal Loss is mathematically defined as:
 
 Scary? It's rather quite intuitive - read on :) 
 
-## Q3: Alpha and Gamma?
+## Alpha and Gamma?
 So, what the hell are these `alpha` and `gamma` in Focal Loss? Also, we will now represent `alpha` as `α` and `gamma` as `γ`.
 
 Here is my understanding from fig-3:
@@ -93,7 +93,7 @@ Really? Is that all that the authors have done? That is to add `(1 − pt)**γ` 
 
 ![](/images/FL.png "eq-5: Focal Loss")
 
-## Q4: How to implement this in code? 
+## How to implement this in code? 
 
 While TensorFlow provides this loss function [here](https://www.tensorflow.org/addons/api_docs/python/tfa/losses/SigmoidFocalCrossEntropy), this is not inherently supported by PyTorch so we have to write a custom loss function. 
 
