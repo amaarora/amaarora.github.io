@@ -122,3 +122,4 @@ If you've understood the meaning of `alpha` and `gamma` then this implementation
 Please feel free to let me know via [twitter](https://twitter.com/amaarora) if you did end up trying Focal Loss after reading this and whether you did see an improvement in your results! Thanks for reading!
 
 - The implementation of Focal Loss has been adapted from [here](https://www.kaggle.com/c/tgs-salt-identification-challenge/discussion/65938).
+- `fig-1` and `fig-2` are from the [Fastai 2018 course](http://course18.fast.ai/) Lecture-09!
