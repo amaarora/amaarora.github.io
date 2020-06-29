@@ -118,5 +118,7 @@ class WeightedFocalLoss(nn.Module):
 
 If you've understood the meaning of `alpha` and `gamma` then this implementation should also make sense. Because, similar to the paper it is simply adding a factor of `at*(1-pt)**self.gamma` to the `BCE_loss` or Binary Cross Entropy Loss.
 
+Please feel free to let me know via [twitter](https://twitter.com/amaarora) if you did end up trying Focal Loss after reading this and whether you did see an improvement in your results! 
+
 ## Credits
-- The implementation of Focal Loss was adapted from [here](https://www.kaggle.com/c/tgs-salt-identification-challenge/discussion/65938).
+- The implementation of Focal Loss has been adapted from [here](https://www.kaggle.com/c/tgs-salt-identification-challenge/discussion/65938).
