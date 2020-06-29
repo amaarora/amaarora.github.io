@@ -75,7 +75,7 @@ Ok, great! So now we know what `γ` does, but, what does `α` do?
 
 Another way, apart from Focal Loss, to deal with class imbalance is to introduce weights. Give high weights to the rare class and small weights to the dominating or common class. These weights are referred to as `α`. 
 
-![](/images/Alpga_CE.png "Weighted Cross Entropy Loss")
+![](/images/Alpha_CE.png "eq-5: Alpha Weighted Cross Entropy Loss")
 
 
 Adding these weights does help with class imbalance however, the focal loss paper reports: 
@@ -91,7 +91,7 @@ From the paper for Focal Loss:
 
 Really? Is that all that the authors have done? That is to add `(1 − pt)**γ` to Cross Entropy Loss? Yes!! Remember `eq-4`? 
 
-![](/images/FL.png "eq-5: Focal Loss")
+![](/images/FL.png "eq-6: Alpha Weighted Focal Loss")
 
 ## How to implement this in code? 
 
