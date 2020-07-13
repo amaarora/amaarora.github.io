@@ -3,16 +3,16 @@ Have you tried [PytorchLightning](https://github.com/PyTorchLightning/pytorch-li
 
 Note: From here on, we refer to **PytorchLightning** as **PL**, cause it's a long name to type and I left my favourite keyboard at work.
 
-For a while now, I was jealous of Tensorflow solely because it's possible to use the same script and run it on CPU, GPU or TPU! For example, take this [notebook](https://www.kaggle.com/cdeotte/triple-stratified-kfold-with-tfrecords) from my one of my favourite kagglers and - at the time of writing this blogpost - a researcher at NVIDIA - [Chris Deotte](http://chrisdeotte.com/) and also 4x Grandmaster! 
+For a while now, I was jealous of Tensorflow solely because it's possible to use the same script to train a model on CPU, GPU or TPU without really changing much! For example, take this [notebook](https://www.kaggle.com/cdeotte/triple-stratified-kfold-with-tfrecords) from my one of my favourite kagglers and - at the time of writing this blogpost - a researcher at NVIDIA - [Chris Deotte](http://chrisdeotte.com/) and also, since yesterday, Kaggle 4x Grandmaster! 
 Just by using an appropriate [strategy](https://www.tensorflow.org/api_docs/python/tf/distribute/Strategy) in Tensorflow, it is possible to run the same experiments on your choice of hardware without changing anything else really. That is the same script could run in TPU, GPU or CPU. 
 
 If you've already worked on multi-GPU machines or used [torch XLA](https://pytorch.org/xla/release/1.5/index.html) to run things on TPU using PyTorch, then you know my rant. Changing hardware choices in PyTorch is not as convenient when it comes to this. I love PyTorch - I do, but just this one thing would make me really frustrated. 
 
 Welcome [PL](https://github.com/PyTorchLightning/pytorch-lightning)! I wish I tried this library sooner.
 
-In this blogpost, we will be going through an introduction to PL and implement all the cool tricks like - Gradient Accumulation, 16-bit precision training, and also add TPU/multi-gpu support - all in a few lines of code. We use PL to work on [SIIM-ISIC Melanoma Classification](https://www.kaggle.com/c/siim-isic-melanoma-classification) challenge on Kaggle - currently I am in the top 10% on the public leaderboard, and in a future blogpost I will share how to train a competitive Melonama classifier. In this post, our focus will be on introducing PL and we use the ISIC competition as an example.
+In this blogpost, we will be going through an introduction to PL and implement all the cool tricks like - Gradient Accumulation, 16-bit precision training, and also add TPU/multi-gpu support - all in a few lines of code. We use PL to work on [SIIM-ISIC Melanoma Classification](https://www.kaggle.com/c/siim-isic-melanoma-classification) challenge on Kaggle. In a future blogpost I will share how to train a competitive Melonama classifier with other tricks that I learnt however, in this post, our focus will be on introducing PL and we use the ISIC competition as an example.
 
-The first part of this post, is mostly about getting the data, creating a dataset and dataloader and the interesting stuff about PL comes in section-3 [The Lightning Module](). If this stuff bores you, feel free to skip forward to the model implemented in PL.
+The first part of this post, is mostly about getting the data, creating our train and validation datasets and dataloaders and the interesting stuff about PL comes in section-3 [The Lightning Module](https://amaarora.github.io/2020/07/12/oganized-pytorch.html#lightning-module). If this stuff bores you, feel free to skip forward to the model implemented in PL.
 
 1. TOC 
 {:toc}
@@ -25,12 +25,12 @@ In this competition, the participants are asked to build a Melonama classifier t
 
 ![](/images/ISIC.png "Example of Lesion Images")
 
-In this blogpost, we will use PL to build a solution that can tell the malign melonama images apart from the rest. 
+In this blogpost, we will use PL to build a solution that can tell the malign melonama images apart from the rest. The model should take only a few hours to train and have ~92% AUC score!
 
 > A side note: Deep learning has come a far way. Compare this to 2012 where [AlexNet](https://papers.nips.cc/paper/4824-imagenet-classification-with-deep-convolutional-neural-networks.pdf)  was trained on multiple e GTX 580 GPU which has only 3GB of memory. To train on 1.2 million examples of Imagenet, the authors had to split the model (with just 8 layers) to 2 GPUs. It took 5-6 days to train this network. Today, it's possible to train in a [few hours](https://www.fast.ai/2018/04/30/dawnbench-fastai/) or [even minutes](https://arxiv.org/abs/1709.05011#:~:text=We%20finish%20the%20100%2Depoch,2048%20KNLs%20without%20losing%20accuracy). For ISIC, each epoch for size 256x256 is around 2mins including validation on a P100 GPU. 
 
 ## Getting the data
-You can download the 256x256 version of the Jpeg images [here]().
+You can download the 256x256 version of the Jpeg images [here](https://www.kaggle.com/cdeotte/jpeg-melanoma-256x256) with all the required metadata to follow along.
 
 ## Melonama Dataset
 Getting our data ready for ingestion into the model is one of the basic things that we need to do for every project. 
@@ -55,7 +55,7 @@ class MelonamaDataset:
         
         return image, torch.tensor(target, dtype=torch.long)
 ```
-The above dataset is a pretty simple class that is instantiated by passing in a list of `image_paths`. To get an item, it reads an image using `Image` module from `PIL`, converts to `np.array` performs augmentations if any and returns `target` and `image`.
+The above dataset is a pretty simple class that is instantiated by passing in a list of `image_paths`, `targets` and `augmentations` if any. To get an item, it reads an image using `Image` module from `PIL`, converts to `np.array` performs augmentations if any and returns `target` and `image`.
 
 We can use `glob` to get `train_image_paths` and `val_image_paths` and create train and val datasets respectively.
 
@@ -112,7 +112,7 @@ Now that our dataloaders are done, and looking good, we are ready for some light
 ## Lightning Module
 PL takes away much of the boilerplate code. By taking away the [Engineering Code](https://pytorch-lightning.readthedocs.io/en/latest/introduction_guide.html#engineering-code) and the [Non-essential code](https://pytorch-lightning.readthedocs.io/en/latest/introduction_guide.html#non-essential-code), it helps us focus on the [Research code](https://pytorch-lightning.readthedocs.io/en/latest/introduction_guide.html#research-code)!
 
-The [Quick Start](https://pytorch-lightning.readthedocs.io/en/stable/new-project.html) and [Introduction Guide](https://pytorch-lightning.readthedocs.io/en/stable/introduction_guide.html) on PL's official documentation are great resources to start!
+The [Quick Start](https://pytorch-lightning.readthedocs.io/en/stable/new-project.html) and [Introduction Guide](https://pytorch-lightning.readthedocs.io/en/stable/introduction_guide.html) on PL's official documentation are great resources to start learning about PL! I started there too.
 
 
 ### Model and Training 
@@ -160,15 +160,52 @@ class Model(LightningModule):
         return auc
 ```
 
-We are using [WeightedFocalLoss](https://amaarora.github.io/2020/06/29/FocalLoss.html#how-to-implement-this-in-code) from my previous blogpose, because this is an imbalanced dataset with only around 1.77% positive classes. 
+We are using [WeightedFocalLoss](https://amaarora.github.io/2020/06/29/FocalLoss.html#how-to-implement-this-in-code) from my previous blogpost, because this is an imbalanced dataset with only around 1.77% positive classes. 
+
+### Model explained
+We add the `__init__` and `forward` method just like you would in pure PyTorch. The `LightningModule` just adds some extra functionalities on top. 
+
+In pure pytorch, the `main` loop with training and validation would look something like:
+
+```python
+train_dataset, valid_dataset = MelonamaDataset(...), MelonamaDatasaet(...)
+train_loader, valid_loader = DataLoader(train_dataset, ...), DataLoader(valid_dataset, ...)
+optimizer = ...
+scheduler = ...
+train_augmentations = albumentations.Compose([...])
+val_aug = albumentations.Compose([...])
+early_stopping = EarlyStopping(...)
+model = PyTorchModel(...)
+train_loss = train_one_epoch(model, optimizer, scheduler)
+preds, valid_loss = evaluate(args, valid_loader, model)
+report_metrics()
+if early_stopping.early_stop:
+    save_model_checkpoint()
+    stop_training()
+```
+
+And ofcourse, then we define our `train_one_epoch` and `evaluate` functions where the training loop looks typically like:
+```python
+model.train()
+for b_idx, data in enumerate(train_loader):
+    loss = model(**data)
+    loss.backward()
+    optimizer.step()
+    optimizer.zero_grad()
+```
+And very similar for `evaluate`. As you can see, we have to write a lot of code to make things work in PyTorch. While this is great for flexibility, typically we have to reuse the same code over and over again in various projects. The training and evaluate loops hardly change much.
+
+What PL does, is that it automates this process for us. No longer do we need to write the boilerplate code.
+
+The training loop, goes directly inside the `training_step` method and the validation loop inside the `validation_step` method. The typical reporting of metrics happens inside the `validation_epoch_end` method.
 
 And that's really it. This is all it takes in PL to create, train and validate a deep learning model. 
 
-Shifting from PyTorch to PL is super easy. It took me around a few hours to read up the introduction docs and reimplement the ISIC model in PL. In some ways, I was able to draw comparisons to the wonderful [fastai](https://arxiv.org/abs/2002.04688) library in the sense that both the libarries make our lives easier. 
+Shifting from PyTorch to PL is super easy. It took me around a few hours to read up the introduction docs and reimplement the ISIC model in PL. In some ways, I was able to draw comparisons to the wonderful [fastai](https://arxiv.org/abs/2002.04688) library in the sense that both the libraries make our lives easier. 
 
-I find PL code is much more organized and compact. Also, when sharing solutions, everybody knows exactly where to look! The training look is in the `training_step` method, validation loop is inside the `validation_step` and methods like `forward` remain unchanged.
+I find PL code is much more organized and compact compared to PyTorch and still very flexible to run experiments. Also, when sharing solutions with others, everybody knows exactly where to look - for example, the training loop is always in the `training_step` method, validation loop is inside the `validation_step` and so on.
 
-To train this model, we simply create a [Trainer](https://pytorch-lightning.readthedocs.io/en/stable/trainer.html) and call `.fit()`.
+To train this model, we can now simply create a [Trainer](https://pytorch-lightning.readthedocs.io/en/stable/trainer.html) and call `.fit()`.
 
 ```python
 debug = False
