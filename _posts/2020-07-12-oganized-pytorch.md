@@ -1,4 +1,4 @@
-# An introduction to PyTorch-Lightninig with comparisons to PyTorch 
+# An introduction to PyTorchLightning with comparisons to PyTorch 
 Have you tried [PytorchLightning](https://github.com/PyTorchLightning/pytorch-lightning) already? If so, then you know why it's so cool. If you haven't, hopefully by the time you finish reading this post, you will find it pretty cool (the word 'it' could refer to this blogpost or the wonderful [PytorchLightning](https://github.com/PyTorchLightning/pytorch-lightning) library - I leave this decision to the reader).
 
 Note: From here on, we refer to **PytorchLightning** as **PL**, cause it's a long name to type and I left my favourite keyboard at work.
@@ -10,9 +10,11 @@ If you've already worked on multi-GPU machines or used [torch XLA](https://pytor
 
 Welcome [PL](https://github.com/PyTorchLightning/pytorch-lightning)! I wish I tried this library sooner.
 
-In this blogpost, we will be going through an introduction to PL and implement all the cool tricks like - Gradient Accumulation, 16-bit precision training, and also add TPU/multi-gpu support - all in a few lines of code. We use PL to work on [SIIM-ISIC Melanoma Classification](https://www.kaggle.com/c/siim-isic-melanoma-classification) challenge on Kaggle. In a future blogpost I will share how to train a competitive Melonama classifier with other tricks that I learnt however, in this post, our focus will be on introducing PL and we use the ISIC competition as an example.
+In this blogpost, we will be going through an introduction to PL and implement all the cool tricks like - **Gradient Accumulation**, **16-bit precision training**, and also add **TPU/multi-gpu support** - all in a few lines of code. We use PL to work on [SIIM-ISIC Melanoma Classification](https://www.kaggle.com/c/siim-isic-melanoma-classification) challenge on Kaggle.In this blogpost, our focus will be on introducing PL and we use the ISIC competition as an example.
 
-The first part of this post, is mostly about getting the data, creating our train and validation datasets and dataloaders and the interesting stuff about PL comes in section-3 [The Lightning Module](https://amaarora.github.io/2020/07/12/oganized-pytorch.html#lightning-module). If this stuff bores you, feel free to skip forward to the model implemented in PL.
+We also draw comparisons to the typical workflows in PyTorch and compare how PL is different and the value it adds in a researcher's life.
+
+The first part of this post, is mostly about getting the data, creating our train and validation datasets and dataloaders and the interesting stuff about PL comes in section-3 [The Lightning Module](https://amaarora.github.io/2020/07/12/oganized-pytorch.html#lightning-module). If this stuff bores you because you've done this so many times already, feel free to skip forward to the model implemented in PL.
 
 1. TOC 
 {:toc}
