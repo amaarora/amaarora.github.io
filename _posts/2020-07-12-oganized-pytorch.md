@@ -293,4 +293,13 @@ trainer = Trainer(gpus=1, max_epochs=2,
                   accumulate_grad_batches=2, precision=16, 
                   tpu_cores=8)
 ```
-[Here](https://www.kaggle.com/abhishek/accelerator-power-hour-pytorch-tpu) is a notebook by Abhishek Thakur for ISIC using TPUs with pure PyTorch. If you compare, you'd realise how easy it is now with PL to train on TPUs.
+[Here](https://www.kaggle.com/abhishek/accelerator-power-hour-pytorch-tpu) is a notebook by [Abhishek Thakur](https://www.linkedin.com/in/abhi1thakur/?originalSubdomain=no) for ISIC using TPUs with pure PyTorch. If you compare, you'd realise how easy it is now with PL to train on TPUs.
+
+
+## Conclusion
+So I hope by now, you were able to compare the differences between PyTorch and PL and that I have convinced you enough to at least try out PL. [Here] is an excellent Kaggle competition to practice those skills and use [PL](https://www.kaggle.com/c/tpu-getting-started)! In the first few experiments with PL, I have found my work to be more streamlined and also I have noticed a reduction in bugs. I find it easier to experiment with different batch sizes, mixed precision, loss functions, optimizers and also schedulers. PL is definitely worth a try.
+
+## Credits
+Thanks for reading! And please feel free to let me know via [twitter](https://twitter.com/amaarora) if you did end up trying PyTorch Lightning and the impact this has had on your experimentation workflows. Constructive feedback is always welcome.
+
+- The implementation of Model was adapted and modified from [this](https://www.kaggle.com/hmendonca/melanoma-neat-pytorch-lightning-native-amp) wonderful notebook on Kaggle.
