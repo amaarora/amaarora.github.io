@@ -1,4 +1,4 @@
-# An introduction to PyTorchLightning with comparisons to PyTorch 
+# An introduction to PyTorch Lightning with comparisons to PyTorch 
 Have you tried [PytorchLightning](https://github.com/PyTorchLightning/pytorch-lightning) already? If so, then you know why it's so cool. If you haven't, hopefully by the time you finish reading this post, you will find it pretty cool (the word 'it' could refer to this blogpost or the wonderful [PytorchLightning](https://github.com/PyTorchLightning/pytorch-lightning) library - I leave this decision to the reader).
 
 Note: From here on, we refer to **PytorchLightning** as **PL**, cause it's a long name to type and I left my favourite keyboard at work.
