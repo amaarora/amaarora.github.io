@@ -27,7 +27,7 @@ In this competition, the participants are asked to build a Melonama classifier t
 
 ![](/images/ISIC.png "src: https://www.isic-archive.com/#!/topWithHeader/onlyHeaderTop/gallery")
 
-In this blogpost, we will use PL to build a solution that can tell the malign melonama images apart from the rest. The model should take only a few hours to train and have ~92% AUC score!
+In this blogpost, we will use PL to build a solution that can tell the malign melonama images apart from the rest. The model should take only a few hours to train and have 0.92 AUC score!
 
 > A side note: Deep learning has come a far way. Compare this to 2012 where [AlexNet](https://papers.nips.cc/paper/4824-imagenet-classification-with-deep-convolutional-neural-networks.pdf)  was trained on multiple e GTX 580 GPU which has only 3GB of memory. To train on 1.2 million examples of Imagenet, the authors had to split the model (with just 8 layers) to 2 GPUs. It took 5-6 days to train this network. Today, it's possible to train in a [few hours](https://www.fast.ai/2018/04/30/dawnbench-fastai/) or [even minutes](https://arxiv.org/abs/1709.05011#:~:text=We%20finish%20the%20100%2Depoch,2048%20KNLs%20without%20losing%20accuracy). For ISIC, each epoch for size 256x256 is around 2mins including validation on a P100 GPU. 
 
