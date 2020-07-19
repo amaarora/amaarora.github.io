@@ -223,9 +223,9 @@ I hope that through this blog post, I have been able to help you get a thorough 
 1. [A Simple Guide to the Versions of the Inception Network](https://towardsdatascience.com/a-simple-guide-to-the-versions-of-the-inception-network-7fc52b863202) by Bharat Raj
 1. [When does label smoothing help](https://papers.nips.cc/paper/8717-when-does-label-smoothing-help.pdf) by Hinton et al
 1. [On Calibration of Modern Neural Networks](https://arxiv.org/abs/1706.04599) aka Temperature Scaling by Pleiss et al 
-1. [Mathematical explainations and proofs](https://leimao.github.io/blog/Label-Smoothing/) for label smoothing by Lei Mao
-1. [Label Smoothing + Mixup](https://youtu.be/vnOpEwmtFJ8) by Jeremy Howard
-1. [Cross Entropy Loss](https://youtu.be/CJKnDu2dxOE?t=7482) explained by Jeremy Howard
+1. [Mathematical explainations and proofs for label smoothing by Lei Mao](https://leimao.github.io/blog/Label-Smoothing/)
+1. [Label Smoothing + Mixup by Jeremy Howard](https://youtu.be/vnOpEwmtFJ8)
+1. [Cross Entropy Loss in Microsoft Excel by Jeremy Howard](https://youtu.be/CJKnDu2dxOE?t=7482)
 
 ## Credits
 This blogpost wouldn't have been possible without the help of my very talented friend [Atmadeep Banerjee](https://twitter.com/abanerjee99). Atmadeep, is currently interning and researching about [Instance Segmentation](https://paperswithcode.com/task/instance-segmentation/codeless) at Harvard! You can find some of his very cool projects at his GitHub [here](https://github.com/Atom-101). 
