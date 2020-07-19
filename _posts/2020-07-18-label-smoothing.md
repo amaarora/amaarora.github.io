@@ -66,7 +66,7 @@ This case where, in order to minimise the cross-entropy loss, the logits corresp
 From the paper, 
 > This, however, can cause two problems. First, it may result in over-fitting: if the model learns to assign full probability to the ground- truth label for each training example, it is not guaranteed to generalize. Second, it encourages the differences between the largest logit and all others to become large, and this, combined with the bounded gradient `∂ℓ/∂z,k` , reduces the ability of the model to adapt.
 
-In other words, our model could become overconfident of it's predictions because to really minimise the loss, our model needs to be very sure of everything the model predicts. This is bad because it is then harder for the model to generalise and easier for it to overfit to the training data. We want the model to generalize and look be able to look at other dogs, cats.. images that weren't part of the training set and still be able to predict them well.
+In other words, our model could become overconfident of it's predictions because to really minimise the loss, our model needs to be very sure of everything that it predicts. This is bad because it is then harder for the model to generalise and easier for it to overfit to the training data. We want the model to generalize and be able to look at other dogs, cats.. images that weren't part of the training set and still be able to predict them well.
 
 ## What is Label Smoothing?
 
@@ -130,7 +130,7 @@ Let's consider that our model learns to predict the following logits for each cl
 
 Also, to calculate the cross-entropy loss, we first need to convert the logits to probabilities. The logits are the outputs from the last linear layer of our deep learning model. To convert them to probabilities, we generally have a softmax layer in the end. Jeremy explains how to implement **Cross-Entropy** loss in Microsoft Excel [here](https://youtu.be/AcA8HAYh7IE?t=1844) including **Softmax** implementation. 
 
-This is the where you PAUSE, look at the video and understand how Jeremy implements **Softmax** and **Cross-Entropy** loss in Microsoft Excel. If you already know how it, great, let's move on.
+This is the where you PAUSE, look at the video and understand how Jeremy implements **Softmax** and **Cross-Entropy** loss in Microsoft Excel. If you already know how, great, let's move on.
 
 We repeat the same process of applying **Softmax** operation to the logits to then get our probabilities like so:
 
