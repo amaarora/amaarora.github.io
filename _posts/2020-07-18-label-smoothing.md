@@ -8,7 +8,7 @@ In this blogpost, together, we:
 
 **Why are we using Microsoft Excel?** 
 
-It's a valid question you might ask and I wasn't a big fan of MS Excel either until I saw [this]((https://youtu.be/CJKnDu2dxOE?t=7482) video by [Jeremy Howard](https://twitter.com/jeremyphoward) about [Cross Entropy Loss](https://en.wikipedia.org/wiki/Cross_entropy). In the video Jeremy explains Cross Entropy Loss using Microsoft Excel. It clicked and I understood it very well even with the fancy math in the formula. 
+It's a valid question you might ask and I wasn't a big fan of MS Excel either until I saw [this](https://youtu.be/CJKnDu2dxOE?t=7482) video by [Jeremy Howard](https://twitter.com/jeremyphoward) about [Cross Entropy Loss](https://en.wikipedia.org/wiki/Cross_entropy). In the video Jeremy explains Cross Entropy Loss using Microsoft Excel. It clicked and I understood it very well even with the fancy math in the formula. 
 And that is my hope here too! In this blogpost I hope that together we can see past the mathematics and get the intuition for Label Smoothing and then later be able to implement it in a language/framework of our choice. 
 
 So, let's get started! 
