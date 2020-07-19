@@ -147,21 +147,69 @@ Believe it or not, we have just successfully implemented **Label Smoothing Cross
 The Label Smoothing Cross Entropy loss has been implemented in the wonderful fastai library like so:
 
 ```python
+# Helper functions from fastai
+def reduce_loss(loss, reduction='mean'):
+    return loss.mean() if reduction=='mean' else loss.sum() if reduction=='sum' else loss
+```
+
+```python
+# Implementation from fastai https://github.com/fastai/fastai2/blob/master/fastai2/layers.py#L338
 class LabelSmoothingCrossEntropy(nn.Module):
     def __init__(self, ε:float=0.1, reduction='mean'):
         super().__init__()
         self.ε,self.reduction = ε,reduction
     
     def forward(self, output, target):
-        # c: number of classes, output: logits
+        # number of classes
         c = output.size()[-1]
         log_preds = F.log_softmax(output, dim=-1)
-        nll = F.nll_loss(log_preds, target, reduction=self.reduction)
         loss = reduce_loss(-log_preds.sum(dim=-1), self.reduction)
-        return lin_comb(loss/c, nll, self.ε)
+        nll = F.nll_loss(log_preds, target, reduction=self.reduction)
+        # (1-ε)* H(q,p) + ε*H(u,p)
+        return (1-self.ε)*nll + self.ε*(loss/c) 
 ```
-In PyTorch `nn.CrossEntropyLoss()` is the same as `F.nll_loss(F.log_softmax(...))`. 
+In PyTorch, `nn.CrossEntropyLoss()` is the same as `F.nll_loss(F.log_softmax(...))`. Therefore, in the implementation above, if the `targets` are one-hot encoded, then `nll` equates to `H(q,p)` from **eq-3**. And then, the `loss/c` equates to `H(u,p)` from **eq-3** as well where, `c` equals total number of classes. 
 
+So, the above implementation can directly be compared to **eq-3** and the Label Smoothing Cross Entropy loss then becomes `(1-self.ε)*nll + self.ε*(loss/c)`.
+
+## Comparing Microsoft Excel results with PyTorch
+Great, now that we know how to implement **Label Smoothing Cross Entropy** loss in both Microsoft Excel and PyTorch, let's compare the results. We take the same example as fig-3, and assume that our model in PyTorch predicts the same LOGITS. 
+
+```python 
+X = torch.tensor([
+    [4.2, -2.4], 
+    [1.6, -0.6], 
+    [3.6, 1.2], 
+    [-0.5, 0.5], 
+    [-0.25, 1.7]
+])
+y = torch.tensor([0,1,1,0,0])
+
+print(X, '\n\n', y)
+
+>> #out
+tensor([[ 4.2000, -2.4000],
+        [ 1.6000, -0.6000],
+        [ 3.6000,  1.2000],
+        [-0.5000,  0.5000],
+        [-0.2500,  1.7000]]) 
+
+ tensor([0, 1, 1, 0, 0])
+```
+
+This is the same as Microsoft Excel and label `0` corresponds to `is_cat` and label `1` corresponds to `is_dog`. Let's now calculate the **Label Smoothing Cross Entropy** loss.
+
+```python
+LabelSmoothingCrossEntropy(ε=0.1, reduction='none')(X,y)
+
+>> #out
+tensor([0.3314, 2.1951, 2.3668, 1.2633, 1.9855])
+```
+
+The results match our Microsoft Excel `LS X-entropy` results from fig-5.
+
+## Conclusion 
+I hope that through this blog post, I have been able to remove all your doubts related to Label Smoothing. By implementing Label Smoothing Cross Entropy loss in Microsoft Excel, step by step, I hope that I've been clear in my attempt to explain everything that goes on behind the scenes. Please feel free to reach out to me via Twitter at [@amaarora](http://twitter.com/amaarora)! Constructive Feedback is always welcome! 
 
 ## References 
 1. [A Simple Guide to the Versions of the Inception Network](https://towardsdatascience.com/a-simple-guide-to-the-versions-of-the-inception-network-7fc52b863202) by Bharat Raj
