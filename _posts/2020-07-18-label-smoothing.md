@@ -4,7 +4,7 @@ In this blogpost, together, we:
 - Read and understand about Label Smoothing from [Rethinking the Inception Architecture for Computer Vision](https://arxiv.org/abs/1512.00567) research paper
 - Look at why do we need Label Smoothing?
 - Reimplement Label Smoothing in Microsoft Excel step by step 
-- Compare the results from our MS Excel implementation with `Fastai` and `PyTorch` versions of Label Smoothing 
+- Compare the results from our MS Excel implementation with `Fastai`/`PyTorch` versions of Label Smoothing 
 
 **Why are we using Microsoft Excel?** 
 
@@ -109,37 +109,39 @@ In this section we implement label smoothing in Microsoft Excel. We know that cr
 
 ![](/images/cross_entropy.png "eq-4")
 
-Great, and from section-2, we also know that Label Smoothing loss is actually the cross entropy loss with the noisy labels.
+Great, and from [section-2](https://amaarora.github.io/2020/07/18/label-smoothing.html#what-is-label-smoothing), we also know that Label Smoothing loss is actually the cross entropy loss with the noisy labels.
 
 Let's consider we have five images again, but this time of only cats and dogs.
 
-![](/images/ce_loss_ex1.png "fig-1")
+![](/images/ce_loss_ex1.png "fig-1: one-hot encoded labels")
 
-Great, at the moment, the labels are one-hot encoded. Let's consider we are using a smoothing factor Є of 0.1. In this case, the updated labels become: 
+Great, at the moment, the labels are one-hot encoded. Let's consider we are using a smoothing factor `Є` of `0.1`. In this case, the updated labels become: 
 
-![](/images/ce_loss_ex2.png "fig-2")
+![](/images/ce_loss_ex2.png "fig-2: Label Smoothing Regularized labels")
 
-We get fig-2 by implementing eq-2 on fig-1. So, now we have our noisy labels. Next step is to simply calculate the cross-entropy loss. We will use the [fastai implementation of cross-entropy loss in excel](https://github.com/fastai/fastai/blob/master/courses/dl1/excel/entropy_example.xlsx), and use it on our noisy labels to calculate the Label Smoothing Cross Entropy Loss.
+We get `fig-2` by implementing `eq-2` on `fig-1`. So, now we have our *LSR labels*. Next step is to simply calculate the cross-entropy loss. We will use the [fastai implementation of cross-entropy loss in excel](https://github.com/fastai/fastai/blob/master/courses/dl1/excel/entropy_example.xlsx), and use it on our *LSR labels* to calculate the `Label Smoothing Cross Entropy` Loss.
 
 Let's consider that our model learns to predict the following LOGITS for each class like so: 
 
-![](/images/ce_loss_ex3.png "fig-3")
+![](/images/ce_loss_ex3.png "fig-3: Model logits")
 
-Great, to calculate the loss, we first need to convert the LOGITS to probabilities. The LOGITS are the outputs from the last linear layer of our deep learning model. To convert them to probabilities, we generally have a softmax layer in the end. Jeremy explains how to implement Cross-Entropy loss [here](https://youtu.be/AcA8HAYh7IE?t=1844) including Softmax implementation. 
+Great, to calculate the loss, we first need to convert the LOGITS to probabilities. The LOGITS are the outputs from the last linear layer of our deep learning model. To convert them to probabilities, we generally have a softmax layer in the end. Jeremy explains how to implement **Cross-Entropy** loss [here](https://youtu.be/AcA8HAYh7IE?t=1844) including **Softmax** implementation in Microsoft Excel. 
 
-This is the where you PAUSE, look at the video and understand how Jeremy implements **Softmax** and **Cross-Entropy** loss in Microsoft Excel. If you already know how to implement Cross Entropy in Excel, great! 
+This is the where you PAUSE, look at the video and understand how Jeremy implements **Softmax** and **Cross-Entropy** loss in Microsoft Excel. If you already know how it, great, let's move on.
 
-Assuming, you have heard my advice, let's move on. We repeat the same process of applying **Softmax** to then get our probabilities from the LOGITS like so:
+We repeat the same process of applying **Softmax** operation to the LOGITS to then get our probabilities like so:
 
 ![](/images/ce_loss_ex4.png "fig-4")
 
-So, now we have successfully converted LOGITS to Probabilities for each image. We did this by applying Softmax to the LOGITS.
+What we have essentially done, is that we take the exponential of the Logits, to get `exp (cat)` and `exp (dog)` from `logit (cat)` and `logit (dog)`. Next, we take get the `sum (exp)` by adding `exp (cat)` and `exp (dog)` along the rows. Finally, we get `prob (cat)` by dividing `exp (cat)` with `sum (exp)` and we get `prob (dog)` by `sum (exp)`. This is how we implement Softmax operation in Microsoft Excel. 
 
-The next step is simply to calculate the Cross-Entropy loss which is `∑q(x)log(p(x))` where p(x) refers to the predicted probability and `q(x)` refers to the ground truth label. In our case `q(x)` are the noisy labels, so we get the *LabelSmoothingCrossEntropy* loss like so:
+So, now that we have successfully converted LOGITS to Probabilities for each image. The next step is simply to calculate the **Cross-Entropy** loss which from `eq-4`, is `∑q(x)log(p(x))` where `p(x)` refers to the predicted probability and `q(x)` refers to the ground truth label. In our case `q(x)` are the noisy labels, so, we get the *LabelSmoothingCrossEntropy* loss like so:
 
 ![](/images/ce_loss_ex6.png "fig-5")
 
-Believe it or not, we have just successfully implemented Label Smoothing cross entropy loss in Microsoft Excel.
+Believe it or not, we have just successfully implemented **Label Smoothing Cross Entropy** loss in Microsoft Excel.
+
+## Fastai/PyTorch Implementation of Label Smoothing Cross Entropy loss
 
 ## References 
 1. [A Simple Guide to the Versions of the Inception Network](https://towardsdatascience.com/a-simple-guide-to-the-versions-of-the-inception-network-7fc52b863202) by Bharat Raj
