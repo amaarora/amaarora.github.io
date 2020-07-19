@@ -66,21 +66,18 @@ In other words, the problem is that our model learns to become overconfident of 
 
 Label Smoothing was first introduced in [Rethinking the Inception Architecture for Computer Vision](https://arxiv.org/abs/1512.00567).  
 
-From the Section-7 **'Model Regularization via Label Smoothing'** in the paper,
-> We propose a mechanism for encouraging the model to be less confident. While this may not be desired if the goal is to maximize the log-likelihood of training labels, it does regularize the model and makes it more adaptable. The method is very simple. Consider a distribution over labels u(k), independent ofthe training example x, and a smoothing parameter Є. For a training example with ground-truth label y, we replace the label distribution q(k|x) = δ(k,y) with
+From Section-7 - *Model Regularization via Label Smoothing* in the paper,
+> We propose a mechanism for encouraging the model to be less confident. While this may not be desired if the goal is to maximize the log-likelihood of training labels, it does regularize the model and makes it more adaptable. The method is very simple. Consider a distribution over labels u(k), independent of the training example x, and a smoothing parameter Є. For a training example with ground-truth label y, we replace the label distribution q(k|x) = δ(k,y) with
 
 
 ![](/images/Label_Smoothing_Formula.png "eq-1")
 
 > which is a mixture of the original ground-truth distribution q(k|x) and the fixed distribution u(k), with weights 1 − Є. and Є, respectively. 
-> In our exper- iments, we used the uniform distribution u(k) = 1/K, so that
+> In our experiments, we used the uniform distribution u(k) = 1/K, so that
 
 ![](/images/label_smoothing_eq2.png "eq-2")
 
-**Explaination**:
-Here's what the researchers are saying, instead of using the hard labels or the one-hot encoded variables where the true label is 1, let's replace them with `(1-Є) * 1` where Є refers to the label smoothing factor. 
-
-Once that's done, let's add some uniform noise `1/K` where K: total number of labels.
+In other words, instead of using the hard labels or the one-hot encoded variables where the true label is 1, let's replace them with `(1-Є) * 1` where Є refers to the smoothing parameter. Once that's done, we add some uniform noise `1/K` where K: total number of labels.
 
 So the updated distribution for the our examples with label smoothing factor `Є = 0.1` becomes:
 
@@ -92,11 +89,17 @@ So the updated distribution for the our examples with label smoothing factor `Є
 | img-4.jpg  | 0.02      | 0.02      | 0.02        | 0.92       | 0.02       |
 | img-5.jpg  | 0.02      | 0.02      | 0.02        | 0.02       | 0.92       |
 
+We get the updated distribution above because `1-Є = 0.9`. So as a first step, we replace all the true labels with `0.9` instead of 1. Next, we add a uniform noise `1/K = 0.02` because in our case `K` equals 5. Finally we get the above update distribution with uniform noise.
+
 The authors refer to the above change as *label-smoothing regularization* or LSR. And then we calculate the cross-entropy loss with the updated distribution LSR above instead.
 
-The updated loss then becomes:
+Now we train the model with the updated LSR instead and therefore, cross-entropy loss get's updated to:
 
 ![](/images/LSR.png "eq-3")
+
+Basically, the new loss `H(q′, p)` equals `1-Є` times the old loss `H(q, p)` + `Є` times the cross entropy loss of the noisy labels `H(u, p)`. 
+
+Let's now cut the math and implement this in Microsoft Excel step by step.
 
 ## References 
 1. [A Simple Guide to the Versions of the Inception Network](https://towardsdatascience.com/a-simple-guide-to-the-versions-of-the-inception-network-7fc52b863202) by Bharat Raj
