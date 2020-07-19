@@ -1,4 +1,4 @@
-# Label Smoothing in Microsoft Excel
+# Label Smoothing Explained using Microsoft Excel
 
 In this blogpost, together, we: 
 - Read and understand about Label Smoothing from [Rethinking the Inception Architecture for Computer Vision](https://arxiv.org/abs/1512.00567) research paper
@@ -17,7 +17,7 @@ So, let's get started!
 {:toc}
 
 ## Why do we need Label Smoothing?
-Let's consider we are faced with a multi-class image classification problem. Someone presents to us five images - 
+Let's consider we are faced with a multi-class image classification problem. Someone presents to us five images with labels -  
 
 | Image Name | Label    |
 |------------|----------|
@@ -27,7 +27,7 @@ Let's consider we are faced with a multi-class image classification problem. Som
 | img-4.jpg  | Bear     |
 | img-5.jpg  | Kangaroo |
 
-As humans, we will quickly be able to assign labels to the image, for example we know that `img-1.jpg` is that of a dog, `img-2.jpg` is a cat and so on.
+As humans, we will quickly be able to assign labels to the image just by looking at them, for example we know that `img-1.jpg` is that of a dog, `img-2.jpg` is a cat and so on.
 
 Let's one-hot encode the labels, so our table get's updated to:
 
@@ -39,7 +39,7 @@ Let's one-hot encode the labels, so our table get's updated to:
 | img-4.jpg  | 0      | 0      | 0        | 1       | 0       |
 | img-5.jpg  | 0      | 0      | 0        | 0       | 1       |
 
-Once we start to train a deep learning model using Cross Entropy Loss, the model predicts a set of logits for each image like so:
+Let's imagine that we used the above set of 5 images and the labels and trianed a deep learning model which in it's early stages learns to predict a set of LOGITS like so:
 
 | Image Name | is_dog | is_cat | is_horse | is_bear | is_kroo |
 |------------|--------|--------|----------|---------|---------|
@@ -49,18 +49,20 @@ Once we start to train a deep learning model using Cross Entropy Loss, the model
 | img-4.jpg  | 1.2      | 0.2      | 0.8        | 1.9       | -0.6       |
 | img-5.jpg  | -0.9      | -0.1      | -0.2        | -0.5       | 1.6       |
 
+This is pretty standard - this is what we do when we're training an image classifier anyway. Right? We pass a list of images and labels, make the predict something, then calculate the cross-entropy loss and backpropogate to update the model's parameters. And we keep doing this until the model learns to assign the correct labels to the images. So what's the problem?
+
 **Here's the important part:**
 
-For the Cross-Entropy loss to be at a minimum, each logit corresponding to the correct class needs to be **significantly higher** than the rest. That is, for example for row 1, `img-1.jpg` the logit of 4.7 corresponding to `is_dog` needs to be significantly higher than the rest. This is also the case for all the other rows where the logit corresponding to the true label needs to be significantly higher than the rest. 
+For the Cross-Entropy loss to really be at a minimum, each logit corresponding to the correct class needs to be **significantly higher** than the rest. That is, for example for row 1, `img-1.jpg` the logit of 4.7 corresponding to `is_dog` needs to be significantly higher than the rest. This is also the case for all the other rows where the logit corresponding to the true label needs to be significantly higher than the rest. 
 
 A mathematical proof is presented [here](https://leimao.github.io/blog/Cross-Entropy-KL-Divergence-MLE/) by Lei Mao on why minimizing this loss is equivalent to maximising the logits. 
 
-This case where to minimise the cross-entropy loss, the logits corresponding to the true label need to be significantly higher than the rest is a problem.
+This case where, in order to minimise the cross-entropy loss, the logits corresponding to the true label need to be significantly higher than the rest can actually cause two problems.
 
 From the paper, 
 > This, however, can cause two problems. First, it may result in over-fitting: if the model learns to assign full probability to the ground- truth label for each training example, it is not guaranteed to generalize. Second, it encourages the differences between the largest logit and all others to become large, and this, combined with the bounded gradient `∂ℓ/∂z,k` , reduces the ability of the model to adapt.
 
-In other words, the problem is that our model learns to become overconfident of it's predictions because it needs to be very sure of everything the model predicts.This is bad because it is then harder for the model to generalise and easier for it to overfit to the training data. 
+In other words, the problem is that our model learns to become overconfident of it's predictions because to really minimise the loss, our model needs to be very sure of everything the model predicts. This is bad because it is then harder for the model to generalise and easier for it to overfit to the training data. We want the model to generalize and look be able to look at other dogs, cats.. images that weren't part of the training set and still be able to predict them well.
 
 ## What is Label Smoothing?
 
