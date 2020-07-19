@@ -1,5 +1,9 @@
 # Label Smoothing Explained using Microsoft Excel
 
+1. TOC 
+{:toc}
+
+## Introduction
 In this blogpost, together, we: 
 - Read and understand about Label Smoothing from [Rethinking the Inception Architecture for Computer Vision](https://arxiv.org/abs/1512.00567) research paper
 - Look at why do we need Label Smoothing?
@@ -13,9 +17,6 @@ It's a valid question you might ask and I wasn't a big fan of MS Excel either un
 And that is my hope here too! In this blogpost I hope that together we can see past the mathematics and get the intuition for **Label Smoothing** and then later be able to implement it in a language/framework of our choice. 
 
 So, let's get started! 
-
-1. TOC 
-{:toc}
 
 ## Why do we need Label Smoothing?
 Let's consider we are faced with a multi-class image classification problem. Someone presents to us five images with labels -  
@@ -142,6 +143,25 @@ So, now that we have successfully converted LOGITS to Probabilities for each ima
 Believe it or not, we have just successfully implemented **Label Smoothing Cross Entropy** loss in Microsoft Excel.
 
 ## Fastai/PyTorch Implementation of Label Smoothing Cross Entropy loss
+
+The Label Smoothing Cross Entropy loss has been implemented in the wonderful fastai library like so:
+
+```python
+class LabelSmoothingCrossEntropy(nn.Module):
+    def __init__(self, ε:float=0.1, reduction='mean'):
+        super().__init__()
+        self.ε,self.reduction = ε,reduction
+    
+    def forward(self, output, target):
+        # c: number of classes, output: logits
+        c = output.size()[-1]
+        log_preds = F.log_softmax(output, dim=-1)
+        nll = F.nll_loss(log_preds, target, reduction=self.reduction)
+        loss = reduce_loss(-log_preds.sum(dim=-1), self.reduction)
+        return lin_comb(loss/c, nll, self.ε)
+```
+In PyTorch `nn.CrossEntropyLoss()` is the same as `F.nll_loss(F.log_softmax(...))`. 
+
 
 ## References 
 1. [A Simple Guide to the Versions of the Inception Network](https://towardsdatascience.com/a-simple-guide-to-the-versions-of-the-inception-network-7fc52b863202) by Bharat Raj
