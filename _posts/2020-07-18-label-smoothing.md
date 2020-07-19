@@ -67,7 +67,7 @@ In other words, the problem is that our model learns to become overconfident of 
 Label Smoothing was first introduced in [Rethinking the Inception Architecture for Computer Vision](https://arxiv.org/abs/1512.00567).  
 
 From Section-7 - *Model Regularization via Label Smoothing* in the paper,
-> We propose a mechanism for encouraging the model to be less confident. While this may not be desired if the goal is to maximize the log-likelihood of training labels, it does regularize the model and makes it more adaptable. The method is very simple. Consider a distribution over labels u(k), independent of the training example x, and a smoothing parameter Є. For a training example with ground-truth label y, we replace the label distribution q(k|x) = δ(k,y) with
+> We propose a mechanism for encouraging the model to be less confident. While this may not be desired if the goal is to maximize the log-likelihood of training labels, it does regularize the model and makes it more adaptable. The method is very simple. Consider a distribution over labels u(k), independent of the training example x, and a smoothing parameter Є. For a training example with ground-truth label y, we replace the label distribution q(k/x) = δ(k,y) with
 
 
 ![](/images/Label_Smoothing_Formula.png "eq-1")
