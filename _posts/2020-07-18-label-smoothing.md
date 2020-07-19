@@ -217,7 +217,7 @@ tensor([0.3314, 2.1951, 2.3668, 1.2633, 1.9855])
 The results match our Microsoft Excel `LS X-entropy` results from fig-5.
 
 ## Conclusion 
-I hope that through this blog post, I have been able to help you get a thorough understanding of **Label Smoothing**. By implementing Label Smoothing Cross Entropy loss in Microsoft Excel, step by step, I also hope that I've been clear in my attempt to explain everything that goes on behind the scenes. Please feel free to reach out to me via Twitter at [@amaarora](http://twitter.com/amaarora)! Feedback is always welcome! 
+I hope that through this blog post, I have been able to help you get a thorough understanding of **Label Smoothing**. By implementing Label Smoothing Cross Entropy loss in Microsoft Excel, step by step, I also hope that I've been clear in my attempt to explain everything that goes on behind the scenes. Please feel free to reach out to me via Twitter at [@amaarora](http://twitter.com/amaarora) - constructive feedback is always welcome.
 
 ## References 
 1. [A Simple Guide to the Versions of the Inception Network](https://towardsdatascience.com/a-simple-guide-to-the-versions-of-the-inception-network-7fc52b863202) by Bharat Raj
