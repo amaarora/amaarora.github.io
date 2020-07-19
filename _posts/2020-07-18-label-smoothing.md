@@ -2,9 +2,9 @@
 
 In this blogpost, together, we: 
 - Read and understand about Label Smoothing from [Rethinking the Inception Architecture for Computer Vision](https://arxiv.org/abs/1512.00567) research paper
-- Why do we need Label Smoothing?
-- Reimplement Label Smoothing in Microsoft Excel 
-- Compare the results with Fastai and PyTorch version of Label Smoothing 
+- Look at why do we need Label Smoothing?
+- Reimplement Label Smoothing in Microsoft Excel step by step 
+- Compare the results from our MS Excel implementation with `Fastai` and `PyTorch` versions of Label Smoothing 
 
 **Why are we using Microsoft Excel?** 
 
