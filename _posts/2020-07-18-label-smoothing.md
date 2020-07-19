@@ -9,8 +9,8 @@ In this blogpost, together, we:
 **Why are we using Microsoft Excel?** 
 
 It's a valid question you might ask and I wasn't a big fan of MS Excel either until I saw [this](https://youtu.be/CJKnDu2dxOE?t=7482) video by [Jeremy Howard](https://twitter.com/jeremyphoward) about [Cross Entropy Loss](https://en.wikipedia.org/wiki/Cross_entropy). In the video Jeremy explains Cross Entropy Loss using Microsoft Excel. It clicked and I understood it very well even with the fancy math in the cross entropy loss formula.
- 
-And that is my hope here too! In this blogpost I hope that together we can see past the mathematics and get the intuition for Label Smoothing and then later be able to implement it in a language/framework of our choice. 
+
+And that is my hope here too! In this blogpost I hope that together we can see past the mathematics and get the intuition for **Label Smoothing** and then later be able to implement it in a language/framework of our choice. 
 
 So, let's get started! 
 
@@ -30,7 +30,7 @@ Let's consider we are faced with a multi-class image classification problem. Som
 
 As humans, we will quickly be able to assign labels to the image just by looking at them, for example we know that `img-1.jpg` is that of a dog, `img-2.jpg` is a cat and so on.
 
-Let's one-hot encode the labels, so our table get's updated to:
+Let's one-hot encode the labels, so our labels get updated to:
 
 | Image Name | is_dog | is_cat | is_horse | is_bear | is_kroo |
 |------------|--------|--------|----------|---------|---------|
@@ -50,7 +50,7 @@ Let's imagine that we used the above set of 5 images and the labels and trianed 
 | img-4.jpg  | 1.2      | 0.2      | 0.8        | 1.9       | -0.6       |
 | img-5.jpg  | -0.9      | -0.1      | -0.2        | -0.5       | 1.6       |
 
-This is pretty standard - this is what we do when we're training an image classifier anyway. Right? We pass a list of images and labels, make the predict something, then calculate the cross-entropy loss and backpropogate to update the model's parameters. And we keep doing this until the model learns to assign the correct labels to the images. So what's the problem?
+This is pretty standard - this is what we do when we're training an image classifier anyway. Right? We pass a list of images and labels, make the model predict something, then calculate the cross-entropy loss and backpropogate to update the model's parameters. And we keep doing this until the model learns to assign the correct labels to the corresponding images. So what's the problem?
 
 **Here's the important part:**
 
