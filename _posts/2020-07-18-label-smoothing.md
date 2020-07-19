@@ -49,24 +49,26 @@ Once we start to train a deep learning model using Cross Entropy Loss, the model
 | img-4.jpg  | 1.2      | 0.2      | 0.8        | 1.9       | -0.6       |
 | img-5.jpg  | -0.9      | -0.1      | -0.2        | -0.5       | 1.6       |
 
-For the Cross-Entropy loss to be at a minimum, each logit corresponding to the correct class needs to be **significantly higher** than the rest. That is for example for row 1, `img-1.jpg` the logit of 4.7 corresponding to `is_dog` needs to be significantly higher than the rest. 
+**Here's the important part:**
+
+For the Cross-Entropy loss to be at a minimum, each logit corresponding to the correct class needs to be **significantly higher** than the rest. That is, for example for row 1, `img-1.jpg` the logit of 4.7 corresponding to `is_dog` needs to be significantly higher than the rest. This is also the case for all the other rows where the logit corresponding to the true label needs to be significantly higher than the rest. 
 
 A mathematical proof is presented [here](https://leimao.github.io/blog/Cross-Entropy-KL-Divergence-MLE/) by Lei Mao on why minimizing this loss is equivalent to maximising the logits. 
 
+This case where to minimise the cross-entropy loss, the logits corresponding to the true label need to be significantly higher than the rest is a problem.
+
 From the paper, 
-> This, however, can cause two problems. First, it may result in over-fitting: if the model learns to assign full probability to the ground- truth label for each training example, it is not guaranteed to generalize. Second, it encourages the differences between the largest logit and all others to become large, and this, combined with the bounded gradient ∂ℓ/∂z,k , reduces the ability of the model to adapt.
+> This, however, can cause two problems. First, it may result in over-fitting: if the model learns to assign full probability to the ground- truth label for each training example, it is not guaranteed to generalize. Second, it encourages the differences between the largest logit and all others to become large, and this, combined with the bounded gradient `∂ℓ/∂z,k` , reduces the ability of the model to adapt.
 
-So, intuitively, the problem is that our model learns to become overconfident of it's predictions. This is bad because we want the model to remain humble! (Jk)
-This is bad because it is then harder for the model to generalise and easier for it to overfit to the training data. 
-
-Now that we know the problem, let's have a look at Label Smoothing.
+In other words, the problem is that our model learns to become overconfident of it's predictions because it needs to be very sure of everything the model predicts.This is bad because it is then harder for the model to generalise and easier for it to overfit to the training data. 
 
 ## What is Label Smoothing?
 
-Label Smoothing was first introduced in [Rethinking the Inception Architecture for Computer Vision](https://arxiv.org/abs/1512.00567) research paper.  
+Label Smoothing was first introduced in [Rethinking the Inception Architecture for Computer Vision](https://arxiv.org/abs/1512.00567).  
 
 From the Section-7 **'Model Regularization via Label Smoothing'** in the paper,
 > We propose a mechanism for encouraging the model to be less confident. While this may not be desired if the goal is to maximize the log-likelihood of training labels, it does regularize the model and makes it more adaptable. The method is very simple. Consider a distribution over labels u(k), independent ofthe training example x, and a smoothing parameter Є. For a training example with ground-truth label y, we replace the label distribution q(k|x) = δ(k,y) with
+
 
 ![](/images/Label_Smoothing_Formula.png "eq-1")
 
