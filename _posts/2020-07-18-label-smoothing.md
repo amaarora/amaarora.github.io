@@ -230,6 +230,6 @@ I hope that through this blog post, I have been able to help you get a thorough 
 ## Credits
 This blogpost wouldn't have been possible without the help of my very talented friend [Atmadeep Banerjee](https://twitter.com/abanerjee99). Atmadeep, is currently interning and researching about [Instance Segmentation](https://paperswithcode.com/task/instance-segmentation/codeless) at Harvard! You can find some of his very cool projects at his GitHub [here](https://github.com/Atom-101). 
 
-Atmadeep was very kind to jump on a call with me for over an hour, when I was unable to replicate the results in Excel and help me find my mistake - `LOG` function in excel has base 10 whereas in `numpy` and `pytorch` it's `LOG` to the base `e`! 
+Atmadeep was very kind to jump on a call with me for over an hour, when I was unable to replicate the results in Excel and help me find my mistake - `LOG` function in excel has base 10 whereas in `numpy` and `pytorch` it's `LOG` to the base `e`! In MS Excel, `LOG` to the base `e` is referred to as `LN`.
 
 It was really funny to have spent the day reading numerous blog posts, few research papers and source code for PyTorch and then finding out that MS Excel implements `LOG` function differently than `numpy` and `pytorch`. But hey! Lesson learnt! When in doubt, contact [@Atmadeep Banerjee](https://twitter.com/abanerjee99)! He has an eye for detail.
