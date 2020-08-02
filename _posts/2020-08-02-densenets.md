@@ -44,7 +44,7 @@ The input of shape *224x224x3* is downsampled to *7x7x512* towards the end of th
 
 To facilitate both down-sampling in the architecture and feature concatenation - the authors divided the network into multiple densely connected dense blocks. Inside the dense blocks, the feature map size remains the same.
 
-## DenseBlock
+## DenseNet Architecture as a combination of DenseBlocks
 
 ![](/images/denseblock.png "fig-3 A DenseNet Architecture with 3 dense blocks")
 
@@ -57,7 +57,7 @@ The authors refer to the layers between the dense blocks as **transition layers*
 
 The transition layers used in the **DenseNet** Architecutre from an implementation perspective consist of a batch-norm layer, 1x1 convolution followed by a 2x2 average pooling layer.
 
-### DenseBlock: detailed overview
+### DenseBlock Explained
 The output of the L<sub>th</sub> layer of DenseNet architecture can be represented as:
 
 ![](/images/densenet_out.png "eq-1 DenseLayer Output")
