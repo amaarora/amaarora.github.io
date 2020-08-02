@@ -39,13 +39,13 @@ So, here's what I think - it would not be possible to concatenate the feature ma
 
 But we can't just keep the feature maps the same size throughout the network - **an essential part of concvolutional networks is down-sampling layers that change the size of feature maps**. For example, look at the VGG architecture below: 
 
-![](/images/imagenet_vgg16.png "fig-4 VGG architecture")
+![](/images/imagenet_vgg16.png "fig-3 VGG architecture")
 
 The input of shape *224x224x3* is downsampled to *7x7x512* towards the end of the network. 
 
 To facilitate both down-sampling in the architecture and feature concatenation - the authors divided the network into multiple densely connected dense blocks. Inside the dense blocks, the feature map size remains the same.
 
-![](/images/denseblock.png "fig-3 A DenseNet Architecture with 3 dense blocks")
+![](/images/denseblock.png "fig-4 A DenseNet Architecture with 3 dense blocks")
 
 Dividing the network into densely connected blocks solves the problem that we discussed above. 
 
