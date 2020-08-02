@@ -168,8 +168,12 @@ class _DenseLayer(nn.Module):
 
 A `DenseLayer` accepts an input, concatenates the input together and performs `bn_function` on these feature maps to get `bottleneck_output`. This is done for computational efficiency. Finally, the convolution operation is performed to get `new_features` which are of size `K` or `growth_rate`.
 
-It should now be easy to map the above implementation with fig-5. Let's say the above is an implementation of `LAYER_2`. First, `LAYER_2` accepts the gray, purple and orange feature maps and concatenates them. 
-Next, the `LAYER_2` performs a bottle neck operation to create `bottleneck_output` for computational efficiency. Finally, the layer performs the non linear transformation operation to generate `new_features`. These `new_features` are the green features as in fig-5.
+It should now be easy to map the above implementation with fig-5 shown below for reference again:
+
+![](/images/denseblock_single.jpeg "fig-5 A view inside the dense block")
+
+Let's say the above is an implementation of `LAYER_2`. First, `LAYER_2` accepts the <span style="color:gray">**gray**</span>, <span style="color:purple">**purple**</span>, <span style="color:orange">**orange**</span> feature maps and concatenates them. 
+Next, the `LAYER_2` performs a bottleneck operation to create `bottleneck_output` for computational efficiency. Finally, the layer performs the non linear transformation operation to generate `new_features`. These `new_features` are the <span style="color:green">**green**</span> features as in fig-5.
 
 
 ### DenseBlock Implementation
