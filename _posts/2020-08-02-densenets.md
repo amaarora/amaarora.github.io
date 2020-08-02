@@ -94,7 +94,9 @@ Now that we understand that a **DenseNet** architecture is divided into multiple
 
 Let's try and understand what's really going on inside a **dense block**. We have some <span style="color:gray">**gray**</span> input features that are then passed to `LAYER_0`. The `LAYER_0` performs a non-linear transformation to add <span style="color:purple">**purple**</span> features to the <span style="color:gray">**gray**</span> features. These are then used as input to `LAYER_1` which performs a non-linear transformation to also add <span style="color:orange">**orange**</span> features to the <span style="color:gray">**gray**</span> and <span style="color:purple">**purple**</span> ones. And so on until the final output for this 3 layer denseblock is a concatenation of <span style="color:gray">**gray**</span>, <span style="color:purple">**purple**</span>, <span style="color:orange">**orange**</span> and <span style="color:green">**green**</span> features. 
 
-As you can see the size of the feature map grows after a pass through each dense layer and the new features are concatenated to the existing features. One can think of the features as a global state of the network and each layer adds `K` features on top to the global state.
+So, in a dense block, each layer adds some features on top of the existing feature maps.
+
+Therefore, as you can see the size of the feature map grows after a pass through each dense layer and the new features are concatenated to the existing features. One can think of the features as a global state of the network and each layer adds `K` features on top to the global state.
 
 This parameter `K` is referred to as **growth rate** of the network.
 
