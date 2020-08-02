@@ -44,7 +44,7 @@ The input of shape *224x224x3* is downsampled to *7x7x512* towards the end of th
 
 To facilitate both down-sampling in the architecture and feature concatenation - the authors divided the network into multiple densely connected dense blocks. Inside the dense blocks, the feature map size remains the same.
 
-## Dense Block
+## DenseBlock
 
 ![](/images/denseblock.png "fig-3 A DenseNet Architecture with 3 dense blocks")
 
@@ -52,10 +52,11 @@ Dividing the network into densely connected blocks solves the problem that we di
 
 Now, the `Convolution + Pooling` operations outside the dense blocks can perform the downsampling operation and inside the dense block we can make sure that the size of the feature maps is the same to be able to perform feature concatenation. 
 
+### Transition Layers
 The authors refer to the layers between the dense blocks as **transition layers** which do the convolution and pooling. 
 
 The transition layers used in the **DenseNet** Architecutre from an implementation perspective consist of a batch-norm layer, 1x1 convolution followed by a 2x2 average pooling layer.
 
 Let's look at the dense block operation in a little more detail. 
 
-### Dense Block: detailed overview
+### DenseBlock: detailed overview
