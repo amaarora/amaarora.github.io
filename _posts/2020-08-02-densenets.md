@@ -56,7 +56,7 @@ Now, the `Convolution + Pooling` operations outside the dense blocks can perform
 ### Transition Layers
 The authors refer to the layers between the dense blocks as **transition layers** which do the convolution and pooling. 
 
-The transition layers used in the **DenseNet** Architecutre from an implementation perspective consist of a batch-norm layer, 1x1 convolution followed by a 2x2 average pooling layer.
+From the paper, we know that the **transition layers** used in the **DenseNet** architecture consist of a batch-norm layer, 1x1 convolution followed by a 2x2 average pooling layer.
 
 Given that the transition layers are prety easy, let's quickly implement them here:
 
