@@ -94,8 +94,6 @@ We can see that the first part of the DenseNet architecture consists of a `7x7 s
 
 Also, the convolution operations inside each of the architectures are the Bottle Neck layers. What this means is that the `1x1 conv` reduces the number of channels in the input and `3x3 conv` performs the convolution operation on the transformed version of the input with reduced number of channels rather than the input.
 
-This has been explained in the paper as well. 
-
 ### Bottleneck Layers
 By now, we know that each layer produces `K` feature maps which are then concatenated to previous feature maps. Therefore, the number of inputs are quite high especially for later layers in the network. 
 
@@ -148,3 +146,6 @@ class _DenseLayer(nn.Module):
 ```
 
 A `DenseLayer` accepts an input, concatenates the input together and performs `bn_function` on these feature maps to get `bottleneck_output`. This is done for computational efficiency. Finally, the convolution operation is performed to get `new_features` which are of size `K` or `growth_rate`.
+
+It should now be easy to map the above implementation with fig-5. Let's say the above is an implementation of `LAYER_2`. First, `LAYER_2` accepts the gray, purple and orange feature maps and concatenates them. 
+Next, the `LAYER_2` performs a bottle neck operation to create `bottleneck_output` for computational efficiency. Finally, the layer performs the non linear transformation operation to generate `new_features`. These `new_features` are the green features as in fig-5.
