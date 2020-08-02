@@ -58,6 +58,12 @@ The authors refer to the layers between the dense blocks as **transition layers*
 The transition layers used in the **DenseNet** Architecutre from an implementation perspective consist of a batch-norm layer, 1x1 convolution followed by a 2x2 average pooling layer.
 
 ### DenseBlock: detailed overview
+The output of the L<sub>th</sub> layer of DenseNet architecture can be represented as:
+
+![](/images/densenet_out.png "eq-1 DenseLayer Output")
+
+where,  **H<sub>L</sub>** are a combination `Convolution + BatchNorm + Relu` operations.
+
 Now that we understand that a DenseNet architecture is divided into multiple dense blocks, let's look at a dense block in a little more detail. Essentially, we know, that inside a dense block, each layer is connected to every other layer and the feature map size remains the same. 
 
 ![](/images/denseblock_single.jpeg "fig-4 A view inside the dense block")
