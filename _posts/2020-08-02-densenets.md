@@ -117,8 +117,8 @@ Also, the convolution operations inside each of the architectures are the Bottle
 ### Bottleneck Layers
 By now, we know that each layer produces `K` feature maps which are then concatenated to previous feature maps. Therefore, the number of inputs are quite high especially for later layers in the network. 
 
-This has huge computational requirements and to make it more efficient, Bottleneck layers were introduced. From the paper:
-> 1×1 convolution can be in- troduced as bottleneck layer before each 3×3 convolution to reduce the number of input feature-maps, and thus to improve computational efficiency. We find this design es- pecially effective for DenseNet and we refer to our network with such a bottleneck layer, i.e., to the BN-ReLU-Conv(1× 1)-BN-ReLU-Conv(3×3) version ofH?, as DenseNet-B. In our experiments, we let each 1×1 convolution produce 4k feature-maps.
+This has huge computational requirements and to make it more efficient, the authors decided to utilize Bottleneck layers. From the paper:
+> 1×1 convolution can be introduced as bottleneck layer before each 3×3 convolution to reduce the number of input feature-maps, and thus to improve computational efficiency. In our experiments, we let each 1×1 convolution produce **4k** feature-maps.
 
 We know `K` refers to the growth rate, so what the authors have finalized on is for `1x1 conv` to first produce `4*K` feature maps and then perform `3x3 conv` on these `4*k` size feature maps.
 
