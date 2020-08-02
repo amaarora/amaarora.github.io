@@ -60,4 +60,4 @@ The transition layers used in the **DenseNet** Architecutre from an implementati
 ### DenseBlock: detailed overview
 Now that we understand that a DenseNet architecture is divided into multiple dense blocks, let's look at a dense block in a little more detail. Essentially, we know, that inside a dense block, each layer is connected to every other layer and the feature map size remains the same. 
 
-![](/images/denseblock.jpeg "fig-4 Dense Block")
+![](/images/denseblock_single.jpeg "fig-4 A view inside the dense block")
