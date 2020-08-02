@@ -86,7 +86,7 @@ We already know by now from fig-4, that DenseNets are divided into multiple Dens
 
 The various architectures of DenseNet have been summarized in the paper.
 
-![](/images/densenet_archs.png "fig-6 DenseNet Architectures")
+![](/images/densenet_archs.png "table-1 DenseNet Architectures")
 
 Each architecture consists of four DenseBlocks with varying number of layers. For example, the `DenseNet-121` has `[6,12,24,16]` layers in the four dense blocks whereas `DenseNet-169` has `[6, 12, 32, 32]` layers.
 
@@ -105,6 +105,7 @@ We know `K` refers to the growth rate, so what the authors have finalized on is 
 ## DenseNet Implementation
 We are now ready and have all the building blocks to implement DenseNet in PyTorch.
 
+### DenseLayer Implementation
 The first thing we need is to implement the dense layer inside a dense block.
 
 ```python
@@ -149,3 +150,163 @@ A `DenseLayer` accepts an input, concatenates the input together and performs `b
 
 It should now be easy to map the above implementation with fig-5. Let's say the above is an implementation of `LAYER_2`. First, `LAYER_2` accepts the gray, purple and orange feature maps and concatenates them. 
 Next, the `LAYER_2` performs a bottle neck operation to create `bottleneck_output` for computational efficiency. Finally, the layer performs the non linear transformation operation to generate `new_features`. These `new_features` are the green features as in fig-5.
+
+
+### DenseBlock Implementation
+Now that we have implemented a `DenseLayer`, we are ready to implement the DenseBlock which consists of multiple such `DenseLayer`s.
+
+```python
+class _DenseBlock(nn.ModuleDict):
+    _version = 2
+
+    def __init__(self, num_layers, num_input_features, bn_size, growth_rate, drop_rate, memory_efficient=False):
+        super(_DenseBlock, self).__init__()
+        for i in range(num_layers):
+            layer = _DenseLayer(
+                num_input_features + i * growth_rate,
+                growth_rate=growth_rate,
+                bn_size=bn_size,
+                drop_rate=drop_rate,
+                memory_efficient=memory_efficient,
+            )
+            self.add_module('denselayer%d' % (i + 1), layer)
+
+    def forward(self, init_features):
+        features = [init_features]
+        for name, layer in self.items():
+            new_features = layer(features)
+            features.append(new_features)
+        return torch.cat(features, 1)
+```
+
+Let's map the implementation of this `DenseBlock` with fig-5. Let's say we pass the number of layers `num_layers` as 3 to create fig-5 block. In this case, let's imagine that the `num_input_features` in gray in the figure is 64. We already know that the authors shows the bottleneck size `bn_size` for `1x1 conv` to be 4. Let's consider the `growth_rate` `K` is 32 (same for all netowrks as in the paper).
+
+Great, so the first layer `LAYER_0` accepts `num_input_features` (64) and outputs extra 32 features. Excellent. 
+Now, `LAYER_1` accepts the 96 features `num_input_features + 1 * growth rate` and outputs extra 32 features again. Finally, `LAYER_2` accepts 128 features and adds the 32 green features on top with are then concatenated to existing features and returned by the `DenseBlock`.
+
+You will find the above two paragraphs to really explain the implementation code of `DenseBlock`. 
+
+## DenseNet Architecture Implementation 
+
+Finally, we are now ready to implement the DenseNet architecture as we have already implemented the `DenseLayer` and `DenseBlock`.
+
+```python
+class DenseNet(nn.Module):
+    def __init__(self, growth_rate=32, block_config=(6, 12, 24, 16),
+                 num_init_features=64, bn_size=4, drop_rate=0, num_classes=1000, memory_efficient=False):
+
+        super(DenseNet, self).__init__()
+
+        # Convolution and pooling part from table-1
+        self.features = nn.Sequential(OrderedDict([
+            ('conv0', nn.Conv2d(3, num_init_features, kernel_size=7, stride=2,
+                                padding=3, bias=False)),
+            ('norm0', nn.BatchNorm2d(num_init_features)),
+            ('relu0', nn.ReLU(inplace=True)),
+            ('pool0', nn.MaxPool2d(kernel_size=3, stride=2, padding=1)),
+        ]))
+
+        # Add multiple denseblocks based on config 
+        # for densenet-121 config: [6,12,24,16]
+        num_features = num_init_features
+        for i, num_layers in enumerate(block_config):
+            block = _DenseBlock(
+                num_layers=num_layers,
+                num_input_features=num_features,
+                bn_size=bn_size,
+                growth_rate=growth_rate,
+                drop_rate=drop_rate,
+                memory_efficient=memory_efficient
+            )
+            self.features.add_module('denseblock%d' % (i + 1), block)
+            num_features = num_features + num_layers * growth_rate
+            if i != len(block_config) - 1:
+                # add transition layer between denseblocks to 
+                # downsample
+                trans = _Transition(num_input_features=num_features,
+                                    num_output_features=num_features // 2)
+                self.features.add_module('transition%d' % (i + 1), trans)
+                num_features = num_features // 2
+
+        # Final batch norm
+        self.features.add_module('norm5', nn.BatchNorm2d(num_features))
+
+        # Linear layer
+        self.classifier = nn.Linear(num_features, num_classes)
+
+        # Official init from torch repo.
+        for m in self.modules():
+            if isinstance(m, nn.Conv2d):
+                nn.init.kaiming_normal_(m.weight)
+            elif isinstance(m, nn.BatchNorm2d):
+                nn.init.constant_(m.weight, 1)
+                nn.init.constant_(m.bias, 0)
+            elif isinstance(m, nn.Linear):
+                nn.init.constant_(m.bias, 0)
+
+    def forward(self, x):
+        features = self.features(x)
+        out = F.relu(features, inplace=True)
+        out = F.adaptive_avg_pool2d(out, (1, 1))
+        out = torch.flatten(out, 1)
+        out = self.classifier(out)
+        return out
+```
+
+And this is it! We have just implemented the `DenseNet` architecture from scratch in PyTorch. The above implementation is really simple. 
+
+Let's use it to create `densenet-121` architecture.
+
+```python
+def _densenet(arch, growth_rate, block_config, num_init_features, pretrained, progress,
+              **kwargs):
+    model = DenseNet(growth_rate, block_config, num_init_features, **kwargs)
+    return model
+
+def densenet121(pretrained=False, progress=True, **kwargs):
+    return _densenet('densenet121', 32, (6, 12, 24, 16), 64, pretrained, progress,
+                     **kwargs)
+```
+
+Here's what happens. First we initialize the stem of the DenseNet architecture - this is the convolution and pooling part from table-1. 
+
+This part of the code does that:
+```python
+        self.features = nn.Sequential(OrderedDict([
+            ('conv0', nn.Conv2d(3, num_init_features, kernel_size=7, stride=2,
+                                padding=3, bias=False)),
+            ('norm0', nn.BatchNorm2d(num_init_features)),
+            ('relu0', nn.ReLU(inplace=True)),
+            ('pool0', nn.MaxPool2d(kernel_size=3, stride=2, padding=1)),
+        ]))
+```
+
+Next, based on the config, we create a `DenseBlock` based on the number of layers in the config. 
+
+This part of the code does this:
+```python
+for i, num_layers in enumerate(block_config):
+            block = _DenseBlock(
+                num_layers=num_layers,
+                num_input_features=num_features,
+                bn_size=bn_size,
+                growth_rate=growth_rate,
+                drop_rate=drop_rate,
+                memory_efficient=memory_efficient
+            )
+            self.features.add_module('denseblock%d' % (i + 1), block)
+```
+
+Finally, we add `Transition` Layers between `DenseBlock`s.
+
+```python
+            if i != len(block_config) - 1:
+                # add transition layer between denseblocks to 
+                # downsample
+                trans = _Transition(num_input_features=num_features,
+                                    num_output_features=num_features // 2)
+                self.features.add_module('transition%d' % (i + 1), trans)
+                num_features = num_features // 2
+```
+
+And that's all the magic behind DenseNets!
