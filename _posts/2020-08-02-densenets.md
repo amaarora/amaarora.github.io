@@ -173,11 +173,12 @@ It should now be easy to map the above implementation with fig-5 shown below for
 ![](/images/denseblock_single.jpeg "fig-5 A view inside the dense block")
 
 Let's say the above is an implementation of `LAYER_2`. First, `LAYER_2` accepts the <span style="color:gray">**gray**</span>, <span style="color:purple">**purple**</span>, <span style="color:orange">**orange**</span> feature maps and concatenates them. 
-Next, the `LAYER_2` performs a bottleneck operation to create `bottleneck_output` for computational efficiency. Finally, the layer performs the non linear transformation operation to generate `new_features`. These `new_features` are the <span style="color:green">**green**</span> features as in fig-5.
+Next, the `LAYER_2` performs a bottleneck operation to create `bottleneck_output` for computational efficiency. Finally, the layer performs the **H<sub>L</sub>** operation as in eq-2 to generate `new_features`. These `new_features` are the <span style="color:green">**green**</span> features as in fig-5.
 
+Great! So far we have successfully implemented Transition and Dense layers.
 
 ### DenseBlock Implementation
-Now that we have implemented a `DenseLayer`, we are ready to implement the DenseBlock which consists of multiple such `DenseLayer`s.
+Now, we are ready to implement the DenseBlock which consists of multiple such `DenseLayer`s.
 
 ```python
 class _DenseBlock(nn.ModuleDict):
@@ -203,12 +204,11 @@ class _DenseBlock(nn.ModuleDict):
         return torch.cat(features, 1)
 ```
 
-Let's map the implementation of this `DenseBlock` with fig-5. Let's say we pass the number of layers `num_layers` as 3 to create fig-5 block. In this case, let's imagine that the `num_input_features` in gray in the figure is 64. We already know that the authors shows the bottleneck size `bn_size` for `1x1 conv` to be 4. Let's consider the `growth_rate` `K` is 32 (same for all netowrks as in the paper).
+Let's map the implementation of this `DenseBlock` with fig-5 again. Let's say we pass the number of layers `num_layers` as *3* to create fig-5 block. In this case, let's imagine that the `num_input_features` in <span style="color:gray">**gray**</span> in the figure is *64*. We already know that the authors choose the bottleneck size `bn_size` for `1x1 conv` to be *4*. Let's consider the `growth_rate` is 32 (same for all networks as in the paper).
 
-Great, so the first layer `LAYER_0` accepts `num_input_features` (64) and outputs extra 32 features. Excellent. 
-Now, `LAYER_1` accepts the 96 features `num_input_features + 1 * growth rate` and outputs extra 32 features again. Finally, `LAYER_2` accepts 128 features and adds the 32 green features on top with are then concatenated to existing features and returned by the `DenseBlock`.
+Great, so the first layer `LAYER_0` accepts *64* `num_input_features` and outputs extra *32* features. Excellent. Now, `LAYER_1` accepts the *96* features `num_input_features + 1 * growth rate` and outputs extra *32* features again. Finally, `LAYER_2` accepts *128* features `num_input_features + 2 * growth rate` and adds the *32* <span style="color:green">**green**</span> features on top with are then concatenated to existing features and returned by the `DenseBlock`.
 
-You will find the above two paragraphs to really explain the implementation code of `DenseBlock`. 
+At this stage, it should be really easy for you to map the implementation of dense block with fig-5.
 
 ## DenseNet Architecture Implementation 
 
@@ -277,9 +277,7 @@ class DenseNet(nn.Module):
         return out
 ```
 
-And this is it! We have just implemented the `DenseNet` architecture from scratch in PyTorch. The above implementation is really simple. 
-
-Let's use it to create `densenet-121` architecture.
+Let's use the above implementation to create `densenet-121` architecture.
 
 ```python
 def _densenet(arch, growth_rate, block_config, num_init_features, pretrained, progress,
@@ -292,7 +290,7 @@ def densenet121(pretrained=False, progress=True, **kwargs):
                      **kwargs)
 ```
 
-Here's what happens. First we initialize the stem of the DenseNet architecture - this is the convolution and pooling part from table-1. 
+Here's what happens. First, we initialize the stem of the DenseNet architecture - this is the `convolution and pooling` part from table-1. 
 
 This part of the code does that:
 ```python
@@ -333,4 +331,14 @@ Finally, we add `Transition` Layers between `DenseBlock`s.
                 num_features = num_features // 2
 ```
 
-And that's all the magic behind DenseNets!
+And that's all the magic behind **DenseNet**s! 
+
+## Conclusion
+Congratulations! Today, together, we successfully understood what **DenseNet**s are and also understood the torchvision implementation of **DenseNet**s. I hope that by now you have a very thorough understanding of the **DenseNet** architecture.
+
+As always, constructive feedback is always welcome at [@amaarora](https://twitter.com/amaarora).
+
+Also, feel free to [subscribe to my blog here](https://amaarora.github.io/subscribe) to receive regular updates regarding new blog posts. Thanks for reading!
+
+## Credits
+All code implementations have been directly copied from [torchvision](https://github.com/pytorch/vision/blob/master/torchvision/models/densenet.py).
