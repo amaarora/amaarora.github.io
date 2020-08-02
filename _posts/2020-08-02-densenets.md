@@ -25,6 +25,8 @@ The DenseNet architecture is all about modifying this standard CNN architecture 
 
 In a DenseNet architecture, each layer is connected to every other layer, hence the name **Densely Connected Convolutional Network**. For `L` layers, there are `L(L+1)/2` direct connections. For each layer, the feature maps of all the preceding layers are used as inputs, and its own feature maps are used as input for each subsequent layers.
 
+This is really it, as simple as this may sound, DenseNets essentially conect every layer to every other layer. This is the main idea that is extremely powerful.
+
 From the paper: 
 > DenseNets have several compelling advantages: they alleviate the vanishing-gradient problem, strengthen feature propagation, encourage feature reuse, and substantially reduce the number of parameters.
 
@@ -57,8 +59,11 @@ The transition layers used in the **DenseNet** Architecutre from an implementati
 ### Inside a single DenseBlock
 Now that we understand that a DenseNet architecture is divided into multiple dense blocks, let's look at a dense block in a little more detail. Essentially, we know, that inside a dense block, each layer is connected to every other layer and the feature map size remains the same. 
 
-![](/images/denseblock_single.jpeg "fig-4 A view inside the dense block")
+![](/images/denseblock_single.jpeg "fig-5 A view inside the dense block")
 
 Let's try and understand what's really going on inside a **dense block**. We have some gray input features that are then passed to `LAYER_0`. The `LAYER_0` performs a non-linear transformation to add purple features to the gray features. These are then used as input to `LAYER_1` which performs a non-linear transformation to also add orange features to the gray and purple ones. And so on until the final output for this 4 layer denseblock is a concatenation of gray, purple, orange and green features. 
 
 As you can see the size of the feature map grows after a pass through each dense layer and the new features are concatenated to the existing features. One can think of the features as a global state of the network and each layer adds `K` features on top to the global state.
+
+## DenseNet Implementation
+We are now ready and have all the building blocks to implement DenseNet in PyTorch.
