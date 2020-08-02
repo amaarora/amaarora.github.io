@@ -25,7 +25,7 @@ The **DenseNet** architecture is all about modifying this standard CNN architect
 
 In a **DenseNet** architecture, each layer is connected to every other layer, hence the name **Densely Connected Convolutional Network**. For `L` layers, there are `L(L+1)/2` direct connections. For each layer, the feature maps of all the preceding layers are used as inputs, and its own feature maps are used as input for each subsequent layers.
 
-This is really it, as simple as this may sound, DenseNets essentially conect every layer to every other layer. This is the main idea that is extremely powerful. The input of a layer inside DenseNet is the concatenation of feature maps from previous layers.
+This is really it, as simple as this may sound, DenseNets essentially conect every layer to every other layer. This is the main idea that is extremely powerful. The input of a layer inside **DenseNet** is the concatenation of feature maps from previous layers.
 
 From the paper: 
 > DenseNets have several compelling advantages: they alleviate the vanishing-gradient problem, strengthen feature propagation, encourage feature reuse, and substantially reduce the number of parameters.
@@ -58,7 +58,7 @@ The authors refer to the layers between the dense blocks as **transition layers*
 
 From the paper, we know that the **transition layers** used in the **DenseNet** architecture consist of a batch-norm layer, 1x1 convolution followed by a 2x2 average pooling layer.
 
-Given that the transition layers are prety easy, let's quickly implement them here:
+Given that the transition layers are pretty easy, let's quickly implement them here:
 
 ```python
 class _Transition(nn.Sequential):
@@ -71,8 +71,24 @@ class _Transition(nn.Sequential):
         self.add_module('pool', nn.AvgPool2d(kernel_size=2, stride=2))
 ```
 
+Essentially the `1x1 conv` performs the downsampling from `num_input_features` to `num_output_features`. 
+
+## Dense connectivity
+Let's consider a network with `L` layers, each of which performs a non-linear transformation **H<sub>L</sub>**. The output of the **L<sub>th</sub>** layer of the network is denoted as **x<sub>L</sub>** and the input image is represented as **x<sub>0</sub>**.
+
+We know that traditional feed-forward netowrks connect the output of the **L<sub>th</sub>** layer to **L+1<sub>th</sub>** layer. And the skip connection can be represented as:
+
+![](/images/resnet_out.png "eq-1 ResNet architecture output")
+
+
+In **DenseNet** architecture, the dense connectivity can be represented as:
+
+![](/images/densenet_out.png "eq-2 DenseNet architecture output")
+
+where [x<sub>0</sub>, x<sub>1</sub>, x<sub>2</sub>..] represents concatenation of the feature maps produced by [0,1,.. L<sub>th</sub>] layers. 
+
 ### Inside a single DenseBlock
-Now that we understand that a DenseNet architecture is divided into multiple dense blocks, let's look at a dense block in a little more detail. Essentially, we know, that inside a dense block, each layer is connected to every other layer and the feature map size remains the same. 
+Now that we understand that a **DenseNet** architecture is divided into multiple dense blocks, let's look at a dense block in a little more detail. Essentially, we know, that inside a dense block, each layer is connected to every other layer and the feature map size remains the same. 
 
 ![](/images/denseblock_single.jpeg "fig-5 A view inside the dense block")
 
