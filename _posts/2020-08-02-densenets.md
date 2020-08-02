@@ -43,8 +43,6 @@ The input of shape *224x224x3* is downsampled to *7x7x512* towards the end of th
 
 To facilitate both down-sampling in the architecture and feature concatenation - the authors divided the network into multiple densely connected dense blocks. Inside the dense blocks, the feature map size remains the same.
 
-## DenseNet Architecture as a combination of DenseBlocks
-
 ![](/images/denseblock.png "fig-3 A DenseNet Architecture with 3 dense blocks")
 
 Dividing the network into densely connected blocks solves the problem that we discussed above. 
