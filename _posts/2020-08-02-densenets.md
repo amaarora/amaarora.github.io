@@ -61,3 +61,7 @@ The transition layers used in the **DenseNet** Architecutre from an implementati
 Now that we understand that a DenseNet architecture is divided into multiple dense blocks, let's look at a dense block in a little more detail. Essentially, we know, that inside a dense block, each layer is connected to every other layer and the feature map size remains the same. 
 
 ![](/images/denseblock_single.jpeg "fig-4 A view inside the dense block")
+
+Let's try and understand what's really going on inside a **dense block**. We have some gray input features that are then passed to `LAYER_0`. The `LAYER_0` performs the **H<sub>L</sub>** operation to add purple features to the gray features. These are then used as input to `LAYER_1` which performs the **H<sub>L</sub>** operation to also add orange features to the gray and purple ones. And so on until the final output for this 4 layer denseblock is a concatenation of gray, purple, orange and green features. 
+
+As you can see the size of the feature map grows after a pass through each dense layer and the new features are concatenated to the existing features. One can think of the features as a global state of the network and each layer adds `K` features on top to the global state.
