@@ -88,11 +88,11 @@ In **DenseNet** architecture, the dense connectivity can be represented as:
 where [x<sub>0</sub>, x<sub>1</sub>, x<sub>2</sub>..] represents concatenation of the feature maps produced by [0,1,.. L<sub>th</sub>] layers. 
 
 ### Inside a single DenseBlock
-Now that we understand that a **DenseNet** architecture is divided into multiple dense blocks, let's look at a dense block in a little more detail. Essentially, we know, that inside a dense block, each layer is connected to every other layer and the feature map size remains the same. 
+Now that we understand that a **DenseNet** architecture is divided into multiple dense blocks, let's look at a single dense block in a little more detail. Essentially, we know, that inside a dense block, each layer is connected to every other layer and the feature map size remains the same. 
 
 ![](/images/denseblock_single.jpeg "fig-5 A view inside the dense block")
 
-Let's try and understand what's really going on inside a **dense block**. We have some gray input features that are then passed to `LAYER_0`. The `LAYER_0` performs a non-linear transformation to add purple features to the gray features. These are then used as input to `LAYER_1` which performs a non-linear transformation to also add orange features to the gray and purple ones. And so on until the final output for this 4 layer denseblock is a concatenation of gray, purple, orange and green features. 
+Let's try and understand what's really going on inside a **dense block**. We have some <span style="color:gray">gray</span> input features that are then passed to `LAYER_0`. The `LAYER_0` performs a non-linear transformation to add purple features to the gray features. These are then used as input to `LAYER_1` which performs a non-linear transformation to also add orange features to the gray and purple ones. And so on until the final output for this 4 layer denseblock is a concatenation of gray, purple, orange and green features. 
 
 As you can see the size of the feature map grows after a pass through each dense layer and the new features are concatenated to the existing features. One can think of the features as a global state of the network and each layer adds `K` features on top to the global state.
 
