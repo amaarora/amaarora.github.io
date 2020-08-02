@@ -104,13 +104,13 @@ This parameter `K` is referred to as **growth rate** of the network.
 
 We already know by now from fig-4, that DenseNets are divided into multiple DenseBlocks.
 
-The various architectures of DenseNet have been summarized in the paper.
+The various architectures of DenseNets have been summarized in the paper.
 
 ![](/images/densenet_archs.png "table-1 DenseNet Architectures")
 
 Each architecture consists of four DenseBlocks with varying number of layers. For example, the `DenseNet-121` has `[6,12,24,16]` layers in the four dense blocks whereas `DenseNet-169` has `[6, 12, 32, 32]` layers.
 
-We can see that the first part of the DenseNet architecture consists of a `7x7 stride 2 Conv Layer` followed by a `3x3 stride-2 MaxPooling layer`.
+We can see that the first part of the DenseNet architecture consists of a `7x7 stride 2 Conv Layer` followed by a `3x3 stride-2 MaxPooling layer`. And the fourth dense block is followed by a **Classification Layer** that accepts the feature maps of all layers of the network to perform the classification.
 
 Also, the convolution operations inside each of the architectures are the Bottle Neck layers. What this means is that the `1x1 conv` reduces the number of channels in the input and `3x3 conv` performs the convolution operation on the transformed version of the input with reduced number of channels rather than the input.
 
