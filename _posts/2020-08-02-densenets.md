@@ -8,8 +8,7 @@ In this post today, we will be looking at DenseNet architecture from the researc
 
 The overall agenda is to:
 - Understand what DenseNet architecture is
-- Introduce DenseBlock
-- Compare DenseNet architecture to [ResNet](https://arxiv.org/abs/1512.03385) architecture 
+- Introduce dense blocks, transition layers and look at a single dense block in more detail
 - Understand step-by-step the TorchVision implementation of DenseNet
 
 ## DenseNet Architecture Introduction
