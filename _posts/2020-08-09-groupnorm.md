@@ -32,10 +32,10 @@ While there are also other existing methods like [Layer Normalization](https://a
 
 Above is an excellent representation of the difference between **BatchNorm**,  **LayerNorm**, **InstanceNorm** and **GroupNorm**.
 
-Without delving much into the math as in the **GN** research paper, let's consider we have a batch of size *(N, C, H, W)* dimensions that needs to be normalized where, *N* represents batch size, *C* represents number of channels and *H* and *W* stand for height and width of the images in the batch.
+Without delving much into the math as in the **GN** research paper, let's consider we have a batch of size `(N, C, H, W)` dimensions that needs to be normalized where, `N` represents batch size, `C` represents number of channels and `H` and `W` stand for height and width of the images in the batch.
 
-In **BN**, the pixels sharing the same channel-index are normalized together. That is, **BN** normalizes accross the (N,H,W) axes. **LayerNorm**, normalizes accross the (C,H,W) axes for each sample.
-**InstanceNorm**, normalizes along the (H,W) dimension for each sample and each channel.
+In **BN**, the pixels sharing the same channel-index are normalized together. That is, **BN** normalizes accross the `(N,H,W)` axes. **LayerNorm**, normalizes accross the `(C,H,W)` axes for each sample.
+**InstanceNorm**, normalizes along the `(H,W)` dimension for each sample and each channel.
 
 ### What does **Group Normalization** do?
 **GN** first divides the channels intro groups. By default, there are 32 groups (from the research paper). So for a batch of dimension *(16, 64, 224, 224)*, there are 2 channels per group and **GN** calculates the mean and variance along a group of channels.
