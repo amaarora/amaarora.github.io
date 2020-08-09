@@ -5,14 +5,14 @@
 ## Introduction
 In this blog post today, we will look at [Group Normalization](https://arxiv.org/abs/1803.08494) research paper and also:
 - The drawback of [Batch Normalization](https://arxiv.org/abs/1502.03167)  
-- Introduction to `Group Normaliation`
-- Other normalization techniques and how does `Group Normalization` compares to those
-- Benefits of `Group Normalization` over other techniques
+- Introduction to **Group Normaliation**
+- Other normalization techniques and how does **Group Normalization** compares to those
+- Benefits of **Group Normalization** over other techniques
 - Discuss **Group Division** and 32 as default number of groups
-- Discuss effect of `Group Normalization` on deeper models (eg. Resnet-101)
-- Analyse how `Group Normalization` and `Batch Normalization` are qualitatively similar
-- Implement `Group Normalization` in *PyTorch* and *Tensorflow*
-- Do a small experiment to apply `GroupNorm` + `Weight Standardization` to `Pets` dataset and compare performance to vanilla `ResNet` with `BatchNorm` 
+- Discuss effect of **Group Normalization** on deeper models (eg. Resnet-101)
+- Analyse how **Group Normalization** and **Batch Normalization** are qualitatively similar
+- Implement **Group Normalization** in *PyTorch* and *Tensorflow*
+- Do a small experiment to apply **GroupNorm** + **Weight Standardization** to **Pets** dataset and compare performance to vanilla **ResNet** with **BatchNorm** 
 
 [Batch Normalization](https://arxiv.org/abs/1502.03167) is used is most state-of-the art computer vision to stabilise training. **BN** normalizes the features based on the mean and variance in a mini-batch. This has helped improve model performance, reduced training times and also helped very deep models converge.
 
