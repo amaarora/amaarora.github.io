@@ -148,6 +148,7 @@ def GroupNorm(x, gamma, beta, G, eps=1e−5):
 Essentially, the authors reshape the batch and divide into groups with `C // G` channels per group where,
 - `C`: number of channels
 - `G`: number of groups
+
 Finally, as discussed in [this](https://amaarora.github.io/2020/08/09/groupnorm.html#batchnorm-groupnorm-instancenorm-and-layernorm) section, the authors normalize along the `(C//G, H, W)` dimension and return the result after reshaping the batch back to `(N, C, H, W)`. 
 
 I hope that by this time, the implementation should be clear to the reader. If it isn't, either I have not explained **GN** very well, or I kindly ask the reader to go back to [BatchNorm, GroupNorm, InstanceNorm and LayerNorm](https://amaarora.github.io/2020/08/09/groupnorm.html#batchnorm-groupnorm-instancenorm-and-layernorm) section and have a quick re-read.
