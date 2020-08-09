@@ -85,7 +85,7 @@ In **IN**, the *mean* and *std deviation* are computed for each sample and each 
 
 ### Group Normalization Explained
 
-![](/images/gn_explained.png "fig-4 GN explained")
+![](/images/gn_explained.jpg "fig-4 GN explained")
 
 Finally, for group norm, the batch is first divided into groups (32 by default, discussed later). The batch with dimension `(N, C, W, H)` is first reshaped to `(N, G, C//G, H, W)` dimensions where `G` represents the **group size**. Finally, the *mean* and *std deviation* are calculated along the `(H, W)` and along `C//G` channels. This is also illustrated very well in `fig-3`.
 
