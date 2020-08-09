@@ -10,13 +10,12 @@ In this blog post today, we will look at [Group Normalization](https://arxiv.org
 - Benefits of **Group Normalization** over other normalization techniques
 - Discuss the optimal number of groups as a hyperparameter in **GN**
 - Discuss effect of **Group Normalization** on deeper models (eg. Resnet-101)
-- Analyse how **Group Normalization** and **Batch Normalization** are qualitatively similar
 - Implement **Group Normalization** in *PyTorch* and *Tensorflow*
-- Implement ResNet-50 with [**GroupNorm** + **Weight Standardization**] on **Pets** dataset and compare performance to vanilla **ResNet-50** with **BatchNorm** layer 
+- Implement **ResNet-50** with [**GroupNorm** + **Weight Standardization**] on **Pets** dataset and compare performance to vanilla **ResNet-50** with **BatchNorm** layer 
 
-[Batch Normalization](https://arxiv.org/abs/1502.03167) is used in most state-of-the art computer vision to stabilise training. **BN** normalizes the features based on the mean and variance in a mini-batch. This has helped improve model performance, reduced training time and also helped very deep models converge.
+[Batch Normalization](https://arxiv.org/abs/1502.03167) is used in most state-of-the art computer vision to stabilise training. **BN** normalizes the features based on the *mean* and *variance* in a mini-batch. This has helped improve model performance, reduce training time and also helped very deep models converge.
 
-But this technique also suffers from drawbacks - if batch size is too small, training becomes unstable with BN.
+But this technique also suffers from drawbacks - if batch size is too small, training becomes unstable with **BN**.
 
 The aim of this blog post is not to study **BN**, many other wonderful posts have been written on that, but to look at other alternatives such as **GN**.
 
@@ -28,28 +27,30 @@ Knowingly or unknowingly, we have all used **BN** in our experiments when traini
 From the Group Normalization research paper,
 > We all know that BN has been established as a very effective component in deep learning. BN normalizes the features by the mean and variance computed within a batch. But despite its great success, BN exhibits drawbacks that are also caused by its distinct behavior of normalizing along the batch dimension. In particular, it is required for BN to work with sufficiently large batch size. A small batch size leads to innacurate estimation of the batch statistics and reducing BN's batch size increases the model error dramatically.
 
-Essentially, what that means is that **BN** is not very effective if the batch sizes are too small. Especially for other CV applications than Image classification such as Object detection, segmentation, video classification, the restriction on batch sizes are more demanding and it is difficult to have higher batch sizes. 
+Essentially, what that means is that **BN** is not very effective if the batch sizes are too small. Especially for CV applications other than Image classification such as object detection, segmentation, video classification, the restriction on batch sizes are more demanding and it is difficult to have higher batch sizes. 
 
-Especially in such cases, **GN** can be used a strong alternative to **BN**. Or, there could be cases where you might want to try a bigger capacity model leaving less space in the GPU to fit a bigger batch size. 
+Especially in such cases, **GN** can be used a strong alternative to **BN**. 
+
+Or, there could be cases where you might want to try a bigger capacity model leaving less space in the GPU to fit a bigger batch size. In such cases as well, you might want to try **GN** as an alternative.
 
 ### Introduction to Group Normalization
 In the [paper](https://arxiv.org/abs/1803.08494), the authors introduce **GN** as a simple alternative to **BN**. From the paper:
 
 > GN divides the channels into groups and computes within each group the mean and variance for normalization. GN's computation is independent of batch sizes, and its accuracy is stable in a wide range of batch sizes. 
 
-Essentially, **GN** takes away the dependance on batch size for normalization and in doing so mitigates the problem suffered by **BN**. There are also other techniques that have been proposed to avoid batch dimension - but we will discuss them later. For now, it is essential for the reader to realize that instead of normalizing accross the batch dimension, **GN** normalizes accross the groups (channel dimension). This has been further explained later in this post.
+Essentially, **GN** takes away the dependance on batch size for normalization and in doing so mitigates the problem suffered by **BN**. There are also other techniques that have been proposed to avoid batch dimension - but we will discuss them later. For now, it is essential for the reader to realize that instead of normalizing accross the batch dimension, **GN** normalizes accross the groups (channel dimension). This has been further explained in depth later in this post [here](https://amaarora.github.io/2020/08/09/groupnorm.html#group-normalization-explained).
 
 First, let's look at how **GN** compares to **BN** for training accross various batch sizes keeping all else same.
 
 ![](/images/BN_batch_size.png "fig-1 Imagenet classification error vs batch sizes")
 
-As can be seen in the image above, because **GN** does not depend on the batch size, the classification error when the deep learning model is normalized using **GN** is stable accross various batch sizes compareed to **BN**. 
+As can be seen in the image above, because **GN** does not depend on the batch size, the validation classification error (when the deep learning model is normalized using **GN**) is stable accross various batch sizes compared to **BN**. 
 
 ![](/images/GN_bs_2.png "fig-2 ResNet-50's validation eror trained with bs 32, 16, 8, 4 and 2")
 
 The same trend as in `fig-1` can also be observed in `fig-2` where the validation error is consistent accross various batch sizes for **GN** as opposed to **BN**. Another key thing to note, the validation error for **GN** as reported in the research paper is very similar to that for **BN** - therefore, **GN** can be considered to be a strong alternative to **BN**. 
 
-The validation errors (from the research paper) are presented in `table-1` below:
+The validation errors (from the research paper) for various batch sizes are presented in `table-1` below:
 
 ![](/images/bs_sensitivity_gn.png "table-1 Sensitivity to batch sizes")
 
@@ -57,11 +58,11 @@ The validation errors (from the research paper) are presented in `table-1` below
 While **BN** performs slightly better than **GN** for batch size 32, **GN** performs better for all lower batch sizes. 
 
 ## Other Normalization Techniques
-`Group Normalization` isn't the first technique that was proposed to overcome the drawback of BN. There are also several other techniques such as [Layer Normalization](https://arxiv.org/abs/1607.06450), [Instance Normalization](https://arxiv.org/abs/1607.08022) and others mentioned in the references of this blog post. 
+`Group Normalization` isn't the first technique that was proposed to overcome the drawback of **BN**. There are also several other techniques such as [Layer Normalization](https://arxiv.org/abs/1607.06450), [Instance Normalization](https://arxiv.org/abs/1607.08022) and others mentioned in the references of this blog post. 
 
-But, GN is the first technique to achieve comparable validation error rates as compared to BN. 
+But, GN is the first technique to achieve comparable validation error rates as compared to **BN**. 
 
-In this section we look at the most popular normalization tecniques namely - Layer Normalization (LN), Instance Normalization (IN), Batch Normalization (BN) and Group Normalization (GN).
+In this section we look at the most popular normalization tecniques namely - Layer Normalization (**LN**), Instance Normalization (*IN*), Batch Normalization (**BN**) and Group Normalization (**GN**).
 
 ### Group Normalization in detail and comparison to other normalization techniques
 
@@ -87,7 +88,7 @@ In **IN**, the *mean* and *std deviation* are computed for each sample and each 
 
 ![](/images/gn_explained.jpg "fig-4 GN explained")
 
-Finally, for group norm, the batch is first divided into groups (32 by default, discussed later). The batch with dimension `(N, C, W, H)` is first reshaped to `(N, G, C//G, H, W)` dimensions where `G` represents the **number of groups**. Finally, the *mean* and *std deviation* are calculated along the `(H, W)` and along `C//G` channels. This is also illustrated very well in `fig-4`.
+Finally, for group norm, the batch is first divided into groups (32 by default, discussed later). The batch with dimension `(N, C, W, H)` is first reshaped to `(N, G, C//G, H, W)` dimensions where `G` represents the **number of groups**. Finally, the *mean* and *std deviation* are calculated along the groups, that is `(H, W)` and along `C//G` channels. This is also illustrated very well in `fig-4`.
 
 One key thing to note here, if `C == G`, that is the number of groups are set to be equal to the number of channels (one channel per group), then **GN** becomes **IN**. 
 
@@ -195,7 +196,7 @@ Thanks to [Sunil Kumar](https://twitter.com/DragonPG2000) who pointed me to [Big
 
 
 ## Conclusion
-I hope that I have been clear in my explaination of Group Normalization, and also through my experiments, provided a way for you to implement **GN** in PyTorch and Tensorflow and run experiments of your own.
+I hope that I have been clear in my explaination of Group Normalization, and also through my experiments, I have been able to provide a way for you to implement **GN** in PyTorch and Tensorflow and run experiments of your own.
 
 As always, constructive feedback is always welcome at [@amaarora](https://twitter.com/amaarora).
 
