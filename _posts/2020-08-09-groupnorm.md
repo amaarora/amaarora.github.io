@@ -45,7 +45,7 @@ The same trend as `fig-1` can also be observed in `fig-2` where the validation e
 
 The validation errors (from the research paper) are presented in `table-1` below:
 
-![](/images/bs_sensitivity_gn.png "fig-3 Sensitivity to batch sizes")
+![](/images/bs_sensitivity_gn.png "table-1 Sensitivity to batch sizes")
 
 
 While BN performs slightly better than GN for batch size 32, GN performs better for all lower batch sizes. 
