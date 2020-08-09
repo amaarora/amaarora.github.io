@@ -51,7 +51,7 @@ The validation errors (from the research paper) are presented in `table-1` below
 While BN performs slightly better than GN for batch size 32, GN performs better for all lower batch sizes. 
 
 ## Other Normalization Techniques
-`Group Normalization` isn't the first technique that was proposed to overcome the drawback of BN. There are also several other techniques such as [Layer Normalization](), [Instance Normalization]() and others mentioned in the references of this blog post. 
+`Group Normalization` isn't the first technique that was proposed to overcome the drawback of BN. There are also several other techniques such as [Layer Normalization](https://arxiv.org/abs/1607.06450), [Instance Normalization](https://arxiv.org/abs/1607.08022) and others mentioned in the references of this blog post. 
 
 But, GN is the first technique to achieve comparable validation error rates as compared to BN. 
 
@@ -189,3 +189,12 @@ I hope that I have been clear in my explaination of Group Normalization, and als
 As always, constructive feedback is always welcome at [@amaarora](https://twitter.com/amaarora).
 
 Also, feel free to [subscribe to my blog here](https://amaarora.github.io/subscribe) to receive regular updates regarding new blog posts. Thanks for reading!
+
+## References
+1. [Group Normalization](https://arxiv.org/abs/1803.08494) by He et al
+1. [Batch Normalization](https://arxiv.org/abs/1502.03167) by Ioffe et al
+1. [Instance Normalization: The Missing Ingredient for Fast Stylization](https://arxiv.org/abs/1607.08022)
+1. [Layer Normalization](https://arxiv.org/abs/1607.06450)
+1. [Weight Standardization](https://arxiv.org/abs/1903.10520)
+1. Implementation of Weight Standardization from the [official repository](https://github.com/joe-siyuan-qiao/WeightStandardization)
+1. [Deep Residual Learning for Image Recognition](https://arxiv.org/abs/1512.03385)
