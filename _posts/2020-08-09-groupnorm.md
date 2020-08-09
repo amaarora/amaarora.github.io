@@ -6,9 +6,7 @@
 In this blog post today, we will look at [Group Normalization](https://arxiv.org/abs/1803.08494) research paper and also:
 - The drawback of [Batch Normalization](https://arxiv.org/abs/1502.03167)  
 - Introduction to `Group Normaliation`
-- Other normalization techniques and how does `Group Normalization` compare to those
-    - Mathematically 
-    - Visually
+- Other normalization techniques and how does `Group Normalization` compares to those
 - Benefits of `Group Normalization` over other techniques
 - Discuss **Group Division** and 32 as default number of groups
 - Discuss effect of `Group Normalization` on deeper models (eg. Resnet-101)
@@ -86,6 +84,8 @@ One key thing to note here, if `C == G`, that is the number of groups are set to
 And if, `G == 1`, that is number of groups is set to 1, **GN** becomes **LN**. 
 
 I would like for the reader to take a minute here and make sure that he understands the differences between these techniques mentioned above.
+
+### Benefits of Group Normalization over other techniques
 
 Also, it is important to note that **GN** is less restricted than **LN**, because in **LN** it is assumed that all channels in a layer make "equal contributions" whereas **GN** is more flexible because in **GN**, each group of channels (instead of all of them) are assumed to have shared mean and variance - the model still has flexibility of learning a different distribution for each group. 
 
