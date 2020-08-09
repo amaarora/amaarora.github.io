@@ -95,8 +95,8 @@ Also, **GN** is slightly better than **IN** because **IN** normalizes accross ea
 
 Therefore, due to the reasons discussed above, we can see that the validation and training errors for **GN** are lower than those for **LN** and **IN**.
 
-## GroupNorm in PyTorch
-Following the snippet of code provided in the research paper:
+## Implementation of GroupNorm
+The following snippet of code has been provided in the research paper:
 ```python
 def GroupNorm(x, gamma, beta, G, eps=1e−5): 
     # x: input features with shape [N,C,H,W] 
