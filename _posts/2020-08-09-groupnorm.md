@@ -113,7 +113,7 @@ One key hyperparameter in **Group Normalization** is the number of groups to div
 
 The authors of the research paper ran an experiment to train `ResNet-50` model on Imagenet dataset using various number of groups. 
 
-As can be seen in `table-2`, settings number of groups to 32 achieves the lowest validation. 
+As can be seen in `table-2`, setting number of groups to 32 achieves the lowest validation. 
 
 In the bottom part of `table-2`, the authors set a fixed number of channels per group. Essentially, since each layer in a deep learning model can have various number of channels, this means there are varying number of groups per layer. Setting 16 channels per group achieved the lowest score. 
 
