@@ -84,6 +84,9 @@ In **LN**, the *mean* and *std deviation* are computed for each sample along the
 In **IN**, the *mean* and *std deviation* are computed for each sample and each channel along the `(H, W)` axes. Again, the calculations are independent of batch size. 
 
 ### Group Normalization Explained
+
+![](/images/gn_explained.png "fig-4 GN explained")
+
 Finally, for group norm, the batch is first divided into groups (32 by default, discussed later). The batch with dimension `(N, C, W, H)` is first reshaped to `(N, G, C//G, H, W)` dimensions where `G` represents the **group size**. Finally, the *mean* and *std deviation* are calculated along the `(H, W)` and along `C//G` channels. This is also illustrated very well in `fig-3`.
 
 One key thing to note here, if `C == G`, that is the number of groups are set to be equal to the number of channels (one channel per group), then **GN** becomes **IN**. 
@@ -98,7 +101,7 @@ Also, it is important to note that **GN** is less restricted than **LN**, becaus
 
 Also, **GN** is slightly better than **IN** because **IN** normalizes accross each sample for each channel, therefore, unlike **GN**, it misses the opportunity of exploiting the channel dependence.
 
-![](/images/gn_comp.png "fig-4 Comparison of error curves")
+![](/images/gn_comp.png "fig-5 Comparison of error curves")
 
 Therefore, due to the reasons discussed above, we can see that the validation and training errors for **GN** are lower than those for **LN** and **IN**.
 
@@ -115,7 +118,7 @@ In the bottom part of `table-2`, the authors set a fixed number of channels per 
 
 ### Group Division Experiments Explained
 
-![](/images/VGG.png "fig-5 VGG")
+![](/images/VGG.png "fig-6 VGG")
 
 Let's understand what's going on with help of VGGNet. As can be seen, there are varying number of channels in different layers of VGGNet (this is also the case for other deep learning models like ResNet, DenseNet etc). The authors essentially in the first experiment, divide each layer into 32 groups. Thus for layer 2 of VGGNet with 128 #channels, there are `128//32`, that is, 4 channels per group if group number is set to 32. The authors ran this experiments for varying number of groups and found for number of groups set to 32 to have the lowest validtion error. 
 
