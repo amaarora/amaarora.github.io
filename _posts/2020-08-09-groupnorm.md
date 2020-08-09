@@ -3,12 +3,12 @@
 {:toc}
 
 ## Introduction
-In this blog post today, we will look at [Group Normalization](https://arxiv.org/abs/1803.08494) research paper and also:
+In this blog post today, we will look at [Group Normalization](https://arxiv.org/abs/1803.08494) research paper and also look at:
 - The drawback of [Batch Normalization](https://arxiv.org/abs/1502.03167)  
-- Introduction to **Group Normaliation**
+- Introduction to **Group Normalization**
 - Other normalization techniques and how does **Group Normalization** compares to those
 - Benefits of **Group Normalization** over other techniques
-- Discuss **Group Division** and 32 as default number of groups
+- Discuss **Group Division** and default number of groups were chosen to be 32
 - Discuss effect of **Group Normalization** on deeper models (eg. Resnet-101)
 - Analyse how **Group Normalization** and **Batch Normalization** are qualitatively similar
 - Implement **Group Normalization** in *PyTorch* and *Tensorflow*
@@ -95,7 +95,33 @@ Also, **GN** is slightly better than **IN** because **IN** normalizes accross ea
 
 Therefore, due to the reasons discussed above, we can see that the validation and training errors for **GN** are lower than those for **LN** and **IN**.
 
+## Number of Groups hyperparameter in Group Normalization
+One key hyperparameter in **Group Normalization** is the number of groups to divide the channels into. 
+
+![](/images/group_division.png "table-2 Group division")
+
+The authors of the research paper ran an experiment to train `ResNet-50` model on Imagenet dataset using various number of groups. 
+
+As can be seen in `table-2`, settings number of groups to 32 achieves the lowest validation. 
+
+In the bottom part of `table-2`, the authors set a fixed number of channels per group. Essentially, since each layer in a deep learning model can have various number of channels, this means there are varying number of groups per layer. Setting 16 channels per group achieved the lowest score. 
+
+### Group Division Experiments Explained
+
+![](/images/VGG.png "fig-5 VGG")
+
+Let's understand what's going on with help of VGGNet. As can be seen, there are varying number of channels in different layers of VGGNet (this is also the case for other deep learning models like ResNet, DenseNet etc). The authors essentially in the first experiment, divide each layer into 32 groups. Thus for layer 2 of VGGNet with 128 #channels, there are `128//32`, that is, 4 channels per group if group number is set to 32. The authors ran this experiments for varying number of groups and found for number of groups set to 32 to have the lowest validtion error. 
+
+For the second experiment, the authors set the number of groups per channel fixed. For example, if number of groups per channel was set to 16, then the second layer with `128` channels had `128//16`, that is, 8 groups and the third layer with 256 channels had `256//16`, 16 groups and so on. The authors found setting 16 channels per group to have to have the lowest validation error.
+
+## Effect of Group Normalization on deeper models
+The authors also ran experiments and trained ResNet-101 architecture for batch size 32 and compared the validation errors with BN and GN implementation. The authors found the BN baseline to have 22.0% validation error and the GN counterpart to have 22.4% validation error. Also, for batch size 2, the authors found the GN error to be 23.0% which is still a very decent result considering the very small batch size. 
+
+> Thus, I think from the results of this experiment, it is safe to say that GN with smaller batch sizes also works for larger models.
+
 ## Implementation of GroupNorm
+Finally, we are now ready to look at the implementation of **GN**.
+
 The following snippet of code has been provided in the research paper:
 ```python
 def GroupNorm(x, gamma, beta, G, eps=1e−5): 
@@ -109,8 +135,15 @@ def GroupNorm(x, gamma, beta, G, eps=1e−5):
     x = tf.reshape(x, [N, C, H, W]) 
     return x ∗ gamma + beta
 ```
+Essentially, the authors reshape the batch and divide into groups with `C // G` channels per group where,
+- `C`: number of channels
+- `G`: number of groups
+Finally, as discussed in [this](https://amaarora.github.io/2020/08/09/groupnorm.html#batchnorm-groupnorm-instancenorm-and-layernorm) section, the authors normalize along the `(C//G, H, W)` dimension and return the result after reshaping the batch back to `(N, C, H, W)`. 
 
-We could rewrite this in `PyTorch` like so:
+I hope that by this time, the implementation should be clear to the reader. If it isn't, either I have not explained **GN** very well, or I kindly ask the reader to go back to [BatchNorm, GroupNorm, InstanceNorm and LayerNorm](https://amaarora.github.io/2020/08/09/groupnorm.html#batchnorm-groupnorm-instancenorm-and-layernorm) section and have a quick re-read.
+
+
+Finally, we could rewrite **GN** in `PyTorch` like so:
 
 ```python 
 import torch
@@ -136,15 +169,23 @@ class GroupNorm(nn.Module):
         return x * self.gamma + self.beta
 ```
 
-`PyTorch` inherent supports `GroupNorm` and can be used by using `nn.GroupNorm`.
+`PyTorch` also inherently supports `GroupNorm` and can be used by using `nn.GroupNorm`.
+
+Having implemented **GN** in PyTorch and Tensorflow, we are now ready to run our own experiments and see the results for ourselves in the next section. 
 
 ## Does GroupNorm really work in practice?
-Personally, I wanted to try a little experiment of my own to compare **GN** with **BN**. 
+Personally, I wanted to try a little experiment of my own to compare **GN** with **BN** and corroborate the findings in the **GN** research paper. 
 
-You can find the experiment in this notebook [here](https://nbviewer.jupyter.org/github/amaarora/amaarora.github.io/blob/master/nbs/Group%20Normalization%20WS.ipynb).
+You can find the experiment in this notebook [here](https://nbviewer.jupyter.org/github/amaarora/amaarora.github.io/blob/master/nbs/Group%20Normalization.ipynb).
 
-Basically, in the experiment, I trained a `resnet50` architecture on the `Pets` dataset. To my surprise, I found that simply replacing `BatchNorm` with `GroupNorm` led to sub-optimal results and the model with `GroupNorm` used as the normalization layer performed much worse than the model normalized with `BatchNorm` layer even for a very small batch size of 4. This was very different to the results reported in fig-1.
+Basically, in the experiment, I trained two `ResNet-34` architectures on the `Pets` dataset - one with **BN** and other with **GN**. To my surprise, I found that simply replacing `BatchNorm` with `GroupNorm` led to sub-optimal results and the model with `GroupNorm` used as the normalization layer performed much worse than the model normalized with `BatchNorm` layer even for a very small batch size of 4. This was very different to the results reported in fig-1.
 
-Thanks to [Sunil Kumar](https://twitter.com/DragonPG2000) who pointed me to [Big Transfer (BiT): General Visual Representation Learning](https://arxiv.org/abs/1912.11370) research paper where I noticed that the researchers used a combination of [Weight Standardization](https://arxiv.org/abs/1903.10520) and **GN** to achieve SOTA results. So I tried this out with the implementation of Weight Standardization as in the official repository [here](https://github.com/joe-siyuan-qiao/WeightStandardization) and very quickly I was able to replicate the results with `GN+WS` performing significantly better than `BN` for batch size of 1.
+Thanks to [Sunil Kumar](https://twitter.com/DragonPG2000) who pointed me to [Big Transfer (BiT): General Visual Representation Learning](https://arxiv.org/abs/1912.11370) research paper where I noticed that the researchers used a combination of [Weight Standardization](https://arxiv.org/abs/1903.10520) and **GN** to achieve SOTA results. So I tried this out with the implementation of Weight Standardization as in the official repository [here](https://github.com/joe-siyuan-qiao/WeightStandardization) and very quickly I was able to replicate the results with `GN + WS` performing significantly better than `BN` for batch size of 1 [here](https://nbviewer.jupyter.org/github/amaarora/amaarora.github.io/blob/master/nbs/Group%20Normalization%20WS.ipynb).
 
-The training logs for the notebook where I simply replaced **BN** with **GN** can be found [here](https://nbviewer.jupyter.org/github/amaarora/amaarora.github.io/blob/master/nbs/Group%20Normalization.ipynb).
+
+## Conclusion
+I hope that I have been clear in my explaination of Group Normalization, and also through my experiments, provided a way for you to implement **GN** in PyTorch and Tensorflow and run experiments of your own.
+
+As always, constructive feedback is always welcome at [@amaarora](https://twitter.com/amaarora).
+
+Also, feel free to [subscribe to my blog here](https://amaarora.github.io/subscribe) to receive regular updates regarding new blog posts. Thanks for reading!
