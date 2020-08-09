@@ -138,7 +138,7 @@ class GroupNorm(nn.Module):
 
 `PyTorch` inherent supports `GroupNorm` and can be used by using `nn.GroupNorm`.
 
-## Does `GroupNorm` really work in practice?
+## Does GroupNorm really work in practice?
 Personally, I wanted to try a little experiment of my own to compare **GN** with **BN**. 
 
 You can find the experiment in this notebook [here](https://nbviewer.jupyter.org/github/amaarora/amaarora.github.io/blob/master/nbs/Group%20Normalization%20WS.ipynb).
