@@ -22,13 +22,13 @@ The aim is to not study BN, many other wonderful posts have been written on that
 
 Through this blog post, I hope to introduce **Group Normalization** as an alternative to **Batch Normalization** and help the reader develop an intuition for cases where GN could perform better than BN.
 
-### Drawback of `Batch Normalization`
+### Drawback of Batch Normalization
 Knowingly or unknowingly, we have all used BN in our experiments. If you have trained a `ResNet` model or pretty much any other CV model using *PyTorch* or *Tensorflow*, you have made use of BN to normalize the deep learning network.
 
 From the Group Normalization research paper,
 > We all know that BN has been established as a very effective component in deep learning. BN normalizes the features by the mean and variance computed within a batch. But despite its great success, BN exhibits drawbacks that are also caused by its distinct behavior of normalizing along the batch dimension. In particular, it is required for BN to work with sufficiently large batch size. A small batch size leads to innacurate estimation of the batch statistics and reducing BN's batch size increases the model error dramatically.
 
-### Introduction to `Group Normalization`
+### Introduction to Group Normalization
 In the paper, the authors introduce GN as a simple alternative to BN. From the paper:
 
 > GN divides the channels into groups and computes within each group the mean and variance for normalization. GN's computation is independent of batch sizes, and its accuracy is stable in a wide range of batch sizes. 
@@ -57,7 +57,7 @@ But, GN is the first technique to achieve comparable validation error rates as c
 
 In this section we look at the most popular normalization tecniques namely - Layer Normalization (LN), Instance Normalization (IN), Batch Normalization (BN) and Group Normalization (GN).
 
-### BN, GN, IN and LN
+### BatchNorm, GroupNorm, InstanceNorm and LayerNorm
 
 ![](/images/GN_BN_LN_IN.png "fig-3 Normalization methods")
 
