@@ -113,7 +113,7 @@ One key hyperparameter in **Group Normalization** is the number of groups to div
 
 The authors of the research paper ran an experiment to train `ResNet-50` model on Imagenet dataset using various number of groups. 
 
-As can be seen in `table-2`, setting number of groups to 32 achieves the lowest validation. 
+As can be seen in `table-2`, setting number of groups to 32 achieves the lowest validation error. 
 
 In the bottom part of `table-2`, the authors set a fixed number of channels per group. Essentially, since each layer in a deep learning model can have various number of channels, this means there are varying number of groups per layer. Setting 16 channels per group achieved the lowest score. 
 
@@ -123,7 +123,7 @@ In the bottom part of `table-2`, the authors set a fixed number of channels per 
 
 Let's understand what's going on with help of VGGNet. As can be seen, there are varying number of channels in different layers of VGGNet (this is also the case for other deep learning models like ResNet, DenseNet etc). The authors essentially in the first experiment, divide each layer into 32 groups. Thus for layer 2 of VGGNet with 128 #channels, there are `128//32`, that is, 4 channels per group if group number is set to 32. The authors ran this experiments for varying number of groups and found for number of groups set to 32 to have the lowest validtion error. 
 
-For the second experiment, the authors set the number of groups per channel fixed. For example, if number of groups per channel was set to 16, then the second layer with `128` channels had `128//16`, that is, 8 groups and the third layer with 256 channels had `256//16`, 16 groups and so on. The authors found setting 16 channels per group to have to have the lowest validation error.
+For the second experiment, the authors set the number of channels per group fixed. For example, if number of channels per group was set to 16, then the second layer with `128` channels had `128//16`, that is, 8 groups and the third layer with 256 channels had `256//16`, 16 groups and so on. The authors found setting 16 channels per group to have to have the lowest validation error.
 
 ## Effect of Group Normalization on deeper models
 The authors also ran experiments and trained ResNet-101 architecture for batch size 32 and compared the validation errors with BN and GN implementation. The authors found the BN baseline to have 22.0% validation error and the GN counterpart to have 22.4% validation error. Also, for batch size 2, the authors found the GN error to be 23.0% which is still a very decent result considering the very small batch size. 
@@ -210,3 +210,6 @@ Also, feel free to [subscribe to my blog here](https://amaarora.github.io/subscr
 1. [Weight Standardization](https://arxiv.org/abs/1903.10520)
 1. Implementation of Weight Standardization from the [official repository](https://github.com/joe-siyuan-qiao/WeightStandardization)
 1. [Deep Residual Learning for Image Recognition](https://arxiv.org/abs/1512.03385)
+
+## Credits
+Thanks to [@AryMob](https://twitter.com/AryMob) for pointing out errata in this post.
