@@ -9,11 +9,9 @@ It brings me great pleasure as I begin writing about **EfficientNets** for three
 2. As far as I am aware, this is the only blog that explains the EfficientNet Architecture in detail **along with code implementations**.
 3. This blog post also sets up the base for future blog posts on [Self-training with Noisy Student improves ImageNet classification](https://arxiv.org/abs/1911.04252), [Fixing the train-test resolution discrepancy](https://arxiv.org/abs/1906.06423) and [Fixing the train-test resolution discrepancy: FixEfficientNet](https://arxiv.org/abs/2003.08237).
 
-As an overview, not only will we look at the [EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks](https://arxiv.org/abs/1905.11946) research paper, but, we will also understand the nuances of **EfficientNet**s by looking at [MnasNet: Platform-Aware Neural Architecture Search for Mobile](https://arxiv.org/abs/1807.11626) research paper. 
+As an overview, not only will we look at the [EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks](https://arxiv.org/abs/1905.11946) research paper, but, we will also understand the nuances of the **EfficientNet** Architecture by looking at [MnasNet: Platform-Aware Neural Architecture Search for Mobile](https://arxiv.org/abs/1807.11626) research paper. 
 
-We will understand how the `EfficientNet-B0` architecture was first developed using **Nueral Architecture Search** similar to `MnasNet` approach and then scaled from **EfficientNet B1-B7**. 
-
-Later, in future blog posts we will use this understanding to look at recent SOTA approaches such as the **Noisy Student**, and **FixEfficientNet** research papers referenced above.
+We will understand how the `EfficientNet-B0` architecture was first developed using **Nueral Architecture Search** similar to `MnasNet` approach and then scaled using **Compound Scaling** to get **EfficientNet B1-B7**. 
 
 We also understand from a high level perspective how to implement the **EfficientNet** Architecture by looking [Ross Wightman](https://github.com/rwightman)'s wonderful implementation in [TIMM](https://github.com/rwightman/pytorch-image-models). This overview should provide the reader with sufficient code-level understanding to dig through the source code or carry out experiments of his/her own.
 
@@ -37,15 +35,17 @@ From the paper,
 
 The great thing about **EfficientNet**s is that not only do they have better accuracies compared to their counterparts, they are also lightweight and thus, faster to run. 
 
+Having looked at their superior accuracies and faster runtimes, let's start to unravel the magic step-by-step.
+
 ## How do they do it?
 So what did the authors [Mingxing Tan](https://scholar.google.com/citations?user=6POeyBoAAAAJ&hl=en) and [Quoc V. Le](https://scholar.google.com/citations?user=vfT6-XIAAAAJ&hl=en) do to make **EfficientNet**s perform so well and efficiently.
 
-In this section we will understand the **EfficientNet** architecture in detail.
+In this section we will understand the main idea introduced in the research paper - **Compound Scaling**.
 
 ### Main Idea: Compound Scaling
 Before the **EfficientNet**s came along, the most common way to scale up ConvNets was either by one of three dimensions - depth, width or image resolution. 
 
-In **EfficientNet**s, this is taken a step further. **EfficientNet**s perform **Compound Scaling** - that is, scale all three dimensions while mantaining a balance between all dimensions of the network. 
+**EfficientNet**s on the other hand perform **Compound Scaling** - that is, scale all three dimensions while mantaining a balance between all dimensions of the network. 
 
 From the paper:
 > In this paper, we want to study and rethink the process of scaling up ConvNets. In particular, we investigate the central question: is there a principled method to scale up ConvNets that can achieve better accuracy and efficiency? Our empirical study shows that it is critical to balance all dimensions of network width/depth/resolution, and surprisingly such balance can be achieved by simply scaling each of them with constant ratio. Based on this observation, we propose a simple yet effective compound scaling method. Unlike conventional practice that arbitrary scales these factors, our method uniformly scales network width, depth, and resolution with a set of fixed scaling coefficients.
