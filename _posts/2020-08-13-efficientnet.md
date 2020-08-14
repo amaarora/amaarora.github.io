@@ -1,4 +1,4 @@
-# EfficientNet Architecture 
+# EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks Mingxing
 
 1. TOC 
 {:toc}
