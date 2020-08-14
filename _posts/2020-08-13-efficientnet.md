@@ -77,7 +77,7 @@ While the authors evaluated the scaling method using existing ConvNets, in order
 
 We understand this is in a lot more detail in this section of the blog post. 
 
-### Summary
+### Main Contribution
 Therefore, to summarize the two main contributions of this research paper were the idea of **Compound Scaling** and using nueral architecture search to define a new mobile-size baseline called **EfficientNet**. We look at both model scaling and the **EfficientNet** architecture in a lot more detail in the following sections. 
 
 ## Model Scaling
