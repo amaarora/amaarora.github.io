@@ -1,4 +1,4 @@
-# EfficientNet Architecture Explained with Code Implementations in PyTorch
+# EfficientNet Architecture 
 
 1. TOC 
 {:toc}
