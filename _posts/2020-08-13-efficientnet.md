@@ -90,7 +90,7 @@ In this section, we will be looking at model scaling in a little more detail and
 
 ![](/images/scaling_effnet.png "fig-3 Scaling up a Baseline Model with Different Network Width(w), Depth(d) and Resolution(r)")
 
-Particularly, in this section we will understand the results shown in `fig-3` and also get an understanding on why **Compound Scaling** works best. 
+Particularly, in this section we will understand the results shown in `fig-3` and also get an understanding on why **Compound Scaling** works better than other traditional approaches. 
 
 ### Depth
 Scaling network depth (number of layers), is the most common way used by many ConvNets. 
