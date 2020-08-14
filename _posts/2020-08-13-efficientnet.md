@@ -30,7 +30,7 @@ In this section we understand "why" **EfficientNet**s are totally worth your tim
 
 ![](/images/effnet_moment.png "fig-1 Model Size vs Imagenet Accuracy")
 
-As we can see from `fig-1`, EfficientNets significantly outperform other ConvNets. `EfficientNet-B7` achieved new state of art with 84.4% top-1 accuracy outperforming the previous SOTA [GPipe](https://arxiv.org/abs/1811.06965) but being **8.4 times smaller** and **6.1 times faster**.
+As we can see from `fig-1`, EfficientNets significantly outperform other ConvNets. In fact, `EfficientNet-B7` achieved new state of art with 84.4% top-1 accuracy outperforming the previous SOTA [GPipe](https://arxiv.org/abs/1811.06965) but being **8.4 times smaller** and **6.1 times faster**.
 
 From the paper, 
 > EfficientNet-B7 achieves state- of-the-art 84.4% top-1 / 97.1% top-5 accuracy on ImageNet, while being 8.4x smaller and 6.1x faster on inference than the best existing ConvNet. Our EfficientNets also transfer well and achieve state-of-the-art accuracy on CIFAR-100 (91.7%), Flowers (98.8%), and 3 other transfer learning datasets, with an order of magnitude fewer parameters.
