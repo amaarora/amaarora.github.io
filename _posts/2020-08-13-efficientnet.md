@@ -116,7 +116,7 @@ It is also beneficial to ensemble models trained on different input resolution a
 
 `fig-3` (right), we can see that accuracy increases with an increase in input image size. 
 
-By studying the indivdiual effects of scaling depth, width and resolution, this brings us to the first observation which I re post here again for reference: 
+By studying the indivdiual effects of scaling depth, width and resolution, this brings us to the first observation which I post here again for reference: 
 
 > Scaling up any dimension of network width, depth, or resolution improves accuracy, but the accuracy gain diminishes for bigger models.
 
