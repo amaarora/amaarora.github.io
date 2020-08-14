@@ -121,7 +121,7 @@ By studying the indivdiual effects of scaling depth, width and resolution, this 
 > Scaling up any dimension of network width, depth, or resolution improves accuracy, but the accuracy gain diminishes for bigger models.
 
 ### Compound Scaling Experiments 
-The authors also ran experiments to validation **Compound Scaling** idea. 
+The authors also ran experiments to validate the **Compound Scaling** idea. 
 
 ![](/images/compound_scaling.png "fig-4 Scaling Network Width for Different Baseline Net- works")
 
