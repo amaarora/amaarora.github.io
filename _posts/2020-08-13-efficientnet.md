@@ -43,7 +43,7 @@ So what did the authors [Mingxing Tan](https://scholar.google.com/citations?user
 In this section we will understand the main idea introduced in the research paper - **Compound Scaling**.
 
 ### Main Idea: Compound Scaling
-Before the **EfficientNet**s came along, the most common way to scale up ConvNets was either by one of three dimensions - depth, width or image resolution. 
+Before the **EfficientNet**s came along, the most common way to scale up ConvNets was either by one of three dimensions - depth (number of layers), width (number of channels) or image resolution (image size). 
 
 **EfficientNet**s on the other hand perform **Compound Scaling** - that is, scale all three dimensions while mantaining a balance between all dimensions of the network. 
 
