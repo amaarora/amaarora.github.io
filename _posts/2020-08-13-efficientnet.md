@@ -23,8 +23,10 @@ Both are similar to the [official implementation](https://github.com/tensorflow/
 
 So, let's get started!
 
-## The EfficientNet Moment
-While, officially there is no such term as 'The EfficientNet Moment', personally, I feel **EfficientNet**s have brough about a revolution and changed the direction of research in Computer Vision.
+## The 'WHY'?
+In this section we understand "why" **EfficientNet**s are totally worth your time. 
+
+`fig-1` below summarizes "why" we could a learn a lot by understanding the **EfficientNet** Architecture.
 
 ![](/images/effnet_moment.png "fig-1 Model Size vs Imagenet Accuracy")
 
@@ -37,12 +39,12 @@ The great thing about **EfficientNet**s is that not only do they have better acc
 
 Having looked at their superior accuracies and faster runtimes, let's start to unravel the magic step-by-step.
 
-## How do they do it?
-So what did the authors [Mingxing Tan](https://scholar.google.com/citations?user=6POeyBoAAAAJ&hl=en) and [Quoc V. Le](https://scholar.google.com/citations?user=vfT6-XIAAAAJ&hl=en) do to make **EfficientNet**s perform so well and efficiently.
+## The "HOW"?
+So "how" did the authors [Mingxing Tan](https://scholar.google.com/citations?user=6POeyBoAAAAJ&hl=en) and [Quoc V. Le](https://scholar.google.com/citations?user=vfT6-XIAAAAJ&hl=en) make **EfficientNet**s perform so well and efficiently?
 
 In this section we will understand the main idea introduced in the research paper - **Compound Scaling**.
 
-### Main Idea: Compound Scaling
+### Compound Scaling
 Before the **EfficientNet**s came along, the most common way to scale up ConvNets was either by one of three dimensions - depth (number of layers), width (number of channels) or image resolution (image size). 
 
 **EfficientNet**s on the other hand perform **Compound Scaling** - that is, scale all three dimensions while mantaining a balance between all dimensions of the network. 
@@ -58,11 +60,25 @@ In `fig-2` above, (b)-(d) are conventional scaling that only increases one dimen
 
 This main idea of **Compound Scaling** really set apart **EfficientNet**s from its predecessors. And intuitively, this idea of compound scaling makes sense too because if the input image is bigger (input resolution), then the network needs more layers (depth) and more channels (width) to capture more fine-grained patterns on the bigger image.
 
-In fact this idea of **Compound Scaling** also works on existing [MobileNets](https://arxiv.org/abs/1704.04861) and [ResNets](https://arxiv.org/abs/1512.03385). 
-
-From `table-1` below, we can clearly see, that the scaled versions of MobileNet and ResNet architectures perform better than their baselines. 
+In fact, this idea of **Compound Scaling** also works on existing [MobileNet](https://arxiv.org/abs/1704.04861) and [ResNet](https://arxiv.org/abs/1512.03385) architectures. 
+    
+From `table-1` below, we can clearly see, that the scaled versions of **MobileNet** and **ResNet** architectures perform better than their baselines or also the conventional methods - (b)-(d) in `fig-2`. 
 
 ![](/images/effnet_t1.png "table-1 Compound Scaling")
+
+Thus, it is safe to summarize - **Compound Scaling** works! 
+
+### Nueral Architecture Search 
+Since we are looking at the "how" - while so far we know **Compound Scaling** was the main idea introduced - the authors found that having a good baseline network is also critical. 
+
+It wasn't enough to achieve such great performance by picking up any existing architecture and applying **Compound Scaling** to it. 
+
+While the authors evaluated the scaling method using existing ConvNets, in order to better demonstrate the effectiveness of this scaling method, they also developed a new mobile-size baseline, called **EfficientNet** using **Nerual Architecture Search**. 
+
+We understand this is in a lot more detail in this section of the blog post. 
+
+### Summary
+Therefore, to summarize the two main contributions of this research paper were the idea of **Compound Scaling** and using nueral architecture search to define a new mobile-size baseline called **EfficientNet**. We look at both model scaling and the **EfficientNet** architecture in a lot more detail in the following sections. 
 
 ## Model Scaling
 Basically, the authors of **EfficientNet** architecture ran a few experiments scaling depth, width and image resolution and the two main observations that they made were: 
