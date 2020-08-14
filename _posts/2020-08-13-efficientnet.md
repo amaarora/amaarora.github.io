@@ -155,12 +155,6 @@ The `MBConv` layer above is nothing but an inverted bottleneck block with squeez
 
 Starting from this baseline architecture, the authors scaled the **EfficientNet-B0** using **Compound Scaling** to obtain **EfficientNet B1-B7**. 
 
-The overall approach can be easily summarized in the image below: 
-
-![](/images/effnet_overall.jpg "fig-5 Overall Approach")
-
-Basically, as summarized in `fig-5` above the overall approach of **EFficientNet**s involves using **Nueral Architecture Search** similar to the **MNasNet** approach to come up with **EfficientNet-B0** and then use **Compound Scaling** to scale this baseline network to get bigger, wider networks **EfficientNet B1-B7**.
-
 ### MnasNet Approach
 Before we understand how was the **EfficientNet-B0** architecture developed, let's first look into the **MnasNet** Architecture and the main idea behind the research paper.
 
