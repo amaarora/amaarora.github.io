@@ -83,12 +83,10 @@ Therefore, to summarize the two main contributions of this research paper were t
 ## Model Scaling
 In this section we look at **Compound Scaling** in a lot more detail.
 
-Basically, the authors of **EfficientNet** architecture ran a few experiments scaling depth, width and image resolution and the two main observations that they made were: 
+Basically, the authors of **EfficientNet** architecture ran a few experiments scaling depth, width and image resolution and made two main observations: 
 
 > 1. Scaling up any dimension of network width, depth, or resolution improves accuracy, but the accu- racy gain diminishes for bigger models.
 > 2. In order to pursue better accuracy and efficiency, it is critical to balance all dimensions of network width, depth, and resolution during ConvNet scaling.
-
-In this section, we will be looking at model scaling in a little more detail and get an understanding of how the authors came about those observations.
 
 ![](/images/scaling_effnet.png "fig-3 Scaling up a Baseline Model with Different Network Width(w), Depth(d) and Resolution(r)")
 
