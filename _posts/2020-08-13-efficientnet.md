@@ -81,16 +81,16 @@ We understand this is in a lot more detail in this section of the blog post.
 Therefore, to summarize the two main contributions of this research paper were the idea of **Compound Scaling** and using nueral architecture search to define a new mobile-size baseline called **EfficientNet**. We look at both **model scaling** and the **EfficientNet** architecture in a lot more detail in the following sections. 
 
 ## Model Scaling
-In this section we look at **Compound Scaling** in a lot more detail.
+In this section we look at **Compound Scaling** in a lot more detail and compare it with conventional scaling approaches.
 
 Basically, the authors of **EfficientNet** architecture ran a few experiments scaling depth, width and image resolution and made two main observations: 
 
-> 1. Scaling up any dimension of network width, depth, or resolution improves accuracy, but the accu- racy gain diminishes for bigger models.
+> 1. Scaling up any dimension of network width, depth, or resolution improves accuracy, but the accuracy gain diminishes for bigger models.
 > 2. In order to pursue better accuracy and efficiency, it is critical to balance all dimensions of network width, depth, and resolution during ConvNet scaling.
 
 ![](/images/scaling_effnet.png "fig-3 Scaling up a Baseline Model with Different Network Width(w), Depth(d) and Resolution(r)")
 
-Particularly, in this section we will understand the results shown in `fig-3` and also get an understanding on why **Compound Scaling** works better than other traditional approaches. 
+Particularly, in this section we will understand the results shown in `fig-3` and also get an understanding on how the authors came about making those observations. 
 
 ### Depth
 Scaling network depth (number of layers), is the most common way used by many ConvNets. 
