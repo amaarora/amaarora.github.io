@@ -145,3 +145,54 @@ The overall approach can be easily summarized in the image below:
 ![](/images/effnet_overall.jpg "fig-5 Overall Approach")
 
 Basically, as summarized in `fig-5` above the overall approach of **EFficientNet**s involves using **Nueral Architecture Search** similar to the **MNasNet** approach to come up with **EfficientNet-B0** and then use **Compound Scaling** to scale this baseline network to get bigger, wider networks **EfficientNet B1-B7**.
+
+### MnasNet Approach
+Before we understand how was the **EfficientNet-B0** architecture developed, let's first look into the **MnasNet** Architecture and the main idea behind the research paper.
+
+![](/images/Mnasnet.png "fig-6 An overview of MNasNet Approach")
+
+From the paper:
+> The search framework consists of three components: a recurrent neural network (RNN) based controller, a trainer to obtain the model accuracy, and a mobile phone based inference engine for measuring the latency.
+
+For **MNasNet**, the authors used model accuracy (on ImageNet) and latency as model objectives to find the best architecture. 
+
+Essentially, the Controller finds a model architecture, this model architecture is then used to train on ImageNet, it's accuracy and latency values are calculated. Then, reward function is calculated and feedback is sent back to controller. We repeat this process a few times until the optimum architecture is achieved such that it's accuracy is maximum given latency is lower than certain specified value. 
+
+The objective function can formally be defined as: 
+
+![](/images/mnasnet_obj.png)
+
+Using the above as reward function, the authors were able to find the **MNasNet** architecture that achieved 75.2% top-1 accuracy and 78ms latency.
+
+### Nueral Architecture Search for EfficientNets
+
+The authors of the **EfficientNet** research paper used the similar approach as explained above to then find an optimal nueral network architecture that maximises **ACC(m)×[FLOPS(m)/T]<sup>w</sup>**. 
+Note that for EfficientNets, the authors used FLOPS instead of latency in the objective function since the authors were not targeting specific hardware as opposed to **MNasNet** architecture.
+
+From the paper: 
+> Our search produces an efficient network, which we name EfficientNet-B0. Since we use the same search space as (Tan et al., 2019), the architecture is similar to MnasNett, except our EfficientNet-B0 is slightly bigger due to the larger FLOPS target (our FLOPS target is 400M). 
+
+The authors named this architecture as **EfficientNet-B0** and it is defined in `table-2` shown below again for reference: 
+
+![](/images/effb0.png "Table-2 EfficientNet-B0 baseline network")
+
+Since, the authors of **EfficientNet**s used the same approach and similar nueral network search space as **MNasNet**, the two architectures are very similar. 
+
+So, the key question now is - what's this **MBConv** layer? As I have mentioned before, it is nothing but an inverted residual bottleneck. 
+
+This has been explained further in the next section. 
+
+### Inverted Bottleneck `MBConv`
+
+![](/images/mbconv.png "fig-7 MBConv Layer")
+
+As in the case of Bottleneck layers that were used in the InceptionNet architecture and also in ResNet-50 and above, the key idea is to first use a `1x1` convolution to bring down the number of channels and apply the `3x3` or `5x5` convolution operation to the reduced number of channels to get output features. Finally, use another `1x1` convolution operation to again increase the number of channels to the initial value. 
+
+The inverted bottleneck as in `MBConv` does the reverse - instead of reducing the number of channels, the first `1x1` conv layer increases the number of channels to 3 times the initial. 
+
+Note that using a standard convolution operation here would be computationally expensive, so a Depthwise Convolution is used to get the output feature map. Finally, the second `1x1` conv layer downsamples the number of channels to the initial value. 
+
+Now you might ask what's a Depthwise Convolution? It has been explained very well [here](https://www.youtube.com/watch?v=T7o3xvJLuHk).
+
+So to summarize, the **EfficientNet-B0** architecture uses this inverted bottleneck with Depthwise Convolution operation. But, to this, they also add squeeze and excitation operation which have been explained in my previous blog post [here](https://amaarora.github.io/2020/07/24/SeNet.html).
+
