@@ -133,7 +133,6 @@ This brings to the second observation:
 
 > In order to pursue better accuracy and efficiency, it is critical to balance all dimensions of network width, depth, and resolution during ConvNet scaling.
 
-### Summary
 So far, we have talked about the idea of **Compound Scaling** idea and looked at how this idea also works for existing ConvNets such as MobileNets and ResNet. 
 
 We also looked at two main observations coming out of **Compound Scaling** experiments. 
