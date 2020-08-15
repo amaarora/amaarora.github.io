@@ -200,6 +200,22 @@ From the paper:
 
 That's all the magic - explained. 
 
+### Scaling Efficient-B0 to get B1-B7
+This is the last section explaining the **EffcientNet** Architecture. In this section, we look into the details as to how the authors scaled `EfficientNet-B0` to get `EfficientNet B1-B7`. 
+
+Let the network depth(d), widt(w) and input image resolution(r) be:
+
+![](/images/dwr.png)
+
+Intuitively, `φ` is a user-defined coeffecient that determines how much extra resources are available. The constants `α`, `β`, `γ` determine how to distribute these extra resources accross networks depth(d), width(w) and input resolution(r).
+
+Given that we have some extra resources `α`, `β`, `γ` can be determined using a small grid search and thus we can scale networks depth, width and input resolution to get a bigger network.
+
+From the paper:
+> Starting from the baseline EfficientNet-B0, we apply our compound scaling method to scale it up with two steps:
+> - STEP 1: we first fix φ = 1, assuming twice more resources available, and do a small grid search of α, β, γ. In particular, we find the best values for EfficientNet-B0 are α = 1.2, β = 1.1, γ = 1.15, under constraint of α * β<sup>2</sup> * γ<sup>2</sup> ≈ 2.
+> - STEP 2: we then fix α, β, γ as constants and scale up baseline network with different φ, to obtain EfficientNet-B1 to B7.
+
 ## Conclusion
 First, we looked at the idea of compound scaling `depth`, `width` and `image resolution` all at the same time instead of the conventional method of scaling only one of the three. Next, we also looked at the various experiments on model scaling and also at the effects of scaling each dimension on model accuracy. We realized, **Compound Scaling** as a technique works best compared to other conventional methods. 
 
