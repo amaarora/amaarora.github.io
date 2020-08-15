@@ -1,4 +1,4 @@
-# EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks Mingxing
+# EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks
 
 1. TOC 
 {:toc}
