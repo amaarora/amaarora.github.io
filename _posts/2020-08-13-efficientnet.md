@@ -75,8 +75,8 @@ It wasn't enough to achieve such great performance by picking up any existing ar
 
 We understand how they did this is in a lot more detail in a later section of this blog post. 
 
-### Main Contribution
-Therefore, to summarize the two main contributions of this research paper were the idea of <u>**Compound Scaling**</u> and using <u>**Nueral Architecture Search** to define a new mobile-size baseline called **EfficientNet**</u>. We look at both **model scaling** and the **EfficientNet** architecture in a lot more detail in the following sections. 
+## Main Contribution
+Therefore, to summarize the two main contributions of this research paper were the idea of <u>Compound Scaling</u> and using <u>Nueral Architecture Search to define a new mobile-size baseline called EfficientNet</u>. We look at both **model scaling** and the **EfficientNet** architecture in a lot more detail in the following sections. 
 
 ## Model Scaling
 In this section we look at **Compound Scaling** in a lot more detail and compare it with conventional scaling approaches.
