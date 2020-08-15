@@ -188,12 +188,24 @@ As in the case of Bottleneck layers that were introduced in the [InceptionV2](ht
 
 ![](/images/bottleneck_design.png "fig-7 Bottleneck Design")
 
-
 The inverted bottleneck as in `MBConv` does the reverse - instead of reducing the number of channels, the first `1x1` conv layer increases the number of channels to 3 times the initial. 
 
-Note that using a standard convolution operation here would be computationally expensive, so a Depthwise Convolution is used to get the output feature map. Finally, the second `1x1` conv layer downsamples the number of channels to the initial value. 
+Note that using a standard convolution operation here would be computationally expensive, so a **Depthwise Convolution** is used to get the output feature map. Finally, the second `1x1` conv layer downsamples the number of channels to the initial value. This has been illustrated in `fig-7`. 
 
 Now you might ask what's a Depthwise Convolution? It has been explained very well [here](https://www.youtube.com/watch?v=T7o3xvJLuHk).
 
 So to summarize, the **EfficientNet-B0** architecture uses this inverted bottleneck with Depthwise Convolution operation. But, to this, they also add squeeze and excitation operation which have been explained in my previous blog post [here](https://amaarora.github.io/2020/07/24/SeNet.html).
 
+From the paper:
+> The main building block of EfficientNet-B0 is mobile inverted bottleneck MBConv (Sandler et al., 2018; Tan et al., 2019), to which we also add squeeze-and-excitation optimization (Hu et al., 2018).
+
+That's all the magic - explained. 
+
+## What have we learnt so far 
+Before looking at the code implementations, let's summarize in simple words what we have learnt so far. First, we looked at the idea of compound scaling depth, width and image resolution all at the same time instead of the conventional method of scaling only one of the three. Next, we also looked at the various experiments and effects of scaling each dimension on model accuracy. 
+
+We also realized that the baseline network to which compound scaling is applied also matters a lot to get best gains. The authors therefore, used Nueral Architecture Search to get a mobile-size network that's very similar to MNasNet and they named it **EfficientNet**. Particularly, this baseline network is termed Efficient-B0. 
+
+Next, the authors scaled this baseline network using compound scaling to scale depth, width and resolution to get Efficient B1-B7. This process has also been summarized in the image below. 
+
+![](/images/effnet_overall.jpg "fig-8 EfficientNet overall approach")
