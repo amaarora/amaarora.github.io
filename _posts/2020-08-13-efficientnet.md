@@ -4,12 +4,11 @@
 {:toc}
 
 ## Introduction
-It brings me great pleasure as I begin writing about **EfficientNets** for three reasons:
+It brings me great pleasure as I begin writing about **EfficientNets** for two reasons:
 1. At the time of writing, [Fixing the train-test resolution discrepancy: FixEfficientNet](https://arxiv.org/abs/2003.08237) (family of **EfficientNet**) is the current State of Art on ImageNet with **88.5%** top-1 accuracy and **98.7%** top-5 accuracy.
-2. As far as I am aware, this is the only blog that explains the EfficientNet Architecture in detail **along with code implementations**.
-3. This blog post also sets up the base for future blog posts on [Self-training with Noisy Student improves ImageNet classification](https://arxiv.org/abs/1911.04252), [Fixing the train-test resolution discrepancy](https://arxiv.org/abs/1906.06423) and [Fixing the train-test resolution discrepancy: FixEfficientNet](https://arxiv.org/abs/2003.08237).
+2. This blog post also sets up the base for future blog posts on [Self-training with Noisy Student improves ImageNet classification](https://arxiv.org/abs/1911.04252), [Fixing the train-test resolution discrepancy](https://arxiv.org/abs/1906.06423) and [Fixing the train-test resolution discrepancy: FixEfficientNet](https://arxiv.org/abs/2003.08237).
 
-In this blog post, in [The "Why"](https://amaarora.github.io/2020/08/13/efficientnet.html#the-why) section, we take a look at the superior performance of EfficientNets compared to their counterparts and understand why **EfficientNet**s are totally worth your time. 
+In this blog post, in [The "Why"](https://amaarora.github.io/2020/08/13/efficientnet.html#the-why) section, we take a look at the superior performance of EfficientNets compared to their counterparts and understand why we are looking into **EfficientNet**s and "why" they are totally worth your time. 
 
 Next, in ["The How"](https://amaarora.github.io/2020/08/13/efficientnet.html#the-how) section, we start to unravel the magic inside **EfficientNets**. Particularly, we look at two main contributions from the research paper: 
 1. Compound Scaling 
@@ -17,7 +16,7 @@ Next, in ["The How"](https://amaarora.github.io/2020/08/13/efficientnet.html#the
 
 Having introduced the two contributions in [The "How"](https://amaarora.github.io/2020/08/13/efficientnet.html#the-how), we the compare the conventional methods of scaling with Compound Scaling approach in [Comparing Conventional Methods with Compound Scaling](https://amaarora.github.io/2020/08/13/efficientnet.html#comparing-conventional-methods-with-compound-scaling). 
 
-Finally we look at the details of the **EfficientNet** Architecture in [The EfficientNet Architecture using NAS](https://amaarora.github.io/2020/08/13/efficientnet.html#the-efficientnet-architecture-using-nas) and also look at code level implementations in [Code overview in PyTorch]().
+Finally we look at the details of the **EfficientNet** Architecture in [The EfficientNet Architecture using NAS](https://amaarora.github.io/2020/08/13/efficientnet.html#the-efficientnet-architecture-using-nas) and learn how the authors used **N**erual **A**rchitecture **S**earch (NAS) to get `EfficientNet-B0` architecture and scaled it using **Compound Scaling** technique to get `EfficientNet B1-B7`.
 
 So, let's get started!
 
@@ -201,11 +200,19 @@ From the paper:
 
 That's all the magic - explained. 
 
-## What have we learnt so far 
-Before looking at the code implementations, let's summarize in simple words what we have learnt so far. First, we looked at the idea of compound scaling depth, width and image resolution all at the same time instead of the conventional method of scaling only one of the three. Next, we also looked at the various experiments and effects of scaling each dimension on model accuracy. 
+## Conclusion
+First, we looked at the idea of compound scaling `depth`, `width` and `image resolution` all at the same time instead of the conventional method of scaling only one of the three. Next, we also looked at the various experiments on model scaling and also at the effects of scaling each dimension on model accuracy. We realized, **Compound Scaling** as a technique works best compared to other conventional methods. 
 
-We also realized that the baseline network to which compound scaling is applied also matters a lot to get best gains. The authors therefore, used Nueral Architecture Search to get a mobile-size network that's very similar to MNasNet and they named it **EfficientNet**. Particularly, this baseline network is termed Efficient-B0. 
+We also realized that the baseline network to which **Compound Scaling** is applied also matters a lot. It is not enough to pick up any existing architecture and scale `depth`, `width` and `image resolution`. The authors therefore, used **N**ueral **A**rchitecture **S**earch to get a mobile-size network that's very similar to `MNasNet` and they named it **EfficientNet**. Particularly, the baseline network is termed Efficient-B0. 
 
-Next, the authors scaled this baseline network using compound scaling to scale depth, width and resolution to get Efficient B1-B7. This process has also been summarized in the image below. 
+Next, the authors scaled this baseline network using **Compound Scaling** technique as explained in [this section]() to scale depth(d), width(w) and resolution(r) to get `Efficient B1-B7`. This process has also been summarized in the image below. 
 
 ![](/images/effnet_overall.jpg "fig-8 EfficientNet overall approach")
+
+I hope through this post I have been able to explain all the magic behind EfficientNets.
+
+As always, constructive feedback is always welcome at [@amaarora](https://twitter.com/amaarora).
+
+Also, feel free to [subscribe to my blog here](https://amaarora.github.io/subscribe) to receive regular updates regarding new blog posts. Thanks for reading!
+
+## References
