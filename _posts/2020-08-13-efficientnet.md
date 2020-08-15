@@ -184,7 +184,10 @@ This has been explained further in the next section.
 
 ![](/images/mbconv.png "fig-7 MBConv Layer")
 
-As in the case of Bottleneck layers that were used in the InceptionNet architecture and also in ResNet-50 and above, the key idea is to first use a `1x1` convolution to bring down the number of channels and apply the `3x3` or `5x5` convolution operation to the reduced number of channels to get output features. Finally, use another `1x1` convolution operation to again increase the number of channels to the initial value. 
+As in the case of Bottleneck layers that were introduced in the [InceptionV2](https://arxiv.org/abs/1512.00567) architecture, the key idea is to first use a `1x1` convolution to bring down the number of channels and apply the `3x3` or `5x5` convolution operation to the reduced number of channels to get output features. Finally, use another `1x1` convolution operation to again increase the number of channels to the initial value. Bottleneck design used in **ResNet**s has been shown below. 
+
+![](/images/bottleneck_design.png "fig-7 Bottleneck Design")
+
 
 The inverted bottleneck as in `MBConv` does the reverse - instead of reducing the number of channels, the first `1x1` conv layer increases the number of channels to 3 times the initial. 
 
