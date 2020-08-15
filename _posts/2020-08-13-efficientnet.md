@@ -9,21 +9,19 @@ It brings me great pleasure as I begin writing about **EfficientNets** for three
 2. As far as I am aware, this is the only blog that explains the EfficientNet Architecture in detail **along with code implementations**.
 3. This blog post also sets up the base for future blog posts on [Self-training with Noisy Student improves ImageNet classification](https://arxiv.org/abs/1911.04252), [Fixing the train-test resolution discrepancy](https://arxiv.org/abs/1906.06423) and [Fixing the train-test resolution discrepancy: FixEfficientNet](https://arxiv.org/abs/2003.08237).
 
-As an overview, not only will we look at the [EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks](https://arxiv.org/abs/1905.11946) research paper, but, we will also understand the nuances of the **EfficientNet** Architecture by looking at [MnasNet: Platform-Aware Neural Architecture Search for Mobile](https://arxiv.org/abs/1807.11626) research paper.
+In this blog post, in [The "Why"](https://amaarora.github.io/2020/08/13/efficientnet.html#the-why) section, we take a look at the superior performance of EfficientNets compared to their counterparts and understand why **EfficientNet**s are totally worth your time. 
 
-We will understand how the `EfficientNet-B0` architecture was first developed using **Nueral Architecture Search** similar to `MnasNet` approach and then scaled using **Compound Scaling** to get **EfficientNet B1-B7**. 
+Next, in ["The How"](https://amaarora.github.io/2020/08/13/efficientnet.html#the-how) section, we start to unravel the magic inside **EfficientNets**. Particularly, we look at two main contributions from the research paper: 
+1. Compound Scaling 
+2. The EfficientNet Architecture (developed using Nueral Architecture Search)
 
-We also understand from a high level perspective how to implement the **EfficientNet** Architecture by looking [Ross Wightman](https://github.com/rwightman)'s wonderful implementation in [TIMM](https://github.com/rwightman/pytorch-image-models). This overview should provide the reader with sufficient code-level understanding to dig through the source code or carry out experiments of his/her own.
+Having introduced the two contributions in [The "How"](https://amaarora.github.io/2020/08/13/efficientnet.html#the-how), we the compare the conventional methods of scaling with Compound Scaling approach in [Comparing Conventional Methods with Compound Scaling](https://amaarora.github.io/2020/08/13/efficientnet.html#comparing-conventional-methods-with-compound-scaling). 
 
-Currently, as far as I am aware, there are two main implementations of **EfficientNet** Architecure in PyTorch:
-1. [Ross Wightman](https://github.com/rwightman)'s in [pytorch-image-models](https://github.com/rwightman/pytorch-image-models)
-2. [Luke Melas](https://github.com/lukemelas)'s in [efficientnet_pytorch](https://github.com/lukemelas/EfficientNet-PyTorch)
-
-Both are similar to the [official implementation](https://github.com/tensorflow/tpu/tree/master/models/official/efficientnet) of **EfficientNet**s.
+Finally we look at the details of the **EfficientNet** Architecture in [The EfficientNet Architecture](https://amaarora.github.io/2020/08/13/efficientnet.html#the-efficientnet-architecture) and also look at code level implementations in [Code overview in PyTorch]().
 
 So, let's get started!
 
-## The 'WHY'?
+## The "WHY"?
 In this section we understand "why" **EfficientNet**s are totally worth your time. 
 
 `fig-1` below summarizes "why" we could a learn a lot by understanding the **EfficientNet** Architecture.
