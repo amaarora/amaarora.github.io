@@ -132,7 +132,7 @@ Having looked at **Compound Scaling**, we will now look at how the authors used 
 
 ## The EfficientNet Architecture using NAS
 
-The authors used **Nueral Architecture Search** approach similar to **MNasNet**. This is a reinforcement learning based approach where the authors developed a baseline neural architecture **Efficient-B0** by leverage a multi-objective search that optimizes for **Accuracy** and **FLOPS**. From the paper: 
+The authors used **Nueral Architecture Search** approach similar to [MNasNet](https://arxiv.org/abs/1807.11626) research paper. This is a reinforcement learning based approach where the authors developed a baseline neural architecture **Efficient-B0** by leveraging a multi-objective search that optimizes for both **Accuracy** and **FLOPS**. From the paper: 
 
 > Specifically, we use the same search space as (Tan et al., 2019), and use **ACC(m)×[FLOPS(m)/T]<sup>w</sup>** as the optimization goal, where `ACC(m)` and `FLOPS(m)` denote the accuracy and FLOPS of model `m`, `T` is the target FLOPS and `w=-0.07` is a hyperparameter for controlling the trade-off between accuracy and FLOPS. Unlike (Tan et al., 2019; Cai et al., 2019), here we optimize FLOPS rather than latency since we are not targeting any specific hardware device.
 
@@ -140,7 +140,7 @@ The EfficientNet-B0 architecture has been summarized in `table-2` below:
 
 ![](/images/effb0.png "Table-2 EfficientNet-B0 baseline network")
 
-The `MBConv` layer above is nothing but an inverted bottleneck block with squeeze and excitation connection added to it. We will learn more about this layer in [this]() section of the blog post.
+The `MBConv` layer above is nothing but an inverted bottleneck block with squeeze and excitation connection added to it. We will learn more about this layer in [this](https://amaarora.github.io/2020/08/13/efficientnet.html#inverted-bottleneck-mbconv) section of the blog post.
 
 Starting from this baseline architecture, the authors scaled the **EfficientNet-B0** using **Compound Scaling** to obtain **EfficientNet B1-B7**. 
 
