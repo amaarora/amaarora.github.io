@@ -75,30 +75,30 @@ It wasn't enough to achieve such great performance by picking up any existing ar
 
 We understand how they did this is in a lot more detail in a later section of this blog post. 
 
-## Main Contribution
+### Main Contributions - CS & NAS
 Therefore, to summarize the two main contributions of this research paper were the idea of <u>Compound Scaling</u> and using <u>Nueral Architecture Search to define a new mobile-size baseline called EfficientNet</u>. We look at both **model scaling** and the **EfficientNet** architecture in a lot more detail in the following sections. 
 
 ## Model Scaling
-In this section we look at **Compound Scaling** in a lot more detail and compare it with conventional scaling approaches.
+In this section we look at various ways of scaling nueral networks in a lot more detail and compare then with the **Compound Scaling** approach.
 
-Basically, the authors of **EfficientNet** architecture ran a few experiments scaling depth, width and image resolution and made two main observations: 
+Basically, the authors of **EfficientNet** architecture ran a lot of experiments scaling depth, width and image resolution and made two main observations: 
 
 > 1. Scaling up any dimension of network width, depth, or resolution improves accuracy, but the accuracy gain diminishes for bigger models.
 > 2. In order to pursue better accuracy and efficiency, it is critical to balance all dimensions of network width, depth, and resolution during ConvNet scaling.
 
 ![](/images/scaling_effnet.png "fig-3 Scaling up a Baseline Model with Different Network Width(w), Depth(d) and Resolution(r)")
 
-Particularly, in this section we will understand the results shown in `fig-3` and also get an understanding on how the authors came about making those observations. 
+These two observations can also be seen in `fig-3`. Now, let's look at the effects of scaling single dimensions on a ConvNet in more detail below. 
 
 ### Depth
 Scaling network depth (number of layers), is the most common way used by many ConvNets. 
 
-Thanks to Residual Connections and BatchNorm and other inventions, it has now been possible to train deeper nueral networks that generally have higher accuracy than their shallower counterparts. The intuition is that deeper ConvNet can capture richer and more complex features, and generalize well on new tasks. However, deeper networks are also more difficult to train due to the vanishing gradient problem. Also, residual connections and batchnorm help alleviate this problem, the accuracy gain of very deep networks diminishes. For example, ResNet-1000 has similar accuracy as ResNet-101 even though it has much more layers. 
+With the advancements in deep learning (particularly thanks to [Residual Connections](https://arxiv.org/abs/1512.03385), [BatchNorm](https://arxiv.org/abs/1502.03167)), it has now been possible to train deeper nueral networks that generally have higher accuracy than their shallower counterparts. The intuition is that deeper ConvNet can capture richer and more complex features, and generalize well on new tasks. However, deeper networks are also more difficult to train due to the [vanishing gradient problem](https://mc.ai/wide-residual-nets-why-deeper-isnt-always-better/). Although residual connections and batchnorm help alleviate this problem, the accuracy gain of very deep networks diminishes. For example, ResNet-1000 has similar accuracy as ResNet-101 even though it has much more layers. 
 
-In `fig-3` (middle), we can also see that ImageNet Top-1 Accuracy saturates at `d=6.0` and no further improvement can be seen after. 
+In `fig-3` (middle), we can also see that `ImageNet` Top-1 Accuracy saturates at `d=6.0` and no further improvement can be seen after. 
 
 ### Width
-Scaling network width - that is, increasing the number of channels in Convolution layers - is most commonly used for small size models. We have seen applications of wider networks previously in [MobileNets](https://arxiv.org/abs/1704.04861), [MNasNet]((https://arxiv.org/abs/1807.11626)). 
+Scaling network width - that is, increasing the number of channels in Convolution layers - is most commonly used for smaller sized models. We have seen applications of wider networks previously in [MobileNets](https://arxiv.org/abs/1704.04861), [MNasNet]((https://arxiv.org/abs/1807.11626)). 
 
 While wider networks tend to be able to capture more fine-grained features and are easier to train, extremely wide but shallow networks tend to have difficul- ties in capturing higher level features. 
 
@@ -118,7 +118,7 @@ By studying the indivdiual effects of scaling depth, width and resolution, this 
 
 > Scaling up any dimension of network width, depth, or resolution improves accuracy, but the accuracy gain diminishes for bigger models.
 
-### Compound Scaling Experiments 
+### Compound Scaling 
 
 ![](/images/compound_scaling.png "fig-4 Scaling Network Width for Different Baseline Net- works")
 
@@ -130,13 +130,7 @@ This brings to the second observation:
 
 > In order to pursue better accuracy and efficiency, it is critical to balance all dimensions of network width, depth, and resolution during ConvNet scaling.
 
-So far, we have talked about the idea of **Compound Scaling** idea and looked at how this idea also works for existing ConvNets such as MobileNets and ResNet. 
-
-We also looked at two main observations coming out of **Compound Scaling** experiments. 
-
-Therefore, I think it is safe to summarize that best accuracy gains can be obvserved by increasing depth, resolution and width while mantaining balance between the three dimensions.
-
-Having looked at **Compound Scaling**, we will now look the EfficientNet Architecture. 
+Having looked at **Compound Scaling**, we will now look at how the authors used Nueral Architecture Search to get mobile-size network that they named **EfficientNet**. 
 
 ## The EfficientNet Architecture
 
