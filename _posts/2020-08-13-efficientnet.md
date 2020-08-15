@@ -66,19 +66,17 @@ From `table-1` below, we can clearly see, that the versions of **MobileNet** and
 
 ![](/images/effnet_t1.png "table-1 Compound Scaling")
 
-Thus, it is safe to summarize - **Compound Scaling** works! 
+Thus, it is safe to summarize - **Compound Scaling** works! But, we're not done yet, there's more magic to be unraveled.
 
 ### Nueral Architecture Search 
-Since we are looking at the "how" - while so far we know **Compound Scaling** was the main idea introduced - the authors found that having a good baseline network is also critical. 
+Since we are looking at the "**how**" - while so far we know **Compound Scaling** was the main idea introduced - the authors found that having a good baseline network is also critical. 
 
-It wasn't enough to achieve such great performance by picking up any existing architecture and applying **Compound Scaling** to it. 
+It wasn't enough to achieve such great performance by picking up any existing architecture and applying **Compound Scaling** to it. While the authors evaluated the scaling method using existing ConvNets (for example - **ResNet**s and **MobileNets** in `table-1` before), in order to better demonstrate the effectiveness of this scaling method, they also developed a new mobile-size baseline, called **EfficientNet** using **Nerual Architecture Search**. 
 
-While the authors evaluated the scaling method using existing ConvNets, in order to better demonstrate the effectiveness of this scaling method, they also developed a new mobile-size baseline, called **EfficientNet** using **Nerual Architecture Search**. 
-
-We understand this is in a lot more detail in this section of the blog post. 
+We understand how they did this is in a lot more detail in a later section of this blog post. 
 
 ### Main Contribution
-Therefore, to summarize the two main contributions of this research paper were the idea of **Compound Scaling** and using nueral architecture search to define a new mobile-size baseline called **EfficientNet**. We look at both **model scaling** and the **EfficientNet** architecture in a lot more detail in the following sections. 
+Therefore, to summarize the two main contributions of this research paper were the idea of <span style="color:red">**Compound Scaling**</span> and <span style="color:red">using nueral architecture search to define a new mobile-size baseline called **EfficientNet**</red>. We look at both **model scaling** and the **EfficientNet** architecture in a lot more detail in the following sections. 
 
 ## Model Scaling
 In this section we look at **Compound Scaling** in a lot more detail and compare it with conventional scaling approaches.
