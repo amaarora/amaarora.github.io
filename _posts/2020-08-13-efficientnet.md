@@ -9,7 +9,7 @@ It brings me great pleasure as I begin writing about **EfficientNets** for three
 2. As far as I am aware, this is the only blog that explains the EfficientNet Architecture in detail **along with code implementations**.
 3. This blog post also sets up the base for future blog posts on [Self-training with Noisy Student improves ImageNet classification](https://arxiv.org/abs/1911.04252), [Fixing the train-test resolution discrepancy](https://arxiv.org/abs/1906.06423) and [Fixing the train-test resolution discrepancy: FixEfficientNet](https://arxiv.org/abs/2003.08237).
 
-As an overview, not only will we look at the [EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks](https://arxiv.org/abs/1905.11946) research paper, but, we will also understand the nuances of the **EfficientNet** Architecture by looking at [MnasNet: Platform-Aware Neural Architecture Search for Mobile](https://arxiv.org/abs/1807.11626) research paper. 
+As an overview, not only will we look at the [EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks](https://arxiv.org/abs/1905.11946) research paper, but, we will also understand the nuances of the **EfficientNet** Architecture by looking at [MnasNet: Platform-Aware Neural Architecture Search for Mobile](https://arxiv.org/abs/1807.11626) research paper.
 
 We will understand how the `EfficientNet-B0` architecture was first developed using **Nueral Architecture Search** similar to `MnasNet` approach and then scaled using **Compound Scaling** to get **EfficientNet B1-B7**. 
 
