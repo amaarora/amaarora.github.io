@@ -221,7 +221,7 @@ First, we looked at the idea of compound scaling `depth`, `width` and `image res
 
 We also realized that the baseline network to which **Compound Scaling** is applied also matters a lot. It is not enough to pick up any existing architecture and scale `depth`, `width` and `image resolution`. The authors therefore, used **N**ueral **A**rchitecture **S**earch to get a mobile-size network that's very similar to `MNasNet` and they named it **EfficientNet**. Particularly, the baseline network is termed Efficient-B0. 
 
-Next, the authors scaled this baseline network using **Compound Scaling** technique as explained in [this section]() to scale depth(d), width(w) and resolution(r) to get `Efficient B1-B7`. This process has also been summarized in the image below. 
+Next, the authors scaled this baseline network using **Compound Scaling** technique as explained in [this section](https://amaarora.github.io/2020/08/13/efficientnet.html#scaling-efficient-b0-to-get-b1-b7) to scale depth(d), width(w) and resolution(r) to get `Efficient B1-B7`. This process has also been summarized in the image below. 
 
 ![](/images/effnet_overall.jpg "fig-8 EfficientNet overall approach")
 
