@@ -160,7 +160,7 @@ The objective function can formally be defined as:
 
 ![](/images/mnasnet_obj.png)
 
-Using the above as reward function, the authors were able to find the **MNasNet** architecture that achieved 75.2% top-1 accuracy and 78ms latency.
+Using the above as reward function, the authors were able to find the **MNasNet** architecture that achieved 75.2% top-1 accuracy and 78ms latency. More about this approach has been explained [here](https://ai.googleblog.com/2018/08/mnasnet-towards-automating-design-of.html).
 
 ### Nueral Architecture Search for EfficientNets
 
@@ -180,7 +180,7 @@ So, the key question now is - what's this **MBConv** layer? As I have mentioned 
 
 This has been explained further in the next section. 
 
-### Inverted Bottleneck `MBConv`
+### Inverted Bottleneck MBConv
 
 ![](/images/mbconv.png "fig-7 MBConv Layer")
 
