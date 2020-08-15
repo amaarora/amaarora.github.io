@@ -132,7 +132,7 @@ This brings to the second observation:
 
 Having looked at **Compound Scaling**, we will now look at how the authors used Nueral Architecture Search to get mobile-size network that they named **EfficientNet**. 
 
-## The EfficientNet Architecture
+## The EfficientNet Architecture using NAS
 
 The authors used **Nueral Architecture Search** approach similar to **MNasNet**. This is a reinforcement learning based approach where the authors developed a baseline neural architecture **Efficient-B0** by leverage a multi-objective search that optimizes for **Accuracy** and **FLOPS**. From the paper: 
 
