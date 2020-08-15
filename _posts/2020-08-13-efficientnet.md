@@ -62,7 +62,7 @@ This main idea of **Compound Scaling** really set apart **EfficientNet**s from i
 
 In fact, this idea of **Compound Scaling** also works on existing [MobileNet](https://arxiv.org/abs/1704.04861) and [ResNet](https://arxiv.org/abs/1512.03385) architectures. 
     
-From `table-1` below, we can clearly see, that the scaled versions of **MobileNet** and **ResNet** architectures perform better than their baselines or also the conventional methods - (b)-(d) in `fig-2`. 
+From `table-1` below, we can clearly see, that the versions of **MobileNet** and **ResNet** architectures scaled using the **Compound Scaling** approach perform better than their baselines or also those architectures that were scaled using conventional methods - (b)-(d) in `fig-2`. 
 
 ![](/images/effnet_t1.png "table-1 Compound Scaling")
 
