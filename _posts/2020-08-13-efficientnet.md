@@ -17,7 +17,7 @@ Next, in ["The How"](https://amaarora.github.io/2020/08/13/efficientnet.html#the
 
 Having introduced the two contributions in [The "How"](https://amaarora.github.io/2020/08/13/efficientnet.html#the-how), we the compare the conventional methods of scaling with Compound Scaling approach in [Comparing Conventional Methods with Compound Scaling](https://amaarora.github.io/2020/08/13/efficientnet.html#comparing-conventional-methods-with-compound-scaling). 
 
-Finally we look at the details of the **EfficientNet** Architecture in [The EfficientNet Architecture](https://amaarora.github.io/2020/08/13/efficientnet.html#the-efficientnet-architecture) and also look at code level implementations in [Code overview in PyTorch]().
+Finally we look at the details of the **EfficientNet** Architecture in [The EfficientNet Architecture using NAS](https://amaarora.github.io/2020/08/13/efficientnet.html#the-efficientnet-architecture-using-nas) and also look at code level implementations in [Code overview in PyTorch]().
 
 So, let's get started!
 
