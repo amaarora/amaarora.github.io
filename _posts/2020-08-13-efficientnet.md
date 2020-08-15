@@ -230,5 +230,3 @@ I hope through this post I have been able to explain all the magic behind Effici
 As always, constructive feedback is always welcome at [@amaarora](https://twitter.com/amaarora).
 
 Also, feel free to [subscribe to my blog here](https://amaarora.github.io/subscribe) to receive regular updates regarding new blog posts. Thanks for reading!
-
-## References
