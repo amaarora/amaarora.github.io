@@ -78,7 +78,7 @@ We understand how they did this is in a lot more detail in a later section of th
 ### Main Contributions - CS & NAS
 Therefore, to summarize the two main contributions of this research paper were the idea of <u>Compound Scaling</u> and using <u>Nueral Architecture Search to define a new mobile-size baseline called EfficientNet</u>. We look at both **model scaling** and the **EfficientNet** architecture in a lot more detail in the following sections. 
 
-## Model Scaling
+## Comparing Conventional Methods with Compound Scaling
 In this section we look at various ways of scaling nueral networks in a lot more detail and compare then with the **Compound Scaling** approach.
 
 Basically, the authors of **EfficientNet** architecture ran a lot of experiments scaling depth, width and image resolution and made two main observations: 
