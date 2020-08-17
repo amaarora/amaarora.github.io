@@ -12,7 +12,7 @@ In this blog post, in [The "Why"](https://amaarora.github.io/2020/08/13/efficien
 
 Next, in ["The How"](https://amaarora.github.io/2020/08/13/efficientnet.html#the-how) section, we start to unravel the magic inside **EfficientNets**. Particularly, we look at two main contributions from the research paper: 
 1. Compound Scaling 
-2. The EfficientNet Architecture (developed using Nueral Architecture Search)
+2. The EfficientNet Architecture (developed using Neural Architecture Search)
 
 Having introduced the two contributions in [The "How"](https://amaarora.github.io/2020/08/13/efficientnet.html#the-how), we the compare the conventional methods of scaling with Compound Scaling approach in [Comparing Conventional Methods with Compound Scaling](https://amaarora.github.io/2020/08/13/efficientnet.html#comparing-conventional-methods-with-compound-scaling). 
 
@@ -65,18 +65,18 @@ From `table-1` below, we can clearly see, that the versions of **MobileNet** and
 
 Thus, it is safe to summarize - **Compound Scaling** works! But, we're not done yet, there's more magic to be unraveled.
 
-### Nueral Architecture Search 
+### Neural Architecture Search 
 Since we are looking at the "**how**" - while so far we know **Compound Scaling** was the main idea introduced - the authors found that having a good baseline network is also critical. 
 
-It wasn't enough to achieve such great performance by picking up any existing architecture and applying **Compound Scaling** to it. While the authors evaluated the scaling method using existing ConvNets (for example - **ResNet**s and **MobileNets** in `table-1` before), in order to better demonstrate the effectiveness of this scaling method, they also developed a new mobile-size baseline, called **EfficientNet** using **Nerual Architecture Search**. 
+It wasn't enough to achieve such great performance by picking up any existing architecture and applying **Compound Scaling** to it. While the authors evaluated the scaling method using existing ConvNets (for example - **ResNet**s and **MobileNets** in `table-1` before), in order to better demonstrate the effectiveness of this scaling method, they also developed a new mobile-size baseline, called **EfficientNet** using **Neural Architecture Search**. 
 
 We understand how they did this is in a lot more detail in a later section of this blog post. 
 
 ### Main Contributions - CS & NAS
-Therefore, to summarize the two main contributions of this research paper were the idea of <u>Compound Scaling</u> and using <u>Nueral Architecture Search to define a new mobile-size baseline called EfficientNet</u>. We look at both **model scaling** and the **EfficientNet** architecture in a lot more detail in the following sections. 
+Therefore, to summarize the two main contributions of this research paper were the idea of <u>Compound Scaling</u> and using <u>Neural Architecture Search to define a new mobile-size baseline called EfficientNet</u>. We look at both **model scaling** and the **EfficientNet** architecture in a lot more detail in the following sections. 
 
 ## Comparing Conventional Methods with Compound Scaling
-In this section we look at various ways of scaling nueral networks in a lot more detail and compare then with the **Compound Scaling** approach.
+In this section we look at various ways of scaling neural networks in a lot more detail and compare then with the **Compound Scaling** approach.
 
 Basically, the authors of **EfficientNet** architecture ran a lot of experiments scaling depth, width and image resolution and made two main observations: 
 
@@ -90,7 +90,7 @@ These two observations can also be seen in `fig-3`. Now, let's look at the effec
 ### Depth
 Scaling network depth (number of layers), is the most common way used by many ConvNets. 
 
-With the advancements in deep learning (particularly thanks to [Residual Connections](https://arxiv.org/abs/1512.03385), [BatchNorm](https://arxiv.org/abs/1502.03167)), it has now been possible to train deeper nueral networks that generally have higher accuracy than their shallower counterparts. The intuition is that deeper ConvNet can capture richer and more complex features, and generalize well on new tasks. However, deeper networks are also more difficult to train due to the [vanishing gradient problem](https://mc.ai/wide-residual-nets-why-deeper-isnt-always-better/). Although residual connections and batchnorm help alleviate this problem, the accuracy gain of very deep networks diminishes. For example, ResNet-1000 has similar accuracy as ResNet-101 even though it has much more layers. 
+With the advancements in deep learning (particularly thanks to [Residual Connections](https://arxiv.org/abs/1512.03385), [BatchNorm](https://arxiv.org/abs/1502.03167)), it has now been possible to train deeper neural networks that generally have higher accuracy than their shallower counterparts. The intuition is that deeper ConvNet can capture richer and more complex features, and generalize well on new tasks. However, deeper networks are also more difficult to train due to the [vanishing gradient problem](https://mc.ai/wide-residual-nets-why-deeper-isnt-always-better/). Although residual connections and batchnorm help alleviate this problem, the accuracy gain of very deep networks diminishes. For example, ResNet-1000 has similar accuracy as ResNet-101 even though it has much more layers. 
 
 In `fig-3` (middle), we can also see that `ImageNet` Top-1 Accuracy saturates at `d=6.0` and no further improvement can be seen after. 
 
@@ -127,11 +127,11 @@ This brings to the second observation:
 
 > In order to pursue better accuracy and efficiency, it is critical to balance all dimensions of network width, depth, and resolution during ConvNet scaling.
 
-Having looked at **Compound Scaling**, we will now look at how the authors used Nueral Architecture Search to get mobile-size network that they named **EfficientNet**. 
+Having looked at **Compound Scaling**, we will now look at how the authors used neural Architecture Search to get mobile-size network that they named **EfficientNet**. 
 
 ## The EfficientNet Architecture using NAS
 
-The authors used **Nueral Architecture Search** approach similar to [MNasNet](https://arxiv.org/abs/1807.11626) research paper. This is a reinforcement learning based approach where the authors developed a baseline neural architecture **Efficient-B0** by leveraging a multi-objective search that optimizes for both **Accuracy** and **FLOPS**. From the paper: 
+The authors used **Neural Architecture Search** approach similar to [MNasNet](https://arxiv.org/abs/1807.11626) research paper. This is a reinforcement learning based approach where the authors developed a baseline neural architecture **Efficient-B0** by leveraging a multi-objective search that optimizes for both **Accuracy** and **FLOPS**. From the paper: 
 
 > Specifically, we use the same search space as (Tan et al., 2019), and use **ACC(m)×[FLOPS(m)/T]<sup>w</sup>** as the optimization goal, where `ACC(m)` and `FLOPS(m)` denote the accuracy and FLOPS of model `m`, `T` is the target FLOPS and `w=-0.07` is a hyperparameter for controlling the trade-off between accuracy and FLOPS. Unlike (Tan et al., 2019; Cai et al., 2019), here we optimize FLOPS rather than latency since we are not targeting any specific hardware device.
 
@@ -161,9 +161,9 @@ The objective function can formally be defined as:
 
 Using the above as reward function, the authors were able to find the **MNasNet** architecture that achieved 75.2% top-1 accuracy and 78ms latency. More about this approach has been explained [here](https://ai.googleblog.com/2018/08/mnasnet-towards-automating-design-of.html).
 
-### Nueral Architecture Search for EfficientNets
+### Neural Architecture Search for EfficientNets
 
-The authors of the **EfficientNet** research paper used the similar approach as explained above to then find an optimal nueral network architecture that maximises **ACC(m)×[FLOPS(m)/T]<sup>w</sup>**. 
+The authors of the **EfficientNet** research paper used the similar approach as explained above to then find an optimal neural network architecture that maximises **ACC(m)×[FLOPS(m)/T]<sup>w</sup>**. 
 Note that for EfficientNets, the authors used FLOPS instead of latency in the objective function since the authors were not targeting specific hardware as opposed to **MNasNet** architecture.
 
 From the paper: 
@@ -173,7 +173,7 @@ The authors named this architecture as **EfficientNet-B0** and it is defined in 
 
 ![](/images/effb0.png "Table-2 EfficientNet-B0 baseline network")
 
-Since, the authors of **EfficientNet**s used the same approach and similar nueral network search space as **MNasNet**, the two architectures are very similar. 
+Since, the authors of **EfficientNet**s used the same approach and similar neural network search space as **MNasNet**, the two architectures are very similar. 
 
 So, the key question now is - what's this **MBConv** layer? As I have mentioned before, it is nothing but an inverted residual bottleneck. 
 

@@ -137,7 +137,7 @@ class FeedForward(nn.Module):
     def forward(self, x):
         return self.dropout(self.c_proj(self.act(self.c_fc(x))))
 ```
-Something, that's just so well explained in Jay Alammar's post - also referenced above, is how the inputs are passed through `ATTENTION` layer first and then on to `FEEDFORWARD` layer. The Feedforward network, is a normal nueral network that accepts the outputs from the `ATTENTION` layer (768), casts them to `nx` (768*4) dimension, adds an activation function `self.act` (GELU), casts them back to `d_model` (768) and adds dropout (0.1). 
+Something, that's just so well explained in Jay Alammar's post - also referenced above, is how the inputs are passed through `ATTENTION` layer first and then on to `FEEDFORWARD` layer. The Feedforward network, is a normal neural network that accepts the outputs from the `ATTENTION` layer (768), casts them to `nx` (768*4) dimension, adds an activation function `self.act` (GELU), casts them back to `d_model` (768) and adds dropout (0.1). 
 
 This is also mentioned in the **GPT** research paper referenced below. 
 > For the position-wise feed-forward networks, we used 3072 dimensional inner states
