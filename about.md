@@ -8,7 +8,7 @@ I am a Data Scientist at [CoreLogic Australia](https://www.corelogic.com.au/) wh
 1. SOTA algorithms to predict house and rental prices across all of Australia and NZ for over 16 million properties
 1. Some pretty cool stuff using Deep Learning that I possibly can't share here
 
-I have a passion for deep learning, thanks to [Jeremy Howard](https://twitter.com/jeremyphoward) who made it possible for me through [fast.ai](fast.ai) to begin my journey in this space around 1.5 years ago.
+I have a passion for deep learning, thanks to [Jeremy Howard](https://twitter.com/jeremyphoward) who made it possible for me through [fast.ai](fast.ai) to begin my journey in this space at the start of 2018.
 
 I am self taught, and an ardent follower of and small contributor to the [fast.ai](fast.ai) course. Through this course itself, I have been able to pickup Python and it has made possible for me to do my own research - something I would have not thought of being able to do when I first started. I believe I still have a lot to learn and commit myself to learning something new every day.  
 
