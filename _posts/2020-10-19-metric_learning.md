@@ -59,6 +59,7 @@ From the paper,
 
 ![](/images/center_loss.png "eq-1 Center Loss")
 
+### A simple example on how to calculate class centers
 To understand the center loss simply, let's look at an example below:
 
 ![](/images/center_loss.jpg "fig-3 Center Loss Explained")
