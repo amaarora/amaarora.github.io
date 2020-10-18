@@ -38,6 +38,8 @@ enhance the discriminative power of the deeply learned features in neural networ
 From the paper, 
 > In the course of training, we simultaneously update the center and minimize the distances between the deep features and their corresponding class centers. The CNNs are trained under the joint supervision of the softmax loss and center loss, with a hyper parameter to balance the two supervision signals. Intuitively, the softmax loss forces the deep features of different classes staying apart. The center loss efficiently pulls the deep features of the same class to their centers.
 
+![](/images/center_loss.png "eq-1 Center Loss")
+
 ![](/images/center_loss.jpg "fig-2 Center Loss Explained")
 
 To understand center loss, let's take the above image as an example. Let's assume we have 5 input images, 3 of `cat` and 2 of label `dog`. We pass it through a neural network to get 512 dimension vector outputs (or a n-dim vector). Next, we take average of the `cat` output vectors and `dog` output vectors to get `cat` and `dog` class centers. Now, as you might imagine, we will have to average the output vectors based on labels at every iteration to continue updating the class centers. The center loss proposed in this paper, makes sure that the output vectors of a label are very close to that label's class centers.
@@ -53,7 +55,7 @@ In this section we understand further and also implement it on MNIST as a toy ex
 
 The toy example has been presented in the notebook [here]. Mathematically, the Softmax Loss function can be represented as: 
 
-![](/images/softmax_loss.png "eq-1 Softmax Loss")
+![](/images/softmax_loss.png "eq-2 Softmax Loss")
 
 As shown in the notebook, a nueral network trained with Softmax layer as the final activation layer followed by cross entropy loss is referred to as Softmax Loss. If we plot the features on a plot, we can look at the test set distribution as shown in the image below (note that this image is from the notebook and not from the original paper).
 
