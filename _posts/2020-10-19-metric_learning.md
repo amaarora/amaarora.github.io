@@ -40,7 +40,7 @@ The toy example has been presented in the notebook [here](https://github.com/ama
 
 ![](/images/softmax_loss.png "eq-2 Softmax Loss")
 
-If we plot the 2-dim features, we can look at the test set distribution as shown in the image below (note that this image is from the notebook and not from the original paper).
+If we plot the 2-dim features, we can look at the test set distribution as shown in the image from the paper below. 
 
 ![](/images/mnist_test_set.png "fig-2 MNIST test features w Softmax Loss")
 
@@ -90,9 +90,18 @@ Therefore, to address this problem the authors proposed a two necessary modifica
 
 In other words, rather than going through the training set image by image, go through a set of mini-batches and continue updating the class centers by taking the averages of the features for each class in the mini batch.
 
-This keep the training more stable and also the learned features are more discriminative as compared to Center Loss. (note that the image below is from the shared notebook and not the original paper)
+Also, the authors used joint supervision to train the CNNs for discriminative feature learning. That is, they used a combination of Softmax loss and Center Loss like so:
+
+**L = L<sub>S</sub> + λL<sub>C</sub>**
+
+Here, 
+L<sub>S</sub> refers to as Softmax Loss ; L<sub>C</sub> refers to as Center Loss
+
+This keeps the training more stable and also the learned features are more discriminative as compared to Center Loss. From the paper: 
 
 ![](/images/center_loss_ftrs.png "fig-3 MNIST test features w Center Loss")
+
+Here, as mentioned `λ` is a hyperparameter that is used for balancing the two loss functions. 
 
 We can see in the image above, now the trained features are more discriminative and also separable as compared to the feature distribution when compared to Softmax Loss. There are more closely formed clusters and this is what metric learning aims to do - minimizing the intra-class variations while keeping the features of different classes separable.
 
