@@ -95,6 +95,14 @@ This keep the training more stable and also the learned features are more discri
 
 We can see in the image above, now the trained features are more discriminative and also separable as compared to the feature distribution when compared to Softmax Loss. There are more closely formed clusters and this is what metric learning aims to do - minimizing the intra-class variations while keeping the features of different classes separable.
 
-
 ## Center Loss: Code Implementation 
 A complete notebook on how to train a network with Center Loss has been shared [here](https://github.com/amaarora/amaarora.github.io/blob/master/nbs/Understanding%20Metric%20Learning.ipynb) along with plots to showcase the difference with Softmax Loss.
+
+## Conclusion
+I hope that today, I was able to provide a concise and easy to digest explaination of the Center Loss and also introduce Metric Learning to the reader. 
+
+For a complete working notebook to train this implementation, refer [here](https://github.com/amaarora/amaarora.github.io/blob/master/nbs/Understanding%20Metric%20Learning.ipynb). 
+
+As usual, in case I have missed anything or to provide feedback, please feel free to reach out to me at [@amaarora](https://twitter.com/amaarora).
+
+Also, feel free to [subscribe to my blog here](https://amaarora.github.io/subscribe) to receive regular updates regarding new blog posts. Thanks for reading!
