@@ -92,7 +92,7 @@ In other words, rather than going through the training set image by image, go th
 
 Also, the authors used joint supervision to train the CNNs for discriminative feature learning. That is, they used a combination of Softmax loss and Center Loss like so:
 
-**L = L<sub>S</sub> + λL<sub>C</sub>**
+![](/images/join_supervision.png "eq-3 Joint Supervision")
 
 Here, 
 L<sub>S</sub> refers to as Softmax Loss ; L<sub>C</sub> refers to as Center Loss
