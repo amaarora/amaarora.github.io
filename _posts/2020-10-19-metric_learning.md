@@ -97,7 +97,7 @@ Also, the authors used joint supervision to train the CNNs for discriminative fe
 Here, 
 L<sub>S</sub> refers to as Softmax Loss ; L<sub>C</sub> refers to as Center Loss
 
-This keeps the training more stable and also the learned features are more discriminative as compared to Center Loss. From the paper: 
+This keeps the training more stable and also the learned features are more discriminative as compared to Softmax Loss. From the paper: 
 
 ![](/images/center_loss_ftrs.png "fig-3 MNIST test features w Center Loss")
 
