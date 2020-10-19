@@ -62,7 +62,7 @@ From the paper,
 ### A simple example on how to calculate class centers
 To understand the center loss simply, let's look at an example below:
 
-![](/images/center_loss.jpg =384x384 "fig-3 Center Loss Explained")
+![](/images/center_loss.jpg "fig-3 Center Loss Explained")
 
 Let's assume we have 5 input images, 3 of `cat` and 2 of label `dog`. We pass it through a neural network to get 512 dimension vector outputs (or a n-dim vector). Next, we take average of the `cat` output vectors and `dog` output vectors to get `cat` and `dog` class centers. These class centers are referred to as **C<sub>yi</sub>** in Eq 1. Therefore, for every feature **X<sub>i</sub>**, the loss becomes it's distance from it's class center **C<sub>yi</sub>**. The closer the feature **X<sub>i</sub>** is to it's class center  **C<sub>yi</sub>**, the lower the loss and vice-versa. 
 
