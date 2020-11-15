@@ -1,4 +1,4 @@
-# METRIC LEARNING 01: Introduction to Metric learning and Center Loss
+<!-- # METRIC LEARNING 01: Introduction to Metric learning and Center Loss
 
 This blog post is a first in a series of total 4 blog posts on **Metric learning**. When I first started to learn about metric learning, I couldn't find any blog posts that explained the concepts in detail along with code implementation. I wish to fill the gap through this series and in this series of 4 blog posts we will be looking at:
 
@@ -115,4 +115,4 @@ For a complete working notebook to train this implementation, refer [here](https
 
 As usual, in case I have missed anything or to provide feedback, please feel free to reach out to me at [@amaarora](https://twitter.com/amaarora).
 
-Also, feel free to [subscribe to my blog here](https://amaarora.github.io/subscribe) to receive regular updates regarding new blog posts. Thanks for reading!
+Also, feel free to [subscribe to my blog here](https://amaarora.github.io/subscribe) to receive regular updates regarding new blog posts. Thanks for reading! -->
