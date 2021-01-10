@@ -58,14 +58,14 @@ Recognizing objects at vastly different scales is a fundamental challenge in com
 
 ![](/images/fpn.png "fig-1 Different ways to recognize objects at different scales")
 
-#### (a) Featurized Image Pyramid
+#### Featurized Image Pyramid
 This is the first way and possibly the simplest to understand to recognize objects at different scales. Given an input image, resize the image to using different scales, pass the original image and the resized images through a CNN, make a prediction at each scale and simply take the average of these predictions to get a final prediction. Intuitively, this enables a model to detect objects accross a large range of scales by scanning the model over both positions and pyramid levels. Chris Deotte explains this too in simple words [here](https://www.kaggle.com/c/siim-isic-melanoma-classification/discussion/160147).
 
 But, can you think of the possible problems with this possible solution? 
 
 For one, inference time would increase. For each image, we would need to rescale it to various new sizes and then average the predictions. Second, it would also not be possible to do this during train time as this would be infeasible in terms of memory and hardware requirements. Therefore, featurized image pyramid technique can only be used at test time which creates an inconsistency between train/test time inference.  
 
-#### (b) Single Feature Map (Faster RCNN)
+#### Single Feature Map (Faster RCNN)
 Another way is to use the inherent scale invariance property of CNNs. As you know, during the forward pass, a deep CNN computes a feature heirarchy layer by layer, and therefore, has an inherent multi scale pyramidal shape. See VGG-16 network below as an example: 
 
 ![](/images/vgg16.png "fig-2 Inherent scale invariance in CNNs")
@@ -82,7 +82,7 @@ Can you think of why this might not work? Maybe take a break to think about the 
 
 As mentioned by Zeilur and Fergus in [Visualizing and Understanding Convolutional Networks](https://arxiv.org/abs/1311.2901) research paper, we know that the earlier layers of a CNN have low-level features whereas the deeper layers learn more and thus, have high-level features. The low-level features (understanding) in earlier layers of a CNN harm their representational capacity for object recognition. 
 
-#### (c) Pyramidal Feature Heirarchy (SSD)
+#### Pyramidal Feature Heirarchy (SSD)
 A third way could be to first have a stem (backbone) that extracts some meaning from the image and then have another convolutional network head on top to extract the features and perform predictions on each of the extracted features. This way, we do not need to worry about the representational capacity of earlier layers of a CNN. This sort of approach was introduced in the [SSD](https://arxiv.org/abs/1512.02325) research paper.
 
 ![](/images/ssd.png "fig-4 Single Shot Detector")
@@ -91,7 +91,7 @@ As can be seen in the image above, the authors of the research paper used earlie
 
 But can you think of ways to improve this? Well, to avoid using low-level features from earlier layers in a CNN, SSD instead builts the pyramid starting from high up in the network already (VGG-16) and then adds several new layers. But, while doing this, it misses the opportunity to reuse the earlier layers which are important for detecting small objects as shown in the FPN research paper. 
 
-#### (d) Feature Pyramid Network
+#### Feature Pyramid Network
 So, finally to the Feature Pyramid Network. Having had a look at all the other approaches, now we can appreciate what the FPN paper introduced and why it was such a success. In the FPN paper, a new architecture was introduced that combines the low-resolution, semantically strong features in the later layers with high-resolution, semantically weak features in the earlier layers via a top-down pathway and lateral connections. Thus, leading to **Multi-scale feature fusion**. 
 
 The result is a feaure pyramid that has rich semantics at all levels because the lower semantic features are interconnected to the higher semantics. Somewhat similar idea to a [U-Net](https://amaarora.github.io/2020/09/13/unet.html). Also, since the predictions are generated from a single original image, the FPN network does not compromise on power, speed or memory.  
@@ -110,7 +110,7 @@ The EfficientDet research paper has an excellent image on Feature Network Design
 
 ![](/images/feature_network_design.png "fig-5 Feature Network Design for cross-scale feature fusion after the introduction of FPN")
 
-#### (a) FPN
+#### FPN
 We already know what a FPN is, the above figure is just a different way to show what we have already learnt in the previous section. As we know, FPN introduces top-down and lateral connections to combine multi-scale features. One thing worth mentioning is that while fusing different features, FPNs simply sum them up without disctinction. 
 
 Looking at `fig-5 (a)`, we can see that P<sub>7</sub><sup>out</sup> and other output features can be calculated as: 
@@ -119,13 +119,13 @@ Looking at `fig-5 (a)`, we can see that P<sub>7</sub><sup>out</sup> and other ou
 
 where, `Resize` is usually a upsampling or downsampling operation for resolution matching, and `Conv` is usually a convolution operation for feature processing. 
 
-#### (b) PANet
+#### PANet
 Around 3 years after the FPNs were first introduced, PANet adds ab extra bottom-up path aggregation on top of FPN since the conventional FPN is inherently limited by the one-way information flow. The authors of PANet were able to enhave the feature heirarchy by not only sharing information from top-bottom layers but also by bottom-up path augmentation. Using this simple improvement over FPN, the PANet was able to achieve 1st place of COCO 2017 Challenge Instance Segmention Task and 2nd place in Object Detection Task without large-batch training. 
 
-#### (c) NAS-FPN
+#### NAS-FPN
 More recently, researchers from google brain adopted Neural Architecture Search and aimed to discover a new feature pyramid architecture in a scalable search space covering all cross-scale connections. The discovered architecture, named NAS-FPN, consisted of a combination of top-down and bottom-up connections to fuse features across scales. Although NAS-FPN ahieved better performance, it requires thousands of GPU hours during search, and the resulting feature network as shown in `fig-5 (c)` is difficult to interpret. 
 
-#### (d) Bi-FPN
+#### Bi-FPN
 Now that we have looked at various ways of multi-scale feature fusion, we are now ready to look into BiFPN. To get BiFPN network, the authors of the EfficientDet paper proposed several optimizations: 
 
 1. Remove all those nodes that have only one input edge. The intuition is that if a node has only one input edge with no feature fusion, then it will have less contribution to the feature network. 
