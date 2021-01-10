@@ -8,6 +8,17 @@ Also, while multiple blog posts previously exist on EfficientDets [[1](https://t
 
 But, code comes later. First, let's understand the novel contributions of the **EfficientDet** paper. 
 
+## Structure
+The blog post is structured in the following way: 
+
+
+1. TOC 
+{:toc}
+
+First, we take a step back and understand multi-scale feature fusion before the introduction of Feature Pyramid Networks. Next, understand the key advancements introduced by FPNs. Next, we look at the various adaptations of FPN such as PANet, NAS-FPN and finally look into BiFPN that was introduced in the EfficientDet paper. 
+
+Having looked at BiFPN in great detail, we then finally look into the EfficientDet Architecture and understand how the authors used `BiFPN + Compound Scaling` to get SOTA results.
+
 ## Prerequisites
 I assume that the reader has some knowledge about Object Detection. If you are completely new to the field or simply want to apply EfficientDet to a object detection problem, there are plenty examples on [Kaggle](https://www.kaggle.com/ar2017/efficientdet-train-mixup-cutmix-stratifiedk-fold) that show how to use EfficientDets. This post is more meant for those who want to understand what's inside an EfficientDet.  
 
