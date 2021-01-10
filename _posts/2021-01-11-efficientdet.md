@@ -20,20 +20,20 @@ First, we take a step back and understand multi-scale feature fusion before the 
 Having looked at BiFPN in great detail, we then finally look into the EfficientDet Architecture and understand how the authors used `BiFPN + Compound Scaling` to get SOTA results.
 
 ## Prerequisites
-I assume that the reader has some knowledge about Object Detection. If you are completely new to the field or simply want to apply EfficientDet to a object detection problem, there are plenty examples on [Kaggle](https://www.kaggle.com/ar2017/efficientdet-train-mixup-cutmix-stratifiedk-fold) that show how to use EfficientDets. This post is more meant for those who want to understand what's inside an EfficientDet.  
+I assume that the reader has some knowledge about Object Detection. If you are completely new to the field or simply want to apply **EfficientDets** to an object detection problem, there are plenty examples on [Kaggle](https://www.kaggle.com/ar2017/efficientdet-train-mixup-cutmix-stratifiedk-fold) that show how to use **EfficientDets**. This post is more meant for those who want to understand what's inside an EfficientDet.  
 
 Also, here is a [great video](https://www.youtube.com/watch?v=8H2qGeOef44) of the fastai 2018 course by [Jeremy Howard](https://twitter.com/jeremyphoward) that introduces object detection. I started here too about a year ago. :)
 
-Also, since it would be an overkill to put EfficientNets as a prerequisite, I will just say that it would be great if the reader has a good enough understanding of [EfficientNets](https://arxiv.org/abs/1905.11946). IfAlso you want a refresher, please refer to this [blog post](https://amaarora.github.io/2020/08/13/efficientnet.html) that explains EfficientNets in detail step-by-step. 
+Also, since it would be an overkill to put EfficientNets as a prerequisite, I will just say that it would be great if the reader has a good enough understanding of [EfficientNets](https://arxiv.org/abs/1905.11946). If you want a refresher, please refer to this [blog post](https://amaarora.github.io/2020/08/13/efficientnet.html) that explains EfficientNets in detail step-by-step. 
 
 ## Contributions 
 There are two main contributions from the paper: 
 1. A new version of a Feature Pyramid Network called **BiFPN**. 
 2. And two, **Compund Scaling**. 
 
-While the idea of compound scaling was first introduced in the EfficientNet paper, the authors apply it to object detection and achieve SOTA results. Also, that the authors of the EfficientDet research paper are the same authors who introduced EfficientNets. 
+While the idea of compound scaling was first introduced in the EfficientNet paper, the authors apply it to object detection and achieve SOTA results. Also, that the authors of the EfficientDet research paper are the same authors who introduced EfficientNets. We won't be looking into Compound Scaling in this blog post as it has already been explained in my previous blog post [here](https://amaarora.github.io/2020/08/13/efficientnet.html#comparing-conventional-methods-with-compound-scaling).
 
-We will be looking at what the BiFPN network is in a lot more detail at a later stage. To understand what a BiFPN is, one must first look into what a FPN is or a Feature Pyramid Network.
+We will be looking at what the BiFPN network is in a lot more detail at a later stage. To understand what a BiFPN is, one must first look into what a FPN (Feature Pyramid Network) is.
 
 ## Introduction
 This paper starts out with a similar introduction as EfficientNets where the authors explain why model efficiency becomes increasingly important for object detection. From the paper: 
