@@ -51,7 +51,7 @@ So, the next section is merely a summary and introduction to Feature Pyramid Net
 
 ---
 
-### Feature Pyramid Network for Object Detection
+### Summary: Feature Pyramid Network for Object Detection
 [He et al](https://arxiv.org/search/cs?query=He%2C+Kaiming&searchtype=author&abstracts=show&order=-announced_date_first&size=50) were the one of the first to exploit the inherent multi-scale pyramid heirarchy of CNNs and construct feature pyramids and apply to object detection. If this doesn't make sense right now - it's okay! I really havent explained in much detail what this means yet. That happens next. 
 
 Recognizing objects at vastly different scales is a fundamental challenge in computer vision. Different authors have tried to solve this differently. However, there are three main categories (total four including FPN) of solutions that existed before the introduction of FPN. 
@@ -137,6 +137,11 @@ I believe that the optimizations 1,2 would be clear to the reader but perhaps no
 There were also other notable optimizations that were introduced with the introduction of BiFPN such as **Weighted Feature Fusion**. As mentioned before and as seen in `eq-1`, when fusing features with different resolutions, a common way is to first resize them to the same resolution and then simply sum them up treating all input features equally without distinction. 
 
 However, since different input features are at different resolutions, it is possible that they might contribute differently to the output feature. Thus, the authors introduced an additional weight for each input in Bi-FPN to address this issue and this is referred to as **Weighted Feature Fusion**. The weights are trained using backward propagation by the network. I won't cover **Fast-normalized fusion** in this blog but it is merely a small improvement over **Softmax-based fusion** to avoid slowdown of GPU hardware by the extra softmax layer. 
+
+### Compound Scaling 
+They key idea of compound scaling has already been introduced [here](https://amaarora.github.io/2020/08/13/efficientnet.html#comparing-conventional-methods-with-compound-scaling). While previous object detection frameworks relied on bigger backbone networks or larger input image sizes, for higher accuracy, the authors of the EfficientDet paper observed that scaling up feature network and box/class prediction network is also critical when taking into account both accuracy and efficiency, 
+
+Thus, by combining EfficientNet backbones with the proposed BiFPN feature fusion, a new family of object detectors EfficientDets were developed which consistently achieve better accuracy with much fewer parameters and FLOPs than previous object detectors.
 
 
 ## EfficientDet Architecture
