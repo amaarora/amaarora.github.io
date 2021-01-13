@@ -1,4 +1,4 @@
-# EfficientDets in PyTorch 
+# Th EfficientDet Architecture in PyTorch 
 
 1. TOC 
 {:toc}
