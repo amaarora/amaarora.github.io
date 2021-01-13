@@ -3,7 +3,7 @@
 1. TOC 
 {:toc}
 
-This blog post is a direct continuation of my [previous blog post](https://amaarora.github.io/2021/01/11/efficientdet.html) explaining EfficientDets. In that post we look inside an EfficientDet and understood the various components such as BiFPN and Compound Scaling that make an EfficientDet network so powerful. 
+This blog post is a direct continuation of my [previous blog post](https://amaarora.github.io/2021/01/11/efficientdet.html) explaining EfficientDets. In that post we look inside an EfficientDet and understood the various components such as BiFPN and Compound Scaling that make an EfficientDet network so powerful.
 
 Today, our focus will be to build on top of that knowledge and showcase how to implement the network using PyTorch step-by-step. 
 
