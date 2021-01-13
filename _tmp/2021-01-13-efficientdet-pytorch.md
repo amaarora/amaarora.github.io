@@ -3,20 +3,22 @@
 1. TOC 
 {:toc}
 
-This blog post is a direct continuation of my [previous blog post](https://amaarora.github.io/2021/01/11/efficientdet.html) explaining EfficientDets. In that post we look inside an EfficientDet and understood the various components such as BiFPN and Compound Scaling that make an EfficientDet network so powerful.
+This blog post is a direct continuation of my [previous blog post](https://amaarora.github.io/2021/01/11/efficientdet.html) explaining EfficientDets. In my previous post, we looked and understood what's inside an **EfficientDet** and also read about the various components such as **BiFPN** and **Compound Scaling** that make an EfficientDet network so powerful.
 
-Today, our focus will be to build on top of that knowledge and showcase how to implement the network using PyTorch step-by-step. 
+Today, our focus will be to build on top of that knowledge and showcase how to implement the network using PyTorch step-by-step. Throughout this blog post I have added some side notes to be able to explain things better.
 
-**NOTE**: The code implementations shared below are not my own but have been directly copied from [Ross Wightman's](https://twitter.com/wightmanr) wonderful repo [efficientdet-pytorch](https://github.com/rwightman/efficientdet-pytorch). This repo makes heavy use of [timm](https://github.com/rwightman/pytorch-image-models) to create the backbone network and also several other operations. 
+> These side-notes would look something like this.
 
-> As part of this blog post - we will not be looking at the source code of `TIMM`. We will only be looking at the implementation inside `efficientdet-pytorch` repo. This is a conscious decision to keep this blog post from blowing up. We will uncover the wonderful `TIMM` library in a series of my future blog posts that I plan to start in about a 7-10 days time. Also, everything below is based on "my understanding" of the code. It is possible that Ross might have implemented things differently than what in the way that I have understood them. 
+**NOTE**: The code implementations shared below are not my own. All code shown below has been directly copied from [Ross Wightman's](https://twitter.com/wightmanr) wonderful repo [efficientdet-pytorch](https://github.com/rwightman/efficientdet-pytorch). `efficientdet-pytorch` makes heavy use of [timm](https://github.com/rwightman/pytorch-image-models) to create the backbone network and also for several other operations. 
+
+> As part of this blog post - we will not be looking at the source code of `timm`. We will only be looking at the implementation inside `efficientdet-pytorch` repo. This is a conscious decision to keep this blog post from blowing up. We will uncover the wonderful `timm` library in a series of my future blog posts that I plan to start in about a 7-10 days time. Also, everything below is based on "my understanding" of the code. It is possible that Ross might have implemented things differently than the way in which I have understood them. 
 
 ![](/images/EfficientDet.png "fig-1 EfficientDet Architecture")
 
 There are few notable things in the architecture above that we must look at before starting with the implementation: 
 1. The BiFPN Layer only interacts with the feature maps at level 3-7 of the backbone network. 
 2. [EfficientNets](https://amaarora.github.io/2020/08/13/efficientnet.html) are used as the backbone network for EfficientDets.
-3. There are bottom-up and top-down connections between the feature maps at different levels. Thus, we would need to be able to Upsample or Downsample the features. 
+3. There are bottom-up and top-down connections between the feature maps at different levels. Thus, we would need to be able to **Upsample** or **Downsample** the features. 
 4. The BiFPN Network consists of multiple BiFPN Layers and the number of BiFPN layers depends on the size of the EfficientDet (compound scaling). 
 5. The EfficientDet Architecture consists of two main components - Backbone + BiFPN network. 
 6. Each "Node" inside a BiFPN layer can accept either 2 or 3 inputs and it combines them to produce a single output. 
@@ -66,22 +68,24 @@ class ResampleFeatureMap(nn.Sequential):
                 self.add_module('upsample', Interpolate2d(scale_factor=scale, mode=upsample))
 ```
 
-Here is the general idea - if `out_channels` is not equal to `in_channels`, then use a 1x1 convolution operation to make them the same. Also, if the reduction ratio is not equal to 1, then either upsample or downsample the input feature map based on the requirements. If `reduction_ratio<1` then, Upsample the input, otherwise if `reduction_ratio>1` then, Downsample the input.
+Here is the general idea - if `out_channels` is not equal to `in_channels`, then use a 1x1 convolution operation to make them the same. Also, if the reduction ratio is not equal to 1, then either upsample or downsample the input feature map based on the requirements. If `reduction_ratio<1` then, **Upsample** the input, otherwise if `reduction_ratio>1` then, **Downsample** the input.
 
 Upsampling or Downsampling in simple terms refers to making the spatial dimensions of the input feature map larger or smaller. Upsampling is generally done using bilinear interpolation and downsampling is generally done using pooling. 
 
-So an example of using this class, assuming all imports work, 
+So an example of using this class, assuming all imports work, would be:
 
 ```python
+# downsampling
 inp = torch.randn(1, 40, 64, 64)
-resample = ResampleFeatureMap(40, 112, 2)
+resample = ResampleFeatureMap(in_channels=40, out_channels=112, reduction_ratio=2)
 out = resample(inp)
 print(inp.shape, out.shape) 
 
 >> torch.Size([1, 40, 64, 64]) torch.Size([1, 112, 32, 32])
 
+# upsampling
 inp = torch.randn(1, 40, 64, 64)
-resample = ResampleFeatureMap(40, 112, 0.5)
+resample = ResampleFeatureMap(in_channels=40, out_channels=112, reduction_ratio=0.5)
 out = resample(inp)
 print(inp.shape, out.shape) 
 
@@ -90,8 +94,7 @@ print(inp.shape, out.shape)
 
 One key thing that's part of this class, is that the class does not have a `forward` method defined that is common to almost all layers in PyTorch. The reason is that this class inherits from `nn.Sequential` instead of `nn.Module`. This class does not need a `forward` method to be defined and automatically calls the modules defined in this class one by one. That is why we do things like `self.add_module` inside the `ResampleFeatureMap` class.
 
-Another thing, the convolution operation inside this `ResampleFeatureMap` calls `ConvBnAct2d` and not `nn.Conv2d`, that's because as mentioned in the EfficientDet paper at the end of section-3: 
-> Notably, to further improve the efficiency, we use depthwise separable convolution for feature fusion, and add batch normalization and activation after each convolution.
+Another thing, the convolution operation inside this `ResampleFeatureMap` calls `ConvBnAct2d` and not `nn.Conv2d`. `ConvBnAct2d` as the name suggests is a Convolution operation followed by Batch Normalization and an Activation function.
 
 So, here is the implementation of `ConvBnAct2d`:
 
@@ -114,7 +117,7 @@ class ConvBnAct2d(nn.Module):
         return x
 ```
 
-The `create_conv2d` is a function from `TIMM`, that creates a `nn.Conv2d` layer in our case. We won't go into the source code of this function as it is part of the `TIMM` library which will look into a series of blog posts later.
+The `create_conv2d` is a function from `timm`, that creates a `nn.Conv2d` layer in our case. We won't go into the source code of this function as it is part of the `timm` library, which we will look into a series of blog posts later.
 
 Now, let's start to get into the tricky bits. Let's see how could we implement a single `BiFpnLayer`.
 
@@ -123,14 +126,16 @@ Now, let's start to get into the tricky bits. Let's see how could we implement a
 ![](/images/BiFPN_layer.png "fig-2 Annotated EfficientDet-D0 Architecture assuming EfficientNet-B0 backbone")
 
 
-Looking at the image above, we can see that a `BiFPN Layer` has `Nodes`. To be specific, each `BiFPN Layer` has 5 input Nodes (number 0-4) 8 internal nodes (number 5-12). The input nodes for the first `BiFPN Layer` are feature outputs from the EfficientNet Backbone. 
+Looking at the image above, we can see that a `BiFPN Layer` has `Nodes`. To be specific, each `BiFPN Layer` has **5 input Nodes** (number 0-4) and **8 internal nodes** (number 5-12). The input nodes for the first `BiFPN Layer` are feature outputs from the EfficientNet Backbone. For the subsequent `BiFpn Layer`s, the feature outputs come from the previous `BiFPN Layer`.
 
-Also, each arrow is the `ResampleFeatureMap` class where the blue arrows perform **DownSampling** and the red arrows perform **Upsampling**. From a code perspective, there are some things that we need to be able to implement the BiFPN Layer: 
-1. We need to be able to extract the feature maps from the EfficientNet Backbone. `TIMM` will do this for us. 
-2. We need to be able to combine the features coming from different nodes at different levels. 
-3. We need to define the numbers and structures of the nodes in Python similar to the diagram. For example, our implementation should know that `Node-6` is the intermediate Node at level `P5` and it accepts the outputs of `Node-5` and `Node-2` as inputs.
-4. Not all Nodes accept the same number of inputs. Some accept 2 inputs whereas some nodes (such as 9, 10, 11) accept 3 inputs as shown in the `fig-2`.
-5. The output features from the EfficientNet-B0 backbone at level P3-P5 have 40, 112, 320 number of channels respectively and each spatial dimension is half that of the previous level. 
+Also, each arrow is the `ResampleFeatureMap` class where the <span style="color:blue">blue arrows</span> perform <span style="color:blue">**DownSampling**</span> and the <span style="color:red">red arrows</span> perform <span style="color:red">**Upsampling**</span>. From a code perspective, there are some things that we need to be able to implement the BiFPN Layer: 
+1. We need to be able to extract the feature maps from the EfficientNet Backbone. `timm` will do this for us. As you'll notice later, we call `timm.create_model` method passing in a parameter called `out_indices` and also `features_only=True`. This tells `timm` to create a model that extracts the required feature maps for us at the correct level. 
+2. We need to be able to combine the features coming from different nodes at different levels. The class `FpnCombine` will take care of this for us which we will look at below.
+3. We need to define the numbers and structures of the nodes in Python similar to the diagram. 
+> For example, our implementation should know that `Node-6` is the intermediate Node at level `**P5**` and it accepts the outputs of `Node-5` and `Node-2` as inputs.
+4. Not all `Node`s accept the same number of inputs. Some accept 2 inputs whereas some nodes (such as 9, 10, 11) accept 3 inputs as shown in the `fig-2`. We can clearly satisfy this requirement by passing the inputs as a `List` of `tensors`.
+5. The output features from the `EfficientNet-B0 `backbone at level **P3**-**P5** have 40, 112, 320 number of channels respectively and each spatial dimension is half that of the previous level. 
+> This is important to note: considering an input image of size `[3, 512, 512]`, the size of feature maps at levels **P3**-**P5** would be `[40, 64, 64]`, `[112, 32, 32]`, `[320, 16, 16]` respectively.
 
 With this general understanding, let's get to work. 
 
@@ -143,20 +148,20 @@ fpn_config
 >> {'nodes': [{'reduction': 64, 'inputs_offsets': [3, 4], 'weight_method': 'fastattn'}, {'reduction': 32, 'inputs_offsets': [2, 5], 'weight_method': 'fastattn'}, {'reduction': 16, 'inputs_offsets': [1, 6], 'weight_method': 'fastattn'}, {'reduction': 8, 'inputs_offsets': [0, 7], 'weight_method': 'fastattn'}, {'reduction': 16, 'inputs_offsets': [1, 7, 8], 'weight_method': 'fastattn'}, {'reduction': 32, 'inputs_offsets': [2, 6, 9], 'weight_method': 'fastattn'}, {'reduction': 64, 'inputs_offsets': [3, 5, 10], 'weight_method': 'fastattn'}, {'reduction': 128, 'inputs_offsets': [4, 11], 'weight_method': 'fastattn'}]}
 ```
 
-For now, let's not worry about where this function comes from. Let's just consider we know that such a function exists which returns a dictionary output like above. And let's assume that we need to build our `BiFPN Layer` using the config returned from the `get_fpn_config()`. 
+> For now, let's not worry about where this function comes from. Let's just consider we know that such a function exists which returns a dictionary output like above. And let's assume that we need to build our `BiFPN Layer` using the config returned from the `get_fpn_config()`. 
 
-By looking at the `fpn_config`, we can see that each `nodes` is a `List` of `Dict`s and each item in the `List` represents a `Node`. Specifically, the list represents Nodes 5-12. As can be seen and confirmed with the help of `fig-2`, `Node-5`, the first item in the `List` accepts the outputs from **Nodes 3 & 4**. And the last item in the `List` which represents `Node-12` accepts the outputs from `Node-11` and `Node-4` as inputs. 
+By looking at the `fpn_config`, we can see that `nodes` is a `List` of `Dict`s and each item in the `List` represents a single `Node`. Specifically, the list represents **Nodes 5-12**. As can be seen and confirmed with the help of `fig-2`, `Node-5` which is the first item in the `List` accepts the outputs from **Nodes 3 & 4** as represented by `{'reduction': 64, 'inputs_offsets': [3, 4], 'weight_method': 'fastattn'}` in the `List`, `Node-6` which is the second item in the `List` accepts the outputs from **Nodes 2 & 5** as represented by `{'reduction': 32, 'inputs_offsets': [2, 5], 'weight_method': 'fastattn'}` in the `List` and so on..
 
 > I repeat, let's not worry about where the `fpn_config` comes from but let's just say there is such a config that god created for us and we will use it to build the `BiFPN Layer`. 
 
-You might ask what's this `reduction` inside the `fpn_config`? Can you see in `fig-2` that there are somethings written like **"input, P1/2, P2/4, P3/8...**, well the denominator number is the `reduction`. For example, at level P5, where `Node-5` exists, the `reduction` is 32. What this means, is that the feature map at this level is of size `H/32 x W/32` where `H` and `W` are the original image Height and Width. 
+You might ask what's this `reduction` inside the `fpn_config`? Can you see in `fig-2` that there are somethings written like **"input, P1/2, P2/4, **P3**/8...**, well the denominator number is the `reduction`. For example, at level **P5**, where `Node-5` exists, the `reduction` is 32. What this means is that the spatial dimensions of the feature map at this level are of size `H/32 x W/32` where `H` and `W` are the original image *Height* and *Width*. 
 
-Great, good work so far! At least now we have a basic structure to build our `BiFPN Layer` on top of. Now, we know which Nodes are linked to which other Nodes and it is defined inside the `fpn_config`. 
+Great, good work so far! At least now we have a basic structure to build our `BiFPN Layer` on top of. Also, now we know which `Node`s are linked to which other `Node`s as defined inside the `fpn_config`. 
 
-So, let's move on to the next step. Now, we need a way to define these `Nodes`.
+So, for now, let's move on to implementing `Node`s without implementing the `BiFPNLayer` first.
 
 ### FNode
-Now inside a `Node`, we need to be able to accept some iputs, and output a `tensor`.
+Now inside a `Node`, we need to be able to accept some iputs, combine those together, perform some computation on this combined input and output a `tensor`.
 
 ```python 
 class Fnode(nn.Module):
@@ -172,11 +177,13 @@ class Fnode(nn.Module):
         return self.after_combine(self.combine(x))
 ```
 
-This is exactly what this class `Fnode` does above. As can be seen in the `forward` method, it accepts `List` of `Tensors`, performs the `combine` and `after_combine` operation on them and returns the output.
+This is exactly what this class `Fnode` does above. As can be seen in the `forward` method, it accepts `List` of `Tensors`, performs the `combine` to combine the inputs together and also performs the computations `after_combine` operation on them and returns the output.
 
-Now what are these `combine` and `after_combine` operations? The `combine` operation is the one that will make sure that the input tensors are changed to be of the same resolution. Remember `fig-2`? A `Node` can accept inputs from various other `Nodes` that might not necessarily be at the same level. Thus there might be a need to do a `resampling` operation before we can combine the inputs to make them be of the same size and same number of channels. Only then can we sum the inputs up. 
+Now what are these `combine` and `after_combine` operations? The `combine` operation is the one that will make sure that the input tensors are changed to be of the same resolution and once they are of the same size, it will combine them together. Remember `fig-2`? A `Node` can accept inputs from various other `Nodes` that might not necessarily be at the same level. Thus there might be a need to do a `resampling` operation before we can combine the inputs to make them be of the same size and same number of channels. Only then can we sum the inputs up. 
 
-Next, we still need to perform the "fusion". Simply summing the inputs up might not be enough and we still need to do some more computation on top to get a good representation or do the actual "fusion" of the Node outputs. This "fusion" operation is a [Depthwise Separable Convolution](https://www.youtube.com/watch?v=T7o3xvJLuHk) followed by a BatchNorm and activation layer. 
+> In the actual implementation, we do not actually sum the input tensors but rather do something called `Fast normalized fusion` that has been described in section 3.3 of the paper. But, it is completely okay if for now we assume that combine the inputs by simply summing them up once they are of the same size.
+
+Next, we still need to perform the "fusion". Simply combining the inputs up might not be enough and we still need to do some more computation on top to get a good representation or do the actual "fusion" of the Node outputs. This "fusion" operation is a [Depthwise Separable Convolution](https://www.youtube.com/watch?v=T7o3xvJLuHk) followed by a BatchNorm and activation layer. 
 
 This has been mentioned in the paper at the end of section-3 as well. 
 > Notably, to further improve the efficiency, we use depthwise separable convolution for feature fusion, and add batch normalization and activation after each convolution. 
@@ -190,9 +197,9 @@ Let's understand the general idea of this class before looking at the code.
 
 ![](/images/FpnCombine.png "fig-3 `FpnCombine` for Node-5")
 
-> Assuming that the combine operation is simply a `sum` operation for now. As can be seen from the figure above, `Node-5` accepts the inputs from `Node-3` and `Node-4`. Now these feature maps are of **different sizes and have different number of channels** so we simply can't sum them up. The feature map size at `Node-4` is `[64, 4, 4]` whereas at `Node-3` is `[64, 8, 8]`. So to be able to combine at `Node-5`, we will convert both feature maps to be of the size `[64, 8, 8]` cause that's what the size of feature map at `Node-5` should be. 
+Assuming that the combine operation is simply a `sum` operation for now. As can be seen from the figure above, `Node-5` accepts the inputs from `Node-3` and `Node-4`. Now these feature maps are of **different sizes and have different number of channels** so we simply can't sum them up. The feature map size at `Node-4` is `[64, 4, 4]` whereas at `Node-3` is `[64, 8, 8]`. So to be able to combine at `Node-5`, we will convert both feature maps to be of the size `[64, 8, 8]` cause that's what the size of feature map at `Node-5` should be. 
 
-> This class, merely does this operation. It will first `resample` both feature maps to be of the same size as the required `[64, 8, 8]` and then it will combine them together using a `weight_method`. This `weight_method` has been explained very well at section 3.3 "Weighted Feature Fusion". I kindly ask the reader to refer there if needed. 
+This class, merely does this operation. It will first `resample` both feature maps to be of the same size as the required `[64, 8, 8]` and then it will combine them together. 
 
 So, now that we have some idea of what we want to accomplish, let's look at the code implementation.
 
@@ -249,9 +256,11 @@ class FpnCombine(nn.Module):
         return out
 ```
 
-There's actually quite a bit happening in this layer but hey, don't be worries - it's not something that we do not know yet. Take a deep breath and read on! This layer will make sense. :) 
+There's actually quite a bit happening in this layer but hey, don't be worried. Take a deep breath and read on! This layer will make sense. :) 
 
-Something new that we have encountered in this class is `feature_info`. What is it? It's something that comes from `TIMM`. Do you remember that we are using the `EfficientNet` backbone? This backbone has something called a `feature_info` which we can get below. For now we assume that there is a blackbox `get_feature_info` function that returns something. 
+Something new that we have encountered in this class is `feature_info`. What is it? It's something that comes from `timm`. Do you remember that we are using the `EfficientNet` backbone? This backbone has something called a `feature_info` which we can see below. 
+
+> Let's not worry about how this `get_feature_info` function is actually implemented. But, let's just assume there is this beatiful function that gives us the desired outputs.
 
 ```python
 backbone = timm.create_model(
@@ -263,7 +272,7 @@ print(feature_info, '\n')
 >> [{'num_chs': 40, 'reduction': 8}, {'num_chs': 112, 'reduction': 16}, {'num_chs': 320, 'reduction': 32}]
 ```
 
-So the `feature_info` is something that tells us how many channels are there at each `reduction` level. For example, the number of channels at level P5 or `reduction` 32 is 320 as shown in the `feature_info` dictionary. Note that this matches the number of channels shown in `fig-2`. Note that this `feature_info` is actually missing levels P6 and P7 where the `reduction` is 64 and 128 respectively. Let's again assume there is some part of code that updates this `feature_info` to make up for this and the new values that get passed to the `FpnCombine` class are:
+So the `feature_info` is something that tells us how many channels are there at each `reduction` level. For example, the number of channels at level **P5** or `reduction` 32 is 320 as shown in the `feature_info` dictionary. Note that this matches the number of channels shown in `fig-2`. Note that this `feature_info` is actually missing levels **P6** and **P7** where the `reduction` is 64 and 128 respectively. Let's again assume there is some part of code that updates this `feature_info` so it actually looks something like below for the first `BiFpnLayer`:
 
 ```python
 >> [{'num_chs': 40, 'reduction': 8}, {'num_chs': 112, 'reduction': 16}, {'num_chs': 320, 'reduction': 32}, {'num_chs': 64, 'reduction': 64}, {'num_chs': 64, 'reduction': 128}]
@@ -300,7 +309,7 @@ def __init__(self, feature_info, fpn_config, fpn_channels, inputs_offsets, targe
         self.edge_weights = None
 ```
 As a general idea:
-> This `FpnCombine` layer accepts a list of nodes as input nodes. Then it calculates some parameters which are then passed to `ResampleFeatureMap` to make sure that we resample the feature maps from the input nodes such that we can combine then.
+> This `FpnCombine` layer accepts a list of nodes as input nodes. Then it calculates some parameters which are then passed to `ResampleFeatureMap` to make sure that we resample/resize the feature maps from the input nodes such that we can combine them.
 
 
 The class accepts `feature_info`, `fpn_config`, `fpn_channels`, `inputs_offsets` and `target_reduction` as required inputs. We will focus just on these. We already know the values of `feature_info` and `fpn_config`. Let me share them below once again for reference: 
@@ -311,19 +320,15 @@ The class accepts `feature_info`, `fpn_config`, `fpn_channels`, `inputs_offsets`
 >> fpn_config = {'nodes': [{'reduction': 64, 'inputs_offsets': [3, 4], 'weight_method': 'fastattn'}, {'reduction': 32, 'inputs_offsets': [2, 5], 'weight_method': 'fastattn'}, {'reduction': 16, 'inputs_offsets': [1, 6], 'weight_method': 'fastattn'}, {'reduction': 8, 'inputs_offsets': [0, 7], 'weight_method': 'fastattn'}, {'reduction': 16, 'inputs_offsets': [1, 7, 8], 'weight_method': 'fastattn'}, {'reduction': 32, 'inputs_offsets': [2, 6, 9], 'weight_method': 'fastattn'}, {'reduction': 64, 'inputs_offsets': [3, 5, 10], 'weight_method': 'fastattn'}, {'reduction': 128, 'inputs_offsets': [4, 11], 'weight_method': 'fastattn'}]}
 ```
 
-The `inputs_offsets` would be a list of `Node` id's such as [3,4] for `Node-5`. This states that `Node-5` accepts the outputs of `Node-3` and `Node-4` as inputs and has to combine them. So, let's just take `Node-5` as an example. Let's assume we are creating this `FpnCombine` layer for `Node-5`.
+**Let's just assume that we are currently creating an instance of this class for `Node-5` as an example.**
 
-The only variables that we do not know the values of are `fpn_channels` and `target_reduction`. The `fpn_channels` almost always have a value of 64. We will worry about where they come from later. For now, trust me that `fpn_channels=64`. Great, what about `target_reduction`? `target_reduction` just refers to the `reduction` value of the current `Node` for which we are creating this `FpnCombine` class. So, from the `fpn_config` we can see the `reduction` for `Node-5` is 64. Thus `target_reduction=64`. And that's it. Now we are ready to look at `__init__` method.
+The `inputs_offsets` would be a list of `Node` id's such as `[3,4]` for `Node-5`. This states that `Node-5` accepts the outputs of `Node-3` and `Node-4` as inputs and has to combine them. 
 
-In this method, we simply iterate through the `input_offsets` (value=[3,4]), the value of `in_channels` for all nodes. Since the `offset` value 3 is less than 5 (`len(feature_info)`), the value of `in_channels` becomes 64. And the value of `input_reduction` is then also 64. So the the first input coming from `Node-3` with 64 channels to `Node-5` has the same `reduction` value as `Node-5`. 
+The only variables that we do not know the values of are `fpn_channels` and `target_reduction`. The `fpn_channels` has a value of 64.Great, what about `target_reduction`? `target_reduction` just refers to the `reduction` value of the current `Node` for which we are creating this `FpnCombine` class. So, from the `fpn_config` we can see the `reduction` for `Node-5` is `64`. Thus `target_reduction=64`.
 
-So the value of `reduction_ratio` becomes 1. Now, we simply set the resample operation for this `Node-3` by sending in these values. We have already looked at `ResampleFeatureMap`. 
+> Note that the value of `target_reduction` for `Node-6` be 32, for `Node-7` it will be 16 and so on..
 
-Next, while iterating over `inputs_offsets` in the following piece of code: 
-```python 
-    for idx, offset in enumerate(inputs_offsets):
-```
-The next value for `offset` would be 4. I leave it to the reader as an exercise to calculate the various values for `Node-4` as I have done so already above for `Node-3`. So the `self.resample` inside the `FpnCombine` is a list of `ResampleFeatureMap` that looks something like below for `Node-5`:
+I leave it to the reader to see how the `self.resample` inside the `FpnCombine` is a list of `ResampleFeatureMap` that looks something like below for `Node-5`:
 
 ```python 
 >> self.resample
@@ -350,7 +355,9 @@ ModuleDict(
 )
 ```
 
-I hope this matches your expectation as in `fig-2`. Now that we have already looked at `__init__`, the `forward` method is pretty straightforward:
+> If you follow along the `for` loop inside the `__init__` method, what I have stated above will become pretty clear to you. It might be a good idea right now to take out a pen and paper, and actually try to guess the values that get passed to `ResampleFeatureMap` for each input offset. If you don't get it, feel free to reach out to me and I'll share the solution. Contact details have been provided at the last of this blog post.
+
+I hope that you've been able to trace the values of `self.resample` for the various `Node`s. Now that we have already looked at `__init__`, the `forward` method is pretty straightforward:
 
 ```python
     def forward(self, x: List[torch.Tensor]):
@@ -377,11 +384,11 @@ I hope this matches your expectation as in `fig-2`. Now that we have already loo
         return out
 ```
 
-There isn't a lot happening. We just go over the inputs one by one, perform the required `resample` operation as in `self.resample` and finally do the "combination" inside the forward. For simplicity, we have assumed that this combination method is `sum`, so `out = torch.stack(nodes, dim=-1)`. And that's it, that's what we return.
+There isn't a lot happening. We just go over the inputs one by one, perform the required `resample` operation as in `self.resample` to make the input feature maps to be of the required size and finally do the "combination" inside the forward.
 
 #### The `after_combine` method
 
-The `after_combine` method is nothing but a Depthwise Separable Convolution that we will look at as part of the `BiFpnLayer` implementation. But for completeness of `FNode`, I state it below too: 
+The `after_combine` method is nothing but a** Depthwise Separable Convolution** that we will look at as part of the `BiFpnLayer` implementation. But for completeness of `FNode`, I state it below too: 
 
 ```python
 conv_kwargs = dict(
@@ -392,10 +399,10 @@ after_combine.add_module(
                 'conv', SeparableConv2d(**conv_kwargs))
 ```
 
-## BiFPN Layer
-Finally, we are ready to look at the implementation of a single `BiFPN Layer`.
+## BiFPN Layer Implementation
+Finally, we are ready to look at the implementation of the `BiFPN Layer`.
 
-> If you have understood the implementation of `FpnCombine`, and also the general idea so far, then you will find the implementation of `BiFPN Layer` as something that brings all the pieces together.
+> If you have understood the implementation of `FpnCombine`, and also the general idea so far, then you will find the implementation of `BiFPN Layer` as something that brings all the pieces together. It should be intuitive rather than complex.
 
 So, let's have a look at it.
 
@@ -452,13 +459,13 @@ fpn_config = {'nodes': [{'reduction': 64, 'inputs_offsets': [3, 4], 'weight_meth
 fpn_channels = 64
 ```
 
-The BiFPN Layer implementation is the glue/adhesive that binds `FNode`, `FpnCombine`, `ResampleFeatureMap` and everything that we've learnt so far together. Let's see how?
+The BiFPN Layer implementation is the glue that binds the `FNode`, `FpnCombine`, `ResampleFeatureMap` classes together. Let's see how?
 
-Inside the `__init__` method, we iterate over the `Nodes`. For each node, `combine` is an instance of `FpnCombine` and `after_combine` is a `SeparableConv2d` nn Module. Next, we create a `FNode` for each of the `Node`s inside the `fpn_config` which each `FNode` having it's own `combine` and `after_combine` values as each `Node` accepts inputs from different `Node`s that are at different levels.
+Inside the `__init__` method, we iterate over the `Nodes`. For each node, `combine` is an instance of `FpnCombine` and `after_combine` is a `SeparableConv2d` nn Module. Next, we create a `FNode` for each of the `Node`s inside the `fpn_config` with each `FNode` having it's own `combine` and `after_combine` values.
 
-Finally, in the `forward` method, where the input `x` should be the 5 feature maps for level P3-P7, we pass them through each node and append the outputs. Finally, we return the last 5 outputs (feature maps), that are then passed on to another `BiFpnLayer` which does the same thing again.
+Finally, in the `forward` method, where the input `x` is list of feature maps from levels **P3**-**P7**, is passed through to each node and we append the outputs. Finally, we return the last 5 outputs (feature maps), that are then passed on to another `BiFpnLayer` which does the same thing again. 
 
-> Take a sigh of relief - we have already covered the bulk of the EfficientDet Network. Only the simple things remain now.
+> If this sounds confusing, then please feel free to reach out to me. I will share the solution. But I really want you to think about what I have stated above. It's better if you spend some time trying to think about it than just asking me for the solution that explains this.
 
 ## BiFPN 
 Having already understood how to implement the `BiFPN Layer`, let's now look at how to implement the `BiFPN` network. It's really a simple case of having multiple `BiFPN layers` inside a single `BiFPN` network.
@@ -529,9 +536,7 @@ class BiFpn(nn.Module):
         return x
 ```
 
-> Aha! So this is where the `fpn_config` is coming from! So, now you know. Until now in this blog post, I had said let's just assume the value of `fpn_config` is something. Well, it's coming from calling the `get_fpn_config` function.
-
-So let's have a look at what is `self.resample` inside here? As you will see in the implementation of the `EfficientDet` Architecture in the next section, the backbone `EfficientNet` only returns a total of 3 feature maps for levels P3-P5. We still need to calculate feature maps for levels P6 & P7 on our own. This is what the `self.resample` layer does here. 
+So let's have a look at what is `self.resample` inside here? As you will see in the implementation of the `EfficientDet` Architecture in the next section, the backbone `EfficientNet` only returns a total of 3 feature maps for levels **P3**-**P5**. We still need to calculate feature maps for levels **P6** & **P7**. This is what the `self.resample` layer does here. 
 
 As you can see in the forward method:
 ```python
@@ -539,16 +544,13 @@ for resample in self.resample.values():
             x.append(resample(x[-1]))
 ```
 
-At the time of input, `x` has total of 3 feature maps. We call the `resample` method and append 2 more feature maps to `x` to make the total length 5 representing the feature maps for levels P3-P7.
+As I mentioned, `x` has total of 3 feature maps reprenting levels **P3**-**P5**. We call the `resample` method and append 2 more feature maps to `x` to make the total length 5 representing the feature maps for levels **P3**-**P7**.
 
 Finally, what is `self.cell`?
-It's simply a repetition of `BiFPN Layers` to represent the `BiFPN Network`. 
-
-There isn't a lot happening in this class and everything should be pretty clear to the reader by now. We can finally move on to implement the **EfficientDet Architecture**.
-
+It's simply a repetition of `BiFPN Layers` to represent the `BiFPN Network`. Since the `self.cell` is a `SequentialList`, each `BiFPNLayer` is called one by one.:)
 
 ## EfficientDet Architecture
-This class is the main one - or is it? Considering we have all the pieces already, this class merely puts all the pieces together. 
+This class is the main one - or is it? Considering we have all the pieces already, this class merely puts them all together. 
 
 ```python
 class EfficientDet(nn.Module):
@@ -581,26 +583,24 @@ class EfficientDet(nn.Module):
 ```
 
 The reader should by now be able to read this code and understand what's going on. We have already done the bulk of the work together here. Though there are some notable things that I would like to mention:
-1. `self.backbone` returns a total of 3 feature maps because we passed the `out_indices=(2, 3, 4)`. As to how? This comes from `TIMM`.
+1. `self.backbone` returns a total of 3 feature maps because we passed the `out_indices=(2, 3, 4)`. As to how? This comes from `timm`.
 2. I have not explained what a `HeadNet` is. It is basically a custom head that takes the final outputs of the `BiFPN` network and either returns a class or bounding box coordinates. The `self.class_net` and `self.box_net` together represent the Box Prediction Net as in `fig-1`.
 
 ## Conclusion
 I truly believe that it wasn't easy to understand how to implement `EfficientDet`s in Tensorflow or PyTorch. The official implementation exists [here](https://github.com/google/automl/tree/master/efficientdet) and the PyTorch version is [here](https://github.com/rwightman/efficientdet-pytorch).
 
-Thanks to [Ross Wightman](https://twitter.com/wightmanr) for his wonderful work in providing us a PyTorch implementation of EfficientDet. It really makes things super easy. 
+Thanks to [Ross Wightman](https://twitter.com/wightmanr) for his wonderful work in providing us with a PyTorch implementation of the **EfficientDet** network. It really makes things super easy for the native PyTorch users. 
 
-Something I have realised when we are doing something like: 
+Something I have realised during this exercise, is that, when we are doing something like: 
 
 ```python 
 from effdet import get_efficientdet_config, EfficientDet
-
 config = get_efficientdet_config('efficientdet_d0')
 efficientdet = EfficientDet(config)
-
 output = efficientdet(inputs)
 ```
 
-When we are merely using someone's library it is hard to appreciate the hard work that the author has put into making things so simple for us. In doing this exercise of going through the source code and to actually find and validate it with the Tensorflow official implementation, I have tremendous respect for Ross and his work.
+When we are merely using the library, it is hard to appreciate the hard work that the author has put into making things so simple for us. In doing this exercise of going through the source code and to try and explain it to everyone, I have noticed the minor details and have tremendous appreciation for Ross's hard work. So, thanks so much Ross! And of course to the authors of the **EfficientDet** for open sourcing the implementation in Tensorflow.
 
 I hope that in today's blog post I have been able to explain how to implement `EfficientDet`s in Code and take away all the confusion and doubt in case you had any. 
 
