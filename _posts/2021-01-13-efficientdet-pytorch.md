@@ -11,7 +11,7 @@ Today, our focus will be to build on top of that knowledge and showcase how to i
 
 **NOTE**: The code implementations shared below are not my own. All code shown below has been directly copied from [Ross Wightman's](https://twitter.com/wightmanr) wonderful repo [efficientdet-pytorch](https://github.com/rwightman/efficientdet-pytorch). `efficientdet-pytorch` makes heavy use of [timm](https://github.com/rwightman/pytorch-image-models) to create the backbone network and also for several other operations. 
 
-> As part of this blog post - we will not be looking at the source code of `timm`. We will only be looking at the implementation inside `efficientdet-pytorch` repo. This is a conscious decision to keep this blog post from blowing up. We will uncover the wonderful `timm` library in a series of my future blog posts that I plan to start in about a 7-10 days time. Also, everything below is based on "my understanding" of the code. It is possible that Ross might have implemented things differently than the way in which I have understood them. 
+> As part of this blog post - we will not be looking at the source code of `timm`. We will only be looking at the implementation inside `efficientdet-pytorch` repo. This is a conscious decision to keep this blog post from blowing up. Also, everything below is based on "my understanding" of the code. It is possible that Ross might have implemented things differently than the way in which I have understood them. 
 
 ![](/images/EfficientDet.png "fig-1 EfficientDet Architecture")
 
