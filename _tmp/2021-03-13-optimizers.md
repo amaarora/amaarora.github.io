@@ -119,3 +119,54 @@ for input_data, labels in train_dataloader:
 ---
 
 In the training loop above we first create an optimizer by passing in `model.parameters()` which represents the parameters that we wish to optimize. We also pass in a learning rate that represents the step size. In PyTorch, calling `loss.backward()` is what appends an attribute `.grad` to each of the parameters in `model.parameters()`. Therefore, in our implementation, we can grab all those parameters whose gradients are not None by doing something like `[p for p in self.params if p.grad is not None]`.
+
+Now to implement `SGD` optimizer, we just need to create a method called `step` that does the optimization step and updates the value of the model parameters based on the gradients. 
+
+```python 
+class SGDOptimizer(Optimizer):
+    def __init__(self, params, **defaults):
+        super().__init__(params, **defaults)
+    
+    def step(self):
+        for p in self.grad_params():
+            p.data.add_(p.grad.data, alpha=-self.defaults['lr'])
+```
+
+This line `p.data.add_(p.grad.data, alpha=-self.defaults['lr'])` essentially does `p = p - lr * p.grad` which is the SGD step for each mini-batch. Thus, we have successfully re-implemented SGD Optimizer. 
+
+To 
+
+## SGD with Momentum
+
+Classical Momentum as described in [this](http://www.cs.toronto.edu/~hinton/absps/momentum.pdf) paper can be defined as: 
+
+![](/images/CM.png "eq-1 Classical Momentum")
+
+Here `µ` represents the momentum factor, typically `0.9`. **Δ𝑓(θ<sub>t</sub>)** represents the gradients of parameters `θ` at time `t`. And `ε` represents the learning rate. 
+
+As can be seen from `eq-1`, essentially we add a factor `µ` times the value of the previous step to the current step. Thus instead of going `p = p - lr * p.grad`, the new step value becomes `new_step = µ * previous_step + lr * p.grad` whereas previously for `SGD`, the step value was `lr * p.grad`.
+
+Now to implement `SGD with Momentum`, we would need to be able to keep a track of the previous steps for each of the parameters. This can be done as below: 
+
+```python
+class SGDOptimizer(Optimizer):
+    def __init__(self, params, **defaults):
+        super().__init__(params, **defaults)
+        self.lr = defaults['lr']
+        self.µ  = defaults['momentum']
+        self.state = defaultdict(dict)
+    
+    def step(self):
+        for p in self.grad_params():
+            param_state = self.state[p]
+            
+            d_p = p.grad.data            
+            if 'moment_buffer' not in param_state:
+                buf = param_state['moment_buffer'] = torch.clone(d_p).detach()
+            else:
+                buf = param_state['moment_buffer']
+            
+            buf.mul_(self.µ).add_(d_p)
+            
+            p.data.add_(buf, alpha=-self.lr)
+```
