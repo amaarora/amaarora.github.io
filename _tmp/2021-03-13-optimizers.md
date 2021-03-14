@@ -170,3 +170,10 @@ class SGDOptimizer(Optimizer):
             
             p.data.add_(buf, alpha=-self.lr)
 ```
+
+From Sebastian Ruder's [blog](https://ruder.io/optimizing-gradient-descent/index.html#stochasticgradientdescent):
+> At the core of `Momentum` is this idea - why don't we keep going in the same direction as last time? If the loss can be interpreted as the height of a hilly terrain, then the optimization process can then be seen as equivalent to the process of simulating the parameter vector as rolling on the landscape. Essentially, when using momentum, we push a ball down a hill. The ball accumulates momentum as it rolls downhill, becoming faster and faster on the way. The same thing happens to our parameter updates: The momentum term increases for dimensions whose gradients point in the same directions and reduces updates for dimensions whose gradients change directions. As a result, we gain faster convergence.
+
+From a code implementation perspective, for each parameter inside `self.grad_params()`, we store a state called `momentum_buffer` that is initialized with the first value of `p.grad`. For every subsequent update, we do `buf.mul_(self.µ).add_(d_p)` which represents `buf = buf * µ + p.grad`. And finally, the parameter updates become `p.data.add_(buf, alpha=-self.lr)` which is essentially `p = p - lr * buf`. 
+
+Thus, we have successfully re-implemented `eq-1`.
