@@ -1,12 +1,12 @@
 # "Adam" and friends
 
-Who's Adam? Why should I care about "his" friends?!
+Who's Adam? Why should we care about "his" friends?!
 
-[Adam](https://arxiv.org/abs/1412.6980) is an `Optimizer`. He has many friends but his dearest are [SGD](http://www.cs.toronto.edu/~hinton/absps/momentum.pdf), Momentum & [RMSprop](https://www.cs.toronto.edu/~tijmen/csc321/slides/lecture_slides_lec6.pdf).
+[Adam](https://arxiv.org/abs/1412.6980) is an `Optimizer`. He has many friends but his dearest are [SGD](http://www.cs.toronto.edu/~hinton/absps/momentum.pdf), [Momentum]((http://www.cs.toronto.edu/~hinton/absps/momentum.pdf)) & [RMSprop](https://www.cs.toronto.edu/~tijmen/csc321/slides/lecture_slides_lec6.pdf).
 
 Each of Adam's friends has contributed to Adam's personality. So to get to know Adam very well, we should first meet the friends. We start out with `SGD` first, then meet `Momentum`, `RMSprop` and finally `Adam`. 
 
-> In this blog post we are going to re-implement `SGD`, `SGD with Momentum`, `RMSprop` & `Adam`. The major contribution of this blog post is to help the reader re-implement these algorithms keeping the implementations simple & by using minimal lines of code. We try to understand these algoirthms from a code perspective rather than from a mathematical perspective. I would also like to refer the reader to Sebastian Ruder's blog on Optimizers [here](https://ruder.io/optimizing-gradient-descent/) for a more theoretical introduction. We also compare the implementations with PyTorch's to compare accuracy. 
+> In this blog post we are going to re-implement `SGD`, `SGD with Momentum`, `RMSprop` & `Adam`. The major contribution of this blog post is to help the reader re-implement these algorithms keeping the implementations simple & by using minimal lines of code. We try to understand these algoirthms from a code perspective rather than from a mathematical perspective. I would also like to refer the reader to Sebastian Ruder's blog on Optimizers [here](https://ruder.io/optimizing-gradient-descent/) for a more theoretical introduction. We also compare the implementations with PyTorch's implementations to check accuracy. 
 
 This blog post has been structured the following way: 
 
@@ -14,13 +14,13 @@ This blog post has been structured the following way:
 {:toc}
 
 ## Introduction 
-In this blog post we are going to re-implement `SGD`, `Momentum`, `RMSprop` and `Adam` from scratch. [Jeremy Howard](https://twitter.com/jeremyphoward) has already shown how [fastai](http://docs.fast.ai/) implements these algorithms building on top of a "generic" Optimizer from scratch [here](https://youtu.be/hPQKzsjTyyQ?t=4188).
-
-[Here's](https://youtu.be/CJKnDu2dxOE?t=6235) another video by Jeremy that implements these algorithms in **Microsoft Excel**! 
+In this blog post we are going to re-implement `SGD`, `Momentum`, `RMSprop` and `Adam` from scratch. 
 
 In this blog post, the code for the Optimizers has been mostly copied from [PyTorch](https://pytorch.org/) but follows a different structure to keep the code implementations to a minimum. The implementations for these various Optimizers in this blog post are "much shorter" than those in PyTorch.
 
-I also compared the re-implementations with PyTorch's implementations and excited to share results below! `SGD`, `SGD_with_momentum`, `RMSprop` and `Adam` are from Pytorch whereas `SGDOptimizer`, `SGDOptimizer_with_momentum`, `RMSPropOptimizer` and `AdamOptimizer` are our own re-implementations. As shown in the `fig-1` below, results are comparable! Refer [here](https://gist.github.com/amaarora/571a7d5011581d67c27d884e68bf6afc) for a complete working notebook to reproduce `fig-1`.
+I also compared the re-implementations with PyTorch's implementations and excited to share results below! `SGD`, `SGD_with_momentum`, `RMSprop` and `Adam` are from Pytorch whereas `SGDOptimizer`, `SGDOptimizer_with_momentum`, `RMSPropOptimizer` and `AdamOptimizer` are our own re-implementations. As shown in the `fig-1` below, results are comparable! 
+
+> Refer [here](https://gist.github.com/amaarora/571a7d5011581d67c27d884e68bf6afc) for a complete working notebook to reproduce `fig-1`.
 
 ![](/images/optimizers.png "fig-1 Adam and Friends")
 
@@ -44,11 +44,13 @@ For an intuitive understanding, refer `fig-2` below:
 
 ![](/images/SGD_intuition.png "fig-2 Gradient Descent")
 
-Let's say we are standing at a certain point `A` of a parabolic hill as shown in `fig-2` and we wish to find the lowest point on this curve. Can you think of some ways to do this? Well, we could try going in a random direction, calculate the value of the function and if it's lower than the previous value, we could take a step in that direction. But this process is slow. With some mathematical magic, we can make this process faster. In fact, the fastest way down a function or the sleepest way down the hill is the one in the opposite direction of the gradient. Gradient at point `A` is the slope of the parabolic function, and by calculating the gradients, we can find the steepest direction in which to move to minimise the value of the function. This is referred to as Gradient Descent. Ofcourse in a high dimensional space, calculating the gradients is a little bit more complicated than in `fig-2` but the idea remains the same. We take a step from point `A` directed by the gradients to follow the steepest path downwards to point `B` to find the lowest value of the curve. 
+Let's say we are standing at a certain point `A` of a parabolic hill as shown in `fig-2` and we wish to find the lowest point on this curve. Can you think of some ways to do this? Well, we could try going in a random direction, calculate the value of the function and if it's lower than the previous value, we could take a step in that direction. But this process is slow. With some mathematical magic, we can make this process faster. In fact, the fastest way down a function or the sleepest way down the hill is the one in the opposite direction of the gradient. Gradient at point `A` is the slope of the parabolic function, and by calculating the gradients, we can find the steepest direction in which to move to minimise the value of the function. This is referred to as Gradient Descent. Ofcourse in a high dimensional space, calculating the gradients is a little bit more complicated than in `fig-2` but the idea remains the same. We take a step from point `A` directed by the gradients to follow the steepest path downwards to point `B` to find the lowest value of the curve. The step-size is governed by a parameter called learning rate. The new position `B` then can be defined as `B = A - lr * A.grad` where `A.grad` represents the slope/gradients of the curve at point `A`.
 
-The stochasticity in Stochastic Gradient Descent arises when we compute the batch gradients. This has been explained below through pseudo-code in `Vanilla Stochastic Gradient Descent`.
+The stochasticity in **Stochastic Gradient Descent** arises when we compute the batch gradients. This has been explained below through pseudo-code in `Vanilla Stochastic Gradient Descent`.
 
-From the [Introduction to SGD by Jeremy Howard](https://youtu.be/ccMHJeQU4Qw?t=4587), and from `fig-2`, we already know that to perform Gradient Descent, we need to be able to calculate the gradients of some function that we wish to minimise with respect to the parameters. We don't need to manually calculate the gradients and as mentioned in [this](https://youtu.be/ccMHJeQU4Qw?t=4575) video by Jeremy, PyTorch can already do this for us using [torch.autorgrad](https://pytorch.org/tutorials/beginner/blitz/autograd_tutorial.html).
+From the [Introduction to SGD by Jeremy Howard](https://youtu.be/ccMHJeQU4Qw?t=4587), and from `fig-2`, we already know that to perform Gradient Descent, we need to be able to calculate the gradients of some function that we wish to minimise with respect to the parameters. 
+
+We don't need to manually calculate the gradients and as mentioned in [this](https://youtu.be/ccMHJeQU4Qw?t=4575) video by Jeremy, PyTorch can already do this for us using [torch.autorgrad](https://pytorch.org/tutorials/beginner/blitz/autograd_tutorial.html).
 
 So now that we know that we can compute the gradients, the procedure of repeatedly evaluating the gradient and then performing a parameter update is called `Gradient Descent`. Its vanilla version looks as follows:
 
@@ -114,7 +116,9 @@ class Optimizer(object):
 The `Optimizer` class above implements two main methods - `grad_params` and `zero_grad`. Doing something like `self.grad_params()` grabs all those parameters as a list whose gradients are not None. Also, calling the `zero_grad()` method would zero out the gradients as explained in [this](https://youtu.be/ccMHJeQU4Qw?t=4575) video.
 
 ---
+
 > At this stage you might ask, what are these parametrs? In PyTorch calling `model.parameters()` returns a generator through which we can iterate through all parameters of our model. A typical training loop as you might have seen in PyTorch looks something like:
+
 ```python
 model = create_model()
 optimizer = torch.optim.SGD(model.parameters(), lr=1e-4)
@@ -126,6 +130,7 @@ for input_data, labels in train_dataloader:
     optimizer.step()
     optimizer.zero_grad()
 ```
+
 ---
 
 In the training loop above we first create an optimizer by passing in `model.parameters()` which represents the parameters that we wish to optimize. We also pass in a learning rate that represents the step size. In PyTorch, calling `loss.backward()` is what appends an attribute `.grad` to each of the parameters in `model.parameters()`. Therefore, in our implementation, we can grab all those parameters whose gradients are not None by doing something like `[p for p in self.params if p.grad is not None]`.
