@@ -77,7 +77,6 @@ So let's keep the key things in our mind before we set out to implement SGD:
     - Take a step in the opposite direction of gradients to minimise the loss. 
 
 
-### `SGD` Code Implementation
 We follow a similar code implementation to PyTorch. In PyTorch as mentioned [here](https://pytorch.org/docs/stable/optim.html), there is a base class for all optimizers called `torch.optim.Optimizer`. It has some key functions methods like `zero_grad`, `step` etc. Remember from our general understanding of SGD, we wish to be able to update the parameters (that we want to optimize) by taking a step in the opposite direction of the gradients to minimise the loss function. 
 
 Thus, from a code implementation perspective, we would need to be able to iterate through all the `parameters` and do `p = p - lr * p.grad`, where `p` refers to parameters and `lr` refers to learning rate. 
@@ -177,3 +176,57 @@ From Sebastian Ruder's [blog](https://ruder.io/optimizing-gradient-descent/index
 From a code implementation perspective, for each parameter inside `self.grad_params()`, we store a state called `momentum_buffer` that is initialized with the first value of `p.grad`. For every subsequent update, we do `buf.mul_(self.µ).add_(d_p)` which represents `buf = buf * µ + p.grad`. And finally, the parameter updates become `p.data.add_(buf, alpha=-self.lr)` which is essentially `p = p - lr * buf`. 
 
 Thus, we have successfully re-implemented `eq-1`.
+
+## RMSprop
+
+`RMSprop` Optimizer brings to us an idea that why should all parameters have the step-size when clearly some parameters should move faster? It's great that `RMSprop` was actually introduced as part of a MOOC by Geoffrey Hinton in his [course](https://www.cs.toronto.edu/~tijmen/csc321/slides/lecture_slides_lec6.pdf).
+
+From the PyTorch docs:
+> The implementation here takes the square root of the gradient average before adding epsilon (note that TensorFlow interchanges these two operations). The effective learning rate is thus `α/(sqrt(v) + ϵ)` where `α` is the scheduled learning rate and `v` is the weighted moving average of the squared gradient.
+
+The update step for `RMSprop` looks like:
+
+![](/images/RMSprop.png "eq-2 RMSprop")
+
+Essentially, for every parameter we keep a moving average of the Mean Square of the gradients. Next, we update the parameters similar to SGD but instead by doing something like `p = p - lr * p.grad`, we instead update the parameters by doing `p(t) = p(t) - (lr / MeanSquare(p, t)) * p(t).grad`.
+
+Here, `p(t)` represents the value of the parameter at time `t`, `lr` represents learning rate and `MeanSquare(p, t)` represents the moving average of the Mean Square Weights of parameter `p` at time `t`.
+
+> Key takeaway to be able to implement RMSprop - we need to able to store the exponentially weighted moving average of the mean square weights of the gradients. 
+
+Therefore, we can update the implementation of `SGD` with momentum to instead implement `RMSprop` like so:
+
+```python
+class RMSPropOptimizer(Optimizer):
+    def __init__(self, params, **defaults):
+        super().__init__(params, **defaults)
+        self.lr  = defaults['lr']
+        self.α   = defaults['alpha']
+        self.eps = defaults['epsilon']
+        self.state = defaultdict(dict)
+    
+    def step(self):
+        for p in self.grad_params():
+            param_state = self.state[p]
+            
+            d_p = p.grad.data   
+            if 'exp_avg_sq' not in param_state:
+                exp_avg_sq = param_state['exp_avg_sq'] = torch.zeros_like(p, memory_format=torch.preserve_format)
+            else:
+                exp_avg_sq = param_state['exp_avg_sq']
+            
+            exp_avg_sq.mul_(self.α).addcmul_(d_p, d_p, value=1-self.α)
+            denom = exp_avg_sq.sqrt().add_(self.eps)
+            
+            p.data.addcdiv_(d_p, denom, value=-self.lr)
+```
+
+As can be seen inside the `step` method, we iterate through the parameters with gradients, and store the initial value of the gradients inside the a variable called `d_p` which represents derivative of parameter `p`. 
+
+Next, we initialize the exponential moving average of the square of the gradients `exp_avg_sq` as an empty array filled with zeros of the same shape as `d_p`. For every next step, this `exp_avg_sq` is updated by this line of code: `exp_avg_sq.mul_(self.α).addcmul_(d_p, d_p, value=1-self.α)`. This equates to `exp_avg_sq = (self.α * exp_avg_sq)  + (1 - self.α * (d_p**2))`.
+
+Therefore, we are keeping an exponentially weighted moving average of the square of the gradients. But as can be seen in `eq-2`, the update step of `RMSprop` actually divides by the `sqrt` of this `exp_avg_sq`. So our denominator `denom` becomes `exp_avg_sq.sqrt().add_(self.eps)`. `eps` is added for numerical stability. 
+
+Finally, we do our update step `p.data.addcdiv_(d_p, denom, value=-self.lr)` which equates to `p = p - (self.lr * d_p)/denom` thus performing the `RMSprop` update step as in `eq-2`. 
+
+Therefore, we have successfully re-implemented `RMSprop` from scratch. 
