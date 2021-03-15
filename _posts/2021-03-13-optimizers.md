@@ -353,3 +353,13 @@ Finally, we calculate the bias correction terms as mentioned in the algorithm an
 We calulate the denominator `denom` as in the algorithm `denom = unbiased_exp_avg_sq.sqrt().add_(self.eps)`. Finally, we perform the parameter update step `p.data.addcdiv_(unbiased_exp_avg, denom, value=-step_size)` which equates to `p = p - unbiased_exp_avg * step_size / denom` that is equivalent to the last step in the algorithm. 
 
 Thus, we have successfully re-implemented `Adam`.
+
+## Working notebook
+> Refer [here](https://gist.github.com/amaarora/571a7d5011581d67c27d884e68bf6afc) for a complete working notebook to reproduce `fig-1`.
+
+## Conclusion
+I hope that through this blog, I have been able to explain all the magic that goes on inside the various optimizers such as `SGD`, `Momentum`, `RMSprop` and `Adam`! 
+
+As usual, in case we have missed anything or to provide feedback, please feel free to reach out to me at [@amaarora](https://twitter.com/amaarora).
+
+Also, feel free to [subscribe to my blog here](https://amaarora.github.io/subscribe) to receive regular updates regarding new blog posts. Thanks for reading!
