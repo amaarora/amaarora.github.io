@@ -230,3 +230,90 @@ Therefore, we are keeping an exponentially weighted moving average of the square
 Finally, we do our update step `p.data.addcdiv_(d_p, denom, value=-self.lr)` which equates to `p = p - (self.lr * d_p)/denom` thus performing the `RMSprop` update step as in `eq-2`. 
 
 Therefore, we have successfully re-implemented `RMSprop` from scratch. 
+
+## Adam
+From the paper: 
+
+> The method computes individual adaptive learning rates for different parameters from estimates of first and second moments of the gradients; the name Adam is derived from adaptive moment estimation.
+
+In this section we are going to discuss `Adam`. Adam's algorithm as defined in the paper is shown below: 
+
+![](/images/Adam.png "fig-2 Adam")
+
+We are going to re-implement this algorithm using `PyTorch`. 
+
+> I have long tried to understand all the math behind `Adam`, reading the paper multiple times. But I believe that I can at best contribute towards helping the reader re-implement `Adam` in PyTorch and not in explaining all the math behind the algorithm. In various papers and algorithms such as RMSprop, it is mentioned that dividing by the sqrt of second moments of the gradients, we can achieve better stability. As to why? I am not sure. Having said that, it is best to assume that this given algorithm works and try to re-implement in PyTorch. 
+
+As can be seen from `fig-2`, to re-implement Adam, we need to be able to keep a moving average of the first and second moments of the gradients. Finally, based on the bias correction term **1 - β<sub>1</sub></sup>t</sup>** for the first moment estimate and **1 - β<sub>2</sub></sup>t</sup>** for the second moment estimate, we compute the biased corrected version and first and second raw moment estimates. 
+
+Finally, the update step for the parameters at time `t` becomes: 
+
+**θ<sub>t</sub> = θ<sub>t-1</sub> - α * m_hat<sub>t</sub> / (sqrt( v_hat<sub>t</sub>) + ε)**
+
+Where, 
+θ<sub>t</sub> - Parameter vector at time `t`
+α - Learning rate 
+m_hat<sub>t</sub> - Bias corrected first moment estimate 
+v_hat<sub>t</sub> - Bias corrected second moment estimate 
+
+Replicating this algorithm in PyTorch is fairly straightforward as shown in the code implementation below: 
+
+```python 
+class AdamOptimizer(Optimizer):
+    def __init__(self, params, **defaults):
+        super().__init__(params, **defaults)
+        self.lr   = defaults['lr']
+        self.ß1   = defaults['beta1']
+        self.ß2   = defaults['beta2']
+        self.eps = defaults['epsilon']
+        self.state = defaultdict(dict)
+        self.state_step = 0
+    
+    def step(self):
+        for p in self.grad_params():
+            self.state_step+=1
+            param_state = self.state[p]
+            
+            d_p = p.grad.data   
+            
+            if 'exp_avg' not in param_state:
+                exp_avg = param_state['exp_avg'] = torch.zeros_like(p, memory_format=torch.preserve_format)
+            else:
+                exp_avg = param_state['exp_avg']
+                
+            if 'exp_avg_sq' not in param_state:
+                exp_avg_sq = param_state['exp_avg_sq'] = torch.zeros_like(p, memory_format=torch.preserve_format)
+            else:
+                exp_avg_sq = param_state['exp_avg_sq']
+            
+            exp_avg.mul_(self.ß1).add_(d_p, alpha=1-self.ß1)
+            exp_avg_sq.mul_(self.ß2).addcmul_(d_p, d_p, value=1-self.ß2)
+
+            bias_correction_1 = 1 - self.ß1**self.state_step
+            bias_correction_2 = 1 - self.ß2**self.state_step
+            
+            unbiased_exp_avg = exp_avg/bias_correction_1
+            unbiased_exp_avg_sq = exp_avg_sq/bias_correction_2
+            
+            denom = unbiased_exp_avg_sq.sqrt().add_(self.eps)
+            
+            step_size = self.lr / bias_correction_1
+            
+            p.data.addcdiv_(unbiased_exp_avg, denom, value=-step_size)
+```
+
+Looking at the `step` method of the above implementation, we can directly relate the implementation to the Adam algorithm as in `fig-2`. We store the gradients of the paramter `p` in a variable called `d_p`. Next, for each parameter we store a state referred to as `param_state`.
+
+From the algorithm, we know that we need to store both first and second moments of the gradients. Therefore, if both `exp_avg` (first moment) and `exp_avg_sq` (second moment) are null, we initialize them as zeroes with the same shape as `p`. 
+
+Once initialized, then for every subsequent step we grab the first and second moments and update them based on the update rule as in the Adam algorithm. 
+
+For first moment `exp_avg`, we do `exp_avg.mul_(self.ß1).add_(d_p, alpha=1-self.ß1)` which equates to `exp_avg = self.ß1 * exp_avg + (1 - self.ß1) * d_p`. This is the same as the Update biased first moment step in the algorithm. `exp_avg` is equivalent to **m<sub>t</sub>** in the algorithm.
+
+For the second moment `exp_avg_sq`, we do `exp_avg_sq.mul_(self.ß2).addcmul_(d_p, d_p, value=1-self.ß2)` which equates to `exp_avg_sq = self.ß2 * exp_avg_sq + (1 - self.ß2) * (d_p**2)`. This is the same as the update biased second raw moment estimate step in the algorithm. `exp_avg_sq` is equivalent to **v<sub>t</sub>** in the algorithm.
+
+Finally, we calculate the bias correction terms as mentioned in the algorithm and calculate the `unbiased_exp_avg` which equates to **m_hat<sub>t</sub>** in the algorithm. We also calculate the `unbiased_exp_avg_sq` after bias correction and `unbiased_exp_avg_sq` equates to **v_hat<sub>t</sub>** in the algorithm. 
+
+We calulate the denominator `denom` as in the algorithm `denom = unbiased_exp_avg_sq.sqrt().add_(self.eps)`. Finally, we perform the parameter update step `p.data.addcdiv_(unbiased_exp_avg, denom, value=-step_size)` which equates to `p = p - unbiased_exp_avg * step_size / denom` that is equivalent to the last step in the algorithm. 
+
+Thus, we have successfully re-implemented `Adam`.
