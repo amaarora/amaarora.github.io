@@ -1,12 +1,14 @@
 # "Adam" and friends
 
-Who's Adam? Why should I care about ("it's" or "his") friends?!
+Who's Adam? Why should I care about "his" friends?!
 
 [Adam](https://arxiv.org/abs/1412.6980) is an `Optimizer`. He has many friends but his dearest are [SGD](http://www.cs.toronto.edu/~hinton/absps/momentum.pdf), Momentum & [RMSprop](https://www.cs.toronto.edu/~tijmen/csc321/slides/lecture_slides_lec6.pdf).
 
-In this blog post we are going to meet "Adam" and his friends and get to know about them in a lot more detail!
-
 Each of Adam's friends has contributed to Adam's personality. So to get to know Adam very well, we should first meet the friends. We start out with `SGD` first, then meet `Momentum`, `RMSprop` and finally `Adam`. 
+
+> In this blog post we are going to re-implement `SGD`, `SGD with Momentum`, `RMSprop` & `Adam`. The major contribution of this blog post is to help the reader re-implement these algorithms keeping the implementations simple & by using minimal lines of code. We try to understand these algoirthms from a code perspective rather than from a mathematical perspective. I would also like to refer the reader to Sebastian Ruder's blog on Optimizers [here](https://ruder.io/optimizing-gradient-descent/) for a more theoretical introduction. We also compare the implementations with PyTorch's to compare accuracy. 
+
+This blog post has been structured the following way: 
 
 1. TOC 
 {:toc}
@@ -18,26 +20,35 @@ In this blog post we are going to re-implement `SGD`, `Momentum`, `RMSprop` and 
 
 In this blog post, the code for the Optimizers has been mostly copied from [PyTorch](https://pytorch.org/) but follows a different structure to keep the code implementations to a minimum. The implementations for these various Optimizers in this blog post are "much shorter" than those in PyTorch.
 
-> This blog post aims at helping you get an intuition about these various different Optimization algorithms including the code implementations. This blog post follows a more practical approach rather than a theoritical one and we understand about these algorithms more from an implementation and experimentation perspective. 
-
-By the end of this blog post we should be able to compare the performance of our implementations with PyTorch's implementations as below: 
+I also compared the re-implementations with PyTorch's implementations and excited to share results below! `SGD`, `SGD_with_momentum`, `RMSprop` and `Adam` are from Pytorch whereas `SGDOptimizer`, `SGDOptimizer_with_momentum`, `RMSPropOptimizer` and `AdamOptimizer` are our own re-implementations. As shown in the `fig-1` below, results are comparable! Refer [here](https://gist.github.com/amaarora/571a7d5011581d67c27d884e68bf6afc) for a complete working notebook to reproduce `fig-1`.
 
 ![](/images/optimizers.png "fig-1 Adam and Friends")
 
-## Prerequisite
-A wonderful introduction to Optimization has been presented [here](https://cs231n.github.io/optimization-1/#optimization). 
+## Resources/Credits
+Generally the resources section is at the last but I'd like to share some wonderful resources right at the start that have helped shape this blog post in it's current form. 
 
-> In this blog post we will not introduce Optimization and it is assumed that the reader has some prior experience with Optimizers or a general understanding of what Optimizers do. In general there are many great resources that are already present that introduce Optimization & SGD. These can be found in the [Resources]() section of this blog post. 
+1. [Introduction to SGD by Jeremy Howard](https://youtu.be/ccMHJeQU4Qw?t=4587). In lesson-2 of Course 19 fast.ai, Jeremy re-implements SGD from scratch using Python!
+2. [Introduction to Optimizers by Jeremy Howard](https://youtu.be/CJKnDu2dxOE?t=6208). In lesson-5 of Course 19 fast.ai, Jeremy re-implements `SGD`, `Momentum`, `RMSprop` & `Adam` in Microsoft Excel! This is a great resource to learn about these algorithms. I started here too and then re-implemented the algorithms in PyTorch that has led to this blog post. 
+3. [Generic Optimizer by Jeremy Howard](https://youtu.be/hPQKzsjTyyQ?t=4169). In Lesson-11 of Course 19 fast.ai, Jeremy creates a Generic Optimizer. Some of the code in this blog post has been inspired from here, but majorly we follow the code implementations as in PyTorch. 
+4. [CS231n Introduction to Optimizers](https://cs231n.github.io/optimization-1/#optimization). This is another great resource from Stanford that introduces Optimization and is a great resource to get an intuition for SGD. It also showcases how to compute the gradients from scratch without using `torch.autograd`. In our blog post, we use `torch.autograd` instead to compute the gradients. 
+5. [An overview of gradient descent optimization algorithms by Sebastian Ruder](https://ruder.io/optimizing-gradient-descent/) is an excellent blog post by one of my favorite researchers and presents the various Optimization algorithms such as Adagrad, Adadelta, AdaMax, Nadam, AMSGrad and more in an easy to understand manner! 
+6. [Why Momentum Really Works from distil.pub](https://distill.pub/2017/momentum/). If you haven't heard of [distil.pub](https://distill.pub/), stop what you're doing and visit this wonderful website that distils research using visual explainations that are easy to understand! 
 
-In [this](https://youtu.be/ccMHJeQU4Qw?t=4575) video, Jeremy implements SGD from scratch and explains all the details with an introduction to Optimizers. 
-
-It is also assumed that the reader has some knowledge about PyTorch and has previously used PyTorch in some form to train neural networks. If not, then the above video by Jeremy is again a great introduction. 
+Having mentioned these resources, we are now ready to start on our journey of re-implementing `SGD`, `Momentum`, `RMSprop` and `Adam` from scratch. We first start out with `SGD` below:
 
 ## Stochastic Gradient Descent
 In this section we will first introduce what is Stochastic Gradient Descent and then based on our understanding, implement it in PyTorch from scratch. 
 
 ### What is Stochastic Gradient Descent?
-From the introductions shared in the Prerequisite section, you might already know that to perform Gradient Descent, we need to be able to calculate the gradients of some function that we wish to minimise with respect to the parameters. We don't need to manually calculate the gradients and as mentioned in [this](https://youtu.be/ccMHJeQU4Qw?t=4575) video by Jeremy, PyTorch can already do this for us using [torch.autorgrad](https://pytorch.org/tutorials/beginner/blitz/autograd_tutorial.html).
+For an intuitive understanding, refer `fig-2` below:
+
+![](/images/SGD_intuition.png "fig-2 Gradient Descent")
+
+Let's say we are standing at a certain point `A` of a parabolic hill as shown in `fig-2` and we wish to find the lowest point on this curve. Can you think of some ways to do this? Well, we could try going in a random direction, calculate the value of the function and if it's lower than the previous value, we could take a step in that direction. But this process is slow. With some mathematical magic, we can make this process faster. In fact, the fastest way down a function or the sleepest way down the hill is the one in the opposite direction of the gradient. Gradient at point `A` is the slope of the parabolic function, and by calculating the gradients, we can find the steepest direction in which to move to minimise the value of the function. This is referred to as Gradient Descent. Ofcourse in a high dimensional space, calculating the gradients is a little bit more complicated than in `fig-2` but the idea remains the same. We take a step from point `A` directed by the gradients to follow the steepest path downwards to point `B` to find the lowest value of the curve. 
+
+The stochasticity in Stochastic Gradient Descent arises when we compute the batch gradients. This has been explained below through pseudo-code in `Vanilla Stochastic Gradient Descent`.
+
+From the [Introduction to SGD by Jeremy Howard](https://youtu.be/ccMHJeQU4Qw?t=4587), and from `fig-2`, we already know that to perform Gradient Descent, we need to be able to calculate the gradients of some function that we wish to minimise with respect to the parameters. We don't need to manually calculate the gradients and as mentioned in [this](https://youtu.be/ccMHJeQU4Qw?t=4575) video by Jeremy, PyTorch can already do this for us using [torch.autorgrad](https://pytorch.org/tutorials/beginner/blitz/autograd_tutorial.html).
 
 So now that we know that we can compute the gradients, the procedure of repeatedly evaluating the gradient and then performing a parameter update is called `Gradient Descent`. Its vanilla version looks as follows:
 
@@ -133,8 +144,6 @@ class SGDOptimizer(Optimizer):
 
 This line `p.data.add_(p.grad.data, alpha=-self.defaults['lr'])` essentially does `p = p - lr * p.grad` which is the SGD step for each mini-batch. Thus, we have successfully re-implemented SGD Optimizer. 
 
-To 
-
 ## SGD with Momentum
 
 Classical Momentum as described in [this](http://www.cs.toronto.edu/~hinton/absps/momentum.pdf) paper can be defined as: 
@@ -145,7 +154,29 @@ Here `µ` represents the momentum factor, typically `0.9`. **Δ𝑓(θ<sub>t</su
 
 As can be seen from `eq-1`, essentially we add a factor `µ` times the value of the previous step to the current step. Thus instead of going `p = p - lr * p.grad`, the new step value becomes `new_step = µ * previous_step + lr * p.grad` whereas previously for `SGD`, the step value was `lr * p.grad`.
 
-Now to implement `SGD with Momentum`, we would need to be able to keep a track of the previous steps for each of the parameters. This can be done as below: 
+---
+What is momentum you might ask? Why does it work? 
+
+From [Why Momentum Really Works from distil.pub](https://distill.pub/2017/momentum/), 
+
+> Here’s a popular story about momentum: gradient descent is a man walking down a hill. He follows the steepest path downwards; his progress is slow, but steady. Momentum is a heavy ball rolling down the same hill. The added inertia acts both as a smoother and an accelerator, dampening oscillations and causing us to barrel through narrow valleys, small humps and local minima.
+It is simple — when optimizing a smooth function f, we make a small step in the gradient:
+
+![](/images/SGD_eq.png "eq-2 SGD")
+
+> For a step-size small enough, gradient descent makes a monotonic improvement at every iteration. It always converges, albeit to a local minimum. Things often begin quite well — with an impressive, almost immediate decrease in the loss. But as the iterations progress, things start to slow down. You start to get a nagging feeling you’re not making as much progress as you should be. What has gone wrong?  
+
+> The landscapes are often described as valleys, trenches, canals and ravines. The iterates either jump between valleys, or approach the optimum in small, timid steps. Progress along certain directions grind to a halt. In these unfortunate regions, gradient descent fumbles.
+
+> Momentum proposes the following tweak to gradient descent. We give gradient descent a short-term memory:
+
+![](/images/momentum_eq.png "eq-3 Momentum")
+
+> The change is innocent, and costs almost nothing. When \beta = 0β=0 , we recover gradient descent. But for \beta = 0.99β=0.99 (sometimes 0.9990.999, if things are really bad), this appears to be the boost we need. Our iterations regain that speed and boldness it lost, speeding to the optimum with a renewed energy.
+
+--- 
+
+Thus, essentially, with `Momentum`, if the momentum factor as in `eq-3` is `β`, then compared to SGD, instead of the new step just being guided by the gradients, is also guided by `β` times the old step size. Thus, to implement momentum, we would need to keep a track of the previous steps. We do this by storing `moment_buffer` inside a `param_state` for each `parameter` as in the implementation below:
 
 ```python
 class SGDOptimizer(Optimizer):
@@ -161,7 +192,7 @@ class SGDOptimizer(Optimizer):
             
             d_p = p.grad.data            
             if 'moment_buffer' not in param_state:
-                buf = param_state['moment_buffer'] = torch.clone(d_p).detach()
+                buf = param_state['`moment_buffer`'] = torch.clone(d_p).detach()
             else:
                 buf = param_state['moment_buffer']
             
