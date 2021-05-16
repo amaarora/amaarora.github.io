@@ -1,11 +1,8 @@
 # Index 
+For more recent paper summaries, refer to [Fully Connected](https://wandb.ai/wandb_fc/pytorch-image-models/reports/Revisiting-ResNets-Improved-Training-and-Scaling-Strategies--Vmlldzo2NDE3NTM?galleryTag=posts) at [Weights & Biases](https://wandb.ai/). Here are some other blogs that I've written:
 
-Subscribe [here](https://amaarora.github.io/subscribe) to receive regular updates regarding new blogposts and paper reviews.
+1. [Inside Hugging Face's Accelerate!](https://wandb.ai/wandb_fc/pytorch-image-models/reports/Inside-Hugging-Face-s-Accelerate---Vmlldzo2MzgzNzA)
+2. [Explained: Characterizing Signal Propagation to Close the Performance Gap in Unnormalized ResNets](https://wandb.ai/wandb_fc/pytorch-image-models/reports/Explained-Characterizing-Signal-Propagation-to-Close-the-Performance-Gap-in-Unnormalized-ResNets--Vmlldzo2NDIzNTE)
+3. [Revisiting ResNets: Improved Training and Scaling Strategies](https://wandb.ai/wandb_fc/pytorch-image-models/reports/Revisiting-ResNets-Improved-Training-and-Scaling-Strategies--Vmlldzo2NDE3NTM)
 
----
-
-Popular past articles on [Medium](https://medium.com/@amaarora) by view count:
-1. [Why Random Forests can't predict trends and how to overcome this problem](https://medium.com/datadriveninvestor/why-wont-time-series-data-and-random-forests-work-very-well-together-3c9f7b271631)
-3. [Three ways of doing matrix multiplication with explainations in Microsoft Excel](https://towardsdatascience.com/matrix-multiplication-part2-lesson8-34c9b77855c4)
-4. [Fast.ai V2 DataBlocks API Overview](https://medium.com/@amaarora/fastai-v2-datablocks-api-code-overview-a-gentle-introduction-60338a6c9aa)
-5. [Feature Importance in Random Forests from scratch](https://medium.com/@amaarora/implementing-feature-importance-in-random-forests-from-scratch-2216e031ff74)
+I am also involved in hosting fortnightly paper reading groups at W&B, refer [here](https://wandb.ai/site/paper-reading-group) for more details. 
