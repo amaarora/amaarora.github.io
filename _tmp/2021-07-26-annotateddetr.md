@@ -24,7 +24,7 @@ In this post, I am not trying to reinvent the wheel, but merely bringing togethe
 
 
 ## The DETR Architecture 
-The overall DETR architecture is surprisingly simple and depicted in Figure-1 below. It contains three main components, which we describe below: a CNN backbone to extract a compact feature representation, an  encoder-decoder transformer, and a simple feed forward network (FFN) that makes the final detection prediction.
+The overall DETR architecture is surprisingly simple and depicted in Figure-1 below. It contains three main components: a CNN backbone to extract a compact feature representation, an  encoder-decoder transformer, and a simple feed forward network (FFN) that makes the final detection prediction.
 
 ![](/images/detr_architecture.png "Figure-1: DETR Architecture")
 
@@ -46,7 +46,11 @@ class Backbone(BackboneBase):
         super().__init__(backbone, train_backbone, num_channels, return_interm_layers)
 ```
 
-Above we create a simple backbone that inherits from `BackboneBase`. The backbone is created using `torchvision.models` and supports all models implemented in `torchvision`. For a complete list, refer [here](https://pytorch.org/vision/stable/models.html). As it's also mentioned in the paper, that the typical value for number of channels is 2048, therefore, for all models except `resnet18` & `resnet34`, the number of channels is set to 2048. This `Backbone` accepts a three channel input image tensor of shape $3×H_0×W_0$, where $H_0$ refers to the image height, and $W_0$ refers to the image width. 
+Above we create a simple backbone that inherits from `BackboneBase`. The backbone is created using `torchvision.models` and supports all models implemented in `torchvision`. For a complete list of supported models, refer [here](https://pytorch.org/vision/stable/models.html). 
+
+As also mentioned above, the typical value for number of channels in the output feature map is 2048, therefore, for all models except `resnet18` & `resnet34`, the `num_channels` variable is set to 2048. This `Backbone` accepts a three channel input image tensor of shape $3×H_0×W_0$, where $H_0$ refers to the input image height, and $W_0$ refers to the input image width. 
+
+Let's next look at the `BackboneBase` class that `Backbone` inherits from.
 
 #### `BackboneBase`
 ```python 
@@ -75,8 +79,23 @@ class BackboneBase(nn.Module):
         return out
 ```
 
-The `BackboneBase` class above accepts a `tensor_list` which is a `NestedTensor`. Before understanding this `BackboneBase` let's first understand what this `NestedTensor` class is in the DETR codebase. 
+The `BackboneBase` class above accepts a `tensor_list` which is a `NestedTensor`. `NestedTensor`s have been explained in the next section. But for now, it should suffice to know that they combine two tensors - `tensors` and `mask`.
 
+**Side note**: Even though the `mask` argument is singular, from my understanding, this class accepts multiple masks for every tensor in the batch thus could very well be named `masks` instead of `mask`. 
+
+The `forward` method of `BackboneBase` accepts an instance of `NestedTensor` class that we contains `tensors` and `mask`. `BackboneBase` then takes the `tensors` from `tensor_list` (instance of `NestedTensor`), and passes that through `self.body` which is responsible for getting the output feature map of shape $f ∈ R^{C×H×W}$, where $C$ is typically set to 2048. For an introduction to `IntermediateLayerGetter`, please refer to another blog post of mine - <enter blog link here>.
+
+So, the output of `self.body` is a `Dict` that looks something like `{"0": <torch.Tensor>}` or `{"0": <torch.Tensor>, "1": <torch.Tensor>, "2": <torch.Tensor>...}` depending on whether `return_interm_layers` is `True` or `False`. Finally, we iterate through this `Dict` output of `self.body` which we call `xs`, interpolate the mask to have the same $H$ and $W$ as the lower-resolution activation map $f ∈ R^{C×H×W}$ output from `Backbone`. 
+
+```python 
+        for name, x in xs.items():
+            m = tensor_list.mask
+            assert m is not None
+            mask = F.interpolate(m[None].float(), size=x.shape[-2:]).to(torch.bool)[0]
+            out[name] = NestedTensor(x, mask)
+```
+
+**Remember**: When we passed the `tensor_list.tensors` through `self.body` we updated the tensor which was first of size $R^3×H_0×W_0$ (with 3 color channels), to a lower-resolution activation map of size $f ∈ R^{C×H×W}$. Thus, we `interpolate` the mask accordingly. 
 
 #### `NestedTensor`
 `NestedTensor` is a simple tensor class that puts `tensors` and `masks` together as below: 
@@ -105,27 +124,8 @@ class NestedTensor(object):
         return str(self.tensors)
 ```
 
-As can be seen from the `NestedTensor` source code, it accepts two arguments - `tensors` and `mask`. 
+As can be seen from the `NestedTensor` source code, it combines `tensors` and `mask` and stores them as `self.tensors` and `self.mask` attributes. 
 
-> Side note: Even though the `mask` argument is singular, from my understanding, this class accepts multiple masks for every tensor in the batch thus could very well be named `masks` instead of `mask`. 
-
-This `NestedTensor` class is really simple - it has two main methods `to` and `decompose`. The `to` method casts both `tensors` and `mask` to `device` (typically `"cuda"`) and returns a new `NestedTensor` containing `cast_tensor` and `cast_mask`. Also, the `decompose` method just returns `tensors` and `mask` as a tuple, thus decomposing the "nested" tensor.
-
-Now going back to the `forward` method of `BackboneBase`, it accepts an instance of this `NestedTensor` class that we now know contains `tensors` and `mask`. `BackboneBase` then takes the `tensors` from `tensor_list`, and passes that through `self.body` which is responsible for getting the outputs from `Backbone` as a `Dict`. For an introduction to `IntermediateLayerGetter`, please refer to another blog post of mine - <enter blog link here>.
-
-So, the output of `self.body` is a `Dict` that looks something like `{"0": <torch.Tensor>}` or `{"0": <torch.Tensor>, "1": <torch.Tensor>, "2": <torch.Tensor>...}` depending on whether `return_interm_layers` is `True` or `False`.
-
-Finally, we iterate through this `Dict` output of `self.body` which we call `xs`, interpolate the mask to have the same $H$ and $W$ as the lower-resolution activation map $f ∈ R^{C×H×W}$ output from `Backbone`. 
-
-```python 
-        for name, x in xs.items():
-            m = tensor_list.mask
-            assert m is not None
-            mask = F.interpolate(m[None].float(), size=x.shape[-2:]).to(torch.bool)[0]
-            out[name] = NestedTensor(x, mask)
-```
-
-> Remember: When we passed the `tensor_list.tensors` through `self.body` we updated the tensor which was first of size $R^3×H_0×W_0$ (with 3 color channels), to a lower-resolution activation map of size $f ∈ R^{C×H×W}$. Thus, we `interpolate` the mask accordingly. 
-
-> Something you might ask - "What are these masks anyway?". We're only doing object detection right? So why do we need masks? Remember, the DETR architecture is capable of doing both instance detection and segmentation. Thus, the codebase has been written in a way to support both these tasks. So what is this `mask` for instance detection?
-
+This `NestedTensor` class is really simple - it has two main methods:
+1. `to`: casts both `tensors` and `mask` to `device` (typically `"cuda"`) and returns a new `NestedTensor` containing `cast_tensor` and `cast_mask`.
+2. `decompose`: returns `tensors` and `mask` as a tuple, thus decomposing the "nested" tensor.
