@@ -6,4 +6,4 @@ I work as a Machine Learning Engineer at Weights & Biases, where I experiment wi
 
 I am interested in making deep learning more accessible to everybody and as part of that, a lot of my time is also spent in contributing to open source projects such as [TIMM](https://github.com/rwightman/pytorch-image-models/) and [fastai](https://github.com/fastai/).
 
-I am also self-taught - thanks to the [fast.ai](https://course.fast.ai/) course - and didn't know how to write Python 3 years ago.
+I am also self-taught - thanks to the wonderful [fast.ai](https://course.fast.ai/) course.

@@ -31,3 +31,101 @@ The overall DETR architecture is surprisingly simple and depicted in Figure-1 be
 
 ### Backbone
 Starting from the initial image $x_{img} ∈ R^3×H_0×W_0$ (with 3 color channels), a conventional CNN backbone generates a lower-resolution activation map $f ∈ R^{C×H×W}$. Typical values we use are C = 2048 and H,W = $\frac{H0}{32} , \frac{W0}{32}$.
+
+```python 
+class Backbone(BackboneBase):
+    """ResNet backbone with frozen BatchNorm."""
+    def __init__(self, name: str,
+                 train_backbone: bool,
+                 return_interm_layers: bool,
+                 dilation: bool):
+        backbone = getattr(torchvision.models, name)(
+            replace_stride_with_dilation=[False, False, dilation],
+            pretrained=is_main_process(), norm_layer=FrozenBatchNorm2d)
+        num_channels = 512 if name in ('resnet18', 'resnet34') else 2048
+        super().__init__(backbone, train_backbone, num_channels, return_interm_layers)
+```
+
+Above we create a simple backbone that inherits from `BackboneBase`. The backbone is created using `torchvision.models` and supports all models implemented in `torchvision`. For a complete list, refer [here](https://pytorch.org/vision/stable/models.html). As it's also mentioned in the paper, that the typical value for number of channels is 2048, therefore, for all models except `resnet18` & `resnet34`, the number of channels is set to 2048. This `Backbone` accepts a three channel input image tensor of shape $3×H_0×W_0$, where $H_0$ refers to the image height, and $W_0$ refers to the image width. 
+
+#### `BackboneBase`
+```python 
+class BackboneBase(nn.Module):
+
+    def __init__(self, backbone: nn.Module, train_backbone: bool, num_channels: int, return_interm_layers: bool):
+        super().__init__()
+        for name, parameter in backbone.named_parameters():
+            if not train_backbone or 'layer2' not in name and 'layer3' not in name and 'layer4' not in name:
+                parameter.requires_grad_(False)
+        if return_interm_layers:
+            return_layers = {"layer1": "0", "layer2": "1", "layer3": "2", "layer4": "3"}
+        else:
+            return_layers = {'layer4': "0"}
+        self.body = IntermediateLayerGetter(backbone, return_layers=return_layers)
+        self.num_channels = num_channels
+
+    def forward(self, tensor_list: NestedTensor):
+        xs = self.body(tensor_list.tensors)
+        out: Dict[str, NestedTensor] = {}
+        for name, x in xs.items():
+            m = tensor_list.mask
+            assert m is not None
+            mask = F.interpolate(m[None].float(), size=x.shape[-2:]).to(torch.bool)[0]
+            out[name] = NestedTensor(x, mask)
+        return out
+```
+
+The `BackboneBase` class above accepts a `tensor_list` which is a `NestedTensor`. Before understanding this `BackboneBase` let's first understand what this `NestedTensor` class is in the DETR codebase. 
+
+
+#### `NestedTensor`
+`NestedTensor` is a simple tensor class that puts `tensors` and `masks` together as below: 
+
+```python 
+class NestedTensor(object):
+    def __init__(self, tensors, mask: Optional[Tensor]):
+        self.tensors = tensors
+        self.mask = mask
+
+    def to(self, device):
+        # type: (Device) -> NestedTensor # noqa
+        cast_tensor = self.tensors.to(device)
+        mask = self.mask
+        if mask is not None:
+            assert mask is not None
+            cast_mask = mask.to(device)
+        else:
+            cast_mask = None
+        return NestedTensor(cast_tensor, cast_mask)
+
+    def decompose(self):
+        return self.tensors, self.mask
+
+    def __repr__(self):
+        return str(self.tensors)
+```
+
+As can be seen from the `NestedTensor` source code, it accepts two arguments - `tensors` and `mask`. 
+
+> Side note: Even though the `mask` argument is singular, from my understanding, this class accepts multiple masks for every tensor in the batch thus could very well be named `masks` instead of `mask`. 
+
+This `NestedTensor` class is really simple - it has two main methods `to` and `decompose`. The `to` method casts both `tensors` and `mask` to `device` (typically `"cuda"`) and returns a new `NestedTensor` containing `cast_tensor` and `cast_mask`. Also, the `decompose` method just returns `tensors` and `mask` as a tuple, thus decomposing the "nested" tensor.
+
+Now going back to the `forward` method of `BackboneBase`, it accepts an instance of this `NestedTensor` class that we now know contains `tensors` and `mask`. `BackboneBase` then takes the `tensors` from `tensor_list`, and passes that through `self.body` which is responsible for getting the outputs from `Backbone` as a `Dict`. For an introduction to `IntermediateLayerGetter`, please refer to another blog post of mine - <enter blog link here>.
+
+So, the output of `self.body` is a `Dict` that looks something like `{"0": <torch.Tensor>}` or `{"0": <torch.Tensor>, "1": <torch.Tensor>, "2": <torch.Tensor>...}` depending on whether `return_interm_layers` is `True` or `False`.
+
+Finally, we iterate through this `Dict` output of `self.body` which we call `xs`, interpolate the mask to have the same $H$ and $W$ as the lower-resolution activation map $f ∈ R^{C×H×W}$ output from `Backbone`. 
+
+```python 
+        for name, x in xs.items():
+            m = tensor_list.mask
+            assert m is not None
+            mask = F.interpolate(m[None].float(), size=x.shape[-2:]).to(torch.bool)[0]
+            out[name] = NestedTensor(x, mask)
+```
+
+> Remember: When we passed the `tensor_list.tensors` through `self.body` we updated the tensor which was first of size $R^3×H_0×W_0$ (with 3 color channels), to a lower-resolution activation map of size $f ∈ R^{C×H×W}$. Thus, we `interpolate` the mask accordingly. 
+
+> Something you might ask - "What are these masks anyway?". We're only doing object detection right? So why do we need masks? Remember, the DETR architecture is capable of doing both instance detection and segmentation. Thus, the codebase has been written in a way to support both these tasks. So what is this `mask` for instance detection?
+
