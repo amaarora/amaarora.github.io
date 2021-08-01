@@ -522,3 +522,22 @@ pos[-1].shape
 Therefore, in the offical code implementation of DETR, the Backbone, is actually an instance on `Joiner` class (how confusing!), that accepts an input, which is of type `NestedTensor` (how confusing again!). The `tensor` and `mask` of this `NestedTensor` input have been zero-padded to ensure that all have the same dimensions $(H_0,W_0)$ as the largest image of the input batch. See Figure-3 for reference. 
 
 Finally, this `NestedTensor` instance, is passed on the Backbone to get outputs `out` & `pos`. Here, `out` is a list of `NestedTensor`, the length of the list depends on the value `return_interm_layers`. `out[-1].tensors` represents lower-resolution activation map $f ∈ R^{C×H×W}$, where $C$ has value 2048. And `pos[-1]` represents the **spatial positional encodings**  $pos ∈ R^{256×H×W}$ for each position on the grid. 
+
+
+## DETR Transformer
+
+![](/images/annotated_tfmr_detr.png "Figure-5: DETR Transformer")
+
+Now, before we can move on and look at the DETR Transformer in code, it's really crucial to first understand the bigger picture. So far we know that the backbone upon accepting an input returns `out` and `pos`, where `out[-1].tensors.shape` is $f ∈ R^{2048×H×W}$ and `pos[-1].shape` is $pos ∈ R^{256×H×W}$.
+
+Before the `out` is passed to the transformer, the number of channels are reduced as mentioned in the paper. 
+
+*First, a 1x1 convolution reduces the channel dimension of the high-level activation map $f$ from $C$ to a smaller dimension $d$. creating a new feature map $z_0 ∈ R^{d×H×W}$.*
+
+Here, $d$ is set to 256, therefore, the new feature map size becomes $f ∈ R^{256×H×W}$ which matches that of the positional encodings.
+
+As also mentioned in the paper, 
+
+*The encoder expects a sequence as input, hence we collapse the spatial dimensions of $z_0$ into one dimension, resulting in a $d×HW$ feature map.* 
+
+Therefore, we can reshape both feature map and spatial positional encodings to shape $696 x 1 x 256$ as shown in Figure-5 above. 
