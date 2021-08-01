@@ -450,6 +450,7 @@ As we already know from the [Attention is all you need](https://arxiv.org/abs/17
 $$ 
 PE(pos, 2i) = \sin(\frac{pos}{10000^{\frac{2i}{d_{model}}}}) \tag{1}
 $$
+
 $$ 
 PE(pos, 2i) = \cos(\frac{pos}{10000^{\frac{2i}{d_{model}}}}) \tag{2}
 $$
