@@ -762,3 +762,5 @@ class TransformerDecoderLayer(nn.Module):
         tgt = tgt + self.dropout3(tgt2)
         return tgt
 ```
+
+The `TransformerDecoderLayer` requires a bit more attention than `TransformerEncoderLayer` (pun intended). First, the `tgt` variable in this case is just a bunch of zeroes of shape $100 x 1 x 256$ which represents Object Queries as in Figure-5. 
