@@ -92,9 +92,9 @@ This is what happened inside the `self.prepare` method:
 4. Convert annotation from $[X, Y, W, H]$ to $[X_1, Y_1, X_2, Y_2]$ format. 
 5. Filter out objects if $X_2 < X_1$ or $Y_2 < Y_1$.
 
-I am going to skip over the source code of `ConvertCocoPolysToMask` but you can find it [here](https://github.com/facebookresearch/detr/blob/master/datasets/coco.py#L50-L112) if interested. 
+> I am going to skip over the source code of `ConvertCocoPolysToMask` but you can find it [here](https://github.com/facebookresearch/detr/blob/master/datasets/coco.py#L50-L112) if interested. I am also going to skip over the transforms for brevity, but you can find them [here](https://github.com/facebookresearch/detr/blob/master/datasets/coco.py#L115-L144) if interested. 
 
-Next, `self._transforms` are applied to `img, target`. I am again to skip over the transforms for brevity, but you can find them [here](https://github.com/facebookresearch/detr/blob/master/datasets/coco.py#L115-L144) if interested. From the paper, transforms/augmentations that get applied are: 
+From the paper, transforms/augmentations that get applied are: 
 
 We use scale augmentation, resizing the input images such that the shortest side is at least 480 and at most 800 pixels while the longest at most 1333. To help learning global relationships through the self-attention of the encoder, we also apply random crop augmentations during training, improving the performance by approximately 1 AP. Specifically, a train image is cropped with probability 0.5 to a random rectangular patch which is then resized again to 800-1333.
 
