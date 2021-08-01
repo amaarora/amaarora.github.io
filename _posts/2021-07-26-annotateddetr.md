@@ -196,10 +196,9 @@ Now, both images get resized to the max size which is `[3, 765, 911]` and finall
 
 ![](/images/collate_img_detr.png "Figure-3: Both images get resized to [3, 765, 911] and image and mask values get set in collate function.")
 
-Here, the `blue` region and `orange` region in both respective resized images represent the filled values. For these `blue` and `orange` regions, the `mask` values are set to `False`, whereas in the grey region outside the `mask` values are set to `True`. 
+Here, the `blue` region and `orange` region in both respective resized images represent the filled values. For these `blue` and `orange` regions, the `mask` values are set to `False`, whereas in the grey region outside the `mask` values are set to `True`. Finally, these `tensor` and `mask` values are joined together in a `NestedTensor` class that has been explained later in this blog post. 
 
 And that's it! We are now ready to feed the data to our DETR architecture. 
-
 
 ### Backbone
 Starting from the initial image $x_{img} ∈ R^3×H_0×W_0$ (with 3 color channels), a conventional CNN backbone generates a lower-resolution activation map $f ∈ R^{C×H×W}$. Typical values we use are C = 2048 and H,W = $\frac{H0}{32} , \frac{W0}{32}$.
