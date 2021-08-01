@@ -45,7 +45,7 @@ The input images are batched together, applying $0$-padding adequately to ensure
 > If you haven't worked with COCO before, the annotations are in a JSON format and must be converted to tensors before they can be fed to the model as labels. Refer to the [COCO website here](https://cocodataset.org/#format-data) for more information on data format.
 
 
-### `CocoDetection` Dataset
+### Coco Detection Dataset
 The `CocoDetection` class below inherits from `torchvision.datasets.CocoDetection`, and adds custom `_transforms` on top. There's also `ConvertCocoPolysToMask` class that is able to prepare the dataset for both object detection and panoptic segmentation. 
 
 ```python 
@@ -75,64 +75,71 @@ target
 >> [{'segmentation': [[573.81, 93.88, 630.42, 11.35, 637.14, 423.0, 569.01, 422.04, 568.05, 421.08, 569.97, 270.43, 560.38, 217.66, 567.09, 190.79, 576.69, 189.83, 567.09, 173.52, 561.34, 162.0, 570.93, 107.31, 572.85, 89.08]], 'area': 24373.2536, 'iscrowd': 0, 'image_id': 463309, 'bbox': [560.38, 11.35, 76.76, 411.65], 'category_id': 82, 'id': 331291}, {'segmentation': [[19.19, 206.3, 188.07, 204.38, 194.79, 249.48, 265.8, 260.04, 278.27, 420.28, 78.68, 421.24, 77.72, 311.85, 95.0, 297.46, 13.43, 267.71, 21.11, 212.06]], 'area': 42141.60884999999, 'iscrowd': 0, 'image_id': 463309, 'bbox': [13.43, 204.38, 264.84, 216.86], 'category_id': 79, 'id': 1122176}]
 ```
 
-Next, some magic goes on when we do `img, target = self.prepare(img, target)`. After passing in the above `img` and `target` through `self.prepare`, the output looks like: 
+Next, we pass the `img` and `target` through `self.prepare` method which is an instance of `ConvertCocoPolysToMask` class, and perform pre-processing on the outputs from `torchvision.datasets.CocoDetection.__getitem__`. 
 
 ```python
 img
 >> <PIL.Image.Image image mode=RGB size=640x427 at 0x7F841F918520>
 
 target
->> {
-    'boxes': tensor([[560.3800,  11.3500, 637.1400, 423.0000], [ 13.4300, 204.3800, 278.2700, 421.2400]]), 
-    'labels': tensor([82, 79]), 
-    'image_id': tensor([463309]), 
-    'area': tensor([24373.2539, 42141.6094]), 
-    'iscrowd': tensor([0, 0]), 
-    'orig_size': tensor([427, 640]), 
-    'size': tensor([427, 640])
-}
+>> {'boxes': tensor([[560.3800,  11.3500, 637.1400, 423.0000], [ 13.4300, 204.3800, 278.2700, 421.2400]]), 'labels': tensor([82, 79]), 'image_id': tensor([463309]), 'area': tensor([24373.2539, 42141.6094]),  'iscrowd': tensor([0, 0]), 'orig_size': tensor([427, 640]), 'size': tensor([427, 640])}
 ```
 
-In summary, the `prepare` method converted everything to a `tensor` and also instead of having a `List` of `Dict`s, the `target` is now a `Dict` with values as type `tensor`. Also, we are no longer returning segmentation masks since we are just working with Object Detection. There's some extra filtering that goes on inside `ConvertCocoPolysToMask` class: 
-1. Filter out objects if `iscrowd=1`.
-2. Convert annotation from $[X, Y, W, H]$ to $[X_1, Y_1, X_2, Y_2]$ format. 
-3. Filter out objects if $X_2 < X_1$ or $Y_2 < Y_1$.
+This is what happened inside the `self.prepare` method:
+1. Converted `boxes`, `labels`, `image_id`, `area`.. to a `tensor`. 
+2. We no longer return segmentation masks since we are just working with Object Detection. 
+3. Filter out objects if `iscrowd=1`.
+4. Convert annotation from $[X, Y, W, H]$ to $[X_1, Y_1, X_2, Y_2]$ format. 
+5. Filter out objects if $X_2 < X_1$ or $Y_2 < Y_1$.
 
-I am going to skip over the exact source code of `ConvertCocoPolysToMask` but you can find the source code [here](https://github.com/facebookresearch/detr/blob/master/datasets/coco.py#L50-L112) if interested. 
+I am going to skip over the source code of `ConvertCocoPolysToMask` but you can find it [here](https://github.com/facebookresearch/detr/blob/master/datasets/coco.py#L50-L112) if interested. 
 
-Next, `self._transforms` are applied to `img, target`. The train transforms look like below: 
-
-```python
-normalize = T.Compose([
-    T.ToTensor(),
-    T.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
-])
-
-scales = [480, 512, 544, 576, 608, 640, 672, 704, 736, 768, 800]
-
-if image_set == 'train':
-    return T.Compose([
-        T.RandomHorizontalFlip(),
-        T.RandomSelect(
-            T.RandomResize(scales, max_size=1333),
-            T.Compose([
-                T.RandomResize([400, 500, 600]),
-                T.RandomSizeCrop(384, 600),
-                T.RandomResize(scales, max_size=1333),
-            ])
-        ),
-        normalize,
-    ])
-```
-
-This is using `torchvision.transforms`. From the paper: 
+Next, `self._transforms` are applied to `img, target`. I am again to skip over the transforms for brevity, but you can find them [here](https://github.com/facebookresearch/detr/blob/master/datasets/coco.py#L115-L144) if interested. From the paper, transforms/augmentations that get applied are: 
 
 We use scale augmentation, resizing the input images such that the shortest side is at least 480 and at most 800 pixels while the longest at most 1333. To help learning global relationships through the self-attention of the encoder, we also apply random crop augmentations during training, improving the performance by approximately 1 AP. Specifically, a train image is cropped with probability 0.5 to a random rectangular patch which is then resized again to 800-1333.
 
-This can be confirmed based on the train transforms above in code. Therefore, the final output from `CocoDetection` dataset is an `img` tensor and a `target` Dict.
+The overall process of creating this dataset looks like below: 
 
-### Custom collate function 
-Next, the DETR architecture uses a custom collate function before the outputs from `CocoDetection` class are fed to the model. This is because each image is still of a different size. As we already know, the input images are batched together, applying $0$-padding adequately to ensure they all have the same dimensions $(H_0,W_0)$ as the largest image of the batch.
+```python 
+from detr.datasets.coco import make_coco_transforms, CocoDetection
+
+coco_img_folder = '../../kaggle/mscoco/train2017/'
+coco_ann_file   = '../../kaggle/mscoco/annotations/instances_train2017.json'
+# create train transforms as in paper
+coco_train_tfms = make_coco_transforms('train')
+coco_dset       = CocoDetection(img_folder=coco_img_folder, ann_file=coco_ann_file, transforms=coco_train_tfms, return_masks=False)
+
+# first item in dataset
+coco_dset[0][0].shape
+>> torch.Size([3, 800, 1066])
+
+coco_dset[0][1]
+>> 
+{'boxes': tensor([[0.5205, 0.6888, 0.9556, 0.5955],
+         [0.2635, 0.2472, 0.4989, 0.4764],
+         [0.3629, 0.7329, 0.4941, 0.5106],
+         [0.6606, 0.4189, 0.6789, 0.7815],
+         [0.3532, 0.1326, 0.1180, 0.0969],
+         [0.2269, 0.1298, 0.0907, 0.0972],
+         [0.3317, 0.2269, 0.1313, 0.1469],
+         [0.3571, 0.0792, 0.1481, 0.1481]]),
+ 'labels': tensor([51, 51, 56, 51, 55, 55, 55, 55]),
+ 'image_id': tensor([9]),
+ 'area': tensor([258072.8281,  95516.1953, 106571.9219,  52219.3594,   4813.5459,
+           3565.9253,   7758.4976,   6395.6035]),
+ 'iscrowd': tensor([0, 0, 0, 0, 0, 0, 0, 0]),
+ 'orig_size': tensor([480, 640]),
+ 'size': tensor([704, 938])}
+```
+
+As can be seen, the `coco_dset` returns the image as a `tensor` and also returns the `target` which is of type `Dict`. But, right now, the images are of different shape, and we need to make them all to be of the same shape before they can be batched together and passed to the DETR model as input. Let's see how that looks like next.
+
+### Tensor and Mask
+From the paper - **the input images are batched together, applying $0$-padding adequately to ensure they all have the same dimensions $(H_0,W_0)$ as the largest image of the batch.**
+
+Let's suppose our `batch_size` is $2$, where the first image is of shape `[3, 765, 512]` in blue and the second image is of shape `[3, 608, 911]` in orange. This has been shown in Figure-2 below: 
+
+![](/images/input_img_detr.png "Figure-2: Input images in batch of shapes - [[3, 765, 512], [3, 608, 911]].")
 
 This is how the collate function looks like: 
 
@@ -143,10 +150,7 @@ def collate_fn(batch):
     return tuple(batch)
 ```
 
-All the fun occurs inside the `nested_tensor_from_tensor_list` function. But remember, here the batch is a list of length batch size. If batch size is 2, then, this `collate_fn` receives `batch` as a list of length 2, where `batch[0]` is the first item, that is a tuple containing `img` tensor, and `target` Dict (outputs from `CocoDetection` dataset).
-
-By calling `batch = list(zip(*batch))`, we convert the batch of items into two lists, where the first list contains the images and the second list contains the targets. Finally, we pass the images to `nested_tensor_from_tensor_list` function that looks like: 
-
+`nested_tensor_from_tensor_list` is responsible for zero padding the original images, to ensure they all have the same dimensions $(H_0,W_0)$ as the largest image of the batch. Let's look at its source code: 
 
 ```python 
 def nested_tensor_from_tensor_list(tensor_list: List[Tensor]):
@@ -174,34 +178,94 @@ def nested_tensor_from_tensor_list(tensor_list: List[Tensor]):
     return NestedTensor(tensor, mask)
 ```
 
-This `nested_tensor_from_tensor_list` receives a `tensor_list`, which is a list of `img` tensors of varying shape. For example, the image shapes could be `[[3, 608, 911], [3, 765, 512]]` for a batch size of 2. Next, we get the `max_size` in `max_size = _max_by_axis([list(img.shape) for img in tensor_list])`. This `_max_by_axis` function returns the maximum value for each axis and looks like below:
+This `nested_tensor_from_tensor_list` receives a `tensor_list`, which is a list of `img` tensors of varying shape - `[[3, 608, 911], [3, 765, 512]]`. We calculate the `max_size` in `max_size = _max_by_axis([list(img.shape) for img in tensor_list])`. This `_max_by_axis` function returns the maximum value for each axis. Therefore, the value of returned `max_size` is `[3, 765, 911]`.
 
-```python 
-def _max_by_axis(the_list):
-    # type: (List[List[int]]) -> List[int]
-    maxes = the_list[0]
-    for sublist in the_list[1:]:
-        for index, item in enumerate(sublist):
-            maxes[index] = max(maxes[index], item)
-    return maxes
+Next, our `batch_shape` is `[len(tensor_list)] + max_size`, which equals `[2, 3, 765, 911]` in our example so far. 
+
+Next, we define `tensor` and `mask` which are of shapes `[2, 3, 765, 911]` and `[2, 765, 911]` respectively. 
+
+```python
+tensor = torch.zeros(batch_shape, dtype=dtype, device=device)
+mask = torch.ones((b, h, w), dtype=torch.bool, device=device)
 ```
 
-Therefore, the returned `max_size` is `[3, 765, 911]`. Finally, we define a `tensor` as `torch.zeros` of size `max_size` and also `mask` of size `max_size`. Next, we fill the tensor with `img` values and set `mask` to `False` inside the image shape values. Let me try and explain this visually: 
+Finally, we fill the `tensor` and `mask` values with the `img` values which were of shapes `[[3, 608, 911], [3, 765, 512]]`, and also set the `mask` values to be `False` inside the actual image shape.
 
-![](/images/input_img_detr.png "Figure-2: Input batch of 2 images of shapes - [[3, 765, 512], [3, 608, 911]].")
+```python
+for img, pad_img, m in zip(tensor_list, tensor, mask):
+    pad_img[: img.shape[0], : img.shape[1], : img.shape[2]].copy_(img)
+    m[: img.shape[1], :img.shape[2]] = False
+```
 
-Now, both images get resized to the max size which is `[3, 765, 911]` and finally, `img` and `mask` values get filled as below. 
+This has been illustrated in Figure-3 below: 
 
-![](/images/collate_img_detr.png "Figure-3: Both images get resized to [3, 765, 911] and image and mask values get set in collate function.")
+![](/images/collate_img_detr.png "Figure-3: Zero padding input images and setting appropriate mask values.")
 
-Here, the `blue` region and `orange` region in both respective resized images represent the filled values. For these `blue` and `orange` regions, the `mask` values are set to `False`, whereas in the grey region outside the `mask` values are set to `True`. Finally, these `tensor` and `mask` values are joined together in a `NestedTensor` class that has been explained later in this blog post. 
+Here, the `blue` region and `orange` region in both respective resized images represent the filled values. For these `blue` and `orange` regions, the `mask` values are set to `False`, whereas in the grey region outside the `mask` values are set to `True`. In code, this looks like:
 
-And that's it! We are now ready to feed the data to our DETR architecture. 
+> Can you guess the `tensor` and `mask` shapes? `tensor` is of shape `[2, 3, 765, 911]`, where both images are zero-padded. The first image (Blue) is zero-padded in height, whereas the second image is zero-padded in width (Orange). Similarly, the `mask` has shape `[2, 765, 911]` where the blue and orange regions represent value `False`, and the gray region in Figure-3, represents value `True`. 
+
+Finally, the `nested_tensor_from_tensor_list` returns a `NestedTensor` passing in `tensor` and `mask` - `NestedTensor(tensor, mask)`. So what is this `NestedTensor`? Let's look at that next. 
+
+### NestedTensor
+`NestedTensor` is a simple tensor class that puts `tensors` and `masks` together as below: 
+
+```python 
+class NestedTensor(object):
+    def __init__(self, tensors, mask: Optional[Tensor]):
+        self.tensors = tensors
+        self.mask = mask
+
+    def to(self, device):
+        # type: (Device) -> NestedTensor # noqa
+        cast_tensor = self.tensors.to(device)
+        mask = self.mask
+        if mask is not None:
+            assert mask is not None
+            cast_mask = mask.to(device)
+        else:
+            cast_mask = None
+        return NestedTensor(cast_tensor, cast_mask)
+
+    def decompose(self):
+        return self.tensors, self.mask
+
+    def __repr__(self):
+        return str(self.tensors)
+```
+
+As can be seen from the `NestedTensor` source code, it combines `tensors` and `mask` and stores them as `self.tensors` and `self.mask` attributes. 
+
+This `NestedTensor` class is really simple - it has two main methods:
+1. `to`: casts both `tensors` and `mask` to `device` (typically `"cuda"`) and returns a new `NestedTensor` containing `cast_tensor` and `cast_mask`.
+2. `decompose`: returns `tensors` and `mask` as a tuple, thus decomposing the "nested" tensor.
+
+```python 
+import torch
+from detr.util.misc import NestedTensor
+
+# represents outputs from custom collate function that we looked at before
+tensor = torch.randn(2, 3, 765, 911)
+mask   = torch.randn(2, 765, 911)
+
+nested_tensor = NestedTensor(tensor, mask)
+
+nested_tensor.tensors.shape
+>> torch.Size([2, 3, 765, 911])
+
+nested_tensor.mask.shape
+>> torch.Size([2, 765, 911])
+```
+
+And that's it! This `NestedTensor` is what get's fed to the DETR Backbone as in Figure-4 below.
+
+---
+
 
 ## The DETR Architecture 
 The overall DETR architecture is surprisingly simple and depicted in Figure-1 below. It contains three main components: a CNN backbone to extract a compact feature representation, an  encoder-decoder transformer, and a simple feed forward network (FFN) that makes the final detection prediction.
 
-![](/images/detr_architecture.png "Figure-2: DETR Architecture")
+![](/images/detr_architecture.png "Figure-4: DETR Architecture")
 
 
 ### Backbone
@@ -274,41 +338,6 @@ The output of `self.body` is a `Dict` that looks something like `{"0": <torch.Te
 **Note**: Please also note, that in summary, the Backbone is responsible for accepting an input `NestedTensor` that consists of the input image as `tensors` and a `mask` corresponding to the image. The backbone merely extracts the features from this input image, interpolates the mask to match the feature map size and returns them as a `NestedTensor` in a `Dict`. Okay? 
 
 > Please re-read above notes until you understand them before moving forward. 
-
-#### NestedTensor
-`NestedTensor` is a simple tensor class that puts `tensors` and `masks` together as below: 
-
-```python 
-class NestedTensor(object):
-    def __init__(self, tensors, mask: Optional[Tensor]):
-        self.tensors = tensors
-        self.mask = mask
-
-    def to(self, device):
-        # type: (Device) -> NestedTensor # noqa
-        cast_tensor = self.tensors.to(device)
-        mask = self.mask
-        if mask is not None:
-            assert mask is not None
-            cast_mask = mask.to(device)
-        else:
-            cast_mask = None
-        return NestedTensor(cast_tensor, cast_mask)
-
-    def decompose(self):
-        return self.tensors, self.mask
-
-    def __repr__(self):
-        return str(self.tensors)
-```
-
-As can be seen from the `NestedTensor` source code, it combines `tensors` and `mask` and stores them as `self.tensors` and `self.mask` attributes. 
-
-This `NestedTensor` class is really simple - it has two main methods:
-1. `to`: casts both `tensors` and `mask` to `device` (typically `"cuda"`) and returns a new `NestedTensor` containing `cast_tensor` and `cast_mask`.
-2. `decompose`: returns `tensors` and `mask` as a tuple, thus decomposing the "nested" tensor.
-
-Okay, great so far we now know how the `Backbone` has been implemented in the DETR architecture. But as can be seen from Figure-1, this is really a very small part of the overall architecture. There is a long way still to go.
 
 #### Positional Encoding
 > Going back to Figure-1, it can be seen that Positional Encodings are added to the output from the Backbone CNN.
