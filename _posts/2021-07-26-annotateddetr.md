@@ -14,7 +14,9 @@ Something I have always believed in is that when you write things in code, the i
 >
 > -- Jeffrey Friedl in the book [Mastering Regular Expressions](https://learning.oreilly.com/library/view/mastering-regular-expressions/0596528124/ch01.html)
 
-The **[DETR Architecture](https://arxiv.org/abs/2005.12872)** might seem like magic at first with all it's glitter and beauty too, but hopefully I would have uncovered that magic for you and revealed all the tricks by the time you finish reading this post. That is my goal. To make it as simple as possible for the keen readers to understand how the **DETR** model works underneath.
+The **[DETR Architecture](https://arxiv.org/abs/2005.12872)** might seem like magic at first with all it's glitter and beauty too, but hopefully I would have uncovered that magic for you and revealed all the tricks by the time you finish reading this post. That is my goal -
+
+> To make it as simple as possible for the readers to understand how the **DETR** model works underneath.
 
 In this post, I am not trying to reinvent the wheel, but merely bringing together a list of prexisting excellent resources to make it easier for the reader to grasp DETR. I leave it up to the reader to further build upon these foundations in any area they choose.
 
@@ -36,18 +38,14 @@ detection pipeline by dropping multiple hand-designed components that encode pri
 
 DETR, however, obtains lower performances on small objects. Also, training settings for DETR differ from standard object detectors in multiple ways. 
 
-## The DETR Architecture 
-The overall DETR architecture is surprisingly simple and depicted in Figure-1 below. It contains three main components: a CNN backbone to extract a compact feature representation, an  encoder-decoder transformer, and a simple feed forward network (FFN) that makes the final detection prediction.
 
-![](/images/detr_architecture.png "Figure-2: DETR Architecture")
-
-### Data Preparation 
+## Data Preparation 
 The input images are batched together, applying $0$-padding adequately to ensure they all have the same dimensions $(H_0,W_0)$ as the largest image of the batch.
 
 > If you haven't worked with COCO before, the annotations are in a JSON format and must be converted to tensors before they can be fed to the model as labels. Refer to the [COCO website here](https://cocodataset.org/#format-data) for more information on data format.
 
 
-#### `CocoDetection` Dataset
+### `CocoDetection` Dataset
 The `CocoDetection` class below inherits from [torchvision's CocoDetection dataset](https://pytorch.org/vision/stable/datasets.html#torchvision.datasets.CocoDetection), and adds custom `_transforms` on top. There's also a custom `ConvertCocoPolysToMask` class that can prepare the dataset for both object detection and panoptic segmentation. 
 
 ```python 
@@ -133,7 +131,7 @@ We use scale augmentation, resizing the input images such that the shortest side
 
 This can be confirmed based on the train transforms above in code. Therefore, the final output from `CocoDetection` dataset is an `img` tensor and a `target` Dict.
 
-#### Collate function 
+### Custom collate function 
 Next, the DETR architecture uses a custom collate function before the outputs from `CocoDetection` class are fed to the model. This is because each image is still of a different size and has not been converted to a `tensor` yet. As we already know, the input images are batched together, applying $0$-padding adequately to ensure they all have the same dimensions $(H_0,W_0)$ as the largest image of the batch.
 
 This is how the collate function looks like: 
@@ -199,6 +197,12 @@ Now, both images get resized to the max size which is `[3, 765, 911]` and finall
 Here, the `blue` region and `orange` region in both respective resized images represent the filled values. For these `blue` and `orange` regions, the `mask` values are set to `False`, whereas in the grey region outside the `mask` values are set to `True`. Finally, these `tensor` and `mask` values are joined together in a `NestedTensor` class that has been explained later in this blog post. 
 
 And that's it! We are now ready to feed the data to our DETR architecture. 
+
+## The DETR Architecture 
+The overall DETR architecture is surprisingly simple and depicted in Figure-1 below. It contains three main components: a CNN backbone to extract a compact feature representation, an  encoder-decoder transformer, and a simple feed forward network (FFN) that makes the final detection prediction.
+
+![](/images/detr_architecture.png "Figure-2: DETR Architecture")
+
 
 ### Backbone
 Starting from the initial image $x_{img} ∈ R^3×H_0×W_0$ (with 3 color channels), a conventional CNN backbone generates a lower-resolution activation map $f ∈ R^{C×H×W}$. Typical values we use are C = 2048 and H,W = $\frac{H0}{32} , \frac{W0}{32}$.
