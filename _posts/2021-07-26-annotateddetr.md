@@ -258,14 +258,14 @@ nested_tensor.mask.shape
 
 And that's it! This `NestedTensor` is what get's fed as input to the DETR Backbone CNN in Figure-1.
 
-## The DETR Architecture 
-The overall DETR architecture is surprisingly simple and depicted in Figure-1 below. It contains three main components: a CNN backbone to extract a compact feature representation, an  encoder-decoder transformer, and a simple feed forward network (FFN) that makes the final detection prediction.
+# The DETR Architecture 
+*The overall DETR architecture is surprisingly simple and depicted in Figure-1 below. It contains three main components: a CNN backbone to extract a compact feature representation, an  encoder-decoder transformer, and a simple feed forward network (FFN) that makes the final detection prediction.*
 
 ![](/images/detr_architecture.png "Figure-4: DETR Architecture")
 
 
-### Backbone
-Starting from the initial image $x_{img} ∈ R^3×H_0×W_0$ (with 3 color channels), a conventional CNN backbone generates a lower-resolution activation map $f ∈ R^{C×H×W}$. Typical values we use are C = 2048 and H,W = $\frac{H0}{32} , \frac{W0}{32}$.
+## Backbone
+*Starting from the initial image $x_{img} ∈ R^3×H_0×W_0$ (with 3 color channels), a conventional CNN backbone generates a lower-resolution activation map $f ∈ R^{C×H×W}$. Typical values we use are C = 2048 and H,W = $\frac{H0}{32} , \frac{W0}{32}$.*
 
 ```python 
 class Backbone(BackboneBase):
@@ -287,7 +287,7 @@ As also mentioned above, the typical value for number of channels in the output 
 
 Since all the fun happens inside the `BackboneBase` class including the `forward` method, let's look at that next.
 
-#### BackboneBase
+### BackboneBase
 ```python 
 class BackboneBase(nn.Module):
 
@@ -313,13 +313,12 @@ class BackboneBase(nn.Module):
             out[name] = NestedTensor(x, mask)
         return out
 ```
-The only difference between a standard Backbone like in [timm](https://github.com/rwightman/pytorch-image-models/) or any other framework and this `BackboneBase` class above is the input that the `BackboneBase` class expects. As can be seen in the `forward` method above, this `BackboneBase` expects the input to be of type `NestedTensor`. Now, what is this `NestedTensor`? We will look at that below. But, here its enough to know the key difference - any standard backbone in [timm](https://github.com/rwightman/pytorch-image-models/) expects a tensor as input, whereas, `BackboneBase` expects a `NestedTensor` as input. 
 
-> A `NestedTensor` is basically 2 tensors - `tensors` and `mask` nested together. That's really all. More on `NestedTensor` in the next section. 
+The `forward` method of `BackboneBase` accepts an instance of `NestedTensor` class that contains `tensors` and `mask` as we saw in secion [Data preparation](https://amaarora.github.io/2021/07/26/annotateddetr.html#data-preparation). `BackboneBase` then takes the `tensors` and passes that through `self.body` in `xs = self.body(tensor_list.tensors)`, which is responsible for getting the output feature map of shape $f ∈ R^{C×H×W}$, where $C$ is typically set to 2048. 
 
-As already mentioned, the `forward` method of `BackboneBase` accepts an instance of `NestedTensor` class that contains `tensors` and `mask`. `BackboneBase` then takes the `tensors` from `tensor_list` (instance of `NestedTensor`), and passes that through `self.body` in `xs = self.body(tensor_list.tensors)`, which is responsible for getting the output feature map of shape $f ∈ R^{C×H×W}$, where $C$ is typically set to 2048. The `self.body` either returns the output from the last layer of the backbone model, or from all intermediate layers and the final layer depending on the value of `return_layers`. For an introduction to `IntermediateLayerGetter`, please refer to another blog post of mine - <enter blog link here>. 
+**Note:** The `self.body` either returns the output from the last layer of the backbone model, or from all intermediate layers and the final layer depending on the value of `return_layers`. For an introduction to `IntermediateLayerGetter`, please refer to another blog post of mine - <enter blog link here>. 
 
-The output of `self.body` is a `Dict` that looks something like `{"0": <torch.Tensor>}` or `{"0": <torch.Tensor>, "1": <torch.Tensor>, "2": <torch.Tensor>...}` depending on whether `return_interm_layers` is `True` or `False`. Finally, we iterate through this `Dict` output of `self.body` which we call `xs`, interpolate the mask to have the same $H$ and $W$ as the lower-resolution activation map $f ∈ R^{C×H×W}$ output from `Backbone`. Because, remember, the output from `self.body` will have a lower feature map size than the output. Because the backbone is a standard CNN, and it reduces the feature map size as we go deeper into the layers. Right? 
+The output of `self.body` is a `Dict` that looks something like `{"0": <torch.Tensor>}` or `{"0": <torch.Tensor>, "1": <torch.Tensor>, "2": <torch.Tensor>...}` depending on whether `return_interm_layers` is `True` or `False`. Finally, we iterate through this `Dict` output of `self.body` which we call `xs`, interpolate the mask to have the same $H$ and $W$ as the lower-resolution activation map $f ∈ R^{C×H×W}$ output from `Backbone` and store both `x` and `mask` in `NestedTensor` as shown below:
 
 ```python 
         for name, x in xs.items():
@@ -329,18 +328,48 @@ The output of `self.body` is a `Dict` that looks something like `{"0": <torch.Te
             out[name] = NestedTensor(x, mask)
 ```
 
-**Note**: Pointed this out again that when we passed the `tensor_list.tensors` through `self.body` we updated the tensor which was first of size $R^3×H_0×W_0$ (with 3 color channels), to a lower-resolution activation map of size $f ∈ R^{C×H×W}$. Thus, we `interpolate` the mask accordingly. 
+In summary, the Backbone is responsible for accepting an input `NestedTensor` that consists of the input image as `tensors` and a `mask` corresponding to the image. The backbone merely extracts the features from this input image, interpolates the mask to match the feature map size and returns them as a `NestedTensor` in a `Dict`. Let's see the Backbone in action in code: 
 
-**Note**: Please also note, that in summary, the Backbone is responsible for accepting an input `NestedTensor` that consists of the input image as `tensors` and a `mask` corresponding to the image. The backbone merely extracts the features from this input image, interpolates the mask to match the feature map size and returns them as a `NestedTensor` in a `Dict`. Okay? 
+```python 
+import torch
+from detr.util.misc import NestedTensor 
+from detr.models.backbone import Backbone 
 
-> Please re-read above notes until you understand them before moving forward. 
+# resnet-50 backbone
+backbone = Backbone('resnet50', train_backbone=True, return_iterm_layers=False, dilation=False)
 
-#### Positional Encoding
-> Going back to Figure-1, it can be seen that Positional Encodings are added to the output from the Backbone CNN.
+# create nested tensor, mimic output from dataset preparation as in last section 
+tensor   = torch.randn(2, 3, 765, 911)
+mask     = torch.randn(2, 765, 911)
+bb_input = NestedTensor(tensor, mask)
 
-Since the transformer architecture is permutation-invariant, we supplement it with [fixed positional encodings](https://arxiv.org/abs/1904.09925) that are added to the input of each attention layer. We defer to the supplementary material the detailed definition of the architecture, which follows the one described in [Attention Is All You Need](https://arxiv.org/abs/1706.03762).
+# get output from backbone 
+out = backbone(bb_input)
+out.keys()
+>> dict_keys(['0'])
 
-In simpler words, since all inputs are fed to the transformer parallely, instead of in a one-by-one fashion as in the case of RNNs, therefore, to let the transformer have information about the respective position of the image pixels, we add "positional encodings" to the input embeddings. 
+out['0'].__class__
+>> detr.util.misc.NestedTensor
+
+out['0'].tensors.shape
+>> torch.Size([2, 2048, 24, 29])
+
+out['0'].mask.shape
+>> torch.Size([2, 24, 29])
+```
+
+Therefore, starting from the initial image $x_{img} ∈ {3 x 765 x 911}$ (with 3 color channels), a conventional CNN backbone generates a lower-resolution activation map $f ∈ R^{2048 x 24 x 29}$. 
+
+### Positional Encoding
+> Going back to Figure-4, it can be seen that Positional Encodings are added to the output lower-resolution activation map from the Backbone CNN.
+
+*Since the transformer architecture is permutation-invariant, we supplement it with [fixed positional encodings](https://arxiv.org/abs/1904.09925) that are added to the input of each attention layer. We defer to the supplementary material the detailed definition of the architecture, which follows the one described in [Attention Is All You Need](https://arxiv.org/abs/1706.03762).*
+
+There are two options to define positional encodings: 
+1. Fixed positional encodings (`PositionEmbeddingSine`)
+2. Learned positional encodings (`PositionEmbeddingLearned`)
+
+Below, we only look at `PositionEmbeddingSine` as an example:
 
 ```python 
 class PositionEmbeddingSine(nn.Module):
@@ -382,7 +411,7 @@ class PositionEmbeddingSine(nn.Module):
         return pos
 ```
 
-As we already know from the [Attention is all you need](https://arxiv.org/abs/1706.03762) paper, the positional encodings can be mathematically defined as: 
+As we already know from the [Attention is all you need](https://arxiv.org/abs/1706.03762) paper, the fixed positional encodings can be mathematically defined as: 
 
 $$ 
 PE(pos, 2i) = \sin(\frac{pos}{10000^{\frac{2i}{d_{model}}}}) \tag{1}
@@ -399,12 +428,12 @@ As for the `PositionalEncoding` class, remember, the `Backbone` first converts i
 
 Next, we convert both `pos_x` and `pos_y` to be of dimension `dim_t` and finally take the alternate `.sin()` and `.cos()` to define `pos_x` and `pos_y`. In the end, `pos` becomes a concatenated tensor of `pos_x` and `pos_y`.
 
-> This definition of Positional Encodings is very different from the ones I've seen before, you will find a simpler implementation of Positional Encodings in PyTorch Tutorial - [LANGUAGE MODELING WITH NN.TRANSFORMER AND TORCHTEXT](https://pytorch.org/tutorials/beginner/transformer_tutorial.html). But, please note, that those are 1-dimensional, whereas for `DETR`, we need 2-dimensional positional encodings for both the `X` and `Y` axis.
+> We do not look at Positional Encodings in detail as many a good resource exist on this topic. Also, the positional encodings have been utilized from the [Attention Is All You Need](https://arxiv.org/abs/1706.03762) paper as is. 
 
-#### Joiner 
-Since the transformer architecture is permutation-invariant, we supplement it with fixed positional encodings that are **added to the input of each attention layer**.
+### Joiner 
+*Since the transformer architecture is permutation-invariant, we supplement it with fixed positional encodings that are **added to the input of each attention layer**.*
 
-So far, we have only defined the positional encodings.  
+The `Joiner` class below, is merely a convenience class, that accepts a `backbone` and `position_embedding` as defined previously, and a `NestedTensor` as input. It then generates a lower-resolution activation map of size $f ∈ R^{C×H×W}$ and positional embeddings of the same-size corresponding to the $X$ and $Y$ positions on the grid. 
 
 ```python
 class Joiner(nn.Sequential):
@@ -422,196 +451,36 @@ class Joiner(nn.Sequential):
         return out, pos
 ```
 
-There is really not much going on in the `Joiner` class. It accepts a `backbone` and `positional_embedding` (which is an instance of `PositionEmbeddingSine`) and initializes `nn.Sequential` with these two modules. 
-
-Next, in the `forward` method, we pass the `tensor_list` through the backbone first to get lower-resolution activation map of size $f ∈ R^{C×H×W}$. Next, we store the outputs from the backbone in `out` and positional encodings in `pos` and return both lists. 
-
-#### Summary 
-So far, we have covered the covered the first section of the DETR architecture - Backbone and Positional Encodings. We still need to look at Transformer Encoder, Transformer Decoder and Attention Heads. Let's see how to implement the Transformer Architecture next.
-
-![](/images/detr_architecture.png "Figure-1: DETR Architecture")
-
-### Transformer Architecture
-From Attention is all you need, the Transformer architecture has been presented in Figure-2 below: 
-
-![](/images/Transformer-architecture.PNG "Figure-2: Transformer Architecture")
-
-As can be seen, the Transformer Encoder, consists of multiple Transformer Encoder layers, where each layer consists of Multi-Head Attention and a feed-forward neural network. 
-
-#### Transformer Encoder
-First, a 1x1 convolution reduces the channel dimension of the high-level activation map $f$ from $C$ to a smaller dimension $d$. creating a new feature map $z_0 ∈ R^{d×H×W}$. The encoder expects a sequence as input, hence we collapse the spatial dimensions of $z_0$ into one dimension, resulting in a $d×HW$ feature map. Each encoder layer has a standard architecture and consists of a **multi-head self-attention** module and a **feed forward network (FFN)**. 
-
-In terms of implementation, from this point on the Transformer architecture is implemented very similarly to the implementation as explained in [The Annotated Transformer](https://nlp.seas.harvard.edu/2018/04/03/attention.html). But, for completeness, I will also share the implementations below. 
-
-The Transformer Encoder consists of multiple Transformer Encoder layers. Thus, it can be easily implemented as below: 
-
+Let's see it in action below: 
 ```python
-class TransformerEncoder(nn.Module):
-    def __init__(self, encoder_layer, num_layers, norm=None):
-        super().__init__()
-        self.layers = _get_clones(encoder_layer, num_layers)
-        self.num_layers = num_layers
-        self.norm = norm
+import torch 
+from detr.util.misc import NestedTensor
+from detr.models.backbone import *
+from detr.models.position_encoding import PositionEmbeddingSine
 
-    def forward(self, src,
-                mask: Optional[Tensor] = None,
-                src_key_padding_mask: Optional[Tensor] = None,
-                pos: Optional[Tensor] = None):
-        output = src
-        for layer in self.layers:
-            output = layer(output, src_mask=mask,
-                           src_key_padding_mask=src_key_padding_mask, pos=pos)
-        if self.norm is not None:
-            output = self.norm(output)
-        return output
+# create backbone, `Joiner` is what get's stored in DETR backbone, not `backbone`
+backbone  = Backbone('resnet50', True, False, False)   
+pos_embed = PositionEmbeddingSine(num_pos_feats=128, normalize=True)
+joiner    = Joiner(backbone, pos_embed)
+
+# mimic input 
+tensor   = torch.randn(2, 3, 765, 911)
+mask     = torch.randn(2, 765, 911)
+bb_input = NestedTensor(tensor, mask)
+
+# get output 
+out, pos = joiner(bb_input)
+
+out[-1].__class__
+>> detr.util.misc.NestedTensor
+
+# reduced lower-resolution feature map output from backbone
+out[-1].tensors.shape
+>>  torch.Size([2, 2048, 24, 29])
+
+# positional encodings with same shape as lower-resolution feature map 
+pos[-1].shape
+>>  torch.Size([2, 256, 24, 29])
 ```
 
-`_get_clones` simply clones the Transformer Encoder layer (explained below), `num_layers` number of times.  
-
-**Note**: The Transformer Encoder, as can be seen from Figure-1, accepts the outputs from Backbone and also accepts Positional Encoding. Even though in Figure-1, it has been shown that the Positional Encoding and the output from the Backbone get added first, 
-
-#### Transformer Encoder Layer
-
-Below, the `TransformerEncoderLayer` has been implemented. 
-
-```python 
-class TransformerEncoderLayer(nn.Module):
-
-    def __init__(self, d_model, nhead, dim_feedforward=2048, dropout=0.1,
-                 activation="relu", normalize_before=False):
-        super().__init__()
-        self.self_attn = nn.MultiheadAttention(d_model, nhead, dropout=dropout)
-        # Implementation of Feedforward model
-        self.linear1 = nn.Linear(d_model, dim_feedforward)
-        self.dropout = nn.Dropout(dropout)
-        self.linear2 = nn.Linear(dim_feedforward, d_model)
-
-        self.norm1 = nn.LayerNorm(d_model)
-        self.norm2 = nn.LayerNorm(d_model)
-        self.dropout1 = nn.Dropout(dropout)
-        self.dropout2 = nn.Dropout(dropout)
-
-        self.activation = _get_activation_fn(activation)
-        self.normalize_before = normalize_before
-
-    def with_pos_embed(self, tensor, pos: Optional[Tensor]):
-        return tensor if pos is None else tensor + pos
-
-    def forward(self, src,
-                src_mask: Optional[Tensor] = None,
-                src_key_padding_mask: Optional[Tensor] = None,
-                pos: Optional[Tensor] = None):
-        src2 = self.norm1(src)
-        q = k = self.with_pos_embed(src2, pos)
-        src2 = self.self_attn(q, k, value=src2, attn_mask=src_mask,
-                              key_padding_mask=src_key_padding_mask)[0]
-        src = src + self.dropout1(src2)
-        src2 = self.norm2(src)
-        src2 = self.linear2(self.dropout(self.activation(self.linear1(src2))))
-        src = src + self.dropout2(src2)
-        return src
-```
-
-It's really straightforward, we accept an input which is called `src`, it is normalized using `nn.LayerNorm`, and finally we set the query and key matrices `q` and `k` as the same by adding positional encoding to the normalized input. Finally, self-attention operation is performed to get `src2` as the output. In this case, since we can attend to anywhere in the sequence - both forwards and backwards, `attn_mask` is actually set to None. Whereas, the `key_padding_mask` are the elements in the key that are ignored by attention. 
-
-Next, is a simple feedforward layer with hidden dimension as `dim_feedforward`. And that's it! That's all the magic behind `TransformerEncoderLayer`. Next, let's look at the `TransformerDecoder`! 
-
-#### Transformer Decoder
-The decoder follows the standard architecture of the transformer, transforming $N$ embeddings of size $d$ using multi-headed self-attention and encoder-decoder attention mechanisms. The difference with the original transformer is that our model decodes the $N$ objects in parallel at each decoder layer, while [Vaswani et al.]((https://arxiv.org/abs/1706.03762)) use an autoregressive model that predicts the output sequence one element at a time. We refer the reader unfamiliar with the concepts to the [supplementary material]((https://arxiv.org/abs/1706.03762)). Since the decoder is also permutation-invariant, the $N$ input embeddings must be different to produce different results. These input embeddings are learnt positional encodings that we refer to as object queries, and similarly to the encoder, we add them to the input of each attention layer. The N object queries are transformed into an output embedding by the decoder. They are then independently decoded into box coordinates and class labels by a feed forward network (described in the next subsection), resulting $N$ final predictions. Using self-attention and encoder-decoder attention over these embeddings, the model globally reasons about all objects together using pair-wise relations between them, while being able to use the whole image as context.
-
-Similar to the Transformer Encoder, the Transformer Decoder consists of repeated Transformer Decoder layers and can be easily implemented as below:
-
-```python
-class TransformerDecoder(nn.Module):
-
-    def __init__(self, decoder_layer, num_layers, norm=None, return_intermediate=False):
-        super().__init__()
-        self.layers = _get_clones(decoder_layer, num_layers)
-        self.num_layers = num_layers
-        self.norm = norm
-        self.return_intermediate = return_intermediate
-
-    def forward(self, tgt, memory,
-                tgt_mask: Optional[Tensor] = None,
-                memory_mask: Optional[Tensor] = None,
-                tgt_key_padding_mask: Optional[Tensor] = None,
-                memory_key_padding_mask: Optional[Tensor] = None,
-                pos: Optional[Tensor] = None,
-                query_pos: Optional[Tensor] = None):
-        output = tgt
-        intermediate = []
-        for layer in self.layers:
-            output = layer(output, memory, tgt_mask=tgt_mask,
-                           memory_mask=memory_mask,
-                           tgt_key_padding_mask=tgt_key_padding_mask,
-                           memory_key_padding_mask=memory_key_padding_mask,
-                           pos=pos, query_pos=query_pos)
-            if self.return_intermediate:
-                intermediate.append(self.norm(output))
-
-        if self.norm is not None:
-            output = self.norm(output)
-            if self.return_intermediate:
-                intermediate.pop()
-                intermediate.append(output)
-
-        if self.return_intermediate:
-            return torch.stack(intermediate)
-
-        return output.unsqueeze(0)
-```
-
-The main difference is the option to return intermediate outputs for Auxilary losses (we'll look at losses later in the blog post). If `self.return_intermediate` is set to True, stacked output from every decoder layer is returned otherwise, output from the last decoder layer is returned. 
-
-#### Transformer Decoder Layer
-As for the Transformer Decoder layer, its implementation is also very similar to the Transformer Encoder layer. 
-
-```python
-class TransformerDecoderLayer(nn.Module):
-
-    def __init__(self, d_model, nhead, dim_feedforward=2048, dropout=0.1,
-                 activation="relu", normalize_before=False):
-        super().__init__()
-        self.self_attn = nn.MultiheadAttention(d_model, nhead, dropout=dropout)
-        self.multihead_attn = nn.MultiheadAttention(d_model, nhead, dropout=dropout)
-        # Implementation of Feedforward model
-        self.linear1 = nn.Linear(d_model, dim_feedforward)
-        self.dropout = nn.Dropout(dropout)
-        self.linear2 = nn.Linear(dim_feedforward, d_model)
-
-        self.norm1 = nn.LayerNorm(d_model)
-        self.norm2 = nn.LayerNorm(d_model)
-        self.norm3 = nn.LayerNorm(d_model)
-        self.dropout1 = nn.Dropout(dropout)
-        self.dropout2 = nn.Dropout(dropout)
-        self.dropout3 = nn.Dropout(dropout)
-
-        self.activation = _get_activation_fn(activation)
-        self.normalize_before = normalize_before
-
-    def with_pos_embed(self, tensor, pos: Optional[Tensor]):
-        return tensor if pos is None else tensor + pos
-
-    def forward(self, tgt, memory,
-                tgt_mask: Optional[Tensor] = None,
-                memory_mask: Optional[Tensor] = None,
-                tgt_key_padding_mask: Optional[Tensor] = None,
-                memory_key_padding_mask: Optional[Tensor] = None,
-                pos: Optional[Tensor] = None,
-                query_pos: Optional[Tensor] = None):
-        tgt2 = self.norm1(tgt)
-        q = k = self.with_pos_embed(tgt2, query_pos)
-        tgt2 = self.self_attn(q, k, value=tgt2, attn_mask=tgt_mask,
-                              key_padding_mask=tgt_key_padding_mask)[0]
-        tgt = tgt + self.dropout1(tgt2)
-        tgt2 = self.norm2(tgt)
-        tgt2 = self.multihead_attn(query=self.with_pos_embed(tgt2, query_pos),
-                                   key=self.with_pos_embed(memory, pos),
-                                   value=memory, attn_mask=memory_mask,
-                                   key_padding_mask=memory_key_padding_mask)[0]
-        tgt = tgt + self.dropout2(tgt2)
-        tgt2 = self.norm3(tgt)
-        tgt2 = self.linear2(self.dropout(self.activation(self.linear1(tgt2))))
-        tgt = tgt + self.dropout3(tgt2)
-        return tgt
-```
+> Something you might want to ask here - "Why are the number of channels in `pos` = 256 whereas backbone output has 2048 channels"? Hold on to that question, we will find it's answer next. 
