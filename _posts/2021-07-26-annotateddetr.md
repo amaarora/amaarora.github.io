@@ -46,7 +46,7 @@ The input images are batched together, applying $0$-padding adequately to ensure
 
 
 ### `CocoDetection` Dataset
-The `CocoDetection` class below inherits from [torchvision's CocoDetection dataset](https://pytorch.org/vision/stable/datasets.html#torchvision.datasets.CocoDetection), and adds custom `_transforms` on top. There's also a custom `ConvertCocoPolysToMask` class that can prepare the dataset for both object detection and panoptic segmentation. 
+The `CocoDetection` class below inherits from `torchvision.datasets.CocoDetection`, and adds custom `_transforms` on top. There's also `ConvertCocoPolysToMask` class that is able to prepare the dataset for both object detection and panoptic segmentation. 
 
 ```python 
 class CocoDetection(torchvision.datasets.CocoDetection):
@@ -93,12 +93,12 @@ target
 }
 ```
 
-In summary, the `prepare` method converted everything to a `tensor` and also instead of having a `List` of `Dict`s, the `target` is now a `Dict` with values as type `tensor`. Also, we are no longer returning segmentation masks since we are just working with Object Detection. There's some extra filtering that goes on inside `ConvertCocoPolysToMask` class like: 
+In summary, the `prepare` method converted everything to a `tensor` and also instead of having a `List` of `Dict`s, the `target` is now a `Dict` with values as type `tensor`. Also, we are no longer returning segmentation masks since we are just working with Object Detection. There's some extra filtering that goes on inside `ConvertCocoPolysToMask` class: 
 1. Filter out objects if `iscrowd=1`.
 2. Convert annotation from $[X, Y, W, H]$ to $[X_1, Y_1, X_2, Y_2]$ format. 
 3. Filter out objects if $X_2 < X_1$ or $Y_2 < Y_1$.
 
-I am going to skip over the exact source code of `ConvertCocoPolysToMask` but you can find it [here](https://github.com/facebookresearch/detr/blob/master/datasets/coco.py#L50-L112) if interested. 
+I am going to skip over the exact source code of `ConvertCocoPolysToMask` but you can find the source code [here](https://github.com/facebookresearch/detr/blob/master/datasets/coco.py#L50-L112) if interested. 
 
 Next, `self._transforms` are applied to `img, target`. The train transforms look like below: 
 
@@ -125,14 +125,14 @@ if image_set == 'train':
     ])
 ```
 
-This is using [torchvision.transforms](https://pytorch.org/vision/stable/transforms.html). From the paper: 
+This is using `torchvision.transforms`. From the paper: 
 
 We use scale augmentation, resizing the input images such that the shortest side is at least 480 and at most 800 pixels while the longest at most 1333. To help learning global relationships through the self-attention of the encoder, we also apply random crop augmentations during training, improving the performance by approximately 1 AP. Specifically, a train image is cropped with probability 0.5 to a random rectangular patch which is then resized again to 800-1333.
 
 This can be confirmed based on the train transforms above in code. Therefore, the final output from `CocoDetection` dataset is an `img` tensor and a `target` Dict.
 
 ### Custom collate function 
-Next, the DETR architecture uses a custom collate function before the outputs from `CocoDetection` class are fed to the model. This is because each image is still of a different size and has not been converted to a `tensor` yet. As we already know, the input images are batched together, applying $0$-padding adequately to ensure they all have the same dimensions $(H_0,W_0)$ as the largest image of the batch.
+Next, the DETR architecture uses a custom collate function before the outputs from `CocoDetection` class are fed to the model. This is because each image is still of a different size. As we already know, the input images are batched together, applying $0$-padding adequately to ensure they all have the same dimensions $(H_0,W_0)$ as the largest image of the batch.
 
 This is how the collate function looks like: 
 
@@ -186,7 +186,7 @@ def _max_by_axis(the_list):
     return maxes
 ```
 
-Therefore, the returned output is `[3, 765, 911]`. Finally, we define a `tensor` as `torch.zeros` of size `max_size` and also `mask` of size `max_size`. Next, we fill the tensor with `img` values and set `mask` to `False` inside the image shape values. Let me try and explain this visually: 
+Therefore, the returned `max_size` is `[3, 765, 911]`. Finally, we define a `tensor` as `torch.zeros` of size `max_size` and also `mask` of size `max_size`. Next, we fill the tensor with `img` values and set `mask` to `False` inside the image shape values. Let me try and explain this visually: 
 
 ![](/images/input_img_detr.png "Figure-2: Input batch of 2 images of shapes - [[3, 765, 512], [3, 608, 911]].")
 
@@ -406,14 +406,14 @@ So far, we have covered the covered the first section of the DETR architecture -
 
 ![](/images/detr_architecture.png "Figure-1: DETR Architecture")
 
-## Transformer Architecture
+### Transformer Architecture
 From Attention is all you need, the Transformer architecture has been presented in Figure-2 below: 
 
 ![](/images/Transformer-architecture.PNG "Figure-2: Transformer Architecture")
 
 As can be seen, the Transformer Encoder, consists of multiple Transformer Encoder layers, where each layer consists of Multi-Head Attention and a feed-forward neural network. 
 
-### Transformer Encoder
+#### Transformer Encoder
 First, a 1x1 convolution reduces the channel dimension of the high-level activation map $f$ from $C$ to a smaller dimension $d$. creating a new feature map $z_0 ∈ R^{d×H×W}$. The encoder expects a sequence as input, hence we collapse the spatial dimensions of $z_0$ into one dimension, resulting in a $d×HW$ feature map. Each encoder layer has a standard architecture and consists of a **multi-head self-attention** module and a **feed forward network (FFN)**. 
 
 In terms of implementation, from this point on the Transformer architecture is implemented very similarly to the implementation as explained in [The Annotated Transformer](https://nlp.seas.harvard.edu/2018/04/03/attention.html). But, for completeness, I will also share the implementations below. 
@@ -491,7 +491,7 @@ It's really straightforward, we accept an input which is called `src`, it is nor
 
 Next, is a simple feedforward layer with hidden dimension as `dim_feedforward`. And that's it! That's all the magic behind `TransformerEncoderLayer`. Next, let's look at the `TransformerDecoder`! 
 
-### Transformer Decoder
+#### Transformer Decoder
 The decoder follows the standard architecture of the transformer, transforming $N$ embeddings of size $d$ using multi-headed self-attention and encoder-decoder attention mechanisms. The difference with the original transformer is that our model decodes the $N$ objects in parallel at each decoder layer, while [Vaswani et al.]((https://arxiv.org/abs/1706.03762)) use an autoregressive model that predicts the output sequence one element at a time. We refer the reader unfamiliar with the concepts to the [supplementary material]((https://arxiv.org/abs/1706.03762)). Since the decoder is also permutation-invariant, the $N$ input embeddings must be different to produce different results. These input embeddings are learnt positional encodings that we refer to as object queries, and similarly to the encoder, we add them to the input of each attention layer. The N object queries are transformed into an output embedding by the decoder. They are then independently decoded into box coordinates and class labels by a feed forward network (described in the next subsection), resulting $N$ final predictions. Using self-attention and encoder-decoder attention over these embeddings, the model globally reasons about all objects together using pair-wise relations between them, while being able to use the whole image as context.
 
 Similar to the Transformer Encoder, the Transformer Decoder consists of repeated Transformer Decoder layers and can be easily implemented as below:
