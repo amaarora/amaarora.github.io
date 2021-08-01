@@ -395,11 +395,16 @@ out['0'].mask.shape
 Therefore, starting from the initial image $x_{img} ∈ {3 x 765 x 911}$ (with 3 color channels), a conventional CNN backbone generates a lower-resolution activation map $f ∈ R^{2048 x 24 x 29}$. 
 
 ### Positional Encoding
-> Going back to Figure-4, it can be seen that Positional Encodings are added to the output lower-resolution activation map from the Backbone CNN.
+
+> Going back to Figure-4, it can be seen that Positional Encodings are added to the output lower-resolution activation map from the Backbone CNN. Also, in Figure-5, it can be seen that Positional Encodings are also added to the Attention layer's input at every Decoder layer. Thus, there are two types of Positional Encodings in DETR. 
 
 *Since the transformer architecture is permutation-invariant, we supplement it with [fixed positional encodings](https://arxiv.org/abs/1904.09925) that are added to the input of each attention layer. We defer to the supplementary material the detailed definition of the architecture, which follows the one described in [Attention Is All You Need](https://arxiv.org/abs/1706.03762).*
 
-There are two options to define positional encodings: 
+*There are two kinds of positional encodings in our model: spatial positional encodings and output positional encodings (object queries).*
+
+> **IMPORTANT** : The spatial positional encodings are the ones that refer to the spatial positions $H$ & $W$ in the lower resolution feature map $f ∈ R^{C x H x W}$. The output positional encodings are the ones that refer to the positions of the various objects in the image and these are always learnt. 
+
+There are two options to define the spatial positional encodings: 
 1. Fixed positional encodings (`PositionEmbeddingSine`)
 2. Learned positional encodings (`PositionEmbeddingLearned`)
 
@@ -764,3 +769,37 @@ class TransformerDecoderLayer(nn.Module):
 ```
 
 The `TransformerDecoderLayer` requires a bit more attention than `TransformerEncoderLayer` (pun intended). First, the `tgt` variable in this case is just a bunch of zeroes of shape $100 x 1 x 256$ which represents Object Queries as in Figure-5. 
+
+> The difference with the original transformer is that the DETR model decodes the $N$ objects in parallel at each decoder layer, while Vaswani et al. used an autoregressive model that predicts the output sequence one element at a time. Since the decoder is also permutation-invariant, the $N$ input embeddings must be different to produce different results. These learnt positional encodings are called object queries and as can be seen in Figure-5, similar to the Encoder, these object queries are also added to the input at each attention layer in the Decoder. 
+
+The Decoder layer can be divided into three parts: 
+1. Multi-Head self-attention (on object queries, output positional encodings)
+2. Multi-Head Attention (Output from 1st part + output positional encodings, Output from encoder + Spatial Positional encodings)
+3. Feed Forward Neural Network 
+
+IMO, to make things crystal clear, it is important to note what's going on in each of the Attention layers inside the Decoder. 
+
+For the first Multi-Head Self-Attention layer, the Q, K & V values are: 
+1. Query: Object queries (`tgt`, initialized as zeroes) + output positional encodings (`qpos`, learned positional encodings, initialized as `nn.Embedding` in PyTorch)
+2. Key: Object queries (`tgt`, initialized as zeroes) + output positional encodings (`qpos`, learned positional encodings, initialized as `nn.Embedding` in PyTorch) 
+3. Value: Object queries (`tgt`)
+
+> Note that the Query and Key values are the same in the first attention layer, hence, self-attention. 
+
+For the second Multi-Head Attention layer, the Q, K & V values are: 
+1. Query: Output from first Multi-Head Self-Attention layer (`tgt`) + ouput positional encodings (`qpos`)
+2. Key: Output from encoder (`memory`) + Spatial Positional Encodings (`pos`)
+3. Value: Output from encoder (`memory`)
+
+Therefore, it's in the second attention layer that the Decoder interacts with/attends to the outputs from the Encoder and starts updating the input Object queries to possible object location information. 
+
+As can be seen from Figure-5, the output from the Decoder is of shape $6x1x100x256$, because it contains output from all Decoder layers, which is finally fed to Class FFN and Box FFN for bounding box prediction and classification.
+
+Next, we calculate the loss on the outputs of the Decoder, and continue this process over and over again, until the model learns to classify and locate the various objects in the input images. I am going to skip over the loss function for now, but that will be introduced in a separate blog post in the next few days. 
+
+# Conclusion
+I hope that as part of this blog post, I've been able to explain the DETR architecture, and IMHO, this blog post is feature complete, barring the loss function, that will be added later. 
+
+Comments or feedback? Please tweet at [@amaarora](https://twitter.com/amaarora).
+
+Thanks for reading!
