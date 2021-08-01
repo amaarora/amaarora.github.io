@@ -264,6 +264,40 @@ And that's it! This `NestedTensor` is what get's fed as input to the DETR Backbo
 ![](/images/detr_architecture.png "Figure-4: DETR Architecture")
 
 
+The overall implementation of the DETR architecture has been shown below: 
+
+```python
+class DETR(nn.Module):
+    """ This is the DETR module that performs object detection """
+    def __init__(self, backbone, transformer, num_classes, num_queries, aux_loss=False):
+        super().__init__()
+        self.num_queries = num_queries
+        self.transformer = transformer
+        hidden_dim = transformer.d_model
+        self.class_embed = nn.Linear(hidden_dim, num_classes + 1)
+        self.bbox_embed = MLP(hidden_dim, hidden_dim, 4, 3)
+        self.query_embed = nn.Embedding(num_queries, hidden_dim)
+        self.input_proj = nn.Conv2d(backbone.num_channels, hidden_dim, kernel_size=1)
+        self.backbone = backbone
+        self.aux_loss = aux_loss
+
+    def forward(self, samples: NestedTensor):
+        features, pos = self.backbone(samples)
+
+        src, mask = features[-1].decompose()
+        assert mask is not None
+        hs = self.transformer(self.input_proj(src), mask, self.query_embed.weight, pos[-1])[0]
+
+        outputs_class = self.class_embed(hs)
+        outputs_coord = self.bbox_embed(hs).sigmoid()
+        out = {'pred_logits': outputs_class[-1], 'pred_boxes': outputs_coord[-1]}
+        if self.aux_loss:
+            out['aux_outputs'] = self._set_aux_loss(outputs_class, outputs_coord)
+        return out
+```
+
+All the magic happens inside `backbone` and `transformer`, which we will look at next. 
+
 ## Backbone
 *Starting from the initial image $x_{img} ∈ R^3×H_0×W_0$ (with 3 color channels), a conventional CNN backbone generates a lower-resolution activation map $f ∈ R^{C×H×W}$. Typical values we use are C = 2048 and H,W = $\frac{H0}{32} , \frac{W0}{32}$.*
 
@@ -483,4 +517,7 @@ pos[-1].shape
 >>  torch.Size([2, 256, 24, 29])
 ```
 
-> Something you might want to ask here - "Why are the number of channels in `pos` = 256 whereas backbone output has 2048 channels"? Hold on to that question, we will find it's answer next. 
+### Summary
+Therefore, in the offical code implementation of DETR, the Backbone, is actually an instance on `Joiner` class (how confusing!), that accepts an input, which is of type `NestedTensor` (how confusing again!). The `tensor` and `mask` of this `NestedTensor` input have been zero-padded to ensure that all have the same dimensions $(H_0,W_0)$ as the largest image of the input batch. See Figure-3 for reference. 
+
+Finally, this `NestedTensor` instance, is passed on the Backbone to get outputs `out` & `pos`. Here, `out` is a list of `NestedTensor`, the length of the list depends on the value `return_interm_layers`. `out[-1].tensors` represents lower-resolution activation map $f ∈ R^{C×H×W}$, where $C$ has value 2048. And `pos[-1]` represents the **spatial positional encodings**  $pos ∈ R^{256×H×W}$ for each position on the grid. 
