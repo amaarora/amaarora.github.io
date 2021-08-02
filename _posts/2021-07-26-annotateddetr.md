@@ -350,7 +350,7 @@ class BackboneBase(nn.Module):
 
 The `forward` method of `BackboneBase` accepts an instance of `NestedTensor` class that contains `tensors` and `mask` as we saw in secion [Data preparation](https://amaarora.github.io/2021/07/26/annotateddetr.html#data-preparation). `BackboneBase` then takes the `tensors` and passes that through `self.body` in `xs = self.body(tensor_list.tensors)`, which is responsible for getting the output feature map of shape $f ∈ R^{C×H×W}$, where $C$ is typically set to 2048. 
 
-**Note:** The `self.body` either returns the output from the last layer of the backbone model, or from all intermediate layers and the final layer depending on the value of `return_layers`. For an introduction to `IntermediateLayerGetter`, please refer to another blog post of mine - <enter blog link here>. 
+**Note:** The `self.body` either returns the output from the last layer of the backbone model, or from all intermediate layers and the final layer depending on the value of `return_layers`. For an introduction to `IntermediateLayerGetter`, please refer to [torchvision docs](https://visual.readthedocs.io/en/latest/_modules/visual/models/utils.html). 
 
 The output of `self.body` is a `Dict` that looks something like `{"0": <torch.Tensor>}` or `{"0": <torch.Tensor>, "1": <torch.Tensor>, "2": <torch.Tensor>...}` depending on whether `return_interm_layers` is `True` or `False`. Finally, we iterate through this `Dict` output of `self.body` which we call `xs`, interpolate the mask to have the same $H$ and $W$ as the lower-resolution activation map $f ∈ R^{C×H×W}$ output from `Backbone` and store both `x` and `mask` in `NestedTensor` as shown below:
 
@@ -800,6 +800,6 @@ Next, we calculate the loss on the outputs of the Decoder, and continue this pro
 # Conclusion
 I hope that as part of this blog post, I've been able to explain the DETR architecture, and IMHO, this blog post is feature complete, barring the loss function, that will be added later. 
 
-Comments or feedback? Please tweet at [@amaarora](https://twitter.com/amaarora).
+As usual, in case I have missed anything or to provide feedback, please feel free to reach out to me at [@amaarora](https://twitter.com/amaarora).
 
-Thanks for reading!
+Also, feel free to [subscribe to my blog here](https://amaarora.github.io/subscribe) to receive regular updates regarding new blog posts. Thanks for reading!
