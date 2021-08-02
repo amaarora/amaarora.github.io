@@ -6,9 +6,9 @@
 ## Foreword 
 Welcome to "**The Annotated DETR**". 
 
-One of the most brilliant and well-explained articles I have ever read is [The Annotated Transformer](https://nlp.seas.harvard.edu/2018/04/03/attention.html). It introduced **Attention** like no other post ever written. The simple idea was to present an "annotated" version of the paper [Attention is all you need](https://arxiv.org/abs/1706.03762) along with code.
+One of the most brilliant and well-explained articles I have read is [The Annotated Transformer](https://nlp.seas.harvard.edu/2018/04/03/attention.html). It introduced **Attention** like no other post. The simple idea was to present an "annotated" version of the paper [Attention is all you need](https://arxiv.org/abs/1706.03762) along with code.
 
-Something I have always believed in is that when you write things in code, the implementation and secrets become clearer. Nothing is hidden anymore.
+Something I have always believed in is that when you write things in code, the implementation and secrets become clearer. Nothing is hidden anymore. Reading the research paper with it's code in front of me, is the best way for me to understand the paper. 
 
 >  There is nothing magic about magic. The magician merely understands something simple which doesn’t appear to be simple or natural to the untrained audience. Once you learn how to hold a card while making your hand look empty, you only need practice before you, too, can “do magic.”
 >
