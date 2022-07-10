@@ -171,13 +171,14 @@ Okay, so pretty much everything is the same as ViT except this idea of shifted w
 
 ### Shifted Windows based Self Atention
 From section 3.2 of the paper:
+
 *The standard Transformer architecture and its adaptation for image classification both conduct global selfattention, where the relationships between a token and all other tokens are computed. The global computation leads to quadratic complexity with respect to the number of tokens, making it unsuitable for many vision problems requiring an immense set of tokens for dense prediction or to represent a high-resolution image.*
 
 *For efficient modeling, we propose to compute self-attention within local windows. The windows are arranged to evenly partition the image in a non-overlapping manner.*
 
 *The window-based self-attention module lacks connections across windows, which limits its modeling power. To introduce cross-window connections while maintaining the efficient computation of non-overlapping windows, we propose a shifted window partitioning approach which alternates between two partitioning configurations in consecutive Swin Transformer blocks.*
 
-*As illustrated in Figure below, the first module uses a regular window partitioning strategy which starts from the top-left pixel, and the 8 × 8 feature map is evenly partitioned into 2 × 2 windows of size 4 × 4 (M = 4). Then, the next module adopts a windowing configuration that is shifted from that of the preceding layer, by displacing the windows by $([M/2], [M/2])$ pixels from the regularly partitioned windows.
+*As illustrated in Figure below, the first module uses a regular window partitioning strategy which starts from the top-left pixel, and the 8 × 8 feature map is evenly partitioned into 2 × 2 windows of size 4 × 4 (M = 4). Then, the next module adopts a windowing configuration that is shifted from that of the preceding layer, by displacing the windows by $([M/2], [M/2])$ pixels from the regularly partitioned windows.*
 
 ![](/images/shifted-windows.png "An illustration of the shifted window approach for computing self-attention in the proposed Swin Transformer architecture.")
 
