@@ -36,12 +36,12 @@ From the Abstract of the paper:
 *Swin Transformer is compatible for a broad range of vision tasks, including image classification (87.3 top-1 accuracy on ImageNet-1K) and dense prediction tasks such as object detection (58.7 box AP and 51.1 mask AP on COCO testdev) and semantic segmentation (53.5 mIoU on ADE20K val). Its performance surpasses the previous state-of-the art by a large margin of +2.7 box AP and +2.6 mask AP on COCO, and +3.2 mIoU on ADE20K, demonstrating the potential of Transformer-based models as vision backbones. The hierarchical design and the shifted window approach also prove beneficial for all-MLP architectures.*
 
 ## Key Concepts/Ideas
-I might be oversimplifying here, but in my head there are only two new key concepts that we need to understand on top of ViT to get a complete grasp of the Swin Transformer architecture. 
+I might be oversimplifying here, but in my head there are only two new key concepts that we need to understand on top of [ViT](https://arxiv.org/abs/2010.11929) to get a complete grasp of the Swin Transformer architecture. 
 
 1. [Shifted Window Attention](https://amaarora.github.io/2022/07/04/swintransformerv1.html#window-attention-and-shifted-window-attention-using-microsoft-excel) 
 2. [Patch Merging](https://amaarora.github.io/2022/07/04/swintransformerv1.html#patch-merging-layer)
 
-Everything else to me looks pretty much the same as ViT (with some minor modifications). So, what are the two concepts? We will get to them later in this blog post. 
+Everything else to me looks pretty much the same as [ViT](https://arxiv.org/abs/2010.11929) (with some minor modifications). So, what are the two concepts? We will get to them later in this blog post. 
 
 First, let's get a high level overview of the architecture. 
 
@@ -51,11 +51,11 @@ First, let's get a high level overview of the architecture.
 
 From section 3.1 of the paper: 
 
-*An overview of the Swin Transformer architecture is presented in the Figure above, which illustrates the tiny version (SwinT). It first splits an input RGB image into non-overlapping patches by a patch splitting module, like ViT. Each patch is
+*An overview of the Swin Transformer architecture is presented in the Figure above, which illustrates the tiny version (SwinT). It first splits an input RGB image into non-overlapping patches by a patch splitting module, like [ViT](https://arxiv.org/abs/2010.11929). Each patch is
 treated as a “token” and its feature is set as a concatenation of the raw pixel RGB values. In our implementation, we use a patch size of 4 × 4 and thus the feature dimension of each patch is 4 × 4 × 3 = 48. A linear embedding layer is applied on this raw-valued feature to project it to an arbitrary dimension (denoted as C).*
 
 ### Patch Partition/Embedding
-So first step is to take in an input image and convert it to Patch Embeddings. This is the exact same as ViT with the difference being that each patch size in Swin Transformer is 4x4 instead of 16x16 as in ViT. I have previously explained Patch Embeddings [here](https://amaarora.github.io/2021/01/18/ViT.html#patch-embeddings) and therefore won't be going into detail here.  
+So first step is to take in an input image and convert it to Patch Embeddings. This is the exact same as [ViT](https://arxiv.org/abs/2010.11929) with the difference being that each patch size in Swin Transformer is 4x4 instead of 16x16 as in [ViT](https://arxiv.org/abs/2010.11929). I have previously explained Patch Embeddings [here](https://amaarora.github.io/2021/01/18/ViT.html#patch-embeddings) and therefore won't be going into detail here.  
 
 ```python 
 from timm.models.layers import PatchEmbed
@@ -159,7 +159,7 @@ Therefore, when we concatenate in code using `x = torch.cat([x0, x1, x2, x3], -1
 Now that we've looked at Patch Merging layer, let's get to the meat of the paper - which is the **Swin Transformer Block**.
 
 ## Swin Transformer Block
-At every stage in *Swin-T*, there are at two Swin Transformer Blocks except Stage-3, where there are 6 Swin Transformer Blocks in tandem. 
+At every stage in *Swin-T*, there are at two consecutive Swin Transformer Blocks except Stage-3, where there are 6 Swin Transformer Blocks in tandem. 
 
 ![](/images/swin-transformer-block.png "Figure-4: Two successive Swin Transformer Blocks")
 
@@ -167,7 +167,7 @@ From section Swin Transformer Block heading under section 3.1 of the paper:
 
 *Swin Transformer is built by replacing the standard multi-head self attention (MSA) module in a Transformer block by a module based on shifted windows, with other layers kept the same. As illustrated in Figure above, a Swin Transformer block consists of a shifted window based MSA module, followed by a 2-layer MLP with GELU nonlinearity in between. A LayerNorm (LN) layer is applied before each MSA module and each MLP, and a residual connection is applied after each module.*
 
-Okay, so pretty much everything is the same as ViT except this idea of shifted windows based attention. So, that's what we should really at next before looking at the code implementation of Swin Transformer Block.
+Okay, so pretty much everything is the same as [ViT](https://arxiv.org/abs/2010.11929) except this idea of shifted windows based attention. So, that's what we should really at next before looking at the code implementation of Swin Transformer Block.
 
 ### Shifted Windows based Self Atention
 From section 3.2 of the paper:
@@ -184,7 +184,9 @@ From section 3.2 of the paper:
 
 Before looking at the code implementation of shifted window based attention, we first need to understand what's exactly going on. And if the above doesn't make much sense, let me try and break it down for you. It's really simple. Trust me!
 
-So on the left, we have an 8x8 feature map which is evenly partitioned into 4 windows of size 4 x 4. Here, the window size $M=4$. Now in the first part of the two successive blocks, we calculate attention inside these windows. But, remember we also need cross-window attention for our network to learn better! Why? (Because we are no longer using a global context). So, in the second part of the swin transformer block, we displace the windows by $([M/2], [M/2])$ pixels from the regularly partitioned windows, and perform attention between these new windows! This leads to cross-window connections. In this case, since $M=4$, we displace the windows by $(2, 2)$. 
+So on the left, we have an 8x8 feature map which is evenly partitioned into 4 windows of size 4 x 4. Here, the window size $M=4$. Now in the first part of the two successive blocks, we calculate attention inside these windows. But, remember we also need cross-window attention for our network to learn better! Why? (Because we are no longer using a global context). So, in the second part of the swin transformer block, we displace the windows by $([M/2], [M/2])$ pixels from the regularly partitioned windows, and perform attention between these new windows! This leads to cross-window connections. In this case, since $M=4$, we displace the windows by $(2, 2)$. Now, we perform self-attention inside the shifted local windows. 
+
+> **Note:** After the shifting windows by (2,2), we have a total of 9 windows, whereas previously we only had 4 windows. There might be a better way to perform shifted window attention. That has been explained in the next section.
 
 ### Efficient batch computation for shifted configuration
 ![](/images/window-partition.png "Figure-6: Illustration of an efficient batch computation approach for self-attention in shifted window partitioning.")
@@ -194,13 +196,13 @@ From section 3.2 of the paper:
 
 *An issue with shifted window partitioning is that it will result in more windows, from $[h/M] x [w/M]$ to $([h/M]+1) X ([w/M]+1)$ in the shifted configuration, and some of the windows will be smaller than $M × M$. Here, we propose a more efficient batch computation approach by cyclic-shifting toward the top-left direction, as illustrated in Figure 4. After this shift, a batched window may be composed of several sub-windows that are not adjacent in the feature map, so a masking mechanism is employed to limit self-attention computation to within each sub-window. With the cyclic-shift, the number of batched windows remains the same as that of regular window partitioning, and thus is also efficient.*
 
-I'll be honest, none of the above made complete sense to me for the first few days when I read the paper until it did! So, I'll try to explain shifted window attention in the easiest way possible using Microsoft Excel.
+I'll be honest, none of the above made complete sense to me for the first few days when I read the paper until recently! So, I'll try to explain shifted window attention in the easiest way possible using **Microsoft Excel**.
 
 ### Window Attention and Shifted Window Attention using Microsoft Excel
 
 Remember that we always have two consecutive Swin Transformer Blocks. The first one performs window attention and the second one performs "shifted" window attention. Here, window attention just means attention inside local windows. Performing a "shifted" window attention makes sure that there is cross-window connections while maintaining the efficient computation of non-overlapping windows.
 
-![](/images/shifted-window-excel.png "Shifted Window using Excel")
+![](/images/shifted-window-excel.png "Figure-7: Shifted Window using Excel")
 
 Let's assume that we have a 8x8 feature map as was shown in the paper. Let this be called as feature map "A". Now, if the window size $M=4$, then we can divide this feature map into 4 windows each of size 4x4. The first Swin Transformer block performs self-attention within these 4 local windows that have been highlighted with different colours. 
 
@@ -234,23 +236,161 @@ array([[0, 0, 0, 0, 1, 1, 2, 2],
 
 As can be seen above, the mask completely matches the highlighted colors in feature map "C". Thus we can perform attention with masking while using cyclic-shift. This will be equivalent to performing window-attention in feature map "B"! I hope that now this concept of window attention and shifted window attenion makes sense. And that now you understand how the authors proposed to use "Efficient batch computation for shifted configuration"! We are now ready to look at the PyTorch implementation of `SwinTransformerBlock` along with `WindowAttention`. 
 
+> Please feel free to pause at this point, and re read the above three sections. Everything I've written above, should make complete sense. If it does, then, you've really understood how Swin Transformer works! If it doesn't, feel free to reach out to me. :)
 
 
+### Swin Transformer Block in PyTorch
 
+```python
+class SwinTransformerBlock(nn.Module):
+    def __init__(
+            self, dim, input_resolution, num_heads=4, head_dim=None, window_size=7, shift_size=0,
+            mlp_ratio=4., qkv_bias=True, drop=0., attn_drop=0., drop_path=0.,
+            act_layer=nn.GELU, norm_layer=nn.LayerNorm):
+        super().__init__()
+        self.dim = dim
+        self.input_resolution = input_resolution
+        self.window_size = window_size
+        self.shift_size = shift_size
+        self.mlp_ratio = mlp_ratio
+        if min(self.input_resolution) <= self.window_size:
+            # if window size is larger than input resolution, we don't partition windows
+            self.shift_size = 0
+            self.window_size = min(self.input_resolution)
 
+        self.norm1 = norm_layer(dim)
+        self.attn = WindowAttention(
+            dim, num_heads=num_heads, head_dim=head_dim, window_size=to_2tuple(self.window_size),
+            qkv_bias=qkv_bias, attn_drop=attn_drop, proj_drop=drop)
 
+        self.drop_path = DropPath(drop_path) if drop_path > 0. else nn.Identity()
+        self.norm2 = norm_layer(dim)
+        self.mlp = Mlp(in_features=dim, hidden_features=int(dim * mlp_ratio), act_layer=act_layer, drop=drop)
 
+        if self.shift_size > 0:
+            H, W = self.input_resolution
+            img_mask = torch.zeros((1, H, W, 1))  # 1 H W 1
+            cnt = 0
+            for h in (
+                    slice(0, -self.window_size),
+                    slice(-self.window_size, -self.shift_size),
+                    slice(-self.shift_size, None)):
+                for w in (
+                        slice(0, -self.window_size),
+                        slice(-self.window_size, -self.shift_size),
+                        slice(-self.shift_size, None)):
+                    img_mask[:, h, w, :] = cnt
+                    cnt += 1
+            mask_windows = window_partition(img_mask, self.window_size)  # num_win, window_size, window_size, 1
+            mask_windows = mask_windows.view(-1, self.window_size * self.window_size)
+            attn_mask = mask_windows.unsqueeze(1) - mask_windows.unsqueeze(2)
+            attn_mask = attn_mask.masked_fill(attn_mask != 0, float(-100.0)).masked_fill(attn_mask == 0, float(0.0))
+        else:
+            attn_mask = None
+        self.register_buffer("attn_mask", attn_mask)
 
+    def forward(self, x):
+        H, W = self.input_resolution
+        B, L, C = x.shape
+        _assert(L == H * W, "input feature has wrong size")
 
+        shortcut = x
+        x = self.norm1(x)
+        x = x.view(B, H, W, C)
 
+        # cyclic shift
+        if self.shift_size > 0:
+            shifted_x = torch.roll(x, shifts=(-self.shift_size, -self.shift_size), dims=(1, 2))
+        else:
+            shifted_x = x
 
+        # partition windows
+        x_windows = window_partition(shifted_x, self.window_size)  # num_win*B, window_size, window_size, C
+        x_windows = x_windows.view(-1, self.window_size * self.window_size, C)  # num_win*B, window_size*window_size, C
 
+        # W-MSA/SW-MSA
+        attn_windows = self.attn(x_windows, mask=self.attn_mask)  # num_win*B, window_size*window_size, C
 
+        # merge windows
+        attn_windows = attn_windows.view(-1, self.window_size, self.window_size, C)
+        shifted_x = window_reverse(attn_windows, self.window_size, H, W)  # B H' W' C
 
+        # reverse cyclic shift
+        if self.shift_size > 0:
+            x = torch.roll(shifted_x, shifts=(self.shift_size, self.shift_size), dims=(1, 2))
+        else:
+            x = shifted_x
+        x = x.view(B, H * W, C)
 
+        # FFN
+        x = shortcut + self.drop_path(x)
+        x = x + self.drop_path(self.mlp(self.norm2(x)))
 
+        return x
+```
 
+In the implementation above, we are using `window_partition`, `window_reverse` & `WindowAttention`, but let me try and explain the implementation of `SwinTransformerBlock` first, without going into the details of `window_partition`, `window_reverse` & `WindowAttention`.
 
+The main part of the `__init__` method is below:
 
+```python
+if self.shift_size > 0:
+    H, W = self.input_resolution
+    img_mask = torch.zeros((1, H, W, 1))  # 1 H W 1
+    cnt = 0
+    for h in (
+            slice(0, -self.window_size),
+            slice(-self.window_size, -self.shift_size),
+            slice(-self.shift_size, None)):
+        for w in (
+                slice(0, -self.window_size),
+                slice(-self.window_size, -self.shift_size),
+                slice(-self.shift_size, None)):
+            img_mask[:, h, w, :] = cnt
+            cnt += 1
+```
 
+I hope this is easily understandable to the reader based on the explanations in [Window Attention and Shifted Window Attention using Microsoft Excel](https://amaarora.github.io/2022/07/04/swintransformerv1.html#window-attention-and-shifted-window-attention-using-microsoft-excel). Apart from that, we are just creating the architecture as in Figure-4. 
 
+We can create Stage-1 of the Swin-T architecture using `SwinTransformerBlock` as below:
+
+```python 
+from timm.models.swin_transformer import SwinTransformerBlock
+x = torch.randn(1, 56*56, 96)
+t_1 = SwinTransformerBlock(dim=96, input_resolution=(56, 56))
+t_2 = SwinTransformerBlock(dim=96, input_resolution=(56, 56), shift_size=3)
+t_1(x).shape, t_2(t_1(x)).shape
+
+>> (torch.Size([1, 3136, 96]), torch.Size([1, 3136, 96]))
+```
+
+As can be seen the only difference between the two transformer blocks is that the second one uses shifted `WindowAttention`, and the `shift_size` is set to 3 or `window_size//2`.
+
+In the `forward` method of `SwinTransformerBlock`, if `shift_size>0`, we perform the cyclic shift. This is performed in PyTorch by using `torch.roll`. Essentially, this `torch.roll` will create feature map "B" from feature map "A" as in figure-7.
+
+## Window Partition
+It is much easier to partition an input into windows using Microsoft Excel, but how do we do this in PyTorch?
+
+```python
+def window_partition(x, window_size: int):
+    """
+    Args:
+        x: (B, H, W, C)
+        window_size (int): window size
+
+    Returns:
+        windows: (num_windows*B, window_size, window_size, C)
+    """
+    B, H, W, C = x.shape
+    x = x.view(B, H // window_size, window_size, W // window_size, window_size, C)
+    windows = x.permute(0, 1, 3, 2, 4, 5).contiguous().view(-1, window_size, window_size, C)
+    return windows
+```
+
+We take an input of shape $(B, H, W, C)$, next, we reshape it to $(B, H/M, M, W/M, M, C)$ and convert it to shape $(B * (H/M * W/M), M, M, C)$ where, 
+
+- B - Batch size
+- H - Image height 
+- W - Image width 
+- C - Number of channels 
+- M - Window size
