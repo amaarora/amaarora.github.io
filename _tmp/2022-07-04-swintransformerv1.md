@@ -162,6 +162,7 @@ At every stage in *Swin-T*, there are at two Swin Transformer Blocks except Stag
 ![](/images/swin-transformer-block.png "Two successive Swin Transformer Blocks")
 
 From section Swin Transformer Block heading under section 3.1 of the paper:
+
 *Swin Transformer is built by replacing the standard multi-head self attention (MSA) module in a Transformer block by a module based on shifted windows, with other layers kept the same. As illustrated in Figure above, a Swin Transformer block consists of a shifted window based MSA module, followed by a 2-layer MLP with GELU nonlinearity in between. A LayerNorm (LN) layer is applied before each MSA module and each MLP, and a residual connection is applied after each module.*
 
 Okay, so pretty much everything is the same as ViT except this idea of shifted windows based attention. So, that's what we should really at next before looking at the code implementation of Swin Transformer Block.
@@ -180,5 +181,73 @@ From section 3.2 of the paper:
 
 Before looking at the code implementation of shifted window based attention, we first need to understand what's exactly going on. And if the above doesn't make much sense, let me try and break it down for you. It's really simple. Trust me!
 
-So on the left, we have an 8x8 feature map which is evenly partitioned into 4 windows of size 4 x 4. Here, the window size $M=4$. Now in the first part of the two successive blocks, we calculate attention inside these windows. But, remember we also need cross-window attention for our network to learn better! Why? (Because we are no longer using a global context). So, in the second part of the swin transformer block, we displace the windows by $([M/2], [M/2])$ pixels from the regularly partitioned windows, and perform attention between these new windows! This leads to cross-window connections. In this case, since $M=4$, we displace the windows by $(2, 2)$.
+So on the left, we have an 8x8 feature map which is evenly partitioned into 4 windows of size 4 x 4. Here, the window size $M=4$. Now in the first part of the two successive blocks, we calculate attention inside these windows. But, remember we also need cross-window attention for our network to learn better! Why? (Because we are no longer using a global context). So, in the second part of the swin transformer block, we displace the windows by $([M/2], [M/2])$ pixels from the regularly partitioned windows, and perform attention between these new windows! This leads to cross-window connections. In this case, since $M=4$, we displace the windows by $(2, 2)$. 
+
+### Efficient batch computation for shifted configuration
+![](/images/window-partition.png "Illustration of an efficient batch computation approach for self-attention in shifted window partitioning.")
+
+
+From section 3.2 of the paper: 
+
+*An issue with shifted window partitioning is that it will result in more windows, from $[h/M] x [w/M]$ to $([h/M]+1) X ([w/M]+1)$ in the shifted configuration, and some of the windows will be smaller than $M × M$. Here, we propose a more efficient batch computation approach by cyclic-shifting toward the top-left direction, as illustrated in Figure 4. After this shift, a batched window may be composed of several sub-windows that are not adjacent in the feature map, so a masking mechanism is employed to limit self-attention computation to within each sub-window. With the cyclic-shift, the number of batched windows remains the same as that of regular window partitioning, and thus is also efficient.*
+
+I'll be honest, none of the above made complete sense to me for the first few days when I read the paper until it did! So, I'll try to explain shifted window attention in the easiest way possible using Microsoft Excel.
+
+### Window Attention and Shifted Window Attention using Microsoft Excel
+
+Remember that we always have two consecutive Swin Transformer Blocks. The first one performs window attention and the second one performs "shifted" window attention. Here, window attention just means attention inside local windows. Performing a "shifted" window attention makes sure that there is cross-window connections while maintaining the efficient computation of non-overlapping windows.
+
+![](/images/shifted-window-excel.png "Shifted Window using Excel")
+
+Let's assume that we have a 8x8 feature map as was shown in the paper. Let this be called as feature map "A". Now, if the window size $M=4$, then we can divide this feature map into 4 windows each of size 4x4. The first Swin Transformer block performs self-attention within these 4 local windows that have been highlighted with different colours. 
+
+Now, before passing on the feature map to the second Swin Transformer Block, we shift the windows by $(M/2, M/2)$ as mentioned in the paper. Therefore, we shift the windows by $(2, 2)$. This leads to feature map "B" where again, each window has been again highlighted with a different color. 
+
+But, there is one simple problem - there are now 9 (3x3) windows. This was also mentioned in the paper before in this language - *An issue with shifted window partitioning is that it will result in more windows, from $[h/M] x [w/M]$ to $([h/M]+1) X ([w/M]+1)$ in the shifted configuration, and some of the windows will be smaller than $M × M$.* 
+
+I hope that the paper's language now makes sense. We have 3x3 windows after shifted the windows by (2, 2), and also some of the windows are smaller than size 4x4. A naive solution could have been to pad the windows that are of size less than 4x4, but this would lead to computation overhead. 
+
+So the authors of the paper suggested something really neat - "Efficient batch computation for shifted configuration"! The idea is to create a feature map "C" by cyclic shifting the feature map "A". But as you can see, this leads to a feature map, where except the top-left window, all other windows consist of sub-windows that aren't really next to each other. The local attention should be as per the highlighted colours in feature map "C" and not the dashed boundaries. Therefore, next step is to use masking when performing local attention. A mask for feature map "C" can be created using the following code: 
+
+```python 
+cnt = 0
+m   = np.arange(1, 65).reshape(8,8)
+for h in (slice(0, -4), slice(-4, -2), slice(-2, None)):
+    for w in (slice(0, -4), slice(-4, -2), slice(-2, None)):
+        m[h, w] = cnt
+        cnt += 1
+m
+
+>> 
+array([[0, 0, 0, 0, 1, 1, 2, 2],
+       [0, 0, 0, 0, 1, 1, 2, 2],
+       [0, 0, 0, 0, 1, 1, 2, 2],
+       [0, 0, 0, 0, 1, 1, 2, 2],
+       [3, 3, 3, 3, 4, 4, 5, 5],
+       [3, 3, 3, 3, 4, 4, 5, 5],
+       [6, 6, 6, 6, 7, 7, 8, 8],
+       [6, 6, 6, 6, 7, 7, 8, 8]])
+```
+
+As can be seen above, the mask completely matches the highlighted colors in feature map "C". Thus we can perform attention with masking while using cyclic-shift. This will be equivalent to performing window-attention in feature map "B"! I hope that now this concept of window attention and shifted window attenion makes sense. And that now you understand how the authors proposed to use "Efficient batch computation for shifted configuration"! We are now ready to look at the PyTorch implementation of `SwinTransformerBlock` along with `WindowAttention`. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
