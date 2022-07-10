@@ -47,7 +47,7 @@ First, let's get a high level overview of the architecture.
 
 ## Swin Transformer Overview
 
-![](/images/swin-transformer.png "Swin Transformer Architecture")
+![](/images/swin-transformer.png "Figure-1: Swin Transformer Architecture")
 
 From section 3.1 of the paper: 
 
@@ -94,7 +94,7 @@ From section 3.1 of the paper:
 
 Here, $C$ is the number of channels (embedding dimension). For the tiny version that has been explained as part of this blog post, $C=96$.
 
-![](/images/PatchMerging.png "Patch Merging")
+![](/images/PatchMerging.png "Figure-2: Patch Merging")
 
 As can be seen below, the Patch-Merging layer merges four patches. So with every merge, both height and width of the image are further reduced by a factor of 2. In stage-1, the input resolution is $(H/4,W/4)$, but after patch merging, the resolution will change to $(H/8, W/8)$ which will be the input for stage-2. For stage-3 the input resolution would be $(H/16, W/16)$ and for stage-4, the input resolution would be $(H/32, W/32)$.
 
@@ -152,7 +152,7 @@ To help understand the code above, I used Microsoft Excel again. In the figure b
 - $X_2$ is represented by `⚫` - starting at row 0, column 1;
 - $X_0$ is represented by `⬛` - starting at row 1, column 1 
 
-![](/images/patch-merging-excel.png "Patch Merging Layer in Excel")
+![](/images/patch-merging-excel.png "Figure-3: Patch Merging Layer in Excel")
 
 Therefore, when we concatenate in code using `x = torch.cat([x0, x1, x2, x3], -1)`, we are actually merging four patches together, and therefore here $X$ would have dimension size of 4C. Next, as was mentioned in the paper - *the output dimension is set to 2C*, therefore, we make use of a `nn.Linear` layer in code to reduce the dimension side to 2C.
 
@@ -161,7 +161,7 @@ Now that we've looked at Patch Merging layer, let's get to the meat of the paper
 ## Swin Transformer Block
 At every stage in *Swin-T*, there are at two Swin Transformer Blocks except Stage-3, where there are 6 Swin Transformer Blocks in tandem. 
 
-![](/images/swin-transformer-block.png "Two successive Swin Transformer Blocks")
+![](/images/swin-transformer-block.png "Figure-4: Two successive Swin Transformer Blocks")
 
 From section Swin Transformer Block heading under section 3.1 of the paper:
 
@@ -180,14 +180,14 @@ From section 3.2 of the paper:
 
 *As illustrated in Figure below, the first module uses a regular window partitioning strategy which starts from the top-left pixel, and the 8 × 8 feature map is evenly partitioned into 2 × 2 windows of size 4 × 4 (M = 4). Then, the next module adopts a windowing configuration that is shifted from that of the preceding layer, by displacing the windows by $([M/2], [M/2])$ pixels from the regularly partitioned windows.*
 
-![](/images/shifted-windows.png "An illustration of the shifted window approach for computing self-attention in the proposed Swin Transformer architecture.")
+![](/images/shifted-windows.png "Figure-5: An illustration of the shifted window approach for computing self-attention in the proposed Swin Transformer architecture.")
 
 Before looking at the code implementation of shifted window based attention, we first need to understand what's exactly going on. And if the above doesn't make much sense, let me try and break it down for you. It's really simple. Trust me!
 
 So on the left, we have an 8x8 feature map which is evenly partitioned into 4 windows of size 4 x 4. Here, the window size $M=4$. Now in the first part of the two successive blocks, we calculate attention inside these windows. But, remember we also need cross-window attention for our network to learn better! Why? (Because we are no longer using a global context). So, in the second part of the swin transformer block, we displace the windows by $([M/2], [M/2])$ pixels from the regularly partitioned windows, and perform attention between these new windows! This leads to cross-window connections. In this case, since $M=4$, we displace the windows by $(2, 2)$. 
 
 ### Efficient batch computation for shifted configuration
-![](/images/window-partition.png "Illustration of an efficient batch computation approach for self-attention in shifted window partitioning.")
+![](/images/window-partition.png "Figure-6: Illustration of an efficient batch computation approach for self-attention in shifted window partitioning.")
 
 
 From section 3.2 of the paper: 
