@@ -150,6 +150,7 @@ To help understand the code above, I used Microsoft Excel again. In the figure b
 - $X_2$ is represented by `⚫` - starting at row 0, column 1;
 - $X_0$ is represented by `⬛` - starting at row 1, column 1 
 
-<img src="../images/patch-merging-excel.png" alt="Patch Merge" width="600"/>
+<div style="text-align:center"><img src="../images/patch-merging-excel.png" alt="Patch Merge" width="600"/></div>
+
 
 Therefore, when we concatenate in code using `x = torch.cat([x0, x1, x2, x3], -1)`, we are actually merging four patches together, and therefore here $X$ would have dimension size of 4C. Next, as was mentioned in the paper - *the output dimension is set to 2C*, therefore, we make use of a `nn.Linear` layer in code to reduce the dimension side to 2C.
