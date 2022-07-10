@@ -10,7 +10,7 @@ I also resigned from my position as **Machine Learning Engineer** from **Weights
 
 I wrote many blogs on various different research papers during my time at W&B that can be found [here](https://amaarora.github.io/). 
 
-A lot has changed in the past 1 year or so since I have been away. As I catch-up with the latest research, I hope to continue releasing more blog posts fortnightly and take you on this journey with me as well. Let's learn together! 
+A lot has changed in the past 1 year or so since I have been away. As I catch-up with the latest research, I hope to continue releasing more blog posts **fortnightly** and take you on this journey with me as well. Let's learn together! 
 
 ## Prerequisites 
 As part of this blog post I am going to assume that the reader has a basic understanding of CNNs and the Transformer architecture. 
@@ -27,7 +27,7 @@ For CNNs, there are various architectures that have been introduced. I have prev
 ## Introduction
 As part of today's blog post, I want to cover [Swin Transformers](https://arxiv.org/abs/2103.14030). As is usual for my blog posts, I will be covering every related concept in theory along with a working PyTorch implementation of the architecture from [TIMM](https://github.com/rwightman/pytorch-image-models). Also, all text presented in this blog post copied directly from the paper will be in *Italics*.
 
-> **NOTE**: At the time of writing this blog post, we already have a V2 of the [Swin Transformer](https://arxiv.org/abs/2111.09883) architecture. This architecture will be covered in a future blog post. 
+> **Note**: At the time of writing this blog post, we already have a [Swin Transformer V2](https://arxiv.org/abs/2111.09883) architecture. This architecture will be covered in a future blog post. 
 
 While the Transformer architecture before this paper had proved to be performing better than CNNs on the ImageNet dataset, it was yet to be utilised as a general purpose backbone for other tasks such as object detection & semantic segmentation. This paper solves that problem and Swin Transformers can capably serve as general purpose backbones for computer vision. 
 
@@ -38,8 +38,8 @@ From the Abstract of the paper:
 ## Key Concepts/Ideas
 I might be oversimplifying here, but in my head there are only two new key concepts that we need to understand on top of ViT to get a complete grasp of the Swin Transformer architecture. 
 
-1. Shifted Window Attention 
-2. Patch Merging
+1. [Shifted Window Attention](https://amaarora.github.io/2022/07/04/swintransformerv1.html#window-attention-and-shifted-window-attention-using-microsoft-excel) 
+2. [Patch Merging](https://amaarora.github.io/2022/07/04/swintransformerv1.html#patch-merging-layer)
 
 Everything else to me looks pretty much the same as ViT (with some minor modifications). So, what are the two concepts? We will get to them later in this blog post. 
 
@@ -55,7 +55,7 @@ From section 3.1 of the paper:
 treated as a “token” and its feature is set as a concatenation of the raw pixel RGB values. In our implementation, we use a patch size of 4 × 4 and thus the feature dimension of each patch is 4 × 4 × 3 = 48. A linear embedding layer is applied on this raw-valued feature to project it to an arbitrary dimension (denoted as C).*
 
 ### Patch Partition/Embedding
-So first step is to take in an input image and convert it to Patch Embeddings. This is the exact same as ViT with the difference being that each patch size in Swin Transformer is **$4 x 4$** instead of **$16 x 16$** as in ViT. I have previously explained Patch Embeddings [here](https://amaarora.github.io/2021/01/18/ViT.html#patch-embeddings) and therefore won't be going into detail here.  
+So first step is to take in an input image and convert it to Patch Embeddings. This is the exact same as ViT with the difference being that each patch size in Swin Transformer is 4x4 instead of 16x16 as in ViT. I have previously explained Patch Embeddings [here](https://amaarora.github.io/2021/01/18/ViT.html#patch-embeddings) and therefore won't be going into detail here.  
 
 ```python 
 from timm.models.layers import PatchEmbed
@@ -66,9 +66,9 @@ patch_embed(x).shape
 >> torch.Size([1, 3136, 96])
 ```
 
-As can be seen, that the output of the Patch Embedding layer is of shape $1 x 3136 x 96$, that is, $1 x (H/4 x W/4) x 96$ where *$96$* is the embedding dimension. 
+As can be seen, that the output of the Patch Embedding layer is of shape $(1, 3136, 96)$, that is, $(1, (H/4, W/4), 96)$ where 96 is the embedding dimension C. 
 
-> NOTE: The embedding dimension 96 has been mentioned in section 3.3 of the paper under **Architecture Variants**.
+> NOTE: The embedding dimension 96 for Swin-T (architecture covered as part of this blog post) has been mentioned in section 3.3 of the paper under **Architecture Variants**.
 
 ### Stage-1 Overview
 Continuing from section 3.1 of the paper:
@@ -105,9 +105,11 @@ from timm.models.swin_transformer import PatchMerging
 x = torch.randn(1, 56*56, 96)
 l = PatchMerging(input_resolution=(56, 56), dim=96, out_dim=192, norm_layer=nn.LayerNorm)
 l(x).shape
+
+>> torch.Size([1, 784, 192]) # (1, 28x28, 192)
 ```
 
-As can be seen, the output width and height are both reduced by a factor of /2 and the number of output channels is 2 x C where C is the number of input channels, here for Swin-T, $C=96$.
+As can be seen, the output width and height are both reduced by a factor of 2 and the number of output channels is **2C** where C is the number of input channels, here for Swin-T, $C=96$.
 
 Let's look at the source code for Patch Merging now that we understand it's functionality: 
 
@@ -150,7 +152,7 @@ To help understand the code above, I used Microsoft Excel again. In the figure b
 - $X_2$ is represented by `⚫` - starting at row 0, column 1;
 - $X_0$ is represented by `⬛` - starting at row 1, column 1 
 
-<img src="../images/patch-merging-excel.png" alt="Patch Merge" width="600"/>
+![](/images/patch-merging-excel.png "Patch Merging Layer in Excel")
 
 Therefore, when we concatenate in code using `x = torch.cat([x0, x1, x2, x3], -1)`, we are actually merging four patches together, and therefore here $X$ would have dimension size of 4C. Next, as was mentioned in the paper - *the output dimension is set to 2C*, therefore, we make use of a `nn.Linear` layer in code to reduce the dimension side to 2C.
 
