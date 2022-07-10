@@ -150,7 +150,35 @@ To help understand the code above, I used Microsoft Excel again. In the figure b
 - $X_2$ is represented by `⚫` - starting at row 0, column 1;
 - $X_0$ is represented by `⬛` - starting at row 1, column 1 
 
-<div style="text-align:center"><img src="../images/patch-merging-excel.png" alt="Patch Merge" width="600"/></div>
-
+<img src="../images/patch-merging-excel.png" alt="Patch Merge" width="600"/>
 
 Therefore, when we concatenate in code using `x = torch.cat([x0, x1, x2, x3], -1)`, we are actually merging four patches together, and therefore here $X$ would have dimension size of 4C. Next, as was mentioned in the paper - *the output dimension is set to 2C*, therefore, we make use of a `nn.Linear` layer in code to reduce the dimension side to 2C.
+
+Now that we've looked at Patch Merging layer, let's get to the meat of the paper - which is the **Swin Transformer Block**.
+
+## Swin Transformer Block
+At every stage in *Swin-T*, there are at two Swin Transformer Blocks except Stage-3, where there are 6 Swin Transformer Blocks in tandem. 
+
+![](/images/swin-transformer-block.png "Two successive Swin Transformer Blocks")
+
+From section Swin Transformer Block heading under section 3.1 of the paper:
+*Swin Transformer is built by replacing the standard multi-head self attention (MSA) module in a Transformer block by a module based on shifted windows, with other layers kept the same. As illustrated in Figure above, a Swin Transformer block consists of a shifted window based MSA module, followed by a 2-layer MLP with GELU nonlinearity in between. A LayerNorm (LN) layer is applied before each MSA module and each MLP, and a residual connection is applied after each module.*
+
+Okay, so pretty much everything is the same as ViT except this idea of shifted windows based attention. So, that's what we should really at next before looking at the code implementation of Swin Transformer Block.
+
+### Shifted Windows based Self Atention
+From section 3.2 of the paper:
+*The standard Transformer architecture and its adaptation for image classification both conduct global selfattention, where the relationships between a token and all other tokens are computed. The global computation leads to quadratic complexity with respect to the number of tokens, making it unsuitable for many vision problems requiring an immense set of tokens for dense prediction or to represent a high-resolution image.*
+
+*For efficient modeling, we propose to compute self-attention within local windows. The windows are arranged to evenly partition the image in a non-overlapping manner.*
+
+*The window-based self-attention module lacks connections across windows, which limits its modeling power. To introduce cross-window connections while maintaining the efficient computation of non-overlapping windows, we propose a shifted window partitioning approach which alternates between two partitioning configurations in consecutive Swin Transformer blocks.*
+
+*As illustrated in Figure below, the first module uses a regular window partitioning strategy which starts from the top-left pixel, and the 8 × 8 feature map is evenly partitioned into 2 × 2 windows of size 4 × 4 (M = 4). Then, the next module adopts a windowing configuration that is shifted from that of the preceding layer, by displacing the windows by $([M/2], [M/2])$ pixels from the regularly partitioned windows.
+
+![](/images/shifted-windows.png "An illustration of the shifted window approach for computing self-attention in the proposed Swin Transformer architecture.")
+
+Before looking at the code implementation of shifted window based attention, we first need to understand what's exactly going on. And if the above doesn't make much sense, let me try and break it down for you. It's really simple. Trust me!
+
+So on the left, we have an 8x8 feature map which is evenly partitioned into 4 windows of size 4 x 4. Here, the window size $M=4$. Now in the first part of the two successive blocks, we calculate attention inside these windows. But, remember we also need cross-window attention for our network to learn better! Why? (Because we are no longer using a global context). So, in the second part of the swin transformer block, we displace the windows by $([M/2], [M/2])$ pixels from the regularly partitioned windows, and perform attention between these new windows! This leads to cross-window connections. In this case, since $M=4$, we displace the windows by $(2, 2)$.
+
