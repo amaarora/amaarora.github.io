@@ -6,11 +6,11 @@
 ## Personal Update
 For someone who was actively releasing blogs almost all throughout 2020 & 2021, I am kinda sad to admit that this is my first blog for the year 2022. But, at the same time, I am super excited to be back. My personal responsibilities took priority for the last 1 year and I had to give up on releasing blog posts. Now that the storm has settled, I am happy to be back. 
 
-I also resigned from my position as **Machine Learning Engineer** from **Weights and Biases (W&B)** earlier this year and have joined [REA Group](https://www.realestate.com.au/) as **Data Science Lead**. It's quite a change in my day to day work life, but I am up for the challenge and enjoying every second of my new job so far. :) 
+I also resigned from my position as **Machine Learning Engineer** from **Weights and Biases (W&B)** earlier this year and have joined [REA Group](https://www.realestate.com.au/) as **Data Science Lead**. It's quite a big change in my day to day work life, but I am up for the challenge and enjoying every second of my new job so far. :) 
 
 I wrote many blogs on various different research papers during my time at W&B that can be found [here](https://amaarora.github.io/). 
 
-A lot has changed in the past 1 year or so since I have been away. As I catch-up with the latest research, I hope to continue releasing more blog posts and take you on this journey with me as well. Let's learn together! 
+A lot has changed in the past 1 year or so since I have been away. As I catch-up with the latest research, I hope to continue releasing more blog posts fortnightly and take you on this journey with me as well. Let's learn together! 
 
 ## Prerequisites 
 As part of this blog post I am going to assume that the reader has a basic understanding of CNNs and the Transformer architecture. 
@@ -25,7 +25,7 @@ For CNNs, there are various architectures that have been introduced. I have prev
 3. [EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks](https://amaarora.github.io/2020/08/13/efficientnet.html)
 
 ## Introduction
-As part of today's blog post, I want to cover [Swin Transformers](https://arxiv.org/abs/2103.14030). As is usual for my blog posts, I will be covering every related concept in theory along with a working PyTorch implementation of the architecture from [TIMM](https://github.com/rwightman/pytorch-image-models). Also, all text presented in this blog post directly from the paper will be in *Italics*.
+As part of today's blog post, I want to cover [Swin Transformers](https://arxiv.org/abs/2103.14030). As is usual for my blog posts, I will be covering every related concept in theory along with a working PyTorch implementation of the architecture from [TIMM](https://github.com/rwightman/pytorch-image-models). Also, all text presented in this blog post copied directly from the paper will be in *Italics*.
 
 > **NOTE**: At the time of writing this blog post, we already have a V2 of the [Swin Transformer](https://arxiv.org/abs/2111.09883) architecture. This architecture will be covered in a future blog post. 
 
@@ -52,41 +52,59 @@ First, let's get a high level overview of the architecture.
 From section 3.1 of the paper: 
 
 *An overview of the Swin Transformer architecture is presented in the Figure above, which illustrates the tiny version (SwinT). It first splits an input RGB image into non-overlapping patches by a patch splitting module, like ViT. Each patch is
-treated as a “token” and its feature is set as a concatenation of the raw pixel RGB values. In our implementation, we use a patch size of 4 × 4 and thus the feature dimension of each patch is 4 × 4 × 3 = 48. A linear embedding layer is applied on this raw-valued feature to project it to an arbitrary dimension.*
+treated as a “token” and its feature is set as a concatenation of the raw pixel RGB values. In our implementation, we use a patch size of 4 × 4 and thus the feature dimension of each patch is 4 × 4 × 3 = 48. A linear embedding layer is applied on this raw-valued feature to project it to an arbitrary dimension (denoted as C).*
 
 ### Patch Partition/Embedding
-So first step is to take in an input image and convert it to Patch Embeddings. This is the exact same as ViT with the difference being that each patch size in Swin Transformer is *4 x 4* instead of *16 * 16* as in ViT. I have previously explained Patch Embeddings [here](https://amaarora.github.io/2021/01/18/ViT.html#patch-embeddings) and therefore won't be going into detail here. A PyTorch implementation of Patch Embeddings looks like (presented below for sake of completeness): 
+So first step is to take in an input image and convert it to Patch Embeddings. This is the exact same as ViT with the difference being that each patch size in Swin Transformer is **$4 x 4$** instead of **$16 x 16$** as in ViT. I have previously explained Patch Embeddings [here](https://amaarora.github.io/2021/01/18/ViT.html#patch-embeddings) and therefore won't be going into detail here.  
 
 ```python 
-from torch import nn as nn
-from timm.helpers import to_2tuple
-from timm.trace_utils import _assert
+from timm.models.layers import PatchEmbed
+x = torch.randn(1, 3, 224, 224)
+patch_embed = PatchEmbed(img_size=224, patch_size=4, embed_dim=96)
+patch_embed(x).shape
 
-class PatchEmbed(nn.Module):
-    """ 2D Image to Patch Embedding
-    """
-    def __init__(self, img_size=224, patch_size=16, in_chans=3, embed_dim=768, norm_layer=None, flatten=True):
-        super().__init__()
-        img_size = to_2tuple(img_size)
-        patch_size = to_2tuple(patch_size)
-        self.img_size = img_size
-        self.patch_size = patch_size
-        self.grid_size = (img_size[0] // patch_size[0], img_size[1] // patch_size[1])
-        self.num_patches = self.grid_size[0] * self.grid_size[1]
-        self.flatten = flatten
-
-        self.proj = nn.Conv2d(in_chans, embed_dim, kernel_size=patch_size, stride=patch_size)
-        self.norm = norm_layer(embed_dim) if norm_layer else nn.Identity()
-
-    def forward(self, x):
-        B, C, H, W = x.shape
-        _assert(H == self.img_size[0], f"Input image height ({H}) doesn't match model ({self.img_size[0]}).")
-        _assert(W == self.img_size[1], f"Input image width ({W}) doesn't match model ({self.img_size[1]}).")
-        x = self.proj(x)
-        if self.flatten:
-            x = x.flatten(2).transpose(1, 2)  # BCHW -> BNC
-        x = self.norm(x)
-        return x
+>> torch.Size([1, 3136, 96])
 ```
 
-I won't be going into detail here and would kindly ask the reader to refer to my [previous blog post](https://amaarora.github.io/2021/01/18/ViT.html#patch-embeddings) for an explaination of this code. 
+As can be seen, that the output of the Patch Embedding layer is of shape $1 x 3136 x 96$, that is, $1 x (H/4 x W/4) x 96$ where *$96$* is the embedding dimension. 
+
+> NOTE: The embedding dimension 96 has been mentioned in section 3.3 of the paper under **Architecture Variants**.
+
+### Stage-1 Overview
+Continuing from section 3.1 of the paper:
+
+*Several Transformer blocks with modified self-attention computation (Swin Transformer blocks) are applied to these patch tokens. The Transformer blocks maintain the number of tokens H/4 × W/4, and together with the linear embedding are referred to as “Stage 1”.*
+
+```python 
+stage_1 = BasicLayer(dim=96, out_dim=192,
+                     input_resolution=(56, 56),
+                     depth=2)
+inp = torch.randn(1, 56*56, 96)
+stage_1(inp).shape
+
+>> torch.Size([1, 3136, 96])
+```
+
+As can be seen from the code snippet above, there is no change in the dimension of the input as it passes through "Stage-1". In fact, the dimension of the inputs doesn't change as it passes through every stage. It is in between stages, that a **Patch Merging** layer is applied to reduce the number of tokens as the network get's deeper. 
+
+### Patch Merging Layer
+From section 3.1 of the paper:
+
+*The first patch merging layer concatenates the features of each group of $2 × 2$ neighboring patches, and applies a linear layer on the $4 x C$- dimensional concatenated features. This reduces the number of tokens by a multiple of 2×2 = 4 (2× downsampling of resolution), and the output dimension is set to $2 x C$.*
+
+Here, $C$ is the number of channels (embedding dimension). For the tiny version that has been explained as part of this blog post, $C=96$.
+
+![](/images/PatchMerging.png "Patch Merging")
+
+As can be seen below, the Patch-Merging layer merges four patches. So with every merge, both height and width of the image are further reduced by a factor of 2. In stage-1, the input resolution is $H/4 x W/4$, but after patch merging, the resolution will change to $H/8 x W/8$ which will be the input for stage-2. For stage-3 the input resolution would be $H/16 x W/16$ and for stage-4, the input resolution would be H/32 x W/32.
+
+Let's understand the inputs and outputs for PatchMerging in code:
+
+```python 
+from timm.models.swin_transformer import PatchMerging
+x = torch.randn(1, 56*56, 96)
+l = PatchMerging(input_resolution=(56, 56), dim=96, out_dim=192, norm_layer=nn.LayerNorm)
+l(x).shape
+```
+
+As can be seen, the output width and height are both reduced by a factor of /2 and the number of output channels is 2 x C where C is the number of input channels, here for Swin-T, C=96.
