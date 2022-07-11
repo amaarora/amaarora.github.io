@@ -159,7 +159,7 @@ Therefore, when we concatenate in code using `x = torch.cat([x0, x1, x2, x3], -1
 Now that we've looked at Patch Merging layer, let's get to the meat of the paper - which is the **Swin Transformer Block**.
 
 ## Swin Transformer Block
-At every stage in *Swin-T*, there are at two consecutive Swin Transformer Blocks except Stage-3, where there are 6 Swin Transformer Blocks in tandem. 
+At every stage in *Swin-T* Architecture, there are at two consecutive Swin Transformer Blocks except in Stage-3, where there are 6 Swin Transformer Blocks in tandem. 
 
 ![](/images/swin-transformer-block.png "Figure-4: Two successive Swin Transformer Blocks")
 
@@ -399,4 +399,8 @@ We take an input of shape $(B, H, W, C)$, next, we reshape it to $(B, H/M, M, W/
 
 
 ## Conclusion 
-And that's really it when it comes to Swin Transformers!
+And that's really it when it comes to Swin Transformers! I hope that I've been to explain the Swin Transformer architecture in detail and I hope that you've enjoed reading the blog post and and explanations using MS Excel. 
+
+As usual, in case I have missed anything or to provide feedback, please feel free to reach out to me at [@amaarora](https://twitter.com/amaarora).
+
+Also, feel free to [subscribe to my blog here](https://amaarora.github.io/subscribe) to receive regular updates regarding new blog posts. Thanks for reading!
