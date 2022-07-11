@@ -70,10 +70,10 @@ As can be seen, that the output of the Patch Embedding layer is of shape $(1, 31
 
 > NOTE: The embedding dimension 96 for Swin-T (architecture covered as part of this blog post) has been mentioned in section 3.3 of the paper under **Architecture Variants**.
 
-### Stage-1 Overview
+### Swin Transformer Stages Overview
 Continuing from section 3.1 of the paper:
 
-*Several Transformer blocks with modified self-attention computation (Swin Transformer blocks) are applied to these patch tokens. The Transformer blocks maintain the number of tokens H/4 × W/4, and together with the linear embedding are referred to as “Stage 1”.*
+*Several Transformer blocks with modified self-attention computation (Swin Transformer blocks) are applied to these patch tokens. The Transformer blocks maintain the number of tokens H/4 × W/4, and together with the linear embedding are referred to as “Stage 1”. To produce a hierarchical representation, the number of tokens is reduced by patch merging layers as the network gets deeper. The first block of patch merging and feature transformation is denoted as “Stage 2”. The procedure is repeated twice, as “Stage 3” and “Stage 4”*
 
 ```python 
 stage_1 = BasicLayer(dim=96, out_dim=192,
@@ -370,7 +370,7 @@ As can be seen the only difference between the two transformer blocks is that th
 
 In the `forward` method of `SwinTransformerBlock`, if `shift_size>0`, we perform the cyclic shift. This is performed in PyTorch by using `torch.roll`. Essentially, this `torch.roll` will create feature map "B" from feature map "A" as in figure-7.
 
-## Window Partition
+### Window Partition
 It is much easier to partition an input into windows using Microsoft Excel, but how do we do this in PyTorch?
 
 ```python
@@ -396,3 +396,7 @@ We take an input of shape $(B, H, W, C)$, next, we reshape it to $(B, H/M, M, W/
 - W - Image width 
 - C - Number of channels 
 - M - Window size
+
+
+## Conclusion 
+And that's really it when it comes to Swin Transformers!
