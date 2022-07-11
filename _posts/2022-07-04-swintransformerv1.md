@@ -6,7 +6,7 @@
 ## Personal Update
 For someone who was actively releasing blogs almost all throughout 2020 & 2021, I am kinda sad to admit that this is my first blog for the year 2022. But, at the same time, I am super excited to be back. My personal responsibilities took priority for the last 1 year and I had to give up on releasing blog posts. Now that the storm has settled, I am happy to be back. 
 
-I also resigned from my position as **Machine Learning Engineer** from **Weights and Biases (W&B)** earlier this year and have joined [REA Group](https://www.realestate.com.au/) as **Data Science Lead**. It's quite a big change in my day to day work life, but I am up for the challenge and enjoying every second of my new job so far. :) 
+I also resigned from my position as Machine Learning Engineer from Weights and Biases (W&B) earlier this year and have joined [REA Group](https://www.realestate.com.au/) as **Data Science Lead**. It's quite a big change in my day to day work life, but I am up for the challenge and enjoying every second of my new job so far. :) 
 
 I wrote many blogs on various different research papers during my time at W&B that can be found [here](https://amaarora.github.io/). 
 
@@ -329,7 +329,9 @@ class SwinTransformerBlock(nn.Module):
         return x
 ```
 
-In the implementation above, we are using `window_partition`, `window_reverse` & `WindowAttention`, but let me try and explain the implementation of `SwinTransformerBlock` first, without going into the details of `window_partition`, `window_reverse` & `WindowAttention`.
+In the implementation above, we are also using `window_reverse` & `WindowAttention`, but as part of this blog post I will be skipping over them as they contain minor details (such as relative position bias) that are not needed for an overall understanding of the `SwinTransformerBlock`.
+
+> If you'd still want me to go over, or want to pair with me on `WindowAttention`, please feel free to reach out to me.
 
 The main part of the `__init__` method is below:
 
