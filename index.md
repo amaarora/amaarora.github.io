@@ -1,4 +1,4 @@
-# Other blog posts not on this Website
+# Index
 During my time as Machine Learning Engineer at Weights and Biases, I also wrote the following blog posts:
 
 1. [Explained: Characterizing Signal Propagation to Close the Performance Gap in Unnormalized ResNets](https://wandb.ai/wandb_fc/pytorch-image-models/reports/Explained-Characterizing-Signal-Propagation-to-Close-the-Performance-Gap-in-Unnormalized-ResNets--Vmlldzo2NDIzNTE)
