@@ -10,6 +10,7 @@ author: Aman Arora
 date: "02/18/2020"
 toc: true
 number-sections: true
+title-block-banner: true
 ---
 
 ## Introduction
