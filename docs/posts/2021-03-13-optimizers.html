@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.335">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Aman Arora">
+<meta name="dcterms.date" content="2021-03-13">
+<meta name="description" content="Basic optimizers from scratch in PyTorch with working notebook.">
+
+<title>Adam and friends</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html">
+ <span class="menu-text">Aman Arora’s Blog</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../about.html">
+ <span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/"><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com"><i class="bi bi-twitter" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Adam and friends</h1>
+            <p class="subtitle lead">Adam, SGD, RMSProp from scratch in PyTorch.</p>
+                  <div>
+        <div class="description">
+          <p>Basic optimizers from scratch in PyTorch with working notebook.</p>
+        </div>
+      </div>
+                          <div class="quarto-categories">
+                <div class="quarto-category">Computer Vision</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Aman Arora </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">March 13, 2021</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#whos-adam-why-should-we-care-about-his-friends" id="toc-whos-adam-why-should-we-care-about-his-friends" class="nav-link active" data-scroll-target="#whos-adam-why-should-we-care-about-his-friends"><span class="toc-section-number">1</span>  Who’s Adam? Why should we care about “his” friends?!</a></li>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link" data-scroll-target="#introduction"><span class="toc-section-number">2</span>  Introduction</a></li>
+  <li><a href="#resourcescredits" id="toc-resourcescredits" class="nav-link" data-scroll-target="#resourcescredits"><span class="toc-section-number">3</span>  Resources/Credits</a></li>
+  <li><a href="#stochastic-gradient-descent" id="toc-stochastic-gradient-descent" class="nav-link" data-scroll-target="#stochastic-gradient-descent"><span class="toc-section-number">4</span>  Stochastic Gradient Descent</a>
+  <ul class="collapse">
+  <li><a href="#what-is-stochastic-gradient-descent" id="toc-what-is-stochastic-gradient-descent" class="nav-link" data-scroll-target="#what-is-stochastic-gradient-descent"><span class="toc-section-number">4.1</span>  What is Stochastic Gradient Descent?</a></li>
+  </ul></li>
+  <li><a href="#sgd-with-momentum" id="toc-sgd-with-momentum" class="nav-link" data-scroll-target="#sgd-with-momentum"><span class="toc-section-number">5</span>  SGD with Momentum</a></li>
+  <li><a href="#rmsprop" id="toc-rmsprop" class="nav-link" data-scroll-target="#rmsprop"><span class="toc-section-number">6</span>  RMSprop</a></li>
+  <li><a href="#adam" id="toc-adam" class="nav-link" data-scroll-target="#adam"><span class="toc-section-number">7</span>  Adam</a></li>
+  <li><a href="#working-notebook" id="toc-working-notebook" class="nav-link" data-scroll-target="#working-notebook"><span class="toc-section-number">8</span>  Working notebook</a></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion"><span class="toc-section-number">9</span>  Conclusion</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<section id="whos-adam-why-should-we-care-about-his-friends" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="whos-adam-why-should-we-care-about-his-friends"><span class="header-section-number">1</span> Who’s Adam? Why should we care about “his” friends?!</h2>
+<p><a href="https://arxiv.org/abs/1412.6980">Adam</a> is an <code>Optimizer</code>. He has many friends but his dearest are <a href="http://www.cs.toronto.edu/~hinton/absps/momentum.pdf">SGD</a>, <a href="(http://www.cs.toronto.edu/~hinton/absps/momentum.pdf)">Momentum</a> &amp; <a href="https://www.cs.toronto.edu/~tijmen/csc321/slides/lecture_slides_lec6.pdf">RMSprop</a>.</p>
+<p>Each of Adam’s friends has contributed to Adam’s personality. So to get to know Adam very well, we should first meet the friends. We start out with <code>SGD</code> first, then meet <code>Momentum</code>, <code>RMSprop</code> and finally <code>Adam</code>.</p>
+<blockquote class="blockquote">
+<p>In this blog post we are going to re-implement <code>SGD</code>, <code>SGD with Momentum</code>, <code>RMSprop</code> &amp; <code>Adam</code>. The major contribution of this blog post is to help the reader re-implement these algorithms keeping the implementations simple &amp; by using minimal lines of code. We try to understand these algoirthms from a code perspective rather than from a mathematical perspective. I would also like to refer the reader to Sebastian Ruder’s blog on Optimizers <a href="https://ruder.io/optimizing-gradient-descent/">here</a> for a more theoretical introduction. We also compare the implementations with PyTorch’s implementations to check accuracy.</p>
+</blockquote>
+<p>This blog post has been structured the following way:</p>
+</section>
+<section id="introduction" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="introduction"><span class="header-section-number">2</span> Introduction</h2>
+<p>In this blog post we are going to re-implement <code>SGD</code>, <code>Momentum</code>, <code>RMSprop</code> and <code>Adam</code> from scratch.</p>
+<p>In this blog post, the code for the Optimizers has been mostly copied from <a href="https://pytorch.org/">PyTorch</a> but follows a different structure to keep the code implementations to a minimum. The implementations for these various Optimizers in this blog post are “much shorter” than those in PyTorch.</p>
+<p>I also compared the re-implementations with PyTorch’s implementations and excited to share results below! <code>SGD</code>, <code>SGD_with_momentum</code>, <code>RMSprop</code> and <code>Adam</code> are from Pytorch whereas <code>SGDOptimizer</code>, <code>SGDOptimizer_with_momentum</code>, <code>RMSPropOptimizer</code> and <code>AdamOptimizer</code> are our own re-implementations. As shown in the <code>fig-1</code> below, results are comparable!</p>
+<blockquote class="blockquote">
+<p>Refer <a href="https://gist.github.com/amaarora/571a7d5011581d67c27d884e68bf6afc">here</a> for a complete working notebook to reproduce <code>fig-1</code>.</p>
+</blockquote>
+<p><img src="../images/optimizers.png" title="fig-1 Adam and Friends" class="img-fluid"></p>
+</section>
+<section id="resourcescredits" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="resourcescredits"><span class="header-section-number">3</span> Resources/Credits</h2>
+<p>Generally the resources section is at the last but I’d like to share some wonderful resources right at the start that have helped shape this blog post in it’s current form.</p>
+<ol type="1">
+<li><a href="https://youtu.be/ccMHJeQU4Qw?t=4587">Introduction to SGD by Jeremy Howard</a>. In lesson-2 of Course 19 fast.ai, Jeremy re-implements SGD from scratch using Python!</li>
+<li><a href="https://youtu.be/CJKnDu2dxOE?t=6208">Introduction to Optimizers by Jeremy Howard</a>. In lesson-5 of Course 19 fast.ai, Jeremy re-implements <code>SGD</code>, <code>Momentum</code>, <code>RMSprop</code> &amp; <code>Adam</code> in Microsoft Excel! This is a great resource to learn about these algorithms. I started here too and then re-implemented the algorithms in PyTorch that has led to this blog post.</li>
+<li><a href="https://youtu.be/hPQKzsjTyyQ?t=4169">Generic Optimizer by Jeremy Howard</a>. In Lesson-11 of Course 19 fast.ai, Jeremy creates a Generic Optimizer. Some of the code in this blog post has been inspired from here, but majorly we follow the code implementations as in PyTorch.</li>
+<li><a href="https://cs231n.github.io/optimization-1/#optimization">CS231n Introduction to Optimizers</a>. This is another great resource from Stanford that introduces Optimization and is a great resource to get an intuition for SGD. It also showcases how to compute the gradients from scratch without using <code>torch.autograd</code>. In our blog post, we use <code>torch.autograd</code> instead to compute the gradients.</li>
+<li><a href="https://ruder.io/optimizing-gradient-descent/">An overview of gradient descent optimization algorithms by Sebastian Ruder</a> is an excellent blog post by one of my favorite researchers and presents the various Optimization algorithms such as Adagrad, Adadelta, AdaMax, Nadam, AMSGrad and more in an easy to understand manner!</li>
+<li><a href="https://distill.pub/2017/momentum/">Why Momentum Really Works from distil.pub</a>. If you haven’t heard of <a href="https://distill.pub/">distil.pub</a>, stop what you’re doing and visit this wonderful website that distils research using visual explainations that are easy to understand!</li>
+</ol>
+<p>Having mentioned these resources, we are now ready to start on our journey of re-implementing <code>SGD</code>, <code>Momentum</code>, <code>RMSprop</code> and <code>Adam</code> from scratch. We first start out with <code>SGD</code> below:</p>
+</section>
+<section id="stochastic-gradient-descent" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="stochastic-gradient-descent"><span class="header-section-number">4</span> Stochastic Gradient Descent</h2>
+<p>In this section we will first introduce what is Stochastic Gradient Descent and then based on our understanding, implement it in PyTorch from scratch.</p>
+<section id="what-is-stochastic-gradient-descent" class="level3" data-number="4.1">
+<h3 data-number="4.1" class="anchored" data-anchor-id="what-is-stochastic-gradient-descent"><span class="header-section-number">4.1</span> What is Stochastic Gradient Descent?</h3>
+<p>For an intuitive understanding, refer <code>fig-2</code> below:</p>
+<p><img src="../images/SGD_intuition.png" title="fig-2 Gradient Descent" class="img-fluid"></p>
+<p>Let’s say we are standing at a certain point <code>A</code> of a parabolic hill as shown in <code>fig-2</code> and we wish to find the lowest point on this curve. Can you think of some ways to do this? Well, we could try going in a random direction, calculate the value of the function and if it’s lower than the previous value, we could take a step in that direction. But this process is slow. With some mathematical magic, we can make this process faster. In fact, the fastest way down a function or the sleepest way down the hill is the one in the opposite direction of the gradient. Gradient at point <code>A</code> is the slope of the parabolic function, and by calculating the gradients, we can find the steepest direction in which to move to minimise the value of the function. This is referred to as Gradient Descent. Ofcourse in a high dimensional space, calculating the gradients is a little bit more complicated than in <code>fig-2</code> but the idea remains the same. We take a step from point <code>A</code> directed by the gradients to follow the steepest path downwards to point <code>B</code> to find the lowest value of the curve. The step-size is governed by a parameter called learning rate. The new position <code>B</code> then can be defined as <code>B = A - lr * A.grad</code> where <code>A.grad</code> represents the slope/gradients of the curve at point <code>A</code>.</p>
+<p>The stochasticity in <strong>Stochastic Gradient Descent</strong> arises when we compute the batch gradients. This has been explained below through pseudo-code in <code>Vanilla Stochastic Gradient Descent</code>.</p>
+<p>From the <a href="https://youtu.be/ccMHJeQU4Qw?t=4587">Introduction to SGD by Jeremy Howard</a>, and from <code>fig-2</code>, we already know that to perform Gradient Descent, we need to be able to calculate the gradients of some function that we wish to minimise with respect to the parameters.</p>
+<p>We don’t need to manually calculate the gradients and as mentioned in <a href="https://youtu.be/ccMHJeQU4Qw?t=4575">this</a> video by Jeremy, PyTorch can already do this for us using <a href="https://pytorch.org/tutorials/beginner/blitz/autograd_tutorial.html">torch.autorgrad</a>.</p>
+<p>So now that we know that we can compute the gradients, the procedure of repeatedly evaluating the gradient and then performing a parameter update is called <code>Gradient Descent</code>. Its vanilla version looks as follows:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Vanilla Gradient Descent</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> epoch <span class="kw">in</span> <span class="bu">range</span>(num_epochs):</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    predictions <span class="op">=</span> model(training_data)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    loss <span class="op">=</span> loss_function(predictions, ground_truth)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    weights_grad <span class="op">=</span> evaluate_gradient(loss) <span class="co"># using torch by calling `loss.backward()`</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    weights <span class="op">-=</span> learning_rate <span class="op">*</span> weights_grad <span class="co"># perform parameter update</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>In Vanilla Gradient Descent, we first get the predictions on the whole training data, then we calculate the loss using some loss function. Finally, we update the weights in the direction of the gradients to minimise the loss. We do this repeatedly for some predefined number of epochs.</p>
+<blockquote class="blockquote">
+<p>Can you think of possible problems with this approach? Can you think of why this approach could be computationally expensive?</p>
+</blockquote>
+<p>In large-scale applications, the training data can have on order of millions of examples. Hence, it seems wasteful to compute the full loss function over the entire training set in order to perform only a single parameter update. A very common approach to addressing this challenge is to compute the gradient over batches of the training data. This approach is reffered to as <code>Stochastic Gradient Descent</code>:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Vanilla Stochastic Gradient Descent</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> epoch <span class="kw">in</span> <span class="bu">range</span>(num_epochs):</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> input_data, labels <span class="kw">in</span> training_dataloader:</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>        preds <span class="op">=</span> model(input_data)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>        loss  <span class="op">=</span> loss_function(preds, labels)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>        weights_grad <span class="op">=</span> evaluate_gradient(loss) <span class="co"># using torch by calling `loss.backward()`</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>        weights <span class="op">-=</span> learning_rate <span class="op">*</span> weights_grad <span class="co"># perform parameter update</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>In <code>Stochastic Gradient Descent</code>, we divide our training data into sets of batches. This is essentially what the <a href="https://pytorch.org/docs/stable/data.html">DataLoader</a> does, it divides the complete training set into batches of some predefined <code>batch_size</code>.</p>
+<p>So let’s keep the key things in our mind before we set out to implement SGD: 1. Divide the training data into batches, PyTorch DataLoaders can do this for us. 2. For each mini-batch: - Make some predictions on the input data and calculate the loss. - Calculate the gradients using <code>torch.autograd</code> based on the loss. - Take a step in the opposite direction of gradients to minimise the loss.</p>
+<p>We follow a similar code implementation to PyTorch. In PyTorch as mentioned <a href="https://pytorch.org/docs/stable/optim.html">here</a>, there is a base class for all optimizers called <code>torch.optim.Optimizer</code>. It has some key functions methods like <code>zero_grad</code>, <code>step</code> etc. Remember from our general understanding of SGD, we wish to be able to update the parameters (that we want to optimize) by taking a step in the opposite direction of the gradients to minimise the loss function.</p>
+<p>Thus, from a code implementation perspective, we would need to be able to iterate through all the <code>parameters</code> and do <code>p = p - lr * p.grad</code>, where <code>p</code> refers to parameters and <code>lr</code> refers to learning rate.</p>
+<p>With this basic understanding let’s implement an Optimizer class below:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Optimizer(<span class="bu">object</span>):</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, params, <span class="op">**</span>defaults):</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.params <span class="op">=</span> <span class="bu">list</span>(params)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.defaults <span class="op">=</span> defaults</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> grad_params(<span class="va">self</span>):</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> [p <span class="cf">for</span> p <span class="kw">in</span> <span class="va">self</span>.params <span class="cf">if</span> p.grad <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>]</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> step(<span class="va">self</span>): </span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>        <span class="cf">raise</span> <span class="pp">NotImplementedError</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> zero_grad(<span class="va">self</span>):</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> p <span class="kw">in</span> <span class="va">self</span>.grad_params():</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>            p.grad.zero_()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The <code>Optimizer</code> class above implements two main methods - <code>grad_params</code> and <code>zero_grad</code>. Doing something like <code>self.grad_params()</code> grabs all those parameters as a list whose gradients are not None. Also, calling the <code>zero_grad()</code> method would zero out the gradients as explained in <a href="https://youtu.be/ccMHJeQU4Qw?t=4575">this</a> video.</p>
+<hr>
+<blockquote class="blockquote">
+<p>At this stage you might ask, what are these parametrs? In PyTorch calling <code>model.parameters()</code> returns a generator through which we can iterate through all parameters of our model. A typical training loop as you might have seen in PyTorch looks something like:</p>
+</blockquote>
+<div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> create_model()</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>optimizer <span class="op">=</span> torch.optim.SGD(model.parameters(), lr<span class="op">=</span><span class="fl">1e-4</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> input_data, labels <span class="kw">in</span> train_dataloader:</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    preds <span class="op">=</span> model(input_data)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    loss  <span class="op">=</span> loss_fn(preds, labels)</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    loss.backward()</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    optimizer.step()</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    optimizer.zero_grad()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<hr>
+<p>In the training loop above we first create an optimizer by passing in <code>model.parameters()</code> which represents the parameters that we wish to optimize. We also pass in a learning rate that represents the step size. In PyTorch, calling <code>loss.backward()</code> is what appends an attribute <code>.grad</code> to each of the parameters in <code>model.parameters()</code>. Therefore, in our implementation, we can grab all those parameters whose gradients are not None by doing something like <code>[p for p in self.params if p.grad is not None]</code>.</p>
+<p>Now to implement <code>SGD</code> optimizer, we just need to create a method called <code>step</code> that does the optimization step and updates the value of the model parameters based on the gradients.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> SGDOptimizer(Optimizer):</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, params, <span class="op">**</span>defaults):</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>(params, <span class="op">**</span>defaults)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> step(<span class="va">self</span>):</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> p <span class="kw">in</span> <span class="va">self</span>.grad_params():</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>            p.data.add_(p.grad.data, alpha<span class="op">=-</span><span class="va">self</span>.defaults[<span class="st">'lr'</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>This line <code>p.data.add_(p.grad.data, alpha=-self.defaults['lr'])</code> essentially does <code>p = p - lr * p.grad</code> which is the SGD step for each mini-batch. Thus, we have successfully re-implemented SGD Optimizer.</p>
+</section>
+</section>
+<section id="sgd-with-momentum" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="sgd-with-momentum"><span class="header-section-number">5</span> SGD with Momentum</h2>
+<p>Classical Momentum as described in <a href="http://www.cs.toronto.edu/~hinton/absps/momentum.pdf">this</a> paper can be defined as:</p>
+<p><img src="../images/CM.png" title="eq-1 Classical Momentum" class="img-fluid"></p>
+<p>Here <code>µ</code> represents the momentum factor, typically <code>0.9</code>. <strong>Δ𝑓(θ<sub>t</sub>)</strong> represents the gradients of parameters <code>θ</code> at time <code>t</code>. And <code>ε</code> represents the learning rate.</p>
+<p>As can be seen from <code>eq-1</code>, essentially we add a factor <code>µ</code> times the value of the previous step to the current step. Thus instead of going <code>p = p - lr * p.grad</code>, the new step value becomes <code>new_step = µ * previous_step + lr * p.grad</code> whereas previously for <code>SGD</code>, the step value was <code>lr * p.grad</code>.</p>
+<p>What is momentum you might ask? Why does it work?</p>
+<p>From <a href="https://distill.pub/2017/momentum/">Why Momentum Really Works from distil.pub</a> -</p>
+<blockquote class="blockquote">
+<p>Here’s a popular story about momentum - gradient descent is a man walking down a hill. He follows the steepest path downwards; his progress is slow, but steady. Momentum is a heavy ball rolling down the same hill. The added inertia acts both as a smoother and an accelerator, dampening oscillations and causing us to barrel through narrow valleys, small humps and local minima. It is simple — when optimizing a smooth function f, we make a small step in the gradient -</p>
+</blockquote>
+<p><img src="../images/SGD_eq.png" title="eq-2 SGD" class="img-fluid"></p>
+<blockquote class="blockquote">
+<p>For a step-size small enough, gradient descent makes a monotonic improvement at every iteration. It always converges, albeit to a local minimum. Things often begin quite well — with an impressive, almost immediate decrease in the loss. But as the iterations progress, things start to slow down. You start to get a nagging feeling you’re not making as much progress as you should be. What has gone wrong?</p>
+</blockquote>
+<blockquote class="blockquote">
+<p>The landscapes are often described as valleys, trenches, canals and ravines. The iterates either jump between valleys, or approach the optimum in small, timid steps. Progress along certain directions grind to a halt. In these unfortunate regions, gradient descent fumbles.</p>
+</blockquote>
+<p>Momentum proposes the following tweak to gradient descent. We give gradient descent a short-term memory -</p>
+<p><img src="../images/momentum_eq.png" title="eq-3 Momentum" class="img-fluid"></p>
+<blockquote class="blockquote">
+<p>The change is innocent, and costs almost nothing. When = 0β=0 , we recover gradient descent. But for = 0.99β=0.99 (sometimes 0.9990.999, if things are really bad), this appears to be the boost we need. Our iterations regain that speed and boldness it lost, speeding to the optimum with a renewed energy.</p>
+</blockquote>
+<hr>
+<p>Thus, essentially, with <code>Momentum</code>, if the momentum factor as in <code>eq-3</code> is <code>β</code>, then compared to SGD, instead of the new step just being guided by the gradients, is also guided by <code>β</code> times the old step size. Thus, to implement momentum, we would need to keep a track of the previous steps. We do this by storing <code>moment_buffer</code> inside a <code>param_state</code> for each <code>parameter</code> as in the implementation below:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> SGDOptimizer(Optimizer):</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, params, <span class="op">**</span>defaults):</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>(params, <span class="op">**</span>defaults)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.lr <span class="op">=</span> defaults[<span class="st">'lr'</span>]</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.µ  <span class="op">=</span> defaults[<span class="st">'momentum'</span>]</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.state <span class="op">=</span> defaultdict(<span class="bu">dict</span>)</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> step(<span class="va">self</span>):</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> p <span class="kw">in</span> <span class="va">self</span>.grad_params():</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>            param_state <span class="op">=</span> <span class="va">self</span>.state[p]</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>            d_p <span class="op">=</span> p.grad.data            </span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="st">'moment_buffer'</span> <span class="kw">not</span> <span class="kw">in</span> param_state:</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>                buf <span class="op">=</span> param_state[<span class="st">'`moment_buffer`'</span>] <span class="op">=</span> torch.clone(d_p).detach()</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>            <span class="cf">else</span>:</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>                buf <span class="op">=</span> param_state[<span class="st">'moment_buffer'</span>]</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>            buf.mul_(<span class="va">self</span>.µ).add_(d_p)</span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>            p.data.add_(buf, alpha<span class="op">=-</span><span class="va">self</span>.lr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>From Sebastian Ruder’s <a href="https://ruder.io/optimizing-gradient-descent/index.html#stochasticgradientdescent">blog</a>: &gt; At the core of <code>Momentum</code> is this idea - why don’t we keep going in the same direction as last time? If the loss can be interpreted as the height of a hilly terrain, then the optimization process can then be seen as equivalent to the process of simulating the parameter vector as rolling on the landscape. Essentially, when using momentum, we push a ball down a hill. The ball accumulates momentum as it rolls downhill, becoming faster and faster on the way. The same thing happens to our parameter updates: The momentum term increases for dimensions whose gradients point in the same directions and reduces updates for dimensions whose gradients change directions. As a result, we gain faster convergence.</p>
+<p>From a code implementation perspective, for each parameter inside <code>self.grad_params()</code>, we store a state called <code>momentum_buffer</code> that is initialized with the first value of <code>p.grad</code>. For every subsequent update, we do <code>buf.mul_(self.µ).add_(d_p)</code> which represents <code>buf = buf * µ + p.grad</code>. And finally, the parameter updates become <code>p.data.add_(buf, alpha=-self.lr)</code> which is essentially <code>p = p - lr * buf</code>.</p>
+<p>Thus, we have successfully re-implemented <code>eq-1</code>.</p>
+</section>
+<section id="rmsprop" class="level2" data-number="6">
+<h2 data-number="6" class="anchored" data-anchor-id="rmsprop"><span class="header-section-number">6</span> RMSprop</h2>
+<p><code>RMSprop</code> Optimizer brings to us an idea that why should all parameters have the step-size when clearly some parameters should move faster? It’s great that <code>RMSprop</code> was actually introduced as part of a MOOC by Geoffrey Hinton in his <a href="https://www.cs.toronto.edu/~tijmen/csc321/slides/lecture_slides_lec6.pdf">course</a>.</p>
+<p>From the PyTorch docs: &gt; The implementation here takes the square root of the gradient average before adding epsilon (note that TensorFlow interchanges these two operations). The effective learning rate is thus <code>α/(sqrt(v) + ϵ)</code> where <code>α</code> is the scheduled learning rate and <code>v</code> is the weighted moving average of the squared gradient.</p>
+<p>The update step for <code>RMSprop</code> looks like:</p>
+<p><img src="../images/RMSprop.png" title="eq-2 RMSprop" class="img-fluid"></p>
+<p>Essentially, for every parameter we keep a moving average of the Mean Square of the gradients. Next, we update the parameters similar to SGD but instead by doing something like <code>p = p - lr * p.grad</code>, we instead update the parameters by doing <code>p(t) = p(t) - (lr / MeanSquare(p, t)) * p(t).grad</code>.</p>
+<p>Here, <code>p(t)</code> represents the value of the parameter at time <code>t</code>, <code>lr</code> represents learning rate and <code>MeanSquare(p, t)</code> represents the moving average of the Mean Square Weights of parameter <code>p</code> at time <code>t</code>.</p>
+<blockquote class="blockquote">
+<p>Key takeaway to be able to implement RMSprop - we need to able to store the exponentially weighted moving average of the mean square weights of the gradients.</p>
+</blockquote>
+<p>Therefore, we can update the implementation of <code>SGD</code> with momentum to instead implement <code>RMSprop</code> like so:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> RMSPropOptimizer(Optimizer):</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, params, <span class="op">**</span>defaults):</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>(params, <span class="op">**</span>defaults)</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.lr  <span class="op">=</span> defaults[<span class="st">'lr'</span>]</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.α   <span class="op">=</span> defaults[<span class="st">'alpha'</span>]</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.eps <span class="op">=</span> defaults[<span class="st">'epsilon'</span>]</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.state <span class="op">=</span> defaultdict(<span class="bu">dict</span>)</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> step(<span class="va">self</span>):</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> p <span class="kw">in</span> <span class="va">self</span>.grad_params():</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>            param_state <span class="op">=</span> <span class="va">self</span>.state[p]</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>            d_p <span class="op">=</span> p.grad.data   </span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="st">'exp_avg_sq'</span> <span class="kw">not</span> <span class="kw">in</span> param_state:</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>                exp_avg_sq <span class="op">=</span> param_state[<span class="st">'exp_avg_sq'</span>] <span class="op">=</span> torch.zeros_like(p, memory_format<span class="op">=</span>torch.preserve_format)</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>            <span class="cf">else</span>:</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>                exp_avg_sq <span class="op">=</span> param_state[<span class="st">'exp_avg_sq'</span>]</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>            exp_avg_sq.mul_(<span class="va">self</span>.α).addcmul_(d_p, d_p, value<span class="op">=</span><span class="dv">1</span><span class="op">-</span><span class="va">self</span>.α)</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>            denom <span class="op">=</span> exp_avg_sq.sqrt().add_(<span class="va">self</span>.eps)</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>            p.data.addcdiv_(d_p, denom, value<span class="op">=-</span><span class="va">self</span>.lr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>As can be seen inside the <code>step</code> method, we iterate through the parameters with gradients, and store the initial value of the gradients inside the a variable called <code>d_p</code> which represents derivative of parameter <code>p</code>.</p>
+<p>Next, we initialize the exponential moving average of the square of the gradients <code>exp_avg_sq</code> as an empty array filled with zeros of the same shape as <code>d_p</code>. For every next step, this <code>exp_avg_sq</code> is updated by this line of code: <code>exp_avg_sq.mul_(self.α).addcmul_(d_p, d_p, value=1-self.α)</code>. This equates to <code>exp_avg_sq = (self.α * exp_avg_sq)  + (1 - self.α * (d_p**2))</code>.</p>
+<p>Therefore, we are keeping an exponentially weighted moving average of the square of the gradients. But as can be seen in <code>eq-2</code>, the update step of <code>RMSprop</code> actually divides by the <code>sqrt</code> of this <code>exp_avg_sq</code>. So our denominator <code>denom</code> becomes <code>exp_avg_sq.sqrt().add_(self.eps)</code>. <code>eps</code> is added for numerical stability.</p>
+<p>Finally, we do our update step <code>p.data.addcdiv_(d_p, denom, value=-self.lr)</code> which equates to <code>p = p - (self.lr * d_p)/denom</code> thus performing the <code>RMSprop</code> update step as in <code>eq-2</code>.</p>
+<p>Therefore, we have successfully re-implemented <code>RMSprop</code> from scratch.</p>
+</section>
+<section id="adam" class="level2" data-number="7">
+<h2 data-number="7" class="anchored" data-anchor-id="adam"><span class="header-section-number">7</span> Adam</h2>
+<p>From the paper:</p>
+<blockquote class="blockquote">
+<p>The method computes individual adaptive learning rates for different parameters from estimates of first and second moments of the gradients; the name Adam is derived from adaptive moment estimation.</p>
+</blockquote>
+<p>In this section we are going to discuss <code>Adam</code>. Adam’s algorithm as defined in the paper is shown below:</p>
+<p><img src="../images/Adam.png" title="fig-2 Adam" class="img-fluid"></p>
+<p>We are going to re-implement this algorithm using <code>PyTorch</code>.</p>
+<blockquote class="blockquote">
+<p>I have long tried to understand all the math behind <code>Adam</code>, reading the paper multiple times. But I believe that I can at best contribute towards helping the reader re-implement <code>Adam</code> in PyTorch and not in explaining all the math behind the algorithm. In various papers and algorithms such as RMSprop, it is mentioned that dividing by the sqrt of second moments of the gradients, we can achieve better stability. As to why? I am not sure. Having said that, it is best to assume that this given algorithm works and try to re-implement in PyTorch.</p>
+</blockquote>
+<p>As can be seen from <code>fig-2</code>, to re-implement Adam, we need to be able to keep a moving average of the first and second moments of the gradients. Finally, based on the bias correction term <strong>1 - β<sub>1</sub>t</strong> for the first moment estimate and <strong>1 - β<sub>2</sub>t</strong> for the second moment estimate, we compute the biased corrected version and first and second raw moment estimates.</p>
+<p>Finally, the update step for the parameters at time <code>t</code> becomes:</p>
+<p><strong>θ<sub>t</sub> = θ<sub>t-1</sub> - α * m_hat<sub>t</sub> / (sqrt( v_hat<sub>t</sub>) + ε)</strong></p>
+<p>Where, θ<sub>t</sub> - Parameter vector at time <code>t</code> α - Learning rate m_hat<sub>t</sub> - Bias corrected first moment estimate v_hat<sub>t</sub> - Bias corrected second moment estimate</p>
+<p>Replicating this algorithm in PyTorch is fairly straightforward as shown in the code implementation below:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> AdamOptimizer(Optimizer):</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, params, <span class="op">**</span>defaults):</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>(params, <span class="op">**</span>defaults)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.lr   <span class="op">=</span> defaults[<span class="st">'lr'</span>]</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.ß<span class="dv">1</span>   <span class="op">=</span> defaults[<span class="st">'beta1'</span>]</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.ß<span class="dv">2</span>   <span class="op">=</span> defaults[<span class="st">'beta2'</span>]</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.eps <span class="op">=</span> defaults[<span class="st">'epsilon'</span>]</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.state <span class="op">=</span> defaultdict(<span class="bu">dict</span>)</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.state_step <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> step(<span class="va">self</span>):</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> p <span class="kw">in</span> <span class="va">self</span>.grad_params():</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.state_step<span class="op">+=</span><span class="dv">1</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>            param_state <span class="op">=</span> <span class="va">self</span>.state[p]</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>            d_p <span class="op">=</span> p.grad.data   </span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="st">'exp_avg'</span> <span class="kw">not</span> <span class="kw">in</span> param_state:</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>                exp_avg <span class="op">=</span> param_state[<span class="st">'exp_avg'</span>] <span class="op">=</span> torch.zeros_like(p, memory_format<span class="op">=</span>torch.preserve_format)</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>            <span class="cf">else</span>:</span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>                exp_avg <span class="op">=</span> param_state[<span class="st">'exp_avg'</span>]</span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>                </span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="st">'exp_avg_sq'</span> <span class="kw">not</span> <span class="kw">in</span> param_state:</span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>                exp_avg_sq <span class="op">=</span> param_state[<span class="st">'exp_avg_sq'</span>] <span class="op">=</span> torch.zeros_like(p, memory_format<span class="op">=</span>torch.preserve_format)</span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>            <span class="cf">else</span>:</span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>                exp_avg_sq <span class="op">=</span> param_state[<span class="st">'exp_avg_sq'</span>]</span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>            exp_avg.mul_(<span class="va">self</span>.ß<span class="dv">1</span>).add_(d_p, alpha<span class="op">=</span><span class="dv">1</span><span class="op">-</span><span class="va">self</span>.ß<span class="dv">1</span>)</span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>            exp_avg_sq.mul_(<span class="va">self</span>.ß<span class="dv">2</span>).addcmul_(d_p, d_p, value<span class="op">=</span><span class="dv">1</span><span class="op">-</span><span class="va">self</span>.ß<span class="dv">2</span>)</span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>            bias_correction_1 <span class="op">=</span> <span class="dv">1</span> <span class="op">-</span> <span class="va">self</span>.ß<span class="dv">1</span><span class="op">**</span><span class="va">self</span>.state_step</span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>            bias_correction_2 <span class="op">=</span> <span class="dv">1</span> <span class="op">-</span> <span class="va">self</span>.ß<span class="dv">2</span><span class="op">**</span><span class="va">self</span>.state_step</span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>            unbiased_exp_avg <span class="op">=</span> exp_avg<span class="op">/</span>bias_correction_1</span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>            unbiased_exp_avg_sq <span class="op">=</span> exp_avg_sq<span class="op">/</span>bias_correction_2</span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a>            denom <span class="op">=</span> unbiased_exp_avg_sq.sqrt().add_(<span class="va">self</span>.eps)</span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a>            step_size <span class="op">=</span> <span class="va">self</span>.lr <span class="op">/</span> bias_correction_1</span>
+<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a>            p.data.addcdiv_(unbiased_exp_avg, denom, value<span class="op">=-</span>step_size)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Looking at the <code>step</code> method of the above implementation, we can directly relate the implementation to the Adam algorithm as in <code>fig-2</code>. We store the gradients of the paramter <code>p</code> in a variable called <code>d_p</code>. Next, for each parameter we store a state referred to as <code>param_state</code>.</p>
+<p>From the algorithm, we know that we need to store both first and second moments of the gradients. Therefore, if both <code>exp_avg</code> (first moment) and <code>exp_avg_sq</code> (second moment) are null, we initialize them as zeroes with the same shape as <code>p</code>.</p>
+<p>Once initialized, then for every subsequent step we grab the first and second moments and update them based on the update rule as in the Adam algorithm.</p>
+<p>For first moment <code>exp_avg</code>, we do <code>exp_avg.mul_(self.ß1).add_(d_p, alpha=1-self.ß1)</code> which equates to <code>exp_avg = self.ß1 * exp_avg + (1 - self.ß1) * d_p</code>. This is the same as the Update biased first moment step in the algorithm. <code>exp_avg</code> is equivalent to <strong>m<sub>t</sub></strong> in the algorithm.</p>
+<p>For the second moment <code>exp_avg_sq</code>, we do <code>exp_avg_sq.mul_(self.ß2).addcmul_(d_p, d_p, value=1-self.ß2)</code> which equates to <code>exp_avg_sq = self.ß2 * exp_avg_sq + (1 - self.ß2) * (d_p**2)</code>. This is the same as the update biased second raw moment estimate step in the algorithm. <code>exp_avg_sq</code> is equivalent to <strong>v<sub>t</sub></strong> in the algorithm.</p>
+<p>Finally, we calculate the bias correction terms as mentioned in the algorithm and calculate the <code>unbiased_exp_avg</code> which equates to <strong>m_hat<sub>t</sub></strong> in the algorithm. We also calculate the <code>unbiased_exp_avg_sq</code> after bias correction and <code>unbiased_exp_avg_sq</code> equates to <strong>v_hat<sub>t</sub></strong> in the algorithm.</p>
+<p>We calulate the denominator <code>denom</code> as in the algorithm <code>denom = unbiased_exp_avg_sq.sqrt().add_(self.eps)</code>. Finally, we perform the parameter update step <code>p.data.addcdiv_(unbiased_exp_avg, denom, value=-step_size)</code> which equates to <code>p = p - unbiased_exp_avg * step_size / denom</code> that is equivalent to the last step in the algorithm.</p>
+<p>Thus, we have successfully re-implemented <code>Adam</code>.</p>
+</section>
+<section id="working-notebook" class="level2" data-number="8">
+<h2 data-number="8" class="anchored" data-anchor-id="working-notebook"><span class="header-section-number">8</span> Working notebook</h2>
+<blockquote class="blockquote">
+<p>Refer <a href="https://gist.github.com/amaarora/571a7d5011581d67c27d884e68bf6afc">here</a> for a complete working notebook to reproduce <code>fig-1</code>.</p>
+</blockquote>
+</section>
+<section id="conclusion" class="level2" data-number="9">
+<h2 data-number="9" class="anchored" data-anchor-id="conclusion"><span class="header-section-number">9</span> Conclusion</h2>
+<p>I hope that through this blog, I have been able to explain all the magic that goes on inside the various optimizers such as <code>SGD</code>, <code>Momentum</code>, <code>RMSprop</code> and <code>Adam</code>!</p>
+<p>As usual, in case we have missed anything or to provide feedback, please feel free to reach out to me at <a href="https://twitter.com/amaarora"><span class="citation" data-cites="amaarora">@amaarora</span></a>.</p>
+<p>Also, feel free to <a href="https://amaarora.github.io/subscribe">subscribe to my blog here</a> to receive regular updates regarding new blog posts. Thanks for reading!</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

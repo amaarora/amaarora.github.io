@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.335">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Aman Arora">
+<meta name="dcterms.date" content="2020-08-13">
+<meta name="description" content="Look at the current SOTA, with top-1 accuracy of 88.5% on ImageNet.">
+
+<title>EfficientNet</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html">
+ <span class="menu-text">Aman Arora’s Blog</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../about.html">
+ <span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/"><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com"><i class="bi bi-twitter" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction"><span class="toc-section-number">1</span>  Introduction</a></li>
+  <li><a href="#the-why" id="toc-the-why" class="nav-link" data-scroll-target="#the-why"><span class="toc-section-number">2</span>  The “WHY”?</a></li>
+  <li><a href="#the-how" id="toc-the-how" class="nav-link" data-scroll-target="#the-how"><span class="toc-section-number">3</span>  The “HOW”?</a>
+  <ul class="collapse">
+  <li><a href="#compound-scaling" id="toc-compound-scaling" class="nav-link" data-scroll-target="#compound-scaling"><span class="toc-section-number">3.1</span>  Compound Scaling</a></li>
+  <li><a href="#neural-architecture-search" id="toc-neural-architecture-search" class="nav-link" data-scroll-target="#neural-architecture-search"><span class="toc-section-number">3.2</span>  Neural Architecture Search</a></li>
+  <li><a href="#main-contributions---cs-nas" id="toc-main-contributions---cs-nas" class="nav-link" data-scroll-target="#main-contributions---cs-nas"><span class="toc-section-number">3.3</span>  Main Contributions - CS &amp; NAS</a></li>
+  </ul></li>
+  <li><a href="#comparing-conventional-methods-with-compound-scaling" id="toc-comparing-conventional-methods-with-compound-scaling" class="nav-link" data-scroll-target="#comparing-conventional-methods-with-compound-scaling"><span class="toc-section-number">4</span>  Comparing Conventional Methods with Compound Scaling</a>
+  <ul class="collapse">
+  <li><a href="#depth" id="toc-depth" class="nav-link" data-scroll-target="#depth"><span class="toc-section-number">4.1</span>  Depth</a></li>
+  <li><a href="#width" id="toc-width" class="nav-link" data-scroll-target="#width"><span class="toc-section-number">4.2</span>  Width</a></li>
+  <li><a href="#resolution" id="toc-resolution" class="nav-link" data-scroll-target="#resolution"><span class="toc-section-number">4.3</span>  Resolution</a></li>
+  <li><a href="#compound-scaling-1" id="toc-compound-scaling-1" class="nav-link" data-scroll-target="#compound-scaling-1"><span class="toc-section-number">4.4</span>  Compound Scaling</a></li>
+  </ul></li>
+  <li><a href="#the-efficientnet-architecture-using-nas" id="toc-the-efficientnet-architecture-using-nas" class="nav-link" data-scroll-target="#the-efficientnet-architecture-using-nas"><span class="toc-section-number">5</span>  The EfficientNet Architecture using NAS</a>
+  <ul class="collapse">
+  <li><a href="#mnasnet-approach" id="toc-mnasnet-approach" class="nav-link" data-scroll-target="#mnasnet-approach"><span class="toc-section-number">5.1</span>  MnasNet Approach</a></li>
+  <li><a href="#neural-architecture-search-for-efficientnets" id="toc-neural-architecture-search-for-efficientnets" class="nav-link" data-scroll-target="#neural-architecture-search-for-efficientnets"><span class="toc-section-number">5.2</span>  Neural Architecture Search for EfficientNets</a></li>
+  <li><a href="#inverted-bottleneck-mbconv" id="toc-inverted-bottleneck-mbconv" class="nav-link" data-scroll-target="#inverted-bottleneck-mbconv"><span class="toc-section-number">5.3</span>  Inverted Bottleneck MBConv</a></li>
+  <li><a href="#scaling-efficient-b0-to-get-b1-b7" id="toc-scaling-efficient-b0-to-get-b1-b7" class="nav-link" data-scroll-target="#scaling-efficient-b0-to-get-b1-b7"><span class="toc-section-number">5.4</span>  Scaling Efficient-B0 to get B1-B7</a></li>
+  </ul></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion"><span class="toc-section-number">6</span>  Conclusion</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">EfficientNet</h1>
+<p class="subtitle lead">Rethinking Model Scaling for Convolutional Neural Networks</p>
+  <div class="quarto-categories">
+    <div class="quarto-category">Computer Vision</div>
+    <div class="quarto-category">Model Architecture</div>
+  </div>
+  </div>
+
+<div>
+  <div class="description">
+    <p>Look at the current SOTA, with top-1 accuracy of 88.5% on ImageNet.</p>
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Aman Arora </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">August 13, 2020</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+</header>
+
+<section id="introduction" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="introduction"><span class="header-section-number">1</span> Introduction</h2>
+<p>It brings me great pleasure as I begin writing about <strong>EfficientNets</strong> for two reasons: 1. At the time of writing, <a href="https://arxiv.org/abs/2003.08237">Fixing the train-test resolution discrepancy: FixEfficientNet</a> (family of <strong>EfficientNet</strong>) is the current State of Art on ImageNet with <strong>88.5%</strong> top-1 accuracy and <strong>98.7%</strong> top-5 accuracy. 2. This blog post also sets up the base for future blog posts on <a href="https://arxiv.org/abs/1911.04252">Self-training with Noisy Student improves ImageNet classification</a>, <a href="https://arxiv.org/abs/1906.06423">Fixing the train-test resolution discrepancy</a> and <a href="https://arxiv.org/abs/2003.08237">Fixing the train-test resolution discrepancy: FixEfficientNet</a>.</p>
+<p>In this blog post, in <a href="https://amaarora.github.io/2020/08/13/efficientnet.html#the-why">The “Why”</a> section, we take a look at the superior performance of EfficientNets compared to their counterparts and understand why we are looking into <strong>EfficientNet</strong>s and “why” they are totally worth your time.</p>
+<p>Next, in <a href="https://amaarora.github.io/2020/08/13/efficientnet.html#the-how">“The How”</a> section, we start to unravel the magic inside <strong>EfficientNets</strong>. Particularly, we look at two main contributions from the research paper: 1. Compound Scaling 2. The EfficientNet Architecture (developed using Neural Architecture Search)</p>
+<p>Having introduced the two contributions in <a href="https://amaarora.github.io/2020/08/13/efficientnet.html#the-how">The “How”</a>, we the compare the conventional methods of scaling with Compound Scaling approach in <a href="https://amaarora.github.io/2020/08/13/efficientnet.html#comparing-conventional-methods-with-compound-scaling">Comparing Conventional Methods with Compound Scaling</a>.</p>
+<p>Finally we look at the details of the <strong>EfficientNet</strong> Architecture in <a href="https://amaarora.github.io/2020/08/13/efficientnet.html#the-efficientnet-architecture-using-nas">The EfficientNet Architecture using NAS</a> and learn how the authors used <strong>N</strong>erual <strong>A</strong>rchitecture <strong>S</strong>earch (NAS) to get <code>EfficientNet-B0</code> architecture and scaled it using <strong>Compound Scaling</strong> technique to get <code>EfficientNet B1-B7</code>.</p>
+<p>So, let’s get started!</p>
+</section>
+<section id="the-why" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="the-why"><span class="header-section-number">2</span> The “WHY”?</h2>
+<p>In this section we understand “why” <strong>EfficientNet</strong>s are totally worth your time.</p>
+<p><code>fig-1</code> below summarizes “why” we could a learn a lot by understanding the <strong>EfficientNet</strong> Architecture.</p>
+<p><img src="../images/effnet_moment.png" title="fig-1 Model Size vs Imagenet Accuracy" class="img-fluid"></p>
+<p>As we can see from <code>fig-1</code>, EfficientNets significantly outperform other ConvNets. In fact, <code>EfficientNet-B7</code> achieved new state of art with 84.4% top-1 accuracy outperforming the previous SOTA <a href="https://arxiv.org/abs/1811.06965">GPipe</a> but being <strong>8.4 times smaller</strong> and <strong>6.1 times faster</strong>.</p>
+<p>From the paper, &gt; EfficientNet-B7 achieves state- of-the-art 84.4% top-1 / 97.1% top-5 accuracy on ImageNet, while being 8.4x smaller and 6.1x faster on inference than the best existing ConvNet. Our EfficientNets also transfer well and achieve state-of-the-art accuracy on CIFAR-100 (91.7%), Flowers (98.8%), and 3 other transfer learning datasets, with an order of magnitude fewer parameters.</p>
+<p>The great thing about <strong>EfficientNet</strong>s is that not only do they have better accuracies compared to their counterparts, they are also lightweight and thus, faster to run.</p>
+<p>Having looked at their superior accuracies and faster runtimes, let’s start to unravel the magic step-by-step.</p>
+</section>
+<section id="the-how" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="the-how"><span class="header-section-number">3</span> The “HOW”?</h2>
+<p>So “how” did the authors <a href="https://scholar.google.com/citations?user=6POeyBoAAAAJ&amp;hl=en">Mingxing Tan</a> and <a href="https://scholar.google.com/citations?user=vfT6-XIAAAAJ&amp;hl=en">Quoc V. Le</a> make <strong>EfficientNet</strong>s perform so well and efficiently?</p>
+<p>In this section we will understand the main idea introduced in the research paper - <strong>Compound Scaling</strong>.</p>
+<section id="compound-scaling" class="level3" data-number="3.1">
+<h3 data-number="3.1" class="anchored" data-anchor-id="compound-scaling"><span class="header-section-number">3.1</span> Compound Scaling</h3>
+<p>Before the <strong>EfficientNet</strong>s came along, the most common way to scale up ConvNets was either by one of three dimensions - depth (number of layers), width (number of channels) or image resolution (image size).</p>
+<p><strong>EfficientNet</strong>s on the other hand perform <strong>Compound Scaling</strong> - that is, scale all three dimensions while mantaining a balance between all dimensions of the network.</p>
+<p>From the paper: &gt; In this paper, we want to study and rethink the process of scaling up ConvNets. In particular, we investigate the central question: is there a principled method to scale up ConvNets that can achieve better accuracy and efficiency? Our empirical study shows that it is critical to balance all dimensions of network width/depth/resolution, and surprisingly such balance can be achieved by simply scaling each of them with constant ratio. Based on this observation, we propose a simple yet effective compound scaling method. Unlike conventional practice that arbitrary scales these factors, our method uniformly scales network width, depth, and resolution with a set of fixed scaling coefficients.</p>
+<p>This main difference between the scaling methods has also been illustrated in <code>fig-2</code> below.</p>
+<p><img src="../images/model_scaling.png" title="fig-2 Model Scaling" class="img-fluid"></p>
+<p>In <code>fig-2</code> above, (b)-(d) are conventional scaling that only increases one dimension of network width, depth, or resolution. (e) is the proposed compound scaling method that uniformly scales all three dimensions with a fixed ratio.</p>
+<p>This main idea of <strong>Compound Scaling</strong> really set apart <strong>EfficientNet</strong>s from its predecessors. And intuitively, this idea of compound scaling makes sense too because if the input image is bigger (input resolution), then the network needs more layers (depth) and more channels (width) to capture more fine-grained patterns on the bigger image.</p>
+<p>In fact, this idea of <strong>Compound Scaling</strong> also works on existing <a href="https://arxiv.org/abs/1704.04861">MobileNet</a> and <a href="https://arxiv.org/abs/1512.03385">ResNet</a> architectures.</p>
+<p>From <code>table-1</code> below, we can clearly see, that the versions of <strong>MobileNet</strong> and <strong>ResNet</strong> architectures scaled using the <strong>Compound Scaling</strong> approach perform better than their baselines or also those architectures that were scaled using conventional methods - (b)-(d) in <code>fig-2</code>.</p>
+<p><img src="../images/effnet_t1.png" title="table-1 Compound Scaling" class="img-fluid"></p>
+<p>Thus, it is safe to summarize - <strong>Compound Scaling</strong> works! But, we’re not done yet, there’s more magic to be unraveled.</p>
+</section>
+<section id="neural-architecture-search" class="level3" data-number="3.2">
+<h3 data-number="3.2" class="anchored" data-anchor-id="neural-architecture-search"><span class="header-section-number">3.2</span> Neural Architecture Search</h3>
+<p>Since we are looking at the “<strong>how</strong>” - while so far we know <strong>Compound Scaling</strong> was the main idea introduced - the authors found that having a good baseline network is also critical.</p>
+<p>It wasn’t enough to achieve such great performance by picking up any existing architecture and applying <strong>Compound Scaling</strong> to it. While the authors evaluated the scaling method using existing ConvNets (for example - <strong>ResNet</strong>s and <strong>MobileNets</strong> in <code>table-1</code> before), in order to better demonstrate the effectiveness of this scaling method, they also developed a new mobile-size baseline, called <strong>EfficientNet</strong> using <strong>Neural Architecture Search</strong>.</p>
+<p>We understand how they did this is in a lot more detail in a later section of this blog post.</p>
+</section>
+<section id="main-contributions---cs-nas" class="level3" data-number="3.3">
+<h3 data-number="3.3" class="anchored" data-anchor-id="main-contributions---cs-nas"><span class="header-section-number">3.3</span> Main Contributions - CS &amp; NAS</h3>
+<p>Therefore, to summarize the two main contributions of this research paper were the idea of <u>Compound Scaling</u> and using <u>Neural Architecture Search to define a new mobile-size baseline called EfficientNet</u>. We look at both <strong>model scaling</strong> and the <strong>EfficientNet</strong> architecture in a lot more detail in the following sections.</p>
+</section>
+</section>
+<section id="comparing-conventional-methods-with-compound-scaling" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="comparing-conventional-methods-with-compound-scaling"><span class="header-section-number">4</span> Comparing Conventional Methods with Compound Scaling</h2>
+<p>In this section we look at various ways of scaling neural networks in a lot more detail and compare then with the <strong>Compound Scaling</strong> approach.</p>
+<p>Basically, the authors of <strong>EfficientNet</strong> architecture ran a lot of experiments scaling depth, width and image resolution and made two main observations:</p>
+<blockquote class="blockquote">
+<ol type="1">
+<li>Scaling up any dimension of network width, depth, or resolution improves accuracy, but the accuracy gain diminishes for bigger models.</li>
+<li>In order to pursue better accuracy and efficiency, it is critical to balance all dimensions of network width, depth, and resolution during ConvNet scaling.</li>
+</ol>
+</blockquote>
+<p><img src="../images/scaling_effnet.png" title="fig-3 Scaling up a Baseline Model with Different Network Width(w), Depth(d) and Resolution(r)" class="img-fluid"></p>
+<p>These two observations can also be seen in <code>fig-3</code>. Now, let’s look at the effects of scaling single dimensions on a ConvNet in more detail below.</p>
+<section id="depth" class="level3" data-number="4.1">
+<h3 data-number="4.1" class="anchored" data-anchor-id="depth"><span class="header-section-number">4.1</span> Depth</h3>
+<p>Scaling network depth (number of layers), is the most common way used by many ConvNets.</p>
+<p>With the advancements in deep learning (particularly thanks to <a href="https://arxiv.org/abs/1512.03385">Residual Connections</a>, <a href="https://arxiv.org/abs/1502.03167">BatchNorm</a>), it has now been possible to train deeper neural networks that generally have higher accuracy than their shallower counterparts. The intuition is that deeper ConvNet can capture richer and more complex features, and generalize well on new tasks. However, deeper networks are also more difficult to train due to the <a href="https://mc.ai/wide-residual-nets-why-deeper-isnt-always-better/">vanishing gradient problem</a>. Although residual connections and batchnorm help alleviate this problem, the accuracy gain of very deep networks diminishes. For example, ResNet-1000 has similar accuracy as ResNet-101 even though it has much more layers.</p>
+<p>In <code>fig-3</code> (middle), we can also see that <code>ImageNet</code> Top-1 Accuracy saturates at <code>d=6.0</code> and no further improvement can be seen after.</p>
+</section>
+<section id="width" class="level3" data-number="4.2">
+<h3 data-number="4.2" class="anchored" data-anchor-id="width"><span class="header-section-number">4.2</span> Width</h3>
+<p>Scaling network width - that is, increasing the number of channels in Convolution layers - is most commonly used for smaller sized models. We have seen applications of wider networks previously in <a href="https://arxiv.org/abs/1704.04861">MobileNets</a>, <a href="(https://arxiv.org/abs/1807.11626)">MNasNet</a>.</p>
+<p>While wider networks tend to be able to capture more fine-grained features and are easier to train, extremely wide but shallow networks tend to have difficul- ties in capturing higher level features.</p>
+<p>Also, as can be seen in <code>fig-3</code> (left), accuracy quickly saturates when networks become much wider with larger <code>w</code>.</p>
+</section>
+<section id="resolution" class="level3" data-number="4.3">
+<h3 data-number="4.3" class="anchored" data-anchor-id="resolution"><span class="header-section-number">4.3</span> Resolution</h3>
+<p>From the paper: &gt; With higher resolution input images, ConvNets can potentially capture more fine-grained patterns. Starting from 224x224 in early ConvNets, modern ConvNets tend to use 299x299 (Szegedy et al., 2016) or 331x331 (Zoph et al., 2018) for better accuracy. Recently, GPipe (Huang et al., 2018) achieves state-of-the-art ImageNet accuracy with 480x480 resolution. Higher resolutions, such as 600x600, are also widely used in object detection ConvNets (He et al., 2017; Lin et al., 2017).</p>
+<p>Increasing image resolution to help improve the accuracy of ConvNets is not new - This has been termed as Progressive Resizing in fast.ai course. (explained <a href="https://www.kdnuggets.com/2019/05/boost-your-image-classification-model.html">here</a>).</p>
+<p>It is also beneficial to ensemble models trained on different input resolution as explained by Chris Deotte <a href="https://www.kaggle.com/c/siim-isic-melanoma-classification/discussion/160147">here</a>.</p>
+<p><code>fig-3</code> (right), we can see that accuracy increases with an increase in input image size.</p>
+<p>By studying the indivdiual effects of scaling depth, width and resolution, this brings us to the first observation which I post here again for reference:</p>
+<blockquote class="blockquote">
+<p>Scaling up any dimension of network width, depth, or resolution improves accuracy, but the accuracy gain diminishes for bigger models.</p>
+</blockquote>
+</section>
+<section id="compound-scaling-1" class="level3" data-number="4.4">
+<h3 data-number="4.4" class="anchored" data-anchor-id="compound-scaling-1"><span class="header-section-number">4.4</span> Compound Scaling</h3>
+<p><img src="../images/compound_scaling.png" title="fig-4 Scaling Network Width for Different Baseline Net- works" class="img-fluid"></p>
+<p>Each dot in a line in <code>fig-4</code> above denotes a model with different width(w). We can see that the best accuracy gains can be obvserved by increasing depth, resolution and width. <code>r=1.0</code> represents 224x224 resolution whereas <code>r=1.3</code> represents 299x299 resolution.</p>
+<p>Therefore, with deeper (d=2.0) and higher resolution (r=2.0), width scaling achieves much better accuracy under the same FLOPS cost.</p>
+<p>This brings to the second observation:</p>
+<blockquote class="blockquote">
+<p>In order to pursue better accuracy and efficiency, it is critical to balance all dimensions of network width, depth, and resolution during ConvNet scaling.</p>
+</blockquote>
+<p>Having looked at <strong>Compound Scaling</strong>, we will now look at how the authors used neural Architecture Search to get mobile-size network that they named <strong>EfficientNet</strong>.</p>
+</section>
+</section>
+<section id="the-efficientnet-architecture-using-nas" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="the-efficientnet-architecture-using-nas"><span class="header-section-number">5</span> The EfficientNet Architecture using NAS</h2>
+<p>The authors used <strong>Neural Architecture Search</strong> approach similar to <a href="https://arxiv.org/abs/1807.11626">MNasNet</a> research paper. This is a reinforcement learning based approach where the authors developed a baseline neural architecture <strong>Efficient-B0</strong> by leveraging a multi-objective search that optimizes for both <strong>Accuracy</strong> and <strong>FLOPS</strong>. From the paper:</p>
+<blockquote class="blockquote">
+<p>Specifically, we use the same search space as (Tan et al., 2019), and use <strong>ACC(m)×[FLOPS(m)/T]<sup>w</sup></strong> as the optimization goal, where <code>ACC(m)</code> and <code>FLOPS(m)</code> denote the accuracy and FLOPS of model <code>m</code>, <code>T</code> is the target FLOPS and <code>w=-0.07</code> is a hyperparameter for controlling the trade-off between accuracy and FLOPS. Unlike (Tan et al., 2019; Cai et al., 2019), here we optimize FLOPS rather than latency since we are not targeting any specific hardware device.</p>
+</blockquote>
+<p>The EfficientNet-B0 architecture has been summarized in <code>table-2</code> below:</p>
+<p><img src="../images/effb0.png" title="Table-2 EfficientNet-B0 baseline network" class="img-fluid"></p>
+<p>The <code>MBConv</code> layer above is nothing but an inverted bottleneck block with squeeze and excitation connection added to it. We will learn more about this layer in <a href="https://amaarora.github.io/2020/08/13/efficientnet.html#inverted-bottleneck-mbconv">this</a> section of the blog post.</p>
+<p>Starting from this baseline architecture, the authors scaled the <strong>EfficientNet-B0</strong> using <strong>Compound Scaling</strong> to obtain <strong>EfficientNet B1-B7</strong>.</p>
+<section id="mnasnet-approach" class="level3" data-number="5.1">
+<h3 data-number="5.1" class="anchored" data-anchor-id="mnasnet-approach"><span class="header-section-number">5.1</span> MnasNet Approach</h3>
+<p>Before we understand how was the <strong>EfficientNet-B0</strong> architecture developed, let’s first look into the <strong>MnasNet</strong> Architecture and the main idea behind the research paper.</p>
+<p><img src="../images/Mnasnet.png" title="fig-6 An overview of MNasNet Approach" class="img-fluid"></p>
+<p>From the paper: &gt; The search framework consists of three components: a recurrent neural network (RNN) based controller, a trainer to obtain the model accuracy, and a mobile phone based inference engine for measuring the latency.</p>
+<p>For <strong>MNasNet</strong>, the authors used model accuracy (on ImageNet) and latency as model objectives to find the best architecture.</p>
+<p>Essentially, the Controller finds a model architecture, this model architecture is then used to train on ImageNet, it’s accuracy and latency values are calculated. Then, reward function is calculated and feedback is sent back to controller. We repeat this process a few times until the optimum architecture is achieved such that it’s accuracy is maximum given latency is lower than certain specified value.</p>
+<p>The objective function can formally be defined as:</p>
+<p><img src="../images/mnasnet_obj.png" class="img-fluid"></p>
+<p>Using the above as reward function, the authors were able to find the <strong>MNasNet</strong> architecture that achieved 75.2% top-1 accuracy and 78ms latency. More about this approach has been explained <a href="https://ai.googleblog.com/2018/08/mnasnet-towards-automating-design-of.html">here</a>.</p>
+</section>
+<section id="neural-architecture-search-for-efficientnets" class="level3" data-number="5.2">
+<h3 data-number="5.2" class="anchored" data-anchor-id="neural-architecture-search-for-efficientnets"><span class="header-section-number">5.2</span> Neural Architecture Search for EfficientNets</h3>
+<p>The authors of the <strong>EfficientNet</strong> research paper used the similar approach as explained above to then find an optimal neural network architecture that maximises <strong>ACC(m)×[FLOPS(m)/T]<sup>w</sup></strong>. Note that for EfficientNets, the authors used FLOPS instead of latency in the objective function since the authors were not targeting specific hardware as opposed to <strong>MNasNet</strong> architecture.</p>
+<p>From the paper: &gt; Our search produces an efficient network, which we name EfficientNet-B0. Since we use the same search space as (Tan et al., 2019), the architecture is similar to MnasNett, except our EfficientNet-B0 is slightly bigger due to the larger FLOPS target (our FLOPS target is 400M).</p>
+<p>The authors named this architecture as <strong>EfficientNet-B0</strong> and it is defined in <code>table-2</code> shown below again for reference:</p>
+<p><img src="../images/effb0.png" title="Table-2 EfficientNet-B0 baseline network" class="img-fluid"></p>
+<p>Since, the authors of <strong>EfficientNet</strong>s used the same approach and similar neural network search space as <strong>MNasNet</strong>, the two architectures are very similar.</p>
+<p>So, the key question now is - what’s this <strong>MBConv</strong> layer? As I have mentioned before, it is nothing but an inverted residual bottleneck.</p>
+<p>This has been explained further in the next section.</p>
+</section>
+<section id="inverted-bottleneck-mbconv" class="level3" data-number="5.3">
+<h3 data-number="5.3" class="anchored" data-anchor-id="inverted-bottleneck-mbconv"><span class="header-section-number">5.3</span> Inverted Bottleneck MBConv</h3>
+<p><img src="../images/mbconv.png" title="fig-7 MBConv Layer" class="img-fluid"></p>
+<p>As in the case of Bottleneck layers that were introduced in the <a href="https://arxiv.org/abs/1512.00567">InceptionV2</a> architecture, the key idea is to first use a <code>1x1</code> convolution to bring down the number of channels and apply the <code>3x3</code> or <code>5x5</code> convolution operation to the reduced number of channels to get output features. Finally, use another <code>1x1</code> convolution operation to again increase the number of channels to the initial value. Bottleneck design used in <strong>ResNet</strong>s has been shown below.</p>
+<p><img src="../images/bottleneck_design.png" title="fig-7 Bottleneck Design" class="img-fluid"></p>
+<p>The inverted bottleneck as in <code>MBConv</code> does the reverse - instead of reducing the number of channels, the first <code>1x1</code> conv layer increases the number of channels to 3 times the initial.</p>
+<p>Note that using a standard convolution operation here would be computationally expensive, so a <strong>Depthwise Convolution</strong> is used to get the output feature map. Finally, the second <code>1x1</code> conv layer downsamples the number of channels to the initial value. This has been illustrated in <code>fig-7</code>.</p>
+<p>Now you might ask what’s a Depthwise Convolution? It has been explained very well <a href="https://www.youtube.com/watch?v=T7o3xvJLuHk">here</a>.</p>
+<p>So to summarize, the <strong>EfficientNet-B0</strong> architecture uses this inverted bottleneck with Depthwise Convolution operation. But, to this, they also add squeeze and excitation operation which have been explained in my previous blog post <a href="https://amaarora.github.io/2020/07/24/SeNet.html">here</a>.</p>
+<p>From the paper: &gt; The main building block of EfficientNet-B0 is mobile inverted bottleneck MBConv (Sandler et al., 2018; Tan et al., 2019), to which we also add squeeze-and-excitation optimization (Hu et al., 2018).</p>
+<p>That’s all the magic - explained.</p>
+</section>
+<section id="scaling-efficient-b0-to-get-b1-b7" class="level3" data-number="5.4">
+<h3 data-number="5.4" class="anchored" data-anchor-id="scaling-efficient-b0-to-get-b1-b7"><span class="header-section-number">5.4</span> Scaling Efficient-B0 to get B1-B7</h3>
+<p>This is the last section explaining the <strong>EffcientNet</strong> Architecture. In this section, we look into the details as to how the authors scaled <code>EfficientNet-B0</code> to get <code>EfficientNet B1-B7</code>.</p>
+<p>Let the network depth(d), widt(w) and input image resolution(r) be:</p>
+<p><img src="../images/dwr.png" class="img-fluid"></p>
+<p>Intuitively, <code>φ</code> is a user-defined coeffecient that determines how much extra resources are available. The constants <code>α</code>, <code>β</code>, <code>γ</code> determine how to distribute these extra resources accross networks depth(d), width(w) and input resolution(r).</p>
+<p>Given that we have some extra resources <code>α</code>, <code>β</code>, <code>γ</code> can be determined using a small grid search and thus we can scale networks depth, width and input resolution to get a bigger network.</p>
+<p>From the paper: &gt; Starting from the baseline EfficientNet-B0, we apply our compound scaling method to scale it up with two steps: &gt; - STEP 1: we first fix φ = 1, assuming twice more resources available, and do a small grid search of α, β, γ. In particular, we find the best values for EfficientNet-B0 are α = 1.2, β = 1.1, γ = 1.15, under constraint of α * β<sup>2</sup> * γ<sup>2</sup> ≈ 2. &gt; - STEP 2: we then fix α, β, γ as constants and scale up baseline network with different φ, to obtain EfficientNet-B1 to B7.</p>
+</section>
+</section>
+<section id="conclusion" class="level2" data-number="6">
+<h2 data-number="6" class="anchored" data-anchor-id="conclusion"><span class="header-section-number">6</span> Conclusion</h2>
+<p>First, we looked at the idea of compound scaling <code>depth</code>, <code>width</code> and <code>image resolution</code> all at the same time instead of the conventional method of scaling only one of the three. Next, we also looked at the various experiments on model scaling and also at the effects of scaling each dimension on model accuracy. We realized, <strong>Compound Scaling</strong> as a technique works best compared to other conventional methods.</p>
+<p>We also realized that the baseline network to which <strong>Compound Scaling</strong> is applied also matters a lot. It is not enough to pick up any existing architecture and scale <code>depth</code>, <code>width</code> and <code>image resolution</code>. The authors therefore, used <strong>N</strong>ueral <strong>A</strong>rchitecture <strong>S</strong>earch to get a mobile-size network that’s very similar to <code>MNasNet</code> and they named it <strong>EfficientNet</strong>. Particularly, the baseline network is termed Efficient-B0.</p>
+<p>Next, the authors scaled this baseline network using <strong>Compound Scaling</strong> technique as explained in <a href="https://amaarora.github.io/2020/08/13/efficientnet.html#scaling-efficient-b0-to-get-b1-b7">this section</a> to scale depth(d), width(w) and resolution(r) to get <code>Efficient B1-B7</code>. This process has also been summarized in the image below.</p>
+<p><img src="../images/effnet_overall.jpg" title="fig-8 EfficientNet overall approach" class="img-fluid"></p>
+<p>I hope through this post I have been able to explain all the magic behind EfficientNets.</p>
+<p>As always, constructive feedback is always welcome at <a href="https://twitter.com/amaarora"><span class="citation" data-cites="amaarora">@amaarora</span></a>.</p>
+<p>Also, feel free to <a href="https://amaarora.github.io/subscribe">subscribe to my blog here</a> to receive regular updates regarding new blog posts. Thanks for reading!</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

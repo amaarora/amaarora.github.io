@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.335">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Aman Arora">
+<meta name="dcterms.date" content="2021-01-18">
+<meta name="description" content="In this blog post, we will be looking at the Vision Transformer architectures in detail, and also re-implement in PyTorch from scratch.">
+
+<title>Vision Transformer</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html">
+ <span class="menu-text">Aman Arora’s Blog</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../about.html">
+ <span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/"><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com"><i class="bi bi-twitter" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Vision Transformer</h1>
+            <p class="subtitle lead">An Image is Worth 16x16 Words - Transformers for Image Recognition at Scale</p>
+                  <div>
+        <div class="description">
+          <p>In this blog post, we will be looking at the Vision Transformer architectures in detail, and also re-implement in PyTorch from scratch.</p>
+        </div>
+      </div>
+                          <div class="quarto-categories">
+                <div class="quarto-category">Computer Vision</div>
+                <div class="quarto-category">Model Architecture</div>
+                <div class="quarto-category">Transformers</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Aman Arora </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">January 18, 2021</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#prerequisite" id="toc-prerequisite" class="nav-link active" data-scroll-target="#prerequisite"><span class="toc-section-number">1</span>  Prerequisite</a></li>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link" data-scroll-target="#introduction"><span class="toc-section-number">2</span>  Introduction</a></li>
+  <li><a href="#key-contributions" id="toc-key-contributions" class="nav-link" data-scroll-target="#key-contributions"><span class="toc-section-number">3</span>  Key Contributions</a></li>
+  <li><a href="#the-vision-transformer" id="toc-the-vision-transformer" class="nav-link" data-scroll-target="#the-vision-transformer"><span class="toc-section-number">4</span>  The Vision Transformer</a></li>
+  <li><a href="#patch-embeddings" id="toc-patch-embeddings" class="nav-link" data-scroll-target="#patch-embeddings"><span class="toc-section-number">5</span>  Patch Embeddings</a></li>
+  <li><a href="#cls-token-position-embeddings" id="toc-cls-token-position-embeddings" class="nav-link" data-scroll-target="#cls-token-position-embeddings"><span class="toc-section-number">6</span>  <code>[cls]</code> token &amp; Position Embeddings</a></li>
+  <li><a href="#the-transformer-encoder" id="toc-the-transformer-encoder" class="nav-link" data-scroll-target="#the-transformer-encoder"><span class="toc-section-number">7</span>  The Transformer Encoder</a></li>
+  <li><a href="#the-vision-transformer-in-pytorch" id="toc-the-vision-transformer-in-pytorch" class="nav-link" data-scroll-target="#the-vision-transformer-in-pytorch"><span class="toc-section-number">8</span>  The Vision Transformer in PyTorch</a></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion"><span class="toc-section-number">9</span>  Conclusion</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<p>This blog is the beginning of some <strong>truly exciting times</strong> - want to know why?</p>
+<p>In this blog post, we would not only be looking at the architectures in detail, but we will also understand how they are implemented in <a href="https://github.com/rwightman/pytorch-image-models">timm</a>, thus, looking at the code implementation too!</p>
+<p>And also please welcome <a href="https://twitter.com/dr_hb_ai">Dr Habib Bukhari</a>! You might know of him as <a href="https://www.kaggle.com/drhabib">DrHB</a> on Kaggle - at the time of writing, ranked <strong>186/154,204</strong> on the Kaggle ranking system! I am sure we all knew that he is great at deep learning but did you also know that he can also do some kickass visualizations to explain complicated concepts easily? And that, we have decided to team up for this and many more future blog posts to explain the concepts in an easy and visual manner. Together, we hope that you like what you read and see! Much effort and planning has gone into writing this blog post.</p>
+<p>So, let’s get started! This blog post has been structured in the following way:</p>
+<ol type="1">
+<li>TOC {:toc}</li>
+</ol>
+<section id="prerequisite" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="prerequisite"><span class="header-section-number">1</span> Prerequisite</h2>
+<p>In this blog post, I assume that the reader knows about the <a href="https://arxiv.org/abs/1706.03762">Transformer Architecture</a>. While it will be introduced briefly as part of this post, our main focus will on understanding how the authors of <a href="https://arxiv.org/abs/2010.11929">An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale</a> from Google Brain applied the <a href="https://arxiv.org/abs/1706.03762">Transformer Architecture</a> to computer vision.</p>
+<p>Here are some of my personal favourite resources on Transformers: 1. <a href="http://jalammar.github.io/illustrated-transformer/">The illustrated Transformer</a> by Jay Alammar 2. <a href="https://nlp.seas.harvard.edu/2018/04/03/attention.html">The Annotated Transformer</a> by Harvard NLP 3. <a href="https://www.youtube.com/watch?v=AFkGPmU16QA&amp;list=PLtmWHNX-gukKocXQOkQjuVxglSDYWsSh9&amp;index=18&amp;t=0s">Introduction to the Transformer</a> by Rachel Thomas and Jeremy Howard</p>
+<p>Though the next one is a biased recommendation, I would also like to recommend the reader to my previous post <a href="https://amaarora.github.io/2020/02/18/annotatedGPT2.html">The Annotated GPT-2</a>, for further reading on Transformers.</p>
+</section>
+<section id="introduction" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="introduction"><span class="header-section-number">2</span> Introduction</h2>
+<p>At the time of release, the <a href="https://arxiv.org/abs/2010.11929">An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale</a> received quite a bit of “attention” from the community. This was the first paper to get some astonishing results on the <a href="http://www.image-net.org/">ImageNet dataset</a> using the <strong>Transformer architecture</strong>. While there had been attempts made in the past to apply Transformers in the context of image processing (<a href="https://arxiv.org/abs/1802.05751">1</a>, <a href="https://arxiv.org/abs/1906.05909">2</a>, <a href="https://arxiv.org/abs/2003.07853">3</a>), this paper was one of the first to apply Transformers to full-sized images.</p>
+<p><strong>NOTE:</strong> I will be using the terms <code>Vision Transformer</code> &amp; <code>ViT</code> interchangeably throughout this blog post and both refer to architecture described in <a href="https://arxiv.org/abs/2010.11929">An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale</a> paper.</p>
+</section>
+<section id="key-contributions" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="key-contributions"><span class="header-section-number">3</span> Key Contributions</h2>
+<p>The key contributions from this paper were not in terms of a new architecture, but rather the application of an existing architecture (Transformers), to the field of Computer Vision. It is the <strong>training method</strong> and the <strong>dataset used to pretrain the network</strong>, that were key for <strong>ViT</strong> to get excellent results compared to SOTA (State of the Art) on ImageNet.</p>
+<p>So, there aren’t a lot of new things to introduce in this post, but rather how to use the existing Transformer architecutre and apply it to Computer Vision. Thus, if the reader knows about <strong>Transformers</strong>, this blog post and the research paper itself should be a fairly simple read.</p>
+</section>
+<section id="the-vision-transformer" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="the-vision-transformer"><span class="header-section-number">4</span> The Vision Transformer</h2>
+<p>We will be using a top down approach to understand the <strong>Visual Transformer</strong> architecture. We will first start by looking at the overall architecture and then dig deeper into each of the five steps in the overall architecture.</p>
+<p>As an overall method, from the paper: &gt; We split an image into fixed-size patches, linearly embed each of them, add position embeddings, and feed the resulting sequence of vectors to a standard Transformer encoder. In order to perform classification, we use the standard approach of adding an extra learnable “classification token” to the sequence. The illustration of the Transformer encoder was inspired by Vaswani et al.&nbsp;(2017)</p>
+<p><img src="../images/ViT.png" title="fig-1 The Model Overview" class="img-fluid"></p>
+<p>The overall architecture can be described easily in five simple steps below: 1. Split an input image into patches. 2. Get linear embeddings (representation) from each patch referred to as <strong>Patch Embeddings</strong>. 3. Add position embeddings and a <code>[cls]</code> token to each of the Patch Embeddings. 4. Pass through a <strong>Transformer Encoder</strong> and get the output values for each of the <code>[cls]</code> tokens. 5. Pass the representations of <code>[cls]</code> tokens through a <code>MLP Head</code> to get final class predictions.</p>
+<blockquote class="blockquote">
+<p>Note that there is a <code>MLP</code> inside the Transformer Encoder and a <code>MLP Head</code> that gives the class predictions, these two are different.</p>
+</blockquote>
+<p>Not as descriptive? Enter <em>Dr Habib</em> to the rescue.</p>
+<p><img src="../images/vit-01.png" title="fig-2 Simplified Model Overview" class="img-fluid"></p>
+<p>Let’s now look at the five steps again with the help of <code>fig-2</code>. Let’s imagine that we want to classify a <code>3</code> channel (RGB) input image of a frog of size <code>224 x 224</code>.</p>
+<p>The <strong>first step</strong> is to create patches all over the image of patch size <code>16 x 16</code>. Thus we create <code>14 x 14</code> or <code>196</code> such patches. We can have these patches in a straight line as in <code>fig-2</code> where the first patch comes from the top-left of the input image and the last patch comes from the bottom-right. As can be seen from the figure, the patch size is <code>3 x 16 x 16</code> where <code>3</code> represents the number of channels (RGB).</p>
+<p>In the <strong>second step</strong>, we pass these patches through a <strong>linear projection layer</strong> to get <code>1 x 768</code> long vector representation for each of the image patches and these representations have been shown in purple in the figure. In the paper, the authors refer to these representations of the patches as <strong>Patch Embeddings</strong>. Can you guess what’s the size of this patch embedding matrix? It’s <code>196 x 768</code>. Because we had a total of <code>196</code> patches and each patch has been represented as a <code>1 x 768</code> long vector. Therefore, the total size of the patch embedding matrix is <code>196 x 768</code>.</p>
+<blockquote class="blockquote">
+<p>You might wonder why is the vector length <code>768</code>? Well, <code>3 x 16 x 16 = 768</code>. So, we are not really losing any information as step of this process of getting these <strong>patch embeddings</strong>.</p>
+</blockquote>
+<p>In the <strong>third step</strong>, we take this patch embedding matrix of size <code>196 x 768</code> and similar to <a href="https://arxiv.org/abs/1810.04805">BERT</a>, the authors prepend a <code>[cls]</code> token to this sequence of embedded patches and then add <strong>Position Embeddings</strong>. As can be seen from <code>fig-2</code>, the size of the <strong>Patch Embeddings</strong> becomes <code>197 x 768</code> after adding the <code>[cls]</code> token and also the size of the <strong>Position Embeddings</strong> is <code>197 x 768</code>.</p>
+<blockquote class="blockquote">
+<p>Why do we add this class token and position embeddings? You will find a detailed answer in the original Transformer and Bert papers, but to answer briefly, the <code>[class]</code> tokens are added as a special tokens whose outputs from the <code>Transformer Encoder</code> serve as the overall image patch representation. And we add the positional embeddings to retain the positional information of the patches. The Transformer model on it’s own does not know about the order of the patches unlike CNNs, thus we need to manually inject some information about the relative or absolute position of the patches.</p>
+</blockquote>
+<p>In the <strong>fourth step</strong>, we pass these preprocessed patch embeddings with positional information and prepended <code>[cls]</code> token to the <strong>Transformer Encoder</strong> and get the learned representations of the <code>[cls]</code> token. Thus, the output frpm the Transformer Encoder would be of size <code>1 x 768</code> which is then fed to the <code>MLP Head</code> (which is nothing but a Linear Layer) as part of the final <strong>fifth step</strong> to get class predictions.</p>
+<p>Having looked at the overall architecture, we will now look at the individual steps in detail in the following sections.</p>
+</section>
+<section id="patch-embeddings" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="patch-embeddings"><span class="header-section-number">5</span> Patch Embeddings</h2>
+<p>In this section we will be looking at <strong>steps one and two</strong> in detail. That is the process of <u>getting patch embeddings from an input image</u>.</p>
+<p><img src="../images/vit-02.png" title="fig-3 Patch Embeddings" class="img-fluid"></p>
+<p>So far in the blog post I have mentioned that the way we get patch embeddings from an input image is to first split an image into fixed-size patches and then linearly embed each one of them using a <strong>linear projection layer</strong> as shown in <code>fig-2</code>.</p>
+<p>But, it is actually possible to combine both steps into a single step using <strong>2D Convolution</strong> operation. It is also better from an implementation perspective to do it this way as our GPUs are optimized to perform the convolution operation and it takes away the need to first split an image into patches. Let’s see why this works?</p>
+<p>If we set the the number of <code>out_channels</code> to <code>768</code>, and both <code>kernel_size</code> &amp; <code>stride</code> to <code>16</code>, then as shown in <code>fig-3</code>, once we perform the convolution operation (where the 2-D Convolution has kernel size <code>3 x 16 x 16</code>), we can get the <strong>Patch Embeddings</strong> matrix of size <code>196 x 768</code> like below:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># input image `B, C, H, W`</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> torch.randn(<span class="dv">1</span>, <span class="dv">3</span>, <span class="dv">224</span>, <span class="dv">224</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co"># 2D conv</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>conv <span class="op">=</span> nn.Conv2d(<span class="dv">3</span>, <span class="dv">768</span>, <span class="dv">16</span>, <span class="dv">16</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>conv(x).reshape(<span class="op">-</span><span class="dv">1</span>, <span class="dv">196</span>).transpose(<span class="dv">0</span>,<span class="dv">1</span>).shape</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> torch.Size([<span class="dv">196</span>, <span class="dv">768</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="cls-token-position-embeddings" class="level2" data-number="6">
+<h2 data-number="6" class="anchored" data-anchor-id="cls-token-position-embeddings"><span class="header-section-number">6</span> <code>[cls]</code> token &amp; Position Embeddings</h2>
+<p>In this section, let’s look at the <strong>third step</strong> in more detail. In this step, we prepend <code>[cls]</code> tokens and add <strong>Positional Embeddings</strong> to the <strong>Patch Embeddings</strong>.</p>
+<p>From the paper: &gt; Similar to BERT’s [class] token, we prepend a learnable embedding to the sequence of embedded patches, whose state at the output of the Transformer encoder (referred to as <strong>Z<sub>L</sub><sup>0</sup></strong>) serves as the image representation. Both during pre-training and fine-tuning, a classification head is attached to <strong>Z<sub>L</sub><sup>0</sup></strong>.</p>
+<blockquote class="blockquote">
+<p>Position embeddings are also added to the patch embeddings to retain positional information. We use standard learnable 1D position embeddings and the resulting sequence of embedding vectors serves as input to the encoder.</p>
+</blockquote>
+<p>This process can be easily visualized as below:</p>
+<p><img src="../images/vit-03.png" title="fig-4 `CLS` token and Position Embeddings" class="img-fluid"></p>
+<p>As can be seen from <code>fig-4</code>, the <code>[cls]</code> token is a vector of size <code>1 x 768</code>. We <strong>prepend</strong> it to the <strong>Patch Embeddings</strong>, thus, the updated size of <strong>Patch Embeddings</strong> becomes <code>197 x 768</code>.</p>
+<p>Next, we add <strong>Positional Embeddings</strong> of size <code>197 x 768</code> to the <strong>Patch Embeddings</strong> with <code>[cls]</code> token to get <strong>combined embeddings</strong> which are then fed to the <code>Transformer Encoder</code>. This is a pretty standard step that comes from the original Transformer paper - <a href="https://arxiv.org/abs/1706.03762">Attention is all you need</a>.</p>
+<blockquote class="blockquote">
+<p>Note that the Positional Embeddings and <code>cls</code> token vector is nothing fancy but rather just a trainable <code>nn.Parameter</code> matrix/vector.</p>
+</blockquote>
+</section>
+<section id="the-transformer-encoder" class="level2" data-number="7">
+<h2 data-number="7" class="anchored" data-anchor-id="the-transformer-encoder"><span class="header-section-number">7</span> The Transformer Encoder</h2>
+<p>This section of the blog post is not specific to Vision Transformers but a repeat of the <em>Transformer Architecture</em> and covers <strong>step-4</strong>. If you already know of the Transformer Architectures, then, feel free to skip this section. If you are not aware of the Transformer Architecture, then I recommend you to go through any of the resources mentioned in the <a href="https://amaarora.github.io/2021/01/18/ViT.html#prerequisite">Prerequisite</a> section of this blog post.</p>
+<p>In this section, we will be looking into the <strong>Transformer Encoder</strong> from <code>fig-1</code> in detail. As shown in <code>fig-1</code>, the Transformer Encoder consists of alternating layers of <strong>Multi-Head Attention</strong> and <strong>MLP</strong> blocks. Also, as shown in <code>fig-1</code>, <strong>Layer Norm</strong> is used before every block and residual connections after every block.</p>
+<p>A single layer/block of the <strong>Transformer Encoder</strong> can be visualized as below:</p>
+<p><img src="../images/vit-07.png" title="fig-5 Transformer Encoder Block" class="img-fluid"></p>
+<p>The first layer of the <strong>Transformer Encoder</strong> accepts <strong>combined embeddings</strong> of shape<code>197 x 768</code> as input. For all subsequent layers, the inputs are the outputs <code>Out</code> matrix of shape <code>197 x 768</code> from the previous layer of the <strong>Transformer Encoder</strong>. There are a total of <u>12 such layers</u> in the <strong>Transformer Encoder</strong> of the ViT-Base architecture.</p>
+<p>Inside the layer, the inputs are first passed through a <strong>Layer Norm</strong>, and then fed to <strong>Multi-Head Attention</strong> block.</p>
+<p>Inside the <strong>Multi-Head Attention</strong>, the inputs are first converted to <code>197 x 2304 (768*3)</code> shape using a <strong>Linear layer</strong> to get the <strong>qkv</strong> matrix. Next we reshape this <strong>qkv</strong> matrix into <code>197 x 3 x 768</code> where each of the three matrices of shape <code>197 x 768</code> represent the <strong>q</strong>, <strong>k</strong> and <strong>v</strong> matrices. These <strong>q</strong>, <strong>k</strong> and <strong>v</strong> matrices are further reshaped to <code>12 x 197 x 64</code> to represent the 12 attention heads. Once we have the <strong>q</strong>, <strong>k</strong> and <strong>v</strong> matrices, we finally perform the attention operation inside the <strong>Multi-Head Attention</strong> block which is given by the equation:</p>
+<p><img src="../images/vit-08.png" title="eq-1 Attention" class="img-fluid"></p>
+<p>Once we get the outputs from the <strong>Multi-Head Attention</strong> block, these are added to the inputs (skip connection) to get the final outouts that again get passed to <strong>Layer Norm</strong> before being fed to the <strong>MLP</strong> Block.</p>
+<p>The <strong>MLP</strong>, is a Multi-Layer Perceptron block consists of two linear layers and a GELU non-linearity. The outputs from the <strong>MLP</strong> block are again added to the inputs (skip connection) to get the final output from one layer of the <strong>Transformer Encoder</strong>.</p>
+<p>Having looked at a single layer inside the <strong>Transformer Encoder</strong>, let’s now zoom out and look at the complete <strong>Transformer Encoder</strong>.</p>
+<p><img src="../images/vit-06.png" title="fig-6 Transformer Encoder" class="img-fluid"></p>
+<p>As can be seen from the image above, a single <strong>Transformer Encoder</strong> consists of 12 layers. The outputs from the first layer are fed to the second layer, outputs from the second fed to the third until we get the final outputs from the 12th layer of the <strong>Transformer Encoder</strong> which are then fed to the <strong>MLP Head</strong> to get class predictions. The above image is another way to summarize <code>fig-1</code>.</p>
+</section>
+<section id="the-vision-transformer-in-pytorch" class="level2" data-number="8">
+<h2 data-number="8" class="anchored" data-anchor-id="the-vision-transformer-in-pytorch"><span class="header-section-number">8</span> The Vision Transformer in PyTorch</h2>
+<p>Having understood the Vision Transformer Architecture in great detail, let’s now look at the code-implementation and understand how to implement this architecture in PyTorch. We will be referencing the code from <a href="https://github.com/rwightman/pytorch-image-models">timm</a> to explain the implementation. The code below has been directly copied from <a href="https://github.com/rwightman/pytorch-image-models/blob/master/timm/models/vision_transformer.py">here</a>.</p>
+<p>We will build Vision Transformer using a bottom-up approach. We will take what we have learnt so far and start implementing the overall architecture piece-by-piece. First things first, how do get <strong>Patch Embeddings</strong>?</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> PatchEmbed(nn.Module):</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">""" Image to Patch Embedding</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, img_size<span class="op">=</span><span class="dv">224</span>, patch_size<span class="op">=</span><span class="dv">16</span>, in_chans<span class="op">=</span><span class="dv">3</span>, embed_dim<span class="op">=</span><span class="dv">768</span>):</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>        img_size <span class="op">=</span> to_2tuple(img_size)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>        patch_size <span class="op">=</span> to_2tuple(patch_size)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>        num_patches <span class="op">=</span> (img_size[<span class="dv">1</span>] <span class="op">//</span> patch_size[<span class="dv">1</span>]) <span class="op">*</span> (img_size[<span class="dv">0</span>] <span class="op">//</span> patch_size[<span class="dv">0</span>])</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.img_size <span class="op">=</span> img_size</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.patch_size <span class="op">=</span> patch_size</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.num_patches <span class="op">=</span> num_patches</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.proj <span class="op">=</span> nn.Conv2d(in_chans, embed_dim, kernel_size<span class="op">=</span>patch_size, stride<span class="op">=</span>patch_size)</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x):</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>        B, C, H, W <span class="op">=</span> x.shape</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>        <span class="cf">assert</span> H <span class="op">==</span> <span class="va">self</span>.img_size[<span class="dv">0</span>] <span class="kw">and</span> W <span class="op">==</span> <span class="va">self</span>.img_size[<span class="dv">1</span>], <span class="op">\</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>            <span class="ss">f"Input image size (</span><span class="sc">{</span>H<span class="sc">}</span><span class="ss">*</span><span class="sc">{</span>W<span class="sc">}</span><span class="ss">) doesn't match model (</span><span class="sc">{</span><span class="va">self</span><span class="sc">.</span>img_size[<span class="dv">0</span>]<span class="sc">}</span><span class="ss">*</span><span class="sc">{</span><span class="va">self</span><span class="sc">.</span>img_size[<span class="dv">1</span>]<span class="sc">}</span><span class="ss">)."</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="va">self</span>.proj(x).flatten(<span class="dv">2</span>).transpose(<span class="dv">1</span>, <span class="dv">2</span>)</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> x</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>As we know, we use a <strong>2-D Convolution</strong> where <code>stride</code>, <code>kernel_size</code> are set to <code>patch_size</code>. Thus, that is exactly what the class above does. We set <code>self.proj</code> to be a <code>nn.Conv2d</code> which goes from 3-channels to <code>768</code> and to get <code>196 x 768</code> patch embedding matrix.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>patch_embed <span class="op">=</span> PatchEmbed()</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> torch.randn(<span class="dv">1</span>, <span class="dv">3</span>, <span class="dv">224</span>, <span class="dv">224</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>patch_embed(x).shape </span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> torch.Size([<span class="dv">1</span>, <span class="dv">196</span>, <span class="dv">768</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Okay, so that’s that. It is also pretty easy to implement the <strong>MLP</strong> Block inside the <strong>Transformer Encoder</strong> below:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Mlp(nn.Module):</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, in_features, hidden_features<span class="op">=</span><span class="va">None</span>, out_features<span class="op">=</span><span class="va">None</span>, act_layer<span class="op">=</span>nn.GELU, drop<span class="op">=</span><span class="fl">0.</span>):</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>        out_features <span class="op">=</span> out_features <span class="kw">or</span> in_features</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>        hidden_features <span class="op">=</span> hidden_features <span class="kw">or</span> in_features</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.fc1 <span class="op">=</span> nn.Linear(in_features, hidden_features)</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.act <span class="op">=</span> act_layer()</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.fc2 <span class="op">=</span> nn.Linear(hidden_features, out_features)</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.drop <span class="op">=</span> nn.Dropout(drop)</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x):</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="va">self</span>.fc1(x)</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="va">self</span>.act(x)</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="va">self</span>.drop(x)</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="va">self</span>.fc2(x)</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="va">self</span>.drop(x)</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> x</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Basically, it consists of two layers and a <code>GELU</code> activation layer. There isn’t a lot happening in this class and is pretty easy to implement. Next, we implement <code>Attention</code> as below:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Attention(nn.Module):</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, dim, num_heads<span class="op">=</span><span class="dv">8</span>, qkv_bias<span class="op">=</span><span class="va">False</span>, qk_scale<span class="op">=</span><span class="va">None</span>, attn_drop<span class="op">=</span><span class="fl">0.</span>, proj_drop<span class="op">=</span><span class="fl">0.</span>):</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.num_heads <span class="op">=</span> num_heads</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>        head_dim <span class="op">=</span> dim <span class="op">//</span> num_heads</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>        <span class="co"># </span><span class="al">NOTE</span><span class="co"> scale factor was wrong in my original version, can set manually to be compat with prev weights</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.scale <span class="op">=</span> qk_scale <span class="kw">or</span> head_dim <span class="op">**</span> <span class="op">-</span><span class="fl">0.5</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.qkv <span class="op">=</span> nn.Linear(dim, dim <span class="op">*</span> <span class="dv">3</span>, bias<span class="op">=</span>qkv_bias)</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.attn_drop <span class="op">=</span> nn.Dropout(attn_drop)</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.proj <span class="op">=</span> nn.Linear(dim, dim)</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.proj_drop <span class="op">=</span> nn.Dropout(proj_drop)</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x):</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>        B, N, C <span class="op">=</span> x.shape</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>        qkv <span class="op">=</span> <span class="va">self</span>.qkv(x).reshape(B, N, <span class="dv">3</span>, <span class="va">self</span>.num_heads, C <span class="op">//</span> <span class="va">self</span>.num_heads).permute(<span class="dv">2</span>, <span class="dv">0</span>, <span class="dv">3</span>, <span class="dv">1</span>, <span class="dv">4</span>)</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>        q, k, v <span class="op">=</span> qkv[<span class="dv">0</span>], qkv[<span class="dv">1</span>], qkv[<span class="dv">2</span>]   <span class="co"># make torchscript happy (cannot use tensor as tuple)</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>        attn <span class="op">=</span> (q <span class="op">@</span> k.transpose(<span class="op">-</span><span class="dv">2</span>, <span class="op">-</span><span class="dv">1</span>)) <span class="op">*</span> <span class="va">self</span>.scale</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>        attn <span class="op">=</span> attn.softmax(dim<span class="op">=-</span><span class="dv">1</span>)</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>        attn <span class="op">=</span> <span class="va">self</span>.attn_drop(attn)</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> (attn <span class="op">@</span> v).transpose(<span class="dv">1</span>, <span class="dv">2</span>).reshape(B, N, C)</span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="va">self</span>.proj(x)</span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="va">self</span>.proj_drop(x)</span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> x</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>As described inside the <strong>Multi-Head Attention</strong> block, we use a Linear layer to get the <strong>qkv</strong> matrix. Also, we apply the attention operation inside the <code>forward</code> method above like so:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>        attn <span class="op">=</span> (q <span class="op">@</span> k.transpose(<span class="op">-</span><span class="dv">2</span>, <span class="op">-</span><span class="dv">1</span>)) <span class="op">*</span> <span class="va">self</span>.scale</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>        attn <span class="op">=</span> attn.softmax(dim<span class="op">=-</span><span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The above code implements <code>eq-1</code>. Since we have already implemented the <strong>Attention</strong> Layer and <strong>MLP</strong> block, let’s quickly implement a single layer of the <strong>Transformer Encoder</strong>. As we already know from <code>fig-5</code>, a single <code>Block</code> consists of Layer Norm, Attention and MLP block.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Block(nn.Module):</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, dim, num_heads, mlp_ratio<span class="op">=</span><span class="fl">4.</span>, qkv_bias<span class="op">=</span><span class="va">False</span>, qk_scale<span class="op">=</span><span class="va">None</span>, drop<span class="op">=</span><span class="fl">0.</span>, attn_drop<span class="op">=</span><span class="fl">0.</span>,</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>                 drop_path<span class="op">=</span><span class="fl">0.</span>, act_layer<span class="op">=</span>nn.GELU, norm_layer<span class="op">=</span>nn.LayerNorm):</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.norm1 <span class="op">=</span> norm_layer(dim)</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.attn <span class="op">=</span> Attention(</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>            dim, num_heads<span class="op">=</span>num_heads, qkv_bias<span class="op">=</span>qkv_bias, qk_scale<span class="op">=</span>qk_scale, attn_drop<span class="op">=</span>attn_drop, proj_drop<span class="op">=</span>drop)</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>        <span class="co"># </span><span class="al">NOTE</span><span class="co">: drop path for stochastic depth, we shall see if this is better than dropout here</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.drop_path <span class="op">=</span> DropPath(drop_path) <span class="cf">if</span> drop_path <span class="op">&gt;</span> <span class="fl">0.</span> <span class="cf">else</span> nn.Identity()</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.norm2 <span class="op">=</span> norm_layer(dim)</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>        mlp_hidden_dim <span class="op">=</span> <span class="bu">int</span>(dim <span class="op">*</span> mlp_ratio)</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.mlp <span class="op">=</span> Mlp(in_features<span class="op">=</span>dim, hidden_features<span class="op">=</span>mlp_hidden_dim, act_layer<span class="op">=</span>act_layer, drop<span class="op">=</span>drop)</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x):</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> x <span class="op">+</span> <span class="va">self</span>.drop_path(<span class="va">self</span>.attn(<span class="va">self</span>.norm1(x)))</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> x <span class="op">+</span> <span class="va">self</span>.drop_path(<span class="va">self</span>.mlp(<span class="va">self</span>.norm2(x)))</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> x</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>As can be seen in the <code>forward</code> method above, this <code>Block</code> accepts inputs <code>x</code>, passes them through <code>self.norm1</code> which is <code>LayerNorm</code> followed by the attention operation. Next, we normalize the output after the attention operation again before passing through <code>self.mlp</code> followed by <code>Dropout</code> to get the outputs <code>Out</code> matrix from this single block as in <code>fig-5</code>.</p>
+<p>Now that we have all the pieces, the complete architecture for the Vision Transformer can be implemented below like so:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> VisionTransformer(nn.Module):</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">""" Vision Transformer with support for patch or hybrid CNN input stage</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, img_size<span class="op">=</span><span class="dv">224</span>, patch_size<span class="op">=</span><span class="dv">16</span>, in_chans<span class="op">=</span><span class="dv">3</span>, num_classes<span class="op">=</span><span class="dv">1000</span>, embed_dim<span class="op">=</span><span class="dv">768</span>, depth<span class="op">=</span><span class="dv">12</span>,</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>                 num_heads<span class="op">=</span><span class="dv">12</span>, mlp_ratio<span class="op">=</span><span class="fl">4.</span>, qkv_bias<span class="op">=</span><span class="va">False</span>, qk_scale<span class="op">=</span><span class="va">None</span>, drop_rate<span class="op">=</span><span class="fl">0.</span>, attn_drop_rate<span class="op">=</span><span class="fl">0.</span>,</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>                 drop_path_rate<span class="op">=</span><span class="fl">0.</span>, norm_layer<span class="op">=</span>nn.LayerNorm):</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.num_classes <span class="op">=</span> num_classes</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.num_features <span class="op">=</span> <span class="va">self</span>.embed_dim <span class="op">=</span> embed_dim  <span class="co"># num_features for consistency with other models</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.patch_embed <span class="op">=</span> PatchEmbed(</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>            img_size<span class="op">=</span>img_size, patch_size<span class="op">=</span>patch_size, in_chans<span class="op">=</span>in_chans, embed_dim<span class="op">=</span>embed_dim)</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>        num_patches <span class="op">=</span> <span class="va">self</span>.patch_embed.num_patches</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.cls_token <span class="op">=</span> nn.Parameter(torch.zeros(<span class="dv">1</span>, <span class="dv">1</span>, embed_dim))</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.pos_embed <span class="op">=</span> nn.Parameter(torch.zeros(<span class="dv">1</span>, num_patches <span class="op">+</span> <span class="dv">1</span>, embed_dim))</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.pos_drop <span class="op">=</span> nn.Dropout(p<span class="op">=</span>drop_rate)</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>        dpr <span class="op">=</span> [x.item() <span class="cf">for</span> x <span class="kw">in</span> torch.linspace(<span class="dv">0</span>, drop_path_rate, depth)]  <span class="co"># stochastic depth decay rule</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.blocks <span class="op">=</span> nn.ModuleList([</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>            Block(</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>                dim<span class="op">=</span>embed_dim, num_heads<span class="op">=</span>num_heads, mlp_ratio<span class="op">=</span>mlp_ratio, qkv_bias<span class="op">=</span>qkv_bias, qk_scale<span class="op">=</span>qk_scale,</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>                drop<span class="op">=</span>drop_rate, attn_drop<span class="op">=</span>attn_drop_rate, drop_path<span class="op">=</span>dpr[i], norm_layer<span class="op">=</span>norm_layer)</span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(depth)])</span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.norm <span class="op">=</span> norm_layer(embed_dim)</span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Classifier head</span></span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.head <span class="op">=</span> nn.Linear(embed_dim, num_classes) <span class="cf">if</span> num_classes <span class="op">&gt;</span> <span class="dv">0</span> <span class="cf">else</span> nn.Identity()</span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward_features(<span class="va">self</span>, x):</span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>        B <span class="op">=</span> x.shape[<span class="dv">0</span>]</span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="va">self</span>.patch_embed(x)</span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>        cls_tokens <span class="op">=</span> <span class="va">self</span>.cls_token.expand(B, <span class="op">-</span><span class="dv">1</span>, <span class="op">-</span><span class="dv">1</span>)  </span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> torch.cat((cls_tokens, x), dim<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> x <span class="op">+</span> <span class="va">self</span>.pos_embed</span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="va">self</span>.pos_drop(x)</span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> blk <span class="kw">in</span> <span class="va">self</span>.blocks:</span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a>            x <span class="op">=</span> blk(x)</span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="va">self</span>.norm(x)</span>
+<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> x[:, <span class="dv">0</span>]</span>
+<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-42"><a href="#cb8-42" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x):</span>
+<span id="cb8-43"><a href="#cb8-43" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="va">self</span>.forward_features(x)</span>
+<span id="cb8-44"><a href="#cb8-44" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="va">self</span>.head(x)</span>
+<span id="cb8-45"><a href="#cb8-45" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> x</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>I leave it as an exercise to the reader to understand the implementation of the Vision Transformer. It merely brings all the pieces together and performs the steps as described in <code>fig-2</code>.</p>
+</section>
+<section id="conclusion" class="level2" data-number="9">
+<h2 data-number="9" class="anchored" data-anchor-id="conclusion"><span class="header-section-number">9</span> Conclusion</h2>
+<p>I hope that through this blog, both Dr Habib and I have been able to explain all the magic that goes on inside the <strong>Vision Transformer</strong> Architecture.</p>
+<p>Once again, thanks to Dr Habib, I have been able to reference his beautiful and simplistic visualizations to explain each step in detail.</p>
+<p>As usual, in case we have missed anything or to provide feedback, please feel free to reach out to me at <a href="https://twitter.com/amaarora"><span class="citation" data-cites="amaarora">@amaarora</span></a> or Dr Habib at <a href="https://twitter.com/dr_hb_ai"><span class="citation" data-cites="dr_hb_ai">@dr_hb_ai</span></a>.</p>
+<p>Also, feel free to <a href="https://amaarora.github.io/subscribe">subscribe to my blog here</a> to receive regular updates regarding new blog posts. Thanks for reading!</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

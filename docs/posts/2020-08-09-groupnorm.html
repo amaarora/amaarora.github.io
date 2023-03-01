@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.335">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Aman Arora">
+<meta name="dcterms.date" content="2020-08-09">
+<meta name="description" content="In this blog post, we will look at Group Normalization research paper and also implement Group Normalization in PyTorch from scratch.">
+
+<title>Group Normalization</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html">
+ <span class="menu-text">Aman Arora’s Blog</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../about.html">
+ <span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/"><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com"><i class="bi bi-twitter" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction"><span class="toc-section-number">1</span>  Introduction</a>
+  <ul class="collapse">
+  <li><a href="#drawback-of-batch-normalization" id="toc-drawback-of-batch-normalization" class="nav-link" data-scroll-target="#drawback-of-batch-normalization"><span class="toc-section-number">1.1</span>  Drawback of Batch Normalization</a></li>
+  <li><a href="#introduction-to-group-normalization" id="toc-introduction-to-group-normalization" class="nav-link" data-scroll-target="#introduction-to-group-normalization"><span class="toc-section-number">1.2</span>  Introduction to Group Normalization</a></li>
+  </ul></li>
+  <li><a href="#other-normalization-techniques" id="toc-other-normalization-techniques" class="nav-link" data-scroll-target="#other-normalization-techniques"><span class="toc-section-number">2</span>  Other Normalization Techniques</a>
+  <ul class="collapse">
+  <li><a href="#group-normalization-in-detail-and-comparison-to-other-normalization-techniques" id="toc-group-normalization-in-detail-and-comparison-to-other-normalization-techniques" class="nav-link" data-scroll-target="#group-normalization-in-detail-and-comparison-to-other-normalization-techniques"><span class="toc-section-number">2.1</span>  Group Normalization in detail and comparison to other normalization techniques</a></li>
+  <li><a href="#group-normalization-explained" id="toc-group-normalization-explained" class="nav-link" data-scroll-target="#group-normalization-explained"><span class="toc-section-number">2.2</span>  Group Normalization Explained</a></li>
+  <li><a href="#benefits-of-group-normalization-over-other-techniques" id="toc-benefits-of-group-normalization-over-other-techniques" class="nav-link" data-scroll-target="#benefits-of-group-normalization-over-other-techniques"><span class="toc-section-number">2.3</span>  Benefits of Group Normalization over other techniques</a></li>
+  </ul></li>
+  <li><a href="#number-of-groups-hyperparameter-in-group-normalization" id="toc-number-of-groups-hyperparameter-in-group-normalization" class="nav-link" data-scroll-target="#number-of-groups-hyperparameter-in-group-normalization"><span class="toc-section-number">3</span>  Number of Groups hyperparameter in Group Normalization</a>
+  <ul class="collapse">
+  <li><a href="#group-division-experiments-explained" id="toc-group-division-experiments-explained" class="nav-link" data-scroll-target="#group-division-experiments-explained"><span class="toc-section-number">3.1</span>  Group Division Experiments Explained</a></li>
+  </ul></li>
+  <li><a href="#effect-of-group-normalization-on-deeper-models" id="toc-effect-of-group-normalization-on-deeper-models" class="nav-link" data-scroll-target="#effect-of-group-normalization-on-deeper-models"><span class="toc-section-number">4</span>  Effect of Group Normalization on deeper models</a></li>
+  <li><a href="#implementation-of-groupnorm" id="toc-implementation-of-groupnorm" class="nav-link" data-scroll-target="#implementation-of-groupnorm"><span class="toc-section-number">5</span>  Implementation of GroupNorm</a></li>
+  <li><a href="#does-groupnorm-really-work-in-practice" id="toc-does-groupnorm-really-work-in-practice" class="nav-link" data-scroll-target="#does-groupnorm-really-work-in-practice"><span class="toc-section-number">6</span>  Does GroupNorm really work in practice?</a></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion"><span class="toc-section-number">7</span>  Conclusion</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="toc-section-number">8</span>  References</a></li>
+  <li><a href="#credits" id="toc-credits" class="nav-link" data-scroll-target="#credits"><span class="toc-section-number">9</span>  Credits</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Group Normalization</h1>
+  <div class="quarto-categories">
+    <div class="quarto-category">Computer Vision</div>
+  </div>
+  </div>
+
+<div>
+  <div class="description">
+    <p>In this blog post, we will look at <a href="https://arxiv.org/abs/1803.08494">Group Normalization</a> research paper and also implement Group Normalization in PyTorch from scratch.</p>
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Aman Arora </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">August 9, 2020</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+</header>
+
+<section id="introduction" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="introduction"><span class="header-section-number">1</span> Introduction</h2>
+<p>In this blog post today, we will look at <a href="https://arxiv.org/abs/1803.08494">Group Normalization</a> research paper and also look at: - The drawback of <a href="https://arxiv.org/abs/1502.03167">Batch Normalization</a> for smaller batch sizes<br>
+- Introduction to <a href="https://arxiv.org/abs/1803.08494">Group Normalization</a> as an alternative to <strong>BN</strong> - Other normalization techniques available and how does <strong>Group Normalization</strong> compare to those - Benefits of <strong>Group Normalization</strong> over other normalization techniques - Discuss the optimal number of groups as a hyperparameter in <strong>GN</strong> - Discuss effect of <strong>Group Normalization</strong> on deeper models (eg. Resnet-101) - Implement <strong>Group Normalization</strong> in <em>PyTorch</em> and <em>Tensorflow</em> - Implement <strong>ResNet-50</strong> with [<strong>GroupNorm</strong> + <strong>Weight Standardization</strong>] on <strong>Pets</strong> dataset and compare performance to vanilla <strong>ResNet-50</strong> with <strong>BatchNorm</strong> layer</p>
+<p><a href="https://arxiv.org/abs/1502.03167">Batch Normalization</a> is used in most state-of-the art computer vision to stabilise training. <strong>BN</strong> normalizes the features based on the <em>mean</em> and <em>variance</em> in a mini-batch. This has helped improve model performance, reduce training time and also helped very deep models converge.</p>
+<p>But this technique also suffers from drawbacks - if batch size is too small, training becomes unstable with <strong>BN</strong>.</p>
+<p>The aim of this blog post is not to study <strong>BN</strong>, many other wonderful posts have been written on that, but to look at other alternatives such as <strong>GN</strong>.</p>
+<p>Through this blog post, I hope to introduce <strong>Group Normalization</strong> as an alternative to <strong>Batch Normalization</strong> and help the reader develop an intuition for cases where <strong>GN</strong> could perform better than <strong>BN</strong>.</p>
+<section id="drawback-of-batch-normalization" class="level3" data-number="1.1">
+<h3 data-number="1.1" class="anchored" data-anchor-id="drawback-of-batch-normalization"><span class="header-section-number">1.1</span> Drawback of Batch Normalization</h3>
+<p>Knowingly or unknowingly, we have all used <strong>BN</strong> in our experiments when training a deep learning network. If you have trained a <code>ResNet</code> model or pretty much any other CV model using <em>PyTorch</em> or <em>Tensorflow</em>, you have made use of <strong>BN</strong> to normalize the deep learning network.</p>
+<p>From the Group Normalization research paper, &gt; We all know that BN has been established as a very effective component in deep learning. BN normalizes the features by the mean and variance computed within a batch. But despite its great success, BN exhibits drawbacks that are also caused by its distinct behavior of normalizing along the batch dimension. In particular, it is required for BN to work with sufficiently large batch size. A small batch size leads to innacurate estimation of the batch statistics and reducing BN’s batch size increases the model error dramatically.</p>
+<p>Essentially, what that means is that <strong>BN</strong> is not very effective if the batch sizes are too small. Especially for CV applications other than Image classification such as object detection, segmentation, video classification, the restriction on batch sizes are more demanding and it is difficult to have higher batch sizes.</p>
+<p>Especially in such cases, <strong>GN</strong> can be used a strong alternative to <strong>BN</strong>.</p>
+<p>Or, there could be cases where you might want to try a bigger capacity model leaving less space in the GPU to fit a bigger batch size. In such cases as well, you might want to try <strong>GN</strong> as an alternative.</p>
+</section>
+<section id="introduction-to-group-normalization" class="level3" data-number="1.2">
+<h3 data-number="1.2" class="anchored" data-anchor-id="introduction-to-group-normalization"><span class="header-section-number">1.2</span> Introduction to Group Normalization</h3>
+<p>In the <a href="https://arxiv.org/abs/1803.08494">paper</a>, the authors introduce <strong>GN</strong> as a simple alternative to <strong>BN</strong>. From the paper:</p>
+<blockquote class="blockquote">
+<p>GN divides the channels into groups and computes within each group the mean and variance for normalization. GN’s computation is independent of batch sizes, and its accuracy is stable in a wide range of batch sizes.</p>
+</blockquote>
+<p>Essentially, <strong>GN</strong> takes away the dependance on batch size for normalization and in doing so mitigates the problem suffered by <strong>BN</strong>. There are also other techniques that have been proposed to avoid batch dimension - but we will discuss them later. For now, it is essential for the reader to realize that instead of normalizing accross the batch dimension, <strong>GN</strong> normalizes accross the groups (channel dimension). This has been further explained in depth later in this post <a href="https://amaarora.github.io/2020/08/09/groupnorm.html#group-normalization-explained">here</a>.</p>
+<p>First, let’s look at how <strong>GN</strong> compares to <strong>BN</strong> for training accross various batch sizes keeping all else same.</p>
+<p><img src="../images/BN_batch_size.png" title="fig-1 Imagenet classification error vs batch sizes" class="img-fluid"></p>
+<p>As can be seen in the image above, because <strong>GN</strong> does not depend on the batch size, the validation classification error (when the deep learning model is normalized using <strong>GN</strong>) is stable accross various batch sizes compared to <strong>BN</strong>.</p>
+<p><img src="../images/GN_bs_2.png" title="fig-2 ResNet-50's validation eror trained with bs 32, 16, 8, 4 and 2" class="img-fluid"></p>
+<p>The same trend as in <code>fig-1</code> can also be observed in <code>fig-2</code> where the validation error is consistent accross various batch sizes for <strong>GN</strong> as opposed to <strong>BN</strong>. Another key thing to note, the validation error for <strong>GN</strong> as reported in the research paper is very similar to that for <strong>BN</strong> - therefore, <strong>GN</strong> can be considered to be a strong alternative to <strong>BN</strong>.</p>
+<p>The validation errors (from the research paper) for various batch sizes are presented in <code>table-1</code> below:</p>
+<p><img src="../images/bs_sensitivity_gn.png" title="table-1 Sensitivity to batch sizes" class="img-fluid"></p>
+<p>While <strong>BN</strong> performs slightly better than <strong>GN</strong> for batch size 32, <strong>GN</strong> performs better for all lower batch sizes.</p>
+</section>
+</section>
+<section id="other-normalization-techniques" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="other-normalization-techniques"><span class="header-section-number">2</span> Other Normalization Techniques</h2>
+<p><code>Group Normalization</code> isn’t the first technique that was proposed to overcome the drawback of <strong>BN</strong>. There are also several other techniques such as <a href="https://arxiv.org/abs/1607.06450">Layer Normalization</a>, <a href="https://arxiv.org/abs/1607.08022">Instance Normalization</a> and others mentioned in the references of this blog post.</p>
+<p>But, GN is the first technique to achieve comparable validation error rates as compared to <strong>BN</strong>.</p>
+<p>In this section we look at the most popular normalization tecniques namely - Layer Normalization (<strong>LN</strong>), Instance Normalization (<em>IN</em>), Batch Normalization (<strong>BN</strong>) and Group Normalization (<strong>GN</strong>).</p>
+<section id="group-normalization-in-detail-and-comparison-to-other-normalization-techniques" class="level3" data-number="2.1">
+<h3 data-number="2.1" class="anchored" data-anchor-id="group-normalization-in-detail-and-comparison-to-other-normalization-techniques"><span class="header-section-number">2.1</span> Group Normalization in detail and comparison to other normalization techniques</h3>
+<p><img src="../images/GN_BN_LN_IN.png" title="fig-3 Normalization methods" class="img-fluid"></p>
+<p>The above image presented in the research paper is one of the best ways to compare the various normalization techniques and get an intuitive understanding for <strong>GN</strong>.</p>
+<p>Let’s consider that we have a batch of dimension <code>(N, C, H, W)</code> that needs to be normalized.</p>
+<p>Here, - <code>N</code>: Batch Size - <code>C</code>: Number of Channels - <code>H</code>: Height of the feature map - <code>W</code>: Width of the feature map</p>
+<p>Essentially, in <strong>BN</strong>, the pixels sharing the same channel index are normalized together. That is, for each channel, <strong>BN</strong> computes the <em>mean</em> and <em>std deviation</em> along the <code>(N, H, W)</code> axes. As we can see, the group statistics depend on <code>N</code>, the batch size.</p>
+<p>In <strong>LN</strong>, the <em>mean</em> and <em>std deviation</em> are computed for each sample along the <code>(C, H, W)</code> axes. Therefore, the calculations are independent of the batch size.</p>
+<p>In <strong>IN</strong>, the <em>mean</em> and <em>std deviation</em> are computed for each sample and each channel along the <code>(H, W)</code> axes. Again, the calculations are independent of batch size.</p>
+</section>
+<section id="group-normalization-explained" class="level3" data-number="2.2">
+<h3 data-number="2.2" class="anchored" data-anchor-id="group-normalization-explained"><span class="header-section-number">2.2</span> Group Normalization Explained</h3>
+<p><img src="../images/gn_explained.jpg" title="fig-4 GN explained" class="img-fluid"></p>
+<p>Finally, for group norm, the batch is first divided into groups (32 by default, discussed later). The batch with dimension <code>(N, C, W, H)</code> is first reshaped to <code>(N, G, C//G, H, W)</code> dimensions where <code>G</code> represents the <strong>number of groups</strong>. Finally, the <em>mean</em> and <em>std deviation</em> are calculated along the groups, that is <code>(H, W)</code> and along <code>C//G</code> channels. This is also illustrated very well in <code>fig-4</code>.</p>
+<p>One key thing to note here, if <code>C == G</code>, that is the number of groups are set to be equal to the number of channels (one channel per group), then <strong>GN</strong> becomes <strong>IN</strong>.</p>
+<p>And if, <code>G == 1</code>, that is number of groups is set to 1, <strong>GN</strong> becomes <strong>LN</strong>.</p>
+<p>I would like for the reader to take a minute here and make sure that he/she understands the differences between these normalization techniques mentioned above.</p>
+</section>
+<section id="benefits-of-group-normalization-over-other-techniques" class="level3" data-number="2.3">
+<h3 data-number="2.3" class="anchored" data-anchor-id="benefits-of-group-normalization-over-other-techniques"><span class="header-section-number">2.3</span> Benefits of Group Normalization over other techniques</h3>
+<p>Also, it is important to note that <strong>GN</strong> is less restricted than <strong>LN</strong>, because in <strong>LN</strong> it is assumed that all channels in a layer make “equal contributions” whereas <strong>GN</strong> is more flexible because in <strong>GN</strong>, each group of channels (instead of all of them) are assumed to have shared mean and variance - the model still has flexibility of learning a different distribution for each group.</p>
+<p>Also, <strong>GN</strong> is slightly better than <strong>IN</strong> because <strong>IN</strong> normalizes accross each sample for each channel, therefore, unlike <strong>GN</strong>, it misses the opportunity of exploiting the channel dependence.</p>
+<p><img src="../images/gn_comp.png" title="fig-5 Comparison of error curves" class="img-fluid"></p>
+<p>Therefore, due to the reasons discussed above, we can see that the validation and training errors for <strong>GN</strong> are lower than those for <strong>LN</strong> and <strong>IN</strong>.</p>
+</section>
+</section>
+<section id="number-of-groups-hyperparameter-in-group-normalization" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="number-of-groups-hyperparameter-in-group-normalization"><span class="header-section-number">3</span> Number of Groups hyperparameter in Group Normalization</h2>
+<p>One key hyperparameter in <strong>Group Normalization</strong> is the number of groups to divide the channels into.</p>
+<p><img src="../images/group_division.png" title="table-2 Group division" class="img-fluid"></p>
+<p>The authors of the research paper ran an experiment to train <code>ResNet-50</code> model on Imagenet dataset using various number of groups.</p>
+<p>As can be seen in <code>table-2</code>, setting number of groups to 32 achieves the lowest validation error.</p>
+<p>In the bottom part of <code>table-2</code>, the authors set a fixed number of channels per group. Essentially, since each layer in a deep learning model can have various number of channels, this means there are varying number of groups per layer. Setting 16 channels per group achieved the lowest score.</p>
+<section id="group-division-experiments-explained" class="level3" data-number="3.1">
+<h3 data-number="3.1" class="anchored" data-anchor-id="group-division-experiments-explained"><span class="header-section-number">3.1</span> Group Division Experiments Explained</h3>
+<p><img src="../images/VGG.png" title="fig-6 VGG" class="img-fluid"></p>
+<p>Let’s understand what’s going on with help of VGGNet. As can be seen, there are varying number of channels in different layers of VGGNet (this is also the case for other deep learning models like ResNet, DenseNet etc). The authors essentially in the first experiment, divide each layer into 32 groups. Thus for layer 2 of VGGNet with 128 #channels, there are <code>128//32</code>, that is, 4 channels per group if group number is set to 32. The authors ran this experiments for varying number of groups and found for number of groups set to 32 to have the lowest validtion error.</p>
+<p>For the second experiment, the authors set the number of channels per group fixed. For example, if number of channels per group was set to 16, then the second layer with <code>128</code> channels had <code>128//16</code>, that is, 8 groups and the third layer with 256 channels had <code>256//16</code>, 16 groups and so on. The authors found setting 16 channels per group to have to have the lowest validation error.</p>
+</section>
+</section>
+<section id="effect-of-group-normalization-on-deeper-models" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="effect-of-group-normalization-on-deeper-models"><span class="header-section-number">4</span> Effect of Group Normalization on deeper models</h2>
+<p>The authors also ran experiments and trained ResNet-101 architecture for batch size 32 and compared the validation errors with BN and GN implementation. The authors found the BN baseline to have 22.0% validation error and the GN counterpart to have 22.4% validation error. Also, for batch size 2, the authors found the GN error to be 23.0% which is still a very decent result considering the very small batch size.</p>
+<blockquote class="blockquote">
+<p>Thus, I think from the results of this experiment, it is safe to say that GN with smaller batch sizes also works for larger models.</p>
+</blockquote>
+</section>
+<section id="implementation-of-groupnorm" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="implementation-of-groupnorm"><span class="header-section-number">5</span> Implementation of GroupNorm</h2>
+<p>Finally, we are now ready to look at the implementation of <strong>GN</strong>.</p>
+<p>The following snippet of code has been provided in the research paper:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> GroupNorm(x, gamma, beta, G, eps<span class="op">=</span><span class="dv">1</span><span class="er">e</span>−<span class="dv">5</span>): </span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># x: input features with shape [N,C,H,W] </span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="co"># gamma, beta: scale and offset, with shape [1,C,1,1] </span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="co"># G: number of groups for GN</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    N, C, H, W <span class="op">=</span> x.shape </span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> tf.reshape(x, [N, G, C <span class="op">//</span> G, H, W])</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    mean, var <span class="op">=</span> tf.nn.moments(x, [<span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>], keep dims<span class="op">=</span><span class="va">True</span>) </span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> (x − mean) <span class="op">/</span> tf.sqrt(var <span class="op">+</span> eps)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> tf.reshape(x, [N, C, H, W]) </span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> x ∗ gamma <span class="op">+</span> beta</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Essentially, the authors reshape the batch and divide into groups with <code>C // G</code> channels per group where, - <code>C</code>: number of channels - <code>G</code>: number of groups</p>
+<p>Finally, as discussed in <a href="https://amaarora.github.io/2020/08/09/groupnorm.html#group-normalization-explained">this</a> section, the authors normalize along the <code>(C//G, H, W)</code> dimension and return the result after reshaping the batch back to <code>(N, C, H, W)</code>.</p>
+<p>I hope that by this time, the implementation should be clear to the reader. If it isn’t, either I have not explained <strong>GN</strong> very well, or I kindly ask the reader to go back to <a href="https://amaarora.github.io/2020/08/09/groupnorm.html#group-normalization-explained">Group Normalization Explained</a> section and have a quick re-read.</p>
+<p>Finally, we could rewrite <strong>GN</strong> in <code>PyTorch</code> like so:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn <span class="im">as</span> nn</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> GroupNorm(nn.Module):</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, num_features, num_groups<span class="op">=</span><span class="dv">32</span>, eps<span class="op">=</span><span class="fl">1e-5</span>):</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>(GroupNorm, <span class="va">self</span>).<span class="fu">__init__</span>()</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.gamma <span class="op">=</span> nn.Parameter(torch.ones(<span class="dv">1</span>,num_features,<span class="dv">1</span>,<span class="dv">1</span>))</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.beta <span class="op">=</span> nn.Parameter(torch.zeros(<span class="dv">1</span>,num_features,<span class="dv">1</span>,<span class="dv">1</span>))</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.num_groups <span class="op">=</span> num_groups</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.eps <span class="op">=</span> eps</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x):</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>        N, C, H, W <span class="op">=</span> x.size()</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> x.view(N, <span class="va">self</span>.num_groups ,<span class="op">-</span><span class="dv">1</span>)</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>        mean <span class="op">=</span> x.mean(<span class="op">-</span><span class="dv">1</span>, keepdim<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>        var <span class="op">=</span> x.var(<span class="op">-</span><span class="dv">1</span>, keepdim<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>        <span class="co"># normalize</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> (x<span class="op">-</span>mean) <span class="op">/</span> (var<span class="op">+</span><span class="va">self</span>.eps).sqrt()</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> x.view(N,C,H,W)</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> x <span class="op">*</span> <span class="va">self</span>.gamma <span class="op">+</span> <span class="va">self</span>.beta</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><code>PyTorch</code> also inherently supports <code>GroupNorm</code> and can be used by using <code>nn.GroupNorm</code>.</p>
+<p>Having implemented <strong>GN</strong> in PyTorch and Tensorflow, we are now ready to run our own experiments and see the results for ourselves in the next section.</p>
+</section>
+<section id="does-groupnorm-really-work-in-practice" class="level2" data-number="6">
+<h2 data-number="6" class="anchored" data-anchor-id="does-groupnorm-really-work-in-practice"><span class="header-section-number">6</span> Does GroupNorm really work in practice?</h2>
+<p>Personally, I wanted to try a little experiment of my own to compare <strong>GN</strong> with <strong>BN</strong> and corroborate the findings in the <strong>GN</strong> research paper.</p>
+<p>You can find the experiment in this notebook <a href="https://nbviewer.jupyter.org/github/amaarora/amaarora.github.io/blob/master/nbs/Group%20Normalization.ipynb">here</a>.</p>
+<p>Basically, in the experiment, I trained two <code>ResNet-34</code> architectures on the <code>Pets</code> dataset - one with <strong>BN</strong> and other with <strong>GN</strong>. To my surprise, I found that simply replacing <code>BatchNorm</code> with <code>GroupNorm</code> led to sub-optimal results and the model with <code>GroupNorm</code> used as the normalization layer performed much worse than the model normalized with <code>BatchNorm</code> layer even for a very small batch size of 4. This was very different to the results reported in fig-1.</p>
+<p>Thanks to <a href="https://twitter.com/DragonPG2000">Sunil Kumar</a> who pointed me to <a href="https://arxiv.org/abs/1912.11370">Big Transfer (BiT): General Visual Representation Learning</a> research paper where I noticed that the researchers used a combination of <a href="https://arxiv.org/abs/1903.10520">Weight Standardization</a> and <strong>GN</strong> to achieve SOTA results. So I tried this out with the implementation of Weight Standardization as in the official repository <a href="https://github.com/joe-siyuan-qiao/WeightStandardization">here</a> and very quickly I was able to replicate the results with <code>GN + WS</code> performing significantly better than <code>BN</code> for batch size of 1 <a href="https://nbviewer.jupyter.org/github/amaarora/amaarora.github.io/blob/master/nbs/Group%20Normalization%20WS.ipynb">here</a>.</p>
+</section>
+<section id="conclusion" class="level2" data-number="7">
+<h2 data-number="7" class="anchored" data-anchor-id="conclusion"><span class="header-section-number">7</span> Conclusion</h2>
+<p>I hope that I have been clear in my explaination of Group Normalization, and also through my experiments, I have been able to provide a way for you to implement <strong>GN</strong> in PyTorch and Tensorflow and run experiments of your own.</p>
+<p>As always, constructive feedback is always welcome at <a href="https://twitter.com/amaarora"><span class="citation" data-cites="amaarora">@amaarora</span></a>.</p>
+<p>Also, feel free to <a href="https://amaarora.github.io/subscribe">subscribe to my blog here</a> to receive regular updates regarding new blog posts. Thanks for reading!</p>
+</section>
+<section id="references" class="level2" data-number="8">
+<h2 data-number="8" class="anchored" data-anchor-id="references"><span class="header-section-number">8</span> References</h2>
+<ol type="1">
+<li><a href="https://arxiv.org/abs/1803.08494">Group Normalization</a> by He et al</li>
+<li><a href="https://arxiv.org/abs/1502.03167">Batch Normalization</a> by Ioffe et al</li>
+<li><a href="https://arxiv.org/abs/1607.08022">Instance Normalization: The Missing Ingredient for Fast Stylization</a></li>
+<li><a href="https://arxiv.org/abs/1607.06450">Layer Normalization</a></li>
+<li><a href="https://arxiv.org/abs/1903.10520">Weight Standardization</a></li>
+<li>Implementation of Weight Standardization from the <a href="https://github.com/joe-siyuan-qiao/WeightStandardization">official repository</a></li>
+<li><a href="https://arxiv.org/abs/1512.03385">Deep Residual Learning for Image Recognition</a></li>
+</ol>
+</section>
+<section id="credits" class="level2" data-number="9">
+<h2 data-number="9" class="anchored" data-anchor-id="credits"><span class="header-section-number">9</span> Credits</h2>
+<p>Thanks to <a href="https://twitter.com/AryMob"><span class="citation" data-cites="AryMob">@AryMob</span></a> for pointing out errata in this post.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

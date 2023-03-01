@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.335">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Aman Arora">
+<meta name="dcterms.date" content="2020-07-12">
+<meta name="description" content="In this blogpost, we will be going through an introduction to Pytorch Lightning and implement all the cool tricks like - Gradient Accumulation, 16-bit precision training, and also add TPU/multi-gpu support - all in a few lines of code. We will use Pytorch Lightning to work on SIIM-ISIC Melanoma Classification challenge on Kaggle.">
+
+<title>An introduction to PyTorch Lightning with comparisons to PyTorch</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html">
+ <span class="menu-text">Aman Arora’s Blog</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../about.html">
+ <span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/"><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com"><i class="bi bi-twitter" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#whats-isic-melanoma-classification-challenge" id="toc-whats-isic-melanoma-classification-challenge" class="nav-link active" data-scroll-target="#whats-isic-melanoma-classification-challenge"><span class="toc-section-number">1</span>  What’s ISIC Melanoma Classification challenge?</a></li>
+  <li><a href="#getting-the-data" id="toc-getting-the-data" class="nav-link" data-scroll-target="#getting-the-data"><span class="toc-section-number">2</span>  Getting the data</a></li>
+  <li><a href="#melonama-dataset" id="toc-melonama-dataset" class="nav-link" data-scroll-target="#melonama-dataset"><span class="toc-section-number">3</span>  Melonama Dataset</a></li>
+  <li><a href="#lightning-module" id="toc-lightning-module" class="nav-link" data-scroll-target="#lightning-module"><span class="toc-section-number">4</span>  Lightning Module</a>
+  <ul class="collapse">
+  <li><a href="#model-and-training" id="toc-model-and-training" class="nav-link" data-scroll-target="#model-and-training"><span class="toc-section-number">4.1</span>  Model and Training</a></li>
+  <li><a href="#model-implementation-compared-to-pytorch" id="toc-model-implementation-compared-to-pytorch" class="nav-link" data-scroll-target="#model-implementation-compared-to-pytorch"><span class="toc-section-number">4.2</span>  Model implementation compared to PyTorch</a></li>
+  </ul></li>
+  <li><a href="#gradient-accumulation" id="toc-gradient-accumulation" class="nav-link" data-scroll-target="#gradient-accumulation"><span class="toc-section-number">5</span>  Gradient Accumulation</a></li>
+  <li><a href="#bit-precision-training" id="toc-bit-precision-training" class="nav-link" data-scroll-target="#bit-precision-training"><span class="toc-section-number">6</span>  16-bit precision training</a></li>
+  <li><a href="#tpu-support" id="toc-tpu-support" class="nav-link" data-scroll-target="#tpu-support"><span class="toc-section-number">7</span>  TPU Support</a></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion"><span class="toc-section-number">8</span>  Conclusion</a></li>
+  <li><a href="#credits" id="toc-credits" class="nav-link" data-scroll-target="#credits"><span class="toc-section-number">9</span>  Credits</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">An introduction to PyTorch Lightning with comparisons to PyTorch</h1>
+<p class="subtitle lead">Better language models and their implications</p>
+  <div class="quarto-categories">
+    <div class="quarto-category">Programming</div>
+    <div class="quarto-category">Computer Vision</div>
+  </div>
+  </div>
+
+<div>
+  <div class="description">
+    <p>In this blogpost, we will be going through an introduction to Pytorch Lightning and implement all the cool tricks like - Gradient Accumulation, 16-bit precision training, and also add TPU/multi-gpu support - all in a few lines of code. We will use Pytorch Lightning to work on SIIM-ISIC Melanoma Classification challenge on Kaggle.</p>
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Aman Arora </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">July 12, 2020</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+</header>
+
+<p>Have you tried <a href="https://github.com/PyTorchLightning/pytorch-lightning">PytorchLightning</a> already? If so, then you know why it’s so cool. If you haven’t, hopefully by the time you finish reading this post, you will find it pretty cool (the word ‘it’ could refer to this blogpost or the wonderful <a href="https://github.com/PyTorchLightning/pytorch-lightning">PytorchLightning</a> library - I leave this decision to the reader).</p>
+<p>Note: From here on, we refer to <strong>PytorchLightning</strong> as <strong>PL</strong>, cause it’s a long name to type and I left my favourite keyboard at work.</p>
+<p>For a while now, I was jealous of Tensorflow solely because it’s possible to use the same script to train a model on CPU, GPU or TPU without really changing much! For example, take this <a href="https://www.kaggle.com/cdeotte/triple-stratified-kfold-with-tfrecords">notebook</a> from my one of my favourite kagglers and - at the time of writing this blogpost - a researcher at NVIDIA - <a href="http://chrisdeotte.com/">Chris Deotte</a> and also, since yesterday, Kaggle 4x Grandmaster! Just by using an appropriate <a href="https://www.tensorflow.org/api_docs/python/tf/distribute/Strategy">strategy</a> in Tensorflow, it is possible to run the same experiments on your choice of hardware without changing anything else really. That is the same script could run in TPU, GPU or CPU.</p>
+<p>If you’ve already worked on multi-GPU machines or used <a href="https://pytorch.org/xla/release/1.5/index.html">torch XLA</a> to run things on TPU using PyTorch, then you know my rant. Changing hardware choices in PyTorch is not as convenient when it comes to this. I love PyTorch - I do, but just this one thing would make me really frustrated.</p>
+<p>Welcome <a href="https://github.com/PyTorchLightning/pytorch-lightning">PL</a>! I wish I tried this library sooner.</p>
+<p>In this blogpost, we will be going through an introduction to PL and implement all the cool tricks like - <strong>Gradient Accumulation</strong>, <strong>16-bit precision training</strong>, and also add <strong>TPU/multi-gpu support</strong> - all in a few lines of code. We use PL to work on <a href="https://www.kaggle.com/c/siim-isic-melanoma-classification">SIIM-ISIC Melanoma Classification</a> challenge on Kaggle. In this blogpost, our focus will be on introducing PL and we use the ISIC competition as an example.</p>
+<p>We also draw comparisons to the typical workflows in PyTorch and compare how PL is different and the value it adds in a researcher’s life.</p>
+<p>The first part of this post, is mostly about getting the data, creating our train and validation datasets and dataloaders and the interesting stuff about PL comes in <strong>The Lightning Module</strong> section of this post. If this stuff bores you because you’ve done this so many times already, feel free to <a href="https://amaarora.github.io/2020/07/12/oganized-pytorch.html#lightning-module">skip</a> forward to the model implemention.</p>
+<ol type="1">
+<li>TOC {:toc}</li>
+</ol>
+<section id="whats-isic-melanoma-classification-challenge" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="whats-isic-melanoma-classification-challenge"><span class="header-section-number">1</span> What’s ISIC Melanoma Classification challenge?</h2>
+<p>From the <a href="https://www.kaggle.com/c/siim-isic-melanoma-classification">description</a> on Kaggle, &gt; Skin cancer is the most prevalent type of cancer. Melanoma, specifically, is responsible for 75% of skin cancer deaths, despite being the least common skin cancer. The American Cancer Society estimates over 100,000 new melanoma cases will be diagnosed in 2020. It’s also expected that almost 7,000 people will die from the disease. As with other cancers, early and accurate detection—potentially aided by data science—can make treatment more effective. Currently, dermatologists evaluate every one of a patient’s moles to identify outlier lesions or “ugly ducklings” that are most likely to be melanoma.</p>
+<p>In this competition, the participants are asked to build a Melonama classifier that classifies to identify melonama in images of skin lesions. Typical lesion images look like the ones below:</p>
+<p><img src="../images/ISIC.png" title="src: https://www.isic-archive.com/#!/topWithHeader/onlyHeaderTop/gallery" class="img-fluid"></p>
+<p>In this blogpost, we will use PL to build a solution that can tell the malign melonama images apart from the rest. The model should take only a few hours to train and have 0.92 AUC score!</p>
+<blockquote class="blockquote">
+<p>A side note: Deep learning has come a far way. Compare this to 2012 where <a href="https://papers.nips.cc/paper/4824-imagenet-classification-with-deep-convolutional-neural-networks.pdf">AlexNet</a> was trained on multiple e GTX 580 GPU which has only 3GB of memory. To train on 1.2 million examples of Imagenet, the authors had to split the model (with just 8 layers) to 2 GPUs. It took 5-6 days to train this network. Today, it’s possible to train in a <a href="https://www.fast.ai/2018/04/30/dawnbench-fastai/">few hours</a> or <a href="https://arxiv.org/abs/1709.05011#:~:text=We%20finish%20the%20100%2Depoch,2048%20KNLs%20without%20losing%20accuracy">even minutes</a>. For ISIC, each epoch for size 256x256 is around 2mins including validation on a P100 GPU.</p>
+</blockquote>
+</section>
+<section id="getting-the-data" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="getting-the-data"><span class="header-section-number">2</span> Getting the data</h2>
+<p>You can download the 256x256 version of the Jpeg images <a href="https://www.kaggle.com/cdeotte/jpeg-melanoma-256x256">here</a> with all the required metadata to follow along.</p>
+</section>
+<section id="melonama-dataset" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="melonama-dataset"><span class="header-section-number">3</span> Melonama Dataset</h2>
+<p>Getting our data ready for ingestion into the model is one of the basic things that we need to do for every project.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> MelonamaDataset:</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, image_paths, targets, augmentations<span class="op">=</span><span class="va">None</span>):</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.image_paths <span class="op">=</span> image_paths</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.targets <span class="op">=</span> targets</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.augmentations <span class="op">=</span> augmentations</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__len__</span>(<span class="va">self</span>): <span class="cf">return</span> <span class="bu">len</span>(<span class="va">self</span>.image_paths)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__getitem__</span>(<span class="va">self</span>, idx):</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>        image_path <span class="op">=</span> <span class="va">self</span>.image_paths[idx]</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>        image <span class="op">=</span> np.array(Image.<span class="bu">open</span>(image_path))</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>        target <span class="op">=</span> <span class="va">self</span>.targets[idx]</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="va">self</span>.augmentations <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>            augmented <span class="op">=</span> <span class="va">self</span>.augmentations(image<span class="op">=</span>image)</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>            image <span class="op">=</span> augmented[<span class="st">'image'</span>]</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> image, torch.tensor(target, dtype<span class="op">=</span>torch.<span class="bu">long</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The above dataset is a pretty simple class that is instantiated by passing in a list of <code>image_paths</code>, <code>targets</code> and <code>augmentations</code> if any. To get an item, it reads an image using <code>Image</code> module from <code>PIL</code>, converts to <code>np.array</code> performs augmentations if any and returns <code>target</code> and <code>image</code>.</p>
+<p>We can use <code>glob</code> to get <code>train_image_paths</code> and <code>val_image_paths</code> and create train and val datasets respectively.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># psuedo code</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>train_image_paths <span class="op">=</span> glob.glob(<span class="st">"&lt;path_to_train_folder&gt;"</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>val_image_paths <span class="op">=</span> glob.glob(<span class="st">"&lt;path_to_val_folder&gt;"</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>sz <span class="op">=</span> <span class="dv">256</span> <span class="co">#go bigger for better AUC score but slower train time</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>train_aug <span class="op">=</span> train_aug <span class="op">=</span> albumentations.Compose([</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    RandomCrop(sz,sz),</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    ..., <span class="co">#your choice of augmentations</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    albumentations.Normalize(always_apply<span class="op">=</span><span class="va">True</span>), </span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    ToTensorV2()</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>])</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>val_aug <span class="op">=</span> albumentations.Compose([</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    albumentations.CenterCrop(sz, sz),</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    albumentations.Normalize(always_apply<span class="op">=</span><span class="va">True</span>),</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    ToTensorV2()</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>])</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>train_dataset <span class="op">=</span> MelonamaDataset(train_image_paths, train_targets, train_aug)</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>val_dataset <span class="op">=</span> MelonamaDataset(val_image_paths, val_targets, val_aug)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Once we have our <code>datasets</code> ready, we can now create our dataloaders and let’s inspect the train images as a sanity check.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Dataloaders</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>train_loader <span class="op">=</span> torch.utils.data.DataLoader(</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    train_dataset, batch_size<span class="op">=</span><span class="dv">64</span>, shuffle<span class="op">=</span><span class="va">True</span>, num_workers<span class="op">=</span><span class="dv">4</span>)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>val_loader <span class="op">=</span> torch.utils.data.DataLoader(</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    val_dataset, batch_size<span class="op">=</span><span class="dv">64</span>, shuffle<span class="op">=</span><span class="va">False</span>, num_workers<span class="op">=</span><span class="dv">4</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># visualize images</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torchvision.utils <span class="im">as</span> vutils</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> matplotlib_imshow(img, one_channel<span class="op">=</span><span class="va">False</span>):</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    fig,ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">16</span>,<span class="dv">8</span>))</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    ax.imshow(img.permute(<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">0</span>).numpy())</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>images<span class="op">=</span> <span class="bu">next</span>(<span class="bu">iter</span>(train_loader))[<span class="dv">0</span>][:<span class="dv">16</span>]</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>img_grid <span class="op">=</span> torchvision.utils.make_grid(images, nrow<span class="op">=</span><span class="dv">8</span>, normalize<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>matplotlib_imshow(img_grid)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><img src="../images/train_images.png" title="Training images" class="img-fluid"></p>
+<p>Now that our dataloaders are done, and looking good, we are ready for some lightning for our Melonama classifier!</p>
+</section>
+<section id="lightning-module" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="lightning-module"><span class="header-section-number">4</span> Lightning Module</h2>
+<p>PL takes away much of the boilerplate code. By taking away the <a href="https://pytorch-lightning.readthedocs.io/en/latest/introduction_guide.html#engineering-code">Engineering Code</a> and the <a href="https://pytorch-lightning.readthedocs.io/en/latest/introduction_guide.html#non-essential-code">Non-essential code</a>, it helps us focus on the <a href="https://pytorch-lightning.readthedocs.io/en/latest/introduction_guide.html#research-code">Research code</a>!</p>
+<p>The <a href="https://pytorch-lightning.readthedocs.io/en/stable/new-project.html">Quick Start</a> and <a href="https://pytorch-lightning.readthedocs.io/en/stable/introduction_guide.html">Introduction Guide</a> on PL’s official documentation are great resources to start learning about PL! I started there too.</p>
+<section id="model-and-training" class="level3" data-number="4.1">
+<h3 data-number="4.1" class="anchored" data-anchor-id="model-and-training"><span class="header-section-number">4.1</span> Model and Training</h3>
+<p>Our model in PL looks something like:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Model(LightningModule):</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, arch<span class="op">=</span><span class="st">'efficientnet-b0'</span>):</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.base <span class="op">=</span> EfficientNet.from_pretrained(arch)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.base._fc <span class="op">=</span> nn.Linear(<span class="va">self</span>.base._fc.in_features, <span class="dv">1</span>)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x):</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.base(x)</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> configure_optimizers(<span class="va">self</span>):</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> torch.optim.Adam(<span class="va">self</span>.parameters(), lr<span class="op">=</span><span class="fl">5e-4</span>)</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> step(<span class="va">self</span>, batch):</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>        x, y  <span class="op">=</span> batch</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>        y_hat <span class="op">=</span> <span class="va">self</span>(x)</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>        loss  <span class="op">=</span> WeightedFocalLoss()(y_hat, y.view(<span class="op">-</span><span class="dv">1</span>,<span class="dv">1</span>).type_as(y_hat))</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> loss, y, y_hat.sigmoid()</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> training_step(<span class="va">self</span>, batch, batch_nb):</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>        loss, y, y_hat <span class="op">=</span> <span class="va">self</span>.step(batch)</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> {<span class="st">'loss'</span>: loss}</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> validation_step(<span class="va">self</span>, batch, batch_nb):</span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>        loss, y, y_hat <span class="op">=</span> <span class="va">self</span>.step(batch)</span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> {<span class="st">'loss'</span>: loss, <span class="st">'y'</span>: y.detach(), <span class="st">'y_hat'</span>: y_hat.detach()}</span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> validation_epoch_end(<span class="va">self</span>, outputs):</span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>        avg_loss <span class="op">=</span> torch.stack([x[<span class="st">'loss'</span>] <span class="cf">for</span> x <span class="kw">in</span> outputs]).mean()</span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>        auc <span class="op">=</span> <span class="va">self</span>.get_auc(outputs)</span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"Epoch </span><span class="sc">{</span><span class="va">self</span><span class="sc">.</span>current_epoch<span class="sc">}</span><span class="ss"> | AUC:</span><span class="sc">{</span>auc<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> {<span class="st">'loss'</span>: avg_loss}</span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> get_auc(<span class="va">self</span>, outputs):</span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>        y <span class="op">=</span> torch.cat([x[<span class="st">'y'</span>] <span class="cf">for</span> x <span class="kw">in</span> outputs])</span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>        y_hat <span class="op">=</span> torch.cat([x[<span class="st">'y_hat'</span>] <span class="cf">for</span> x <span class="kw">in</span> outputs])</span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a>        <span class="co"># shift tensors to cpu</span></span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a>        auc <span class="op">=</span> roc_auc_score(y.cpu().numpy(), </span>
+<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a>                            y_hat.cpu().numpy()) </span>
+<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> auc</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>We are using <a href="https://amaarora.github.io/2020/06/29/FocalLoss.html#how-to-implement-this-in-code">WeightedFocalLoss</a> from my previous blogpost, because this is an imbalanced dataset with only around 1.77% positive classes.</p>
+</section>
+<section id="model-implementation-compared-to-pytorch" class="level3" data-number="4.2">
+<h3 data-number="4.2" class="anchored" data-anchor-id="model-implementation-compared-to-pytorch"><span class="header-section-number">4.2</span> Model implementation compared to PyTorch</h3>
+<p>We add the <code>__init__</code> and <code>forward</code> method just like you would in pure PyTorch. The <code>LightningModule</code> just adds some extra functionalities on top.</p>
+<p>In pure pytorch, the <code>main</code> loop with training and validation would look something like:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>train_dataset, valid_dataset <span class="op">=</span> MelonamaDataset(...), MelonamaDatasaet(...)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>train_loader, valid_loader <span class="op">=</span> DataLoader(train_dataset, ...), DataLoader(valid_dataset, ...)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>optimizer <span class="op">=</span> ...</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>scheduler <span class="op">=</span> ...</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>train_augmentations <span class="op">=</span> albumentations.Compose([...])</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>val_aug <span class="op">=</span> albumentations.Compose([...])</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>early_stopping <span class="op">=</span> EarlyStopping(...)</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> PyTorchModel(...)</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>train_loss <span class="op">=</span> train_one_epoch(model, optimizer, scheduler)</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>preds, valid_loss <span class="op">=</span> evaluate(args, valid_loader, model)</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>report_metrics()</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> early_stopping.early_stop:</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    save_model_checkpoint()</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>    stop_training()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>And ofcourse, then we define our <code>train_one_epoch</code> and <code>evaluate</code> functions where the training loop looks typically like:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>model.train()</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> b_idx, data <span class="kw">in</span> <span class="bu">enumerate</span>(train_loader):</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    loss <span class="op">=</span> model(<span class="op">**</span>data)</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    loss.backward()</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    optimizer.step()</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    optimizer.zero_grad()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>And very similar for <code>evaluate</code>. As you can see, we have to write a lot of code to make things work in PyTorch. While this is great for flexibility, typically we have to reuse the same code over and over again in various projects. The training and evaluate loops hardly change much.</p>
+<p>What PL does, is that it automates this process for us. No longer do we need to write the boilerplate code.</p>
+<p>The training loop, goes directly inside the <code>training_step</code> method and the validation loop inside the <code>validation_step</code> method. The typical reporting of metrics happens inside the <code>validation_epoch_end</code> method. Inside the <code>Model</code> class, both the <code>training_step</code> and <code>validation_step</code> call the <code>step</code> method which get’s the <code>x</code>s and <code>y</code>s from the batch, calls <code>forward</code> to make a forward pass and returns the loss. When we are finished training, our validation loop get’s called and at the end of an epoch <code>validation_epoch_end</code> get’s called which accumulates the results for us and calculates <a href="https://scikit-learn.org/stable/modules/generated/sklearn.metrics.roc_auc_score.html">AUC score</a>. We use <code>roc_auc_score</code> because AUC score is used as a metric on the Kaggle competition itself.</p>
+<p>And that’s really it. This is all it takes in PL to create, train and validate a deep learning model. There are some other nice functionalities like logging - <code>Wandb</code> and also <code>tensorboard</code> support which you can read more about <a href="https://pytorch-lightning.readthedocs.io/en/latest/loggers.html">here</a>.</p>
+<p>Shifting from PyTorch to PL is super easy. It took me around a few hours to read up the introduction docs and reimplement the ISIC model in PL. I find PL code is much more organized and compact compared to PyTorch and still very flexible to run experiments. Also, when sharing solutions with others, everybody knows exactly where to look - for example, the training loop is always in the <code>training_step</code> method, validation loop is inside the <code>validation_step</code> and so on.</p>
+<p>In some ways, I was able to draw comparisons to the wonderful <a href="https://arxiv.org/abs/2002.04688">fastai</a> library in the sense that both the libraries make our lives easier.</p>
+<p>Similar to fastai, to train the model in PL, we can now simply create a <a href="https://pytorch-lightning.readthedocs.io/en/stable/trainer.html">Trainer</a> and call <code>.fit()</code>.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>debug <span class="op">=</span> <span class="va">False</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>gpus <span class="op">=</span> torch.cuda.device_count()</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>trainer <span class="op">=</span> Trainer(gpus<span class="op">=</span>gpus, max_epochs<span class="op">=</span><span class="dv">2</span>, </span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>                  num_sanity_val_steps<span class="op">=</span><span class="dv">1</span> <span class="cf">if</span> debug <span class="cf">else</span> <span class="dv">0</span>)</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>trainer.fit(model, train_dataloader<span class="op">=</span>train_loader, val_dataloaders<span class="op">=</span>val_loader)</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="co">## outputs</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span>  Epoch <span class="dv">0</span> <span class="op">|</span> AUC:<span class="fl">0.8667878706561116</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    Epoch <span class="dv">1</span> <span class="op">|</span> AUC:<span class="fl">0.8867006574533746</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>And that’s really it. This is all it takes to create a baseline model in PL.</p>
+</section>
+</section>
+<section id="gradient-accumulation" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="gradient-accumulation"><span class="header-section-number">5</span> Gradient Accumulation</h2>
+<p>So now that our baseline model is ready, let’s add gradient accumulation!</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>trainer <span class="op">=</span> Trainer(gpus<span class="op">=</span><span class="dv">1</span>, max_epochs<span class="op">=</span><span class="dv">2</span>, </span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>                  num_sanity_val_steps<span class="op">=</span><span class="dv">1</span> <span class="cf">if</span> debug <span class="cf">else</span> <span class="dv">0</span>, </span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>                  accumulate_grad_batches<span class="op">=</span><span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>It’s as simple as adding a single parameter in PL!</p>
+<p>A typical workflow in PyTorch would look like:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>accumulate_grad_batches<span class="op">=</span><span class="dv">2</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>optimizer.zero_grad()</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> b_idx, data <span class="kw">in</span> <span class="bu">enumerate</span>(train_loader):</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    loss <span class="op">=</span> model(<span class="op">**</span>data, args<span class="op">=</span>args, weights<span class="op">=</span>weights)</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    loss.backward()</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (b_idx <span class="op">+</span> <span class="dv">1</span>) <span class="op">%</span> accumulate_grad_batches <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>                <span class="co"># take optimizer every `accumulate_grad_batches` number of times</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>                optimizer.step()</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>                optimizer.zero_grad()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>PL nicely takes this boilerplate code away from us and provides easy access to researchers to implement gradient accumulation. It is very helpful to have larger batch sizes on a single GPU. To read more about it, refer to <a href="https://medium.com/huggingface/training-larger-batches-practical-tips-on-1-gpu-multi-gpu-distributed-setups-ec88c3e51255">this great article</a> by <a href="https://huggingface.co/">Hugging Face</a>!</p>
+</section>
+<section id="bit-precision-training" class="level2" data-number="6">
+<h2 data-number="6" class="anchored" data-anchor-id="bit-precision-training"><span class="header-section-number">6</span> 16-bit precision training</h2>
+<p>16 bit precision can cut the memory usage by half and also speed up training dramatically. <a href="https://arxiv.org/pdf/1905.12322.pdf">Here</a> is a research paper which provides comprehensive analysis on 16-bit precision training.</p>
+<p>For a more gentler introduction refer to the fastai docs <a href="http://dev.fast.ai/callback.fp16#A-little-bit-of-theory">here</a> which has some great resources and explains mixed precision very nicely.</p>
+<p>To add 16-bit precision training, we first need to make sure that we PyTorch 1.6+. PyTorch only <a href="https://analyticsindiamag.com/pytorch-mixed-precision-training/">recently added native support</a> for Mixed Precision Training.</p>
+<p>To download the latest version of PyTorch simply run</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="ex">!pip</span> install <span class="at">--pre</span> torch==1.7.0.dev20200701+cu101 torchvision==0.8.0.dev20200701+cu101 <span class="at">-f</span> https://download.pytorch.org/whl/nightly/cu101/torch_nightly.html</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>After this, adding 16-bit training is as simple as:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>trainer <span class="op">=</span> Trainer(gpus<span class="op">=</span><span class="dv">1</span>, max_epochs<span class="op">=</span><span class="dv">2</span>, </span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>                  num_sanity_val_steps<span class="op">=</span><span class="dv">1</span> <span class="cf">if</span> debug <span class="cf">else</span> <span class="dv">0</span>, </span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>                  accumulate_grad_batches<span class="op">=</span><span class="dv">2</span>, precision<span class="op">=</span><span class="dv">16</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>If you want to continue to use an older version of PyTorch, refer <a href="https://pytorch-lightning.readthedocs.io/en/latest/apex.html#apex-16-bit">here</a>.</p>
+<p>In a typical workflow in PyTorch, we would be using <code>amp</code> fron NVIDIA to directly manipulate the training loop to support 16-bit precision training which can be very cumbersome and time consuming. With PyTorch now adding support for mixed precision and with PL, this is really easy to implement.</p>
+</section>
+<section id="tpu-support" class="level2" data-number="7">
+<h2 data-number="7" class="anchored" data-anchor-id="tpu-support"><span class="header-section-number">7</span> TPU Support</h2>
+<p>Finally, we are down to my last promise of adding TPU support and being able to run this script on TPUs!</p>
+<p>Here’s a <a href="https://cloud.google.com/blog/products/ai-machine-learning/what-makes-tpus-fine-tuned-for-deep-learning">post by Google</a> introducing TPUs and here is an <a href="https://medium.com/bigdatarepublic/cost-comparison-of-deep-learning-hardware-google-tpuv2-vs-nvidia-tesla-v100-3c63fe56c20f">excellent blogpost</a> comparing various pieces of hardware. TPUs are typically 5 times faster than a V100 and reduce training times significantly.</p>
+<p>To use a TPU, switch to <a href="https://colab.research.google.com/notebooks/basic_features_overview.ipynb">Google Colab</a> or <a href="http://kaggle.com/">Kaggle</a> notebooks with free TPU availability. For more information on TPUs, watch <a href="https://www.youtube.com/watch?v=kPMpmcl_Pyw">this video</a> by Google again.</p>
+<p>To train your models on TPU on PL is again very simple, download the required libraries and add a parameter to the trainer. :)</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="op">!</span>curl https:<span class="op">//</span>raw.githubusercontent.com<span class="op">/</span>pytorch<span class="op">/</span>xla<span class="op">/</span>master<span class="op">/</span>contrib<span class="op">/</span>scripts<span class="op">/</span>env<span class="op">-</span>setup.py <span class="op">-</span>o pytorch<span class="op">-</span>xla<span class="op">-</span>env<span class="op">-</span>setup.py</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="op">!</span>python pytorch<span class="op">-</span>xla<span class="op">-</span>env<span class="op">-</span>setup.py <span class="op">--</span>version nightly <span class="op">--</span>apt<span class="op">-</span>packages libomp5 libopenblas<span class="op">-</span>dev</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>trainer <span class="op">=</span> Trainer(gpus<span class="op">=</span><span class="dv">1</span>, max_epochs<span class="op">=</span><span class="dv">2</span>, </span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>                  num_sanity_val_steps<span class="op">=</span><span class="dv">1</span> <span class="cf">if</span> debug <span class="cf">else</span> <span class="dv">0</span>, </span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>                  accumulate_grad_batches<span class="op">=</span><span class="dv">2</span>, precision<span class="op">=</span><span class="dv">16</span>, </span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>                  tpu_cores<span class="op">=</span><span class="dv">8</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><a href="https://www.kaggle.com/abhishek/accelerator-power-hour-pytorch-tpu">Here</a> is a notebook by <a href="https://www.linkedin.com/in/abhi1thakur/?originalSubdomain=no">Abhishek Thakur</a> for ISIC using TPUs with pure PyTorch. If you compare, you’d realise how easy it is now with PL to train on TPUs.</p>
+</section>
+<section id="conclusion" class="level2" data-number="8">
+<h2 data-number="8" class="anchored" data-anchor-id="conclusion"><span class="header-section-number">8</span> Conclusion</h2>
+<p>So I hope by now, you were able to compare the differences between PyTorch and PL and that I have convinced you enough to at least try out PL. [Here] is an excellent Kaggle competition to practice those skills and use <a href="https://www.kaggle.com/c/tpu-getting-started">PL</a>! In the first few experiments with PL, I have found my work to be more streamlined and also I have noticed a reduction in bugs. I find it easier to experiment with different batch sizes, mixed precision, loss functions, optimizers and also schedulers. PL is definitely worth a try.</p>
+</section>
+<section id="credits" class="level2" data-number="9">
+<h2 data-number="9" class="anchored" data-anchor-id="credits"><span class="header-section-number">9</span> Credits</h2>
+<p>Thanks for reading! And please feel free to let me know via <a href="https://twitter.com/amaarora">twitter</a> if you did end up trying PyTorch Lightning and the impact this has had on your experimentation workflows. Constructive feedback is always welcome.</p>
+<ul>
+<li>The implementation of Model was adapted and modified from <a href="https://www.kaggle.com/hmendonca/melanoma-neat-pytorch-lightning-native-amp">this</a> wonderful notebook on Kaggle.</li>
+</ul>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.335">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Aman Arora">
+<meta name="dcterms.date" content="2020-09-06">
+<meta name="description" content="In this blog post, we will looking at Image Segmentation based problem in Pytorch with SIIM-ACR Pneumothorax Segmentation competition serving as a useful example and create a solution that will get us to the top-100 leaderboard position on Kaggle.">
+
+<title>Top 100 solution - SIIM-ACR Pneumothorax Segmentation</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html">
+ <span class="menu-text">Aman Arora’s Blog</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../about.html">
+ <span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/"><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com"><i class="bi bi-twitter" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction"><span class="toc-section-number">1</span>  Introduction</a></li>
+  <li><a href="#problem-statement" id="toc-problem-statement" class="nav-link" data-scroll-target="#problem-statement"><span class="toc-section-number">2</span>  Problem Statement</a>
+  <ul class="collapse">
+  <li><a href="#what-is-image-segmentation" id="toc-what-is-image-segmentation" class="nav-link" data-scroll-target="#what-is-image-segmentation"><span class="toc-section-number">2.1</span>  What is Image Segmentation?</a></li>
+  <li><a href="#siim-acr-overview" id="toc-siim-acr-overview" class="nav-link" data-scroll-target="#siim-acr-overview"><span class="toc-section-number">2.2</span>  SIIM-ACR Overview</a></li>
+  </ul></li>
+  <li><a href="#preparing-the-dataset" id="toc-preparing-the-dataset" class="nav-link" data-scroll-target="#preparing-the-dataset"><span class="toc-section-number">3</span>  Preparing the Dataset</a>
+  <ul class="collapse">
+  <li><a href="#downloading-the-.dcm-files-and-converting-to-.png" id="toc-downloading-the-.dcm-files-and-converting-to-.png" class="nav-link" data-scroll-target="#downloading-the-.dcm-files-and-converting-to-.png"><span class="toc-section-number">3.1</span>  Downloading the <code>.dcm</code> files and converting to <code>.png</code></a></li>
+  <li><a href="#pytorch-dataset" id="toc-pytorch-dataset" class="nav-link" data-scroll-target="#pytorch-dataset"><span class="toc-section-number">3.2</span>  PyTorch Dataset</a></li>
+  <li><a href="#five-fold-splits" id="toc-five-fold-splits" class="nav-link" data-scroll-target="#five-fold-splits"><span class="toc-section-number">3.3</span>  Five-fold splits</a></li>
+  <li><a href="#train-and-val-datasets-and-dataloaders" id="toc-train-and-val-datasets-and-dataloaders" class="nav-link" data-scroll-target="#train-and-val-datasets-and-dataloaders"><span class="toc-section-number">3.4</span>  Train and Val Datasets and Dataloaders</a></li>
+  <li><a href="#train-and-valid-augmentations" id="toc-train-and-valid-augmentations" class="nav-link" data-scroll-target="#train-and-valid-augmentations"><span class="toc-section-number">3.5</span>  Train and Valid Augmentations</a></li>
+  <li><a href="#visualize" id="toc-visualize" class="nav-link" data-scroll-target="#visualize"><span class="toc-section-number">3.6</span>  Visualize</a></li>
+  </ul></li>
+  <li><a href="#model---training-and-validation" id="toc-model---training-and-validation" class="nav-link" data-scroll-target="#model---training-and-validation"><span class="toc-section-number">4</span>  Model - Training and Validation</a>
+  <ul class="collapse">
+  <li><a href="#loss-function" id="toc-loss-function" class="nav-link" data-scroll-target="#loss-function"><span class="toc-section-number">4.1</span>  Loss Function</a></li>
+  <li><a href="#model-training" id="toc-model-training" class="nav-link" data-scroll-target="#model-training"><span class="toc-section-number">4.2</span>  Model Training</a></li>
+  <li><a href="#model-validation" id="toc-model-validation" class="nav-link" data-scroll-target="#model-validation"><span class="toc-section-number">4.3</span>  Model Validation</a></li>
+  </ul></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion"><span class="toc-section-number">5</span>  Conclusion</a></li>
+  <li><a href="#credits" id="toc-credits" class="nav-link" data-scroll-target="#credits"><span class="toc-section-number">6</span>  Credits</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Top 100 solution - SIIM-ACR Pneumothorax Segmentation</h1>
+  <div class="quarto-categories">
+    <div class="quarto-category">Computer Vision</div>
+    <div class="quarto-category">Kaggle</div>
+    <div class="quarto-category">Image Segmentation</div>
+  </div>
+  </div>
+
+<div>
+  <div class="description">
+    <p>In this blog post, we will looking at Image Segmentation based problem in Pytorch with SIIM-ACR Pneumothorax Segmentation competition serving as a useful example and create a solution that will get us to the top-100 leaderboard position on Kaggle.</p>
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Aman Arora </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">September 6, 2020</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+</header>
+
+<section id="introduction" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="introduction"><span class="header-section-number">1</span> Introduction</h2>
+<p>This week I spent most of my time implementing a solution for <a href="kaggle.com/c/siim-acr-pneumothorax-segmentation/submissions">SIIM-ACR Pneumothorax Segmentation</a> Kaggle competition and in today’s blog post, we will looking at how to work on Image Segmentation based problems in Pytorch with this competition serving as a useful example.</p>
+<p>This blog post assumes the reader to have some idea about <a href="https://www.analyticsvidhya.com/blog/2019/04/introduction-image-segmentation-techniques-python/"><strong>Image Segmentation</strong></a>, <a href="https://arxiv.org/abs/1505.04597"><strong>U-Net</strong></a> and <a href="https://pytorch.org/"><strong>PyTorch</strong></a>.</p>
+<p>This post is based on a “code-first” approach with an aim to provide a reproducible training script that could then be used for other projects or Kaggle competitions. We train the model using pure PyTorch.</p>
+<p>For a complete working notebook to follow along step-by-step refer <a href="https://github.com/amaarora/amaarora.github.io/blob/master/nbs/Training.ipynb">here</a>.</p>
+<p>First, we download the dataset from Kaggle and convert the <code>.dcm</code> files to <code>.png</code> images for both masks and radiography images. Next, we create a PyTorch Dataset that returns the image and mask as a dictionary. Finally, we create the model using the wonderful <a href="https://github.com/qubvel/segmentation_models.pytorch">Pytorch Image Segmentation library</a> by Pavel Yakubovskiy(https://github.com/qubvel). Once we have the model, we create our training and validation scripts and train it using <code>ComboLoss</code> that was also used by the competition winner - <a href="https://www.linkedin.com/in/anuar-aimoldin/">Anuar Aimoldin</a>. Winning solution can be referenced <a href="https://www.kaggle.com/c/siim-acr-pneumothorax-segmentation/discussion/107824">here</a>.</p>
+<p>While I found lots of blog posts showing Image Segmentation using the wonderful <a href="https://docs.fast.ai/">fastai library</a>, there were fewer blog posts that attempted to do this task using pure Pytorch. I try the latter, because I have done the former many times and want to understand the minor details of training an Image Segmentation model in PyTorch. While it was much harder than training a model in fastai, getting stuck in problems helped me further expand my understanding on Image Segmentation.</p>
+<p>Using pure PyTorch and some help from existing scripts, I was able to create a working solution that then landed in top-100 position on the private leaderboard with a dice score of 0.8421.</p>
+<p>With that being said, let’s get started and look at the code pieces required to create such a solution step-by-step.</p>
+</section>
+<section id="problem-statement" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="problem-statement"><span class="header-section-number">2</span> Problem Statement</h2>
+<section id="what-is-image-segmentation" class="level3" data-number="2.1">
+<h3 data-number="2.1" class="anchored" data-anchor-id="what-is-image-segmentation"><span class="header-section-number">2.1</span> What is Image Segmentation?</h3>
+<p>Before we look at what we are trying to solve in SIIM-ACR Competition, let’s first look at Image Segmentation. Image segmentation can also be thought of as pixel-wise classification where, for each pixel in the input image, we are predicting whether it is a part of the segmentation mask or not. We predict <code>1</code> if we think the pixel is a part of the segmentation mask and <code>0</code> otherwise.</p>
+<p><img src="../images/img_segmentation_example.png" title="fig-1 Eye Segmentation Model" class="img-fluid"></p>
+<p>Let’s say we have a 8x8 image, therefore as shown in <code>fig-1</code>, the idea is to predict a label - 0 or 1 for each pixel in the input image. This is precisely what Image Segmentation is.</p>
+</section>
+<section id="siim-acr-overview" class="level3" data-number="2.2">
+<h3 data-number="2.2" class="anchored" data-anchor-id="siim-acr-overview"><span class="header-section-number">2.2</span> SIIM-ACR Overview</h3>
+<p>For the <strong>SIIM-ACR Competition</strong>, the competitors were asked to build an image-segmentation model that can classify and segment pneumothorax. From the <a href="https://www.kaggle.com/c/siim-acr-pneumothorax-segmentation/overview">description on Kaggle</a> for <strong>SIIM-ACR Competition</strong>:</p>
+<blockquote class="blockquote">
+<p>In this competition, you’ll develop a model to classify (and if present, segment) pneumothorax from a set of chest radiographic images.</p>
+</blockquote>
+<p>Specfically, given a chest radiographic image (<code>fig-2</code> left), the idea is to predict a mask that shows the position of pneumothorax in an image (<code>fig-2</code> right).</p>
+<p><img src="../images/acr_lung_ex.png" title="fig-2 Sample Image and Pneumothorax Segmentation Mask" class="img-fluid"></p>
+<p>Now that we have looked at what we are trying to solve, let’s start with building our solution.</p>
+</section>
+</section>
+<section id="preparing-the-dataset" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="preparing-the-dataset"><span class="header-section-number">3</span> Preparing the Dataset</h2>
+<p>The first step is almost always getting the data ready. In the competition, the data has been provided as <code>.dcm</code> files. <code>.dcm</code> is short for DICOM format. <a href="https://en.wikipedia.org/wiki/DICOM">DICOM</a> is standard image format for medical-imaging information and related data. It consists of the image and associated metadata of the patient such as sex, age etc as well. Don’t worry if you haven’t seen DICOM before, there’s always a first-time.</p>
+<p>I first learned about it through Kaggle too - specifically, <a href="https://www.kaggle.com/c/rsna-intracranial-hemorrhage-detection/overview">RSNA Intracranial Hemorrhage Detection</a>. There’s also this wonderful <a href="https://www.kaggle.com/jhoward/some-dicom-gotchas-to-be-aware-of-fastai">Some DICOM gotchas to be aware of (fastai)</a> Kaggle notebook by none other than <a href="https://twitter.com/jeremyphoward">Jeremy Howard</a> himself that serves as an excellent introduction to DICOM format.</p>
+<p>Also, <a href="https://docs.fast.ai/">fastai</a> library, has a medical submodule that makes it really easy to interact with <code>.dcm</code> files.</p>
+<p>For us, we simply download the files from Kaggle first, and then re-use the <a href="https://github.com/sneddy/pneumothorax-segmentation/blob/master/unet_pipeline/utils/prepare_png.py">prepare_png.py</a> script by SIIM-ACR competition winner - <a href="https://www.linkedin.com/in/anuar-aimoldin/">Anuar Aimoldin</a>. Let’s see how.</p>
+<section id="downloading-the-.dcm-files-and-converting-to-.png" class="level3" data-number="3.1">
+<h3 data-number="3.1" class="anchored" data-anchor-id="downloading-the-.dcm-files-and-converting-to-.png"><span class="header-section-number">3.1</span> Downloading the <code>.dcm</code> files and converting to <code>.png</code></h3>
+<p>The following lines of code will first download the dataset from Kaggle - this includes all <code>.dcm</code> files for stage-two of the competition including <em>train</em> and <em>test</em> folders. Next, the <code>prepare_png.py</code> script extracts the pixel information (or simply said “the image”) from the <code>.dcm</code> file, and stores the image as <code>.png</code> file in the output directory.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">OUTPUT_DIR</span><span class="op">=</span><span class="st">'&lt;path_to_output_dir&gt;'</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> siim-acr <span class="kw">&amp;&amp;</span> <span class="bu">cd</span> siim-acr </span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> data <span class="kw">&amp;&amp;</span> <span class="bu">cd</span> data</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="ex">kaggle</span> datasets download <span class="at">-d</span> seesee/siim-train-test</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">unzip</span> siim-train-test.zip </span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">mv</span> siim/<span class="pp">*</span> . </span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">rmdir</span> siim</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> ../src/ <span class="kw">&amp;&amp;</span> <span class="bu">cd</span> ../src</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> clone https://github.com/sneddy/pneumothorax-segmentation</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> pneumothorax-segmentation/unet_pipeline/utils/prepare_png.py <span class="at">-train_path</span> ../data/dicom-images-train/ <span class="at">-test_path</span> ../data/dicom-images-test/ <span class="at">-out_path</span> <span class="va">$OUTPUT_DIR</span> <span class="at">-img_size</span> 512 <span class="at">-rle_path</span> ../data/train-rle.csv</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Running the above, should create a folder <code>siim-acr</code> in your current directory that has the following structure:</p>
+<pre><code>├── data
+│&nbsp;&nbsp; ├── dataset512
+│&nbsp;&nbsp; ├── dicom-images-test
+│&nbsp;&nbsp; └── dicom-images-train
+└── src
+    └── pneumothorax-segmentation</code></pre>
+<p>The <code>dicom-images-train</code> and <code>dicom-images-test</code> directory consist of all the <code>.dcm</code> files provided by Kaggle. The <code>dataset512</code> consists of all the <code>.png</code> files that have been extracted from the <code>.dcm</code> files. This includes train image files and also label masks extracted as <code>.png</code> images. <code>pneumothorax-segmentation</code> is the GitHub repo that contains the <code>prepare_png.py</code> script.</p>
+<p>Therefore, now that our data has been downloaded and all files converted to <code>.png</code> images, we are ready to start building our <code>Dataset</code> class.</p>
+</section>
+<section id="pytorch-dataset" class="level3" data-number="3.2">
+<h3 data-number="3.2" class="anchored" data-anchor-id="pytorch-dataset"><span class="header-section-number">3.2</span> PyTorch Dataset</h3>
+<p>In PyTorch, a <code>Dataset</code> class almost always returns the image and label. Since, this is an image segmentation task, the label, in this case is also an image - specifically the image of the mask as in <code>fig-2</code> (right).</p>
+<p>One thing I didn;t mention in the previous section, is that when we downloaded the files, we were also provided with a <code>train-rle.csv</code> file which consists of two columns - <code>ImageId</code> and <code>EncodedPixels</code>.</p>
+<p><img src="../images/train_rle.png" title="fig-3 `train-rle.csv` preview" class="img-fluid"></p>
+<p>Each row consists of an <code>ImageId</code> and <code>EncodedPixels</code> - which are the 512x512 masks as in <code>fig-2</code> with run-length-encoding to keep the size of the <code>.csv</code> file small. You can read more about run-length-encoding <a href="https://www.geeksforgeeks.org/run-length-encoding/">here</a>.</p>
+<p>So, to create the dataset, we read this <code>.csv</code> file as <code>rle_df</code>, and store it to <code>df</code> attribute of the <code>Dataset</code> class. In order to get an item from the dataset, we could get the corresponding <code>image_id</code> based on index <code>i</code>. Once we have the <code>image_id</code>, we could get the <code>img_path</code> and <code>mask_path</code> too and return the <code>image</code> and <code>mask</code> after applying the augmentations if present. If the augmentations are present, this class returns two <code>image</code> and <code>mask</code> tensors of shape <code>(3, 512, 512)</code> and <code>(1, 512, 512)</code> respectively or numpy arrays of the same shape otherwise.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Dataset():</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, rle_df, image_base_dir, masks_base_dir, augmentation<span class="op">=</span><span class="va">None</span>):</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.df             <span class="op">=</span> rle_df</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.image_base_dir <span class="op">=</span> image_base_dir</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.masks_base_dir <span class="op">=</span> masks_base_dir</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.image_ids      <span class="op">=</span> rle_df.ImageId.values</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.augmentation   <span class="op">=</span> augmentation</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__getitem__</span>(<span class="va">self</span>, i):</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>        image_id  <span class="op">=</span> <span class="va">self</span>.image_ids[i]</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>        img_path  <span class="op">=</span> os.path.join(<span class="va">self</span>.image_base_dir, image_id<span class="op">+</span><span class="st">'.png'</span>) </span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>        mask_path <span class="op">=</span> os.path.join(<span class="va">self</span>.masks_base_dir, image_id<span class="op">+</span><span class="st">'.png'</span>)</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>        image     <span class="op">=</span> cv2.imread(img_path, <span class="dv">1</span>)</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>        mask      <span class="op">=</span> cv2.imread(mask_path, <span class="dv">0</span>)     </span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>        <span class="co"># apply augmentations</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="va">self</span>.augmentation:</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>            sample <span class="op">=</span> {<span class="st">"image"</span>: image, <span class="st">"mask"</span>: mask}</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>            sample <span class="op">=</span> <span class="va">self</span>.augmentation(<span class="op">**</span>sample)</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>            image, mask <span class="op">=</span> sample[<span class="st">'image'</span>], sample[<span class="st">'mask'</span>]</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> {</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>            <span class="st">'image'</span>: image, </span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>            <span class="st">'mask'</span> : mask</span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__len__</span>(<span class="va">self</span>):</span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="bu">len</span>(<span class="va">self</span>.image_ids)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="five-fold-splits" class="level3" data-number="3.3">
+<h3 data-number="3.3" class="anchored" data-anchor-id="five-fold-splits"><span class="header-section-number">3.3</span> Five-fold splits</h3>
+<p>One thing we haven’t done yet is to create train-val splits. This is standard for training any model. For this competition, we will doing a five-fold stratified split using <code>StratifiedKFold</code> from <code>sklearn</code>.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>RLE_DF <span class="op">=</span> pd.read_csv(<span class="st">'&lt;path_to_train_rle.csv'</span><span class="op">&gt;</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>kf <span class="op">=</span> StratifiedKFold()</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a> </span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> CREATE_FIVE_FOLDS:</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    RLE_DF[<span class="st">'has_mask'</span>] <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    RLE_DF.loc[RLE_DF.EncodedPixels<span class="op">!=</span><span class="st">'-1'</span>, <span class="st">'has_mask'</span>] <span class="op">=</span> <span class="dv">1</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    RLE_DF[<span class="st">'kfold'</span>]<span class="op">=-</span><span class="dv">1</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> fold, (train_index, test_index) <span class="kw">in</span> <span class="bu">enumerate</span>(kf.split(X<span class="op">=</span>RLE_DF.ImageId, y<span class="op">=</span>RLE_DF.has_mask)):</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>            RLE_DF.loc[test_index, <span class="st">'kfold'</span>] <span class="op">=</span> fold</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    RLE_DF.to_csv(<span class="st">'&lt;path_to_target_file.csv&gt;'</span>, index<span class="op">=</span><span class="va">False</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Running the above script creates a new <code>.csv</code> file which looks something like:</p>
+<p><img src="../images/kfold.png" title="fig-4 Kfolds training file" class="img-fluid"></p>
+<p>As can be seen, each image has been assigned to a specific fold. Thus, all our data has been divided into five folds. Once we have this, then getting the train and validation dataframes is as simple as running:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>TRAIN_DF <span class="op">=</span> RLE_DF.query(<span class="ss">f'kfold!=</span><span class="sc">{</span>FOLD_ID<span class="sc">}</span><span class="ss">'</span>).reset_index(drop<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>VAL_DF   <span class="op">=</span> RLE_DF.query(<span class="ss">f'kfold==</span><span class="sc">{</span>FOLD_ID<span class="sc">}</span><span class="ss">'</span>).reset_index(drop<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="bu">len</span>(TRAIN_DF), <span class="bu">len</span>(VAL_DF)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> (<span class="dv">10364</span>, <span class="dv">2590</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Therefore, we have split the <code>train-rle.csv</code> into training and validation splits with 10,364 files in training split and 2590 files in validation split.</p>
+</section>
+<section id="train-and-val-datasets-and-dataloaders" class="level3" data-number="3.4">
+<h3 data-number="3.4" class="anchored" data-anchor-id="train-and-val-datasets-and-dataloaders"><span class="header-section-number">3.4</span> Train and Val Datasets and Dataloaders</h3>
+<p>Now that we have our train and validation splits, creating <code>train</code> and <code>validation</code> datasets and dataloaders is a piece of cake.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>TRAIN_BATCH_SIZE <span class="op">=</span> <span class="dv">8</span> </span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>VALID_BATCH_SIZE <span class="op">=</span> <span class="dv">16</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co"># datasets</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>train_dataset <span class="op">=</span> Dataset(TRAIN_DF, <span class="st">'&lt;path_to_train_png_image_dir&gt;'</span>, <span class="st">'&lt;path_to_train_png_masks_dir&gt;'</span>) </span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>val_dataset   <span class="op">=</span> Dataset(VAL_DF, <span class="st">'&lt;path_to_train_png_image_dir&gt;'</span>, <span class="st">'&lt;path_to_train_png_masks_dir&gt;'</span>)</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="co"># dataloaders</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>train_dataloader <span class="op">=</span> DataLoader(train_dataset, TRAIN_BATCH_SIZE, </span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>                              shuffle<span class="op">=</span><span class="va">True</span>, num_workers<span class="op">=</span><span class="dv">4</span>)</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>val_dataloader   <span class="op">=</span> DataLoader(val_dataset, VALID_BATCH_SIZE, shuffle<span class="op">=</span><span class="va">False</span>, num_workers<span class="op">=</span><span class="dv">4</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>We already have a <code>Dataset</code> class before, that accepts a DataFrame and returns <code>image</code> and <code>mask</code> numpy arrays or tensors based on augmentations. Since, we have not provided any augmentations so far, the returned values would be numpy arrays.</p>
+</section>
+<section id="train-and-valid-augmentations" class="level3" data-number="3.5">
+<h3 data-number="3.5" class="anchored" data-anchor-id="train-and-valid-augmentations"><span class="header-section-number">3.5</span> Train and Valid Augmentations</h3>
+<p>We could also add image augmentations by simply passing augmentations to the <code>Dataset</code> class.</p>
+<p>Let’s first define train and validation augmentations using the brilliant <a href="https://github.com/albumentations-team/albumentations">albumentations library</a>.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> albumentations <span class="im">as</span> albu</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Train transforms</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>TRN_TFMS <span class="op">=</span> albu.Compose([</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    albu.HorizontalFlip(),</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    albu.Rotate(<span class="dv">10</span>),</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    albu.Normalize(),</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    ToTensor(),</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>])</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>​</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Test transforms</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>VAL_TFMS <span class="op">=</span> albu.Compose([</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>    albu.Normalize(),</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>    ToTensor(),</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The train transforms add random horizontal flipping, random rotation and also normalize the image and mask to have values between (0, 1) instead of (0, 255). We also convert the numpy arrays to tensor using <code>ToTensor()</code> method in <strong>albumentations</strong>.</p>
+<p>The validation transform only normalizes and converts the numpy arrays to tensors.</p>
+<p>Now that we have defined the augmentations, we can create the datasets and dataloaders like so:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>TRAIN_BATCH_SIZE <span class="op">=</span> <span class="dv">8</span> </span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>VALID_BATCH_SIZE <span class="op">=</span> <span class="dv">16</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co"># datasets</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>train_dataset <span class="op">=</span> Dataset(TRAIN_DF, <span class="st">'&lt;path_to_train_png_image_dir&gt;'</span>, <span class="st">'&lt;path_to_train_png_masks_dir&gt;'</span>, augmentation<span class="op">=</span>TRN_TFMS) </span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>val_dataset   <span class="op">=</span> Dataset(VAL_DF, <span class="st">'&lt;path_to_train_png_image_dir&gt;'</span>, <span class="st">'&lt;path_to_train_png_masks_dir&gt;'</span>, augmentation<span class="op">=</span>VAL_TFMS)</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="co"># dataloaders</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>train_dataloader <span class="op">=</span> DataLoader(train_dataset, TRAIN_BATCH_SIZE, </span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>                              shuffle<span class="op">=</span><span class="va">True</span>, num_workers<span class="op">=</span><span class="dv">4</span>)</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>val_dataloader   <span class="op">=</span> DataLoader(val_dataset, VALID_BATCH_SIZE, shuffle<span class="op">=</span><span class="va">False</span>, num_workers<span class="op">=</span><span class="dv">4</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Great! So far so good. Until now we have created the <code>Dataset</code> class that accepts a DataFrame and returns <code>image</code> and <code>mask</code> as a Python dictionary. We have also defined some train and validation augmentations and added them to training and validation datasets.</p>
+</section>
+<section id="visualize" class="level3" data-number="3.6">
+<h3 data-number="3.6" class="anchored" data-anchor-id="visualize"><span class="header-section-number">3.6</span> Visualize</h3>
+<p>Let’s visualize some images now. First, we create simple helper functions from <code>torchvision</code> examples like so:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> matplotlib_imshow(img, one_channel<span class="op">=</span><span class="va">False</span>):</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    fig,ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">10</span>,<span class="dv">6</span>))</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    ax.imshow(img.permute(<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">0</span>).numpy())</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> visualize(<span class="op">**</span>images):</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    images <span class="op">=</span> {k:v.numpy() <span class="cf">for</span> k,v <span class="kw">in</span> images.items() <span class="cf">if</span> <span class="bu">isinstance</span>(v, torch.Tensor)} <span class="co">#convert tensor to numpy </span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    n <span class="op">=</span> <span class="bu">len</span>(images)</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    plt.figure(figsize<span class="op">=</span>(<span class="dv">16</span>, <span class="dv">8</span>))</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    image, mask <span class="op">=</span> images[<span class="st">'image'</span>], images[<span class="st">'mask'</span>]</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    plt.imshow(image.transpose(<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">0</span>), vmin<span class="op">=</span><span class="dv">0</span>, vmax<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> mask.<span class="bu">max</span>()<span class="op">&gt;</span><span class="dv">0</span>:</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>        plt.imshow(mask.squeeze(<span class="dv">0</span>), alpha<span class="op">=</span><span class="fl">0.25</span>)</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>    plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>And now visualizing an image with mask is as simple as:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># plot one image with mask </span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>visualize(<span class="op">**</span>train_dataset[<span class="dv">1</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><img src="../images/acr_img_mask.png" title="fig-2 Example Image with Segmentation Mask" class="img-fluid"></p>
+<p>And to visualize multiple train images, we could do something like:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>images, masks <span class="op">=</span> <span class="bu">next</span>(<span class="bu">iter</span>(train_dataloader))[<span class="st">'image'</span>], <span class="bu">next</span>(<span class="bu">iter</span>(train_dataloader))[<span class="st">'mask'</span>]</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>img_grid <span class="op">=</span> torchvision.utils.make_grid(images[:<span class="dv">9</span>], nrow<span class="op">=</span><span class="dv">3</span>, normalize<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>matplotlib_imshow(img_grid)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><img src="../images/acr_img_grid.png" title="fig-3 Train image grid" class="img-fluid"></p>
+<p>As can be seen from <code>fig-3</code>, some images are rotated, some are flipped - this is due to the train image augmentations. This way, our model sees a slightly different version of the same image every time in an epoch and will therefore be able to generalize better.</p>
+<p>Now, that our dataset and dataloaders with image augmentations are done, we are ready to look into model building, training and validation.</p>
+</section>
+</section>
+<section id="model---training-and-validation" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="model---training-and-validation"><span class="header-section-number">4</span> Model - Training and Validation</h2>
+<p>To create our <a href="https://arxiv.org/abs/1505.04597">U-Net</a> based model, we will be using the wonderful <a href="https://github.com/qubvel/segmentation_models.pytorch">Segmentation Models library</a> in PyTorch by <a href="https://github.com/qubvel">Pavel Yakubovskiy</a>. I promise to do a future blog post on creating a U-Net structure from scratch with a <a href="https://arxiv.org/abs/1512.03385">ResNet</a> encoder branch, but for simplicity, for this introductory post, using the <strong>Segmentation Models</strong> library is a much easier option. If you’re keen to create a U-Net architecture from scratch, <a href="https://www.youtube.com/watch?v=u1loyDCoGbE">here</a> is an excellent video by Abhishek Thakur.</p>
+<p>Thanks to the library, creating our segmentation model architecture is as simple as:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> segmentation_models_pytorch <span class="im">as</span> smp</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> smp.Unet(</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    encoder_name<span class="op">=</span><span class="st">'se_resnext50_32x4d'</span>, </span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    encoder_weights<span class="op">=</span><span class="st">'imagenet'</span>, </span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    classes<span class="op">=</span><span class="dv">1</span>, </span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    activation<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Usually, there is a <code>Sigmoid</code> activation U-Net, but in our case, we do not add any activation and set it to <code>None</code> because the <code>Sigmoid</code> activation is already a part of the loss function that we use to train the model.</p>
+<p>Given an input batch of images of size <code>(8, 3, 512, 512)</code> the model outputs masks of batch dimensions <code>(8, 1, 512, 512)</code> which represents the predicted segmentation masks for each of the 8 images.</p>
+<p>Usually, one of the common loss functions for Image Segmentation is pixel wise Cross Entropy but for our introductory post today we will be using the same loss function as the winner of the competition.</p>
+<section id="loss-function" class="level3" data-number="4.1">
+<h3 data-number="4.1" class="anchored" data-anchor-id="loss-function"><span class="header-section-number">4.1</span> Loss Function</h3>
+<div class="sourceCode" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> sys<span class="op">;</span> sys.path.append(<span class="st">'&lt;path to `pneumothorax-segmentation/unet_pipeline/`&gt;'</span>)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> Losses <span class="im">import</span> ComboLoss</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>criterion <span class="op">=</span> ComboLoss(<span class="op">**</span>{<span class="st">'weights'</span>:{<span class="st">'bce'</span>:<span class="dv">3</span>, <span class="st">'dice'</span>:<span class="dv">1</span>, <span class="st">'focal'</span>:<span class="dv">4</span>}})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>This loss function is a combination of Binary Cross Entropy, Dice Loss and Focal Loss. I have written about Focal Loss before <a href="https://amaarora.github.io/2020/06/29/FocalLoss.html">here</a>.</p>
+<p>From my understanding, we use a combination loss for stable training. Since the evaluation metric is <code>dice</code>, we are using <code>dice</code> loss here. We use <code>bce</code> for pixel wise comparison between predictions and ground truth mask, and <code>focal</code> loss due to the high class imbalance - the actual mask is only a tiny part of the whole image. I again promise to do a future blog post on the various loss functions, but for now, for simplicity we simply re-use the <code>ComboLoss</code> to train our model with (3, 1, 4) weights to stabilize training.</p>
+<p>Let’s also quickly define the optimizer and scheduler.</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>optimizer <span class="op">=</span> torch.optim.Adam(model.parameters(), lr<span class="op">=</span><span class="fl">1e-4</span>)</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>scheduler <span class="op">=</span> torch.optim.lr_scheduler.MultiStepLR(</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    optimizer, milestones<span class="op">=</span>[<span class="dv">3</span>,<span class="dv">5</span>,<span class="dv">6</span>,<span class="dv">7</span>,<span class="dv">8</span>,<span class="dv">9</span>,<span class="dv">10</span>,<span class="dv">11</span>,<span class="dv">13</span>,<span class="dv">15</span>], gamma<span class="op">=</span><span class="fl">0.75</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Great, so far, we have our <code>model</code>, <code>loss function</code> and also the <code>optimizer</code> and <code>scheduler</code> defined. We are now ready to train our model.</p>
+</section>
+<section id="model-training" class="level3" data-number="4.2">
+<h3 data-number="4.2" class="anchored" data-anchor-id="model-training"><span class="header-section-number">4.2</span> Model Training</h3>
+<p>I reused the same training loop as in the <a href="https://amaarora.github.io/2020/08/23/siimisic.html">ISIC competition</a> below:</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> AverageMeter:</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"keep record of batch scores and loss"</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>):</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.val <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.avg <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.<span class="bu">sum</span> <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.count <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> reset(<span class="va">self</span>):</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.val <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.avg <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.<span class="bu">sum</span> <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.count <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> update(<span class="va">self</span>, val, n<span class="op">=</span><span class="dv">1</span>):</span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.val <span class="op">=</span> val</span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.<span class="bu">sum</span> <span class="op">+=</span> val <span class="op">*</span> n</span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.count <span class="op">+=</span> n</span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.avg <span class="op">=</span> <span class="va">self</span>.<span class="bu">sum</span> <span class="op">/</span> <span class="va">self</span>.count</span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> train_one_epoch(train_loader, model, optimizer, loss_fn, accumulation_steps<span class="op">=</span><span class="dv">1</span>, device<span class="op">=</span><span class="st">'cuda'</span>):</span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>    losses <span class="op">=</span> AverageMeter()</span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>    model <span class="op">=</span> model.to(device)</span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a>    model.train()</span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> accumulation_steps <span class="op">&gt;</span> <span class="dv">1</span>: </span>
+<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a>        optimizer.zero_grad()</span>
+<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a>    tk0 <span class="op">=</span> tqdm(train_loader, total<span class="op">=</span><span class="bu">len</span>(train_loader))</span>
+<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> b_idx, data <span class="kw">in</span> <span class="bu">enumerate</span>(tk0):</span>
+<span id="cb15-29"><a href="#cb15-29" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> key, value <span class="kw">in</span> data.items():</span>
+<span id="cb15-30"><a href="#cb15-30" aria-hidden="true" tabindex="-1"></a>            data[key] <span class="op">=</span> value.to(device)</span>
+<span id="cb15-31"><a href="#cb15-31" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> accumulation_steps <span class="op">==</span> <span class="dv">1</span> <span class="kw">and</span> b_idx <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb15-32"><a href="#cb15-32" aria-hidden="true" tabindex="-1"></a>            optimizer.zero_grad()</span>
+<span id="cb15-33"><a href="#cb15-33" aria-hidden="true" tabindex="-1"></a>        out  <span class="op">=</span> model(data[<span class="st">'image'</span>])</span>
+<span id="cb15-34"><a href="#cb15-34" aria-hidden="true" tabindex="-1"></a>        loss <span class="op">=</span> loss_fn(out, data[<span class="st">'mask'</span>])</span>
+<span id="cb15-35"><a href="#cb15-35" aria-hidden="true" tabindex="-1"></a>        <span class="cf">with</span> torch.set_grad_enabled(<span class="va">True</span>):</span>
+<span id="cb15-36"><a href="#cb15-36" aria-hidden="true" tabindex="-1"></a>            loss.backward()</span>
+<span id="cb15-37"><a href="#cb15-37" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> (b_idx <span class="op">+</span> <span class="dv">1</span>) <span class="op">%</span> accumulation_steps <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb15-38"><a href="#cb15-38" aria-hidden="true" tabindex="-1"></a>                optimizer.step()</span>
+<span id="cb15-39"><a href="#cb15-39" aria-hidden="true" tabindex="-1"></a>                optimizer.zero_grad()</span>
+<span id="cb15-40"><a href="#cb15-40" aria-hidden="true" tabindex="-1"></a>        losses.update(loss.item(), train_loader.batch_size)</span>
+<span id="cb15-41"><a href="#cb15-41" aria-hidden="true" tabindex="-1"></a>        tk0.set_postfix(loss<span class="op">=</span>losses.avg, learning_rate<span class="op">=</span>optimizer.param_groups[<span class="dv">0</span>][<span class="st">'lr'</span>])</span>
+<span id="cb15-42"><a href="#cb15-42" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> losses.avg</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The above training loop is a basic one with possible gradient accumulation due to the small batch size in <strong>Image Segmentation</strong> based problems. I personally trained my models without gradient accumulation, but you could very well train your models by passing in <code>accumulation_steps=N</code> where <code>N</code> is the number of times you want to accumulate the gradients, thereby, increasing the batch size.</p>
+<p>The <code>train_one_epoch</code> function accepts a <code>dataloader</code>, <code>model</code>, <code>optimizer</code> and <code>loss_fn</code>. We first move the model to <code>cuda</code> and put the model in train mode. Next, we iterate over the dataloader to get images and masks and move them to <code>cuda</code> as well.</p>
+<p>Finally, we pass the batch of images to get predictions. Remember the output size is <code>(8, 1, 512, 512)</code> for three channel input images of height and width 512 and batch size 8. Once we have the predictions, as is standard for any training loop, we can calculate the loss and backpropogate to update the model weights. Finally, we also display the average loss in the training progress bar using <code>tqdm</code>.</p>
+<p>To train the model we can simply run:</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>train_loss <span class="op">=</span> train_one_epoch(train_dataloader, model, optimizer, criterion)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="model-validation" class="level3" data-number="4.3">
+<h3 data-number="4.3" class="anchored" data-anchor-id="model-validation"><span class="header-section-number">4.3</span> Model Validation</h3>
+<p>Hardly ever would one just be concerned with model training. It is imperative to have a good validation step to check model performance. In this step we create the model validation loop which is similar to the training loop. s</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> evaluate(valid_loader, model, device<span class="op">=</span><span class="st">'cuda'</span>, metric<span class="op">=</span>dice_metric):</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    losses <span class="op">=</span> AverageMeter()</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    model <span class="op">=</span> model.to(device)</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    model.<span class="bu">eval</span>()</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    tk0 <span class="op">=</span> tqdm(valid_loader, total<span class="op">=</span><span class="bu">len</span>(valid_loader))</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> torch.no_grad():</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> b_idx, data <span class="kw">in</span> <span class="bu">enumerate</span>(tk0):</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> key, value <span class="kw">in</span> data.items():</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>                data[key] <span class="op">=</span> value.to(device)</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>            out   <span class="op">=</span> model(data[<span class="st">'image'</span>])</span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>            out   <span class="op">=</span> torch.sigmoid(out)</span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>            dice  <span class="op">=</span> metric(out, data[<span class="st">'mask'</span>]).cpu()</span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>            losses.update(dice.mean().item(), valid_loader.batch_size)</span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>            tk0.set_postfix(dice_score<span class="op">=</span>losses.avg)</span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> losses.avg</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The above validation loop accepts a valid dataloader, trained model some metric to check model performance. It first moves the model to GPU, and puts the model in <code>eval</code> mode. Next we iterate over the dataloader to get the images and masks and pass the images through the model to get mask predictions. Finally, we take the sigmoid to convert raw logits to be in range (0, 1). Finally, we can calculate the dice score and display it in the validation progress bar with <code>tqdm</code>.</p>
+</section>
+</section>
+<section id="conclusion" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="conclusion"><span class="header-section-number">5</span> Conclusion</h2>
+<p>I hope that today, I was able to provide a good introductory and reporoducible script to train Image Segmentation based models. This was also my first experience with training image segmentation models and hope to write more about Unet architecture, loss functions and review image segmentation research papers in the future.</p>
+<p>For a complete working notebook with a submission script to Kaggle and pretrained models, refer <a href="https://github.com/amaarora/amaarora.github.io/blob/master/nbs/Training.ipynb">here</a>. Running the script should take around 2 minutes on a P100.</p>
+<p>As usual, in case I have missed anything or to provide feedback, please feel free to reach out to me at <a href="https://twitter.com/amaarora"><span class="citation" data-cites="amaarora">@amaarora</span></a>.</p>
+<p>Also, feel free to <a href="https://amaarora.github.io/subscribe">subscribe to my blog here</a> to receive regular updates regarding new blog posts. Thanks for reading!</p>
+</section>
+<section id="credits" class="level2" data-number="6">
+<h2 data-number="6" class="anchored" data-anchor-id="credits"><span class="header-section-number">6</span> Credits</h2>
+<p>We made use of <code>prepare_png.py</code> script from <a href="https://github.com/sneddy/pneumothorax-segmentation">Anuar Aymoldin’s 1st place solution</a> and also directly used the loss function.</p>
+<p>The model was created using <a href="https://github.com/qubvel/segmentation_models.pytorch">segmentation_models.pytorch</a> library.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

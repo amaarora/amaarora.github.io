@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.335">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Aman Arora">
+<meta name="dcterms.date" content="2021-01-11">
+<meta name="description" content="As part of this blog post I will explain how EfficientDets work step-by-step.">
+
+<title>EfficientDet - Scalable and Efficient Object Detection</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html">
+ <span class="menu-text">Aman Arora’s Blog</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../about.html">
+ <span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/"><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com"><i class="bi bi-twitter" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">EfficientDet - Scalable and Efficient Object Detection</h1>
+                  <div>
+        <div class="description">
+          <p>As part of this blog post I will explain how EfficientDets work step-by-step.</p>
+        </div>
+      </div>
+                          <div class="quarto-categories">
+                <div class="quarto-category">Computer Vision</div>
+                <div class="quarto-category">Model Architecture</div>
+                <div class="quarto-category">Object Detection</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Aman Arora </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">January 11, 2021</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#structure" id="toc-structure" class="nav-link active" data-scroll-target="#structure"><span class="toc-section-number">1</span>  Structure</a></li>
+  <li><a href="#prerequisites" id="toc-prerequisites" class="nav-link" data-scroll-target="#prerequisites"><span class="toc-section-number">2</span>  Prerequisites</a></li>
+  <li><a href="#contributions" id="toc-contributions" class="nav-link" data-scroll-target="#contributions"><span class="toc-section-number">3</span>  Contributions</a></li>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link" data-scroll-target="#introduction"><span class="toc-section-number">4</span>  Introduction</a>
+  <ul class="collapse">
+  <li><a href="#summary-feature-pyramid-network-for-object-detection" id="toc-summary-feature-pyramid-network-for-object-detection" class="nav-link" data-scroll-target="#summary-feature-pyramid-network-for-object-detection"><span class="toc-section-number">4.1</span>  Summary: Feature Pyramid Network for Object Detection</a></li>
+  <li><a href="#bifpn-bi-directional-feature-pyramid-network" id="toc-bifpn-bi-directional-feature-pyramid-network" class="nav-link" data-scroll-target="#bifpn-bi-directional-feature-pyramid-network"><span class="toc-section-number">4.2</span>  BiFPN: Bi-directional Feature Pyramid Network</a></li>
+  <li><a href="#compound-scaling" id="toc-compound-scaling" class="nav-link" data-scroll-target="#compound-scaling"><span class="toc-section-number">4.3</span>  Compound Scaling</a></li>
+  </ul></li>
+  <li><a href="#efficientdet-architecture" id="toc-efficientdet-architecture" class="nav-link" data-scroll-target="#efficientdet-architecture"><span class="toc-section-number">5</span>  EfficientDet Architecture</a></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion"><span class="toc-section-number">6</span>  Conclusion</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<p>First of all, a very happy new year to you! I really hope that 2021 turns out to be a lot better than 2020 for all of us. 2020 was the first year when I started working as an <strong>Applied AI Scientist</strong> in the Medical field - my first ever deep learning job! In 2021 I hope to build upon this platform and introduce many more key research papers in a simple and easy to grasp manner. This blog post is the first of many more blogposts to be released this year.</p>
+<p>Today, we will be looking at the <a href="https://arxiv.org/abs/1911.09070">EfficientDet: Scalable and Efficient Object Detection</a> research paper. With single-model and single-scale, <em>EfficientDet-D7</em> was able to achieve SOTA results at the time of release of the paper. Even after a year later, at the time of writing, the results are still in the top-5 positions on the <a href="https://paperswithcode.com/sota/object-detection-on-coco">COCO leaderboard</a>. Also, recently, in the <a href="https://www.kaggle.com/c/nfl-impact-detection/overview">NFL 1st and Future - Impact Detection</a> Kaggle competition, <strong>EfficientDets</strong> figured in almost all of the <a href="https://www.kaggle.com/c/nfl-impact-detection/discussion/208812">top winning solutions</a>. So, in this blog post we will be uncovering all the magic that leads to such tremendous success for EfficientDets.</p>
+<p>Also, while multiple blog posts previously exist on EfficientDets [<a href="https://towardsdatascience.com/a-thorough-breakdown-of-efficientdet-for-object-detection-dc6a15788b73">1</a>, <a href="https://towardsdatascience.com/efficientdet-scalable-and-efficient-object-detection-review-4472ffc34fd9">2</a>, <a href="https://medium.com/towards-artificial-intelligence/efficientdet-when-object-detection-meets-scalability-and-efficiency-551e263719aa">3</a>..], there isn’t one that explains how to implement <code>EfficientDets</code> in code. In a later blog post that follows this one, I will explain how to implement EfficientDets in PyTorch. The implementation would be directly copied from <a href="https://twitter.com/wightmanr">Ross Wightman’s</a> excellent repo <a href="https://github.com/rwightman/efficientdet-pytorch">efficientdet-pytorch</a> and the code from the repo used as reference to explain how to implement <code>EfficientDets</code> in PyTorch.</p>
+<p>But, code comes later. First, let’s understand the novel contributions of the <strong>EfficientDet</strong> paper.</p>
+<section id="structure" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="structure"><span class="header-section-number">1</span> Structure</h2>
+<p>The blog post is structured in the following way:</p>
+<ol type="1">
+<li>TOC {:toc}</li>
+</ol>
+<p>First, we take a step back and understand multi-scale feature fusion before the introduction of Feature Pyramid Networks. Next, understand the key advancements introduced by FPNs. Next, we look at the various adaptations of FPN such as PANet, NAS-FPN and finally look into BiFPN that was introduced in the EfficientDet paper.</p>
+<p>Having looked at BiFPN in great detail, we then finally look into the EfficientDet Architecture and understand how the authors used <code>BiFPN + Compound Scaling</code> to get SOTA results.</p>
+</section>
+<section id="prerequisites" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="prerequisites"><span class="header-section-number">2</span> Prerequisites</h2>
+<p>I assume that the reader has some knowledge about Object Detection. If you are completely new to the field or simply want to apply <strong>EfficientDets</strong> to an object detection problem, there are plenty examples on <a href="https://www.kaggle.com/ar2017/efficientdet-train-mixup-cutmix-stratifiedk-fold">Kaggle</a> that show how to use <strong>EfficientDets</strong>. This post is more meant for those who want to understand what’s inside an EfficientDet.</p>
+<p>Also, here is a <a href="https://www.youtube.com/watch?v=8H2qGeOef44">great video</a> of the fastai 2018 course by <a href="https://twitter.com/jeremyphoward">Jeremy Howard</a> that introduces object detection. I started here too about a year ago. :)</p>
+<p>Also, since it would be an overkill to put EfficientNets as a prerequisite, I will just say that it would be great if the reader has a good enough understanding of <a href="https://arxiv.org/abs/1905.11946">EfficientNets</a>. If you want a refresher, please refer to this <a href="https://amaarora.github.io/2020/08/13/efficientnet.html">blog post</a> that explains EfficientNets in detail step-by-step.</p>
+</section>
+<section id="contributions" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="contributions"><span class="header-section-number">3</span> Contributions</h2>
+<p>There are two main contributions from the paper: 1. A new version of a Feature Pyramid Network called <strong>BiFPN</strong>. 2. And two, <strong>Compund Scaling</strong>.</p>
+<p>While the idea of compound scaling was first introduced in the EfficientNet paper, the authors apply it to object detection and achieve SOTA results. Also, that the authors of the EfficientDet research paper are the same authors who introduced EfficientNets. We won’t be looking into Compound Scaling in this blog post as it has already been explained in my previous blog post <a href="https://amaarora.github.io/2020/08/13/efficientnet.html#comparing-conventional-methods-with-compound-scaling">here</a>.</p>
+<p>We will be looking at what the BiFPN network is in a lot more detail at a later stage. To understand what a BiFPN is, one must first look into what a FPN (Feature Pyramid Network) is.</p>
+</section>
+<section id="introduction" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="introduction"><span class="header-section-number">4</span> Introduction</h2>
+<p>This paper starts out with a similar introduction as EfficientNets where the authors explain why model efficiency becomes increasingly important for object detection. From the paper: &gt; Tremendous progresses have been made in recent years towards more accurate object detection. meanwhile, state-of-the-art object detectors also become increasingly more expensive. For example, the latest AmoebaNet-based NASFPN detector requires 167M parameters and 3045B FLOPs (30x more than RetinaNet) to achieve state-ofthe-art accuracy. The large model sizes and expensive computation costs deter their deployment in many real-world applications such as robotics and self-driving cars where model size and latency are highly constrained. Given these real-world resource constraints, model efficiency becomes increasingly important for object detection.</p>
+<p>The key question that this paper tries to solve is “<strong>Is it possible to build a scalable detection architecture with both higher accuracy and better efficiency across a wide spectrum of resource constraints</strong>”?</p>
+<p>The authors identified two main challenges when it comes to answering this question: 1. Efficient multi-scale feature fusion 2. And two, Model Scaling</p>
+<p>To explain multi-scale feature fusion, we will need to take a step back here and before continuing with the EfficientDet paper, we will have to first look into <a href="https://arxiv.org/abs/1612.03144">Feature Pyramid Networks</a> and understand the key idea behind them. But basically, multi-scale feature fusion aims to aggregate features at different resolutions.</p>
+<p>So, the next section is merely a summary and introduction to Feature Pyramid Networks. Feel free to skip if you already know what a FPN is.</p>
+<hr>
+<section id="summary-feature-pyramid-network-for-object-detection" class="level3" data-number="4.1">
+<h3 data-number="4.1" class="anchored" data-anchor-id="summary-feature-pyramid-network-for-object-detection"><span class="header-section-number">4.1</span> Summary: Feature Pyramid Network for Object Detection</h3>
+<p><a href="https://arxiv.org/search/cs?query=He%2C+Kaiming&amp;searchtype=author&amp;abstracts=show&amp;order=-announced_date_first&amp;size=50">He et al</a> were the one of the first to exploit the inherent multi-scale pyramid heirarchy of CNNs and construct feature pyramids and apply to object detection. If this doesn’t make sense right now - it’s okay! I really havent explained in much detail what this means yet. That happens next.</p>
+<p>Recognizing objects at vastly different scales is a fundamental challenge in computer vision. Different authors have tried to solve this differently. However, there are three main categories (total four including FPN) of solutions that existed before the introduction of FPN.</p>
+<p><img src="../images/fpn.png" title="fig-1 Different ways to recognize objects at different scales" class="img-fluid"></p>
+<section id="featurized-image-pyramid" class="level4" data-number="4.1.1">
+<h4 data-number="4.1.1" class="anchored" data-anchor-id="featurized-image-pyramid"><span class="header-section-number">4.1.1</span> Featurized Image Pyramid</h4>
+<p>This is the first way and possibly the simplest to understand to recognize objects at different scales. Given an input image, resize the image to using different scales, pass the original image and the resized images through a CNN, make a prediction at each scale and simply take the average of these predictions to get a final prediction. Intuitively, this enables a model to detect objects accross a large range of scales by scanning the model over both positions and pyramid levels. Chris Deotte explains this too in simple words <a href="https://www.kaggle.com/c/siim-isic-melanoma-classification/discussion/160147">here</a>.</p>
+<p>But, can you think of the possible problems with this possible solution?</p>
+<p>For one, inference time would increase. For each image, we would need to rescale it to various new sizes and then average the predictions. Second, it would also not be possible to do this during train time as this would be infeasible in terms of memory and hardware requirements. Therefore, featurized image pyramid technique can only be used at test time which creates an inconsistency between train/test time inference.</p>
+</section>
+<section id="single-feature-map-faster-rcnn" class="level4" data-number="4.1.2">
+<h4 data-number="4.1.2" class="anchored" data-anchor-id="single-feature-map-faster-rcnn"><span class="header-section-number">4.1.2</span> Single Feature Map (Faster RCNN)</h4>
+<p>Another way is to use the inherent scale invariance property of CNNs. As you know, during the forward pass, a deep CNN computes a feature heirarchy layer by layer, and therefore, has an inherent multi scale pyramidal shape. See VGG-16 network below as an example:</p>
+<p><img src="../images/vgg16.png" title="fig-2 Inherent scale invariance in CNNs" class="img-fluid"></p>
+<p>The later layers are much smaller in spatial dimensions compared to the earlier layers. Thus, the scales are different.</p>
+<p>Therefore, one could just accept an original image, do a forward pass through a CNN, and get bouding box and class predictions just using this single original scaled image making use of the inherent scale invariance property of CNNs. In fact, this is exactly what was done in the <a href="https://arxiv.org/abs/1506.01497">Faster RCNN</a> research paper.</p>
+<p><img src="../images/faster_rcnn.png" title="fig-3 Faster RCNN" class="img-fluid"></p>
+<p>As can be seen in the image above, given an input image, we pass it through a CNN to get a 256-d long intermediate representation of the image. Finally, we use <code>cls layer</code> and <code>reg layer</code> to get classification and bounding box predictions in Faster RCNN method. This has been also explained very well by Jeremy in the video I referenced before.</p>
+<p>Can you think of why this might not work? Maybe take a break to think about the possible reasons why this won’t work.</p>
+<p>As mentioned by Zeilur and Fergus in <a href="https://arxiv.org/abs/1311.2901">Visualizing and Understanding Convolutional Networks</a> research paper, we know that the earlier layers of a CNN have low-level features whereas the deeper layers learn more and thus, have high-level features. The low-level features (understanding) in earlier layers of a CNN harm their representational capacity for object recognition.</p>
+</section>
+<section id="pyramidal-feature-heirarchy-ssd" class="level4" data-number="4.1.3">
+<h4 data-number="4.1.3" class="anchored" data-anchor-id="pyramidal-feature-heirarchy-ssd"><span class="header-section-number">4.1.3</span> Pyramidal Feature Heirarchy (SSD)</h4>
+<p>A third way could be to first have a stem (backbone) that extracts some meaning from the image and then have another convolutional network head on top to extract the features and perform predictions on each of the extracted features. This way, we do not need to worry about the representational capacity of earlier layers of a CNN. This sort of approach was introduced in the <a href="https://arxiv.org/abs/1512.02325">SSD</a> research paper.</p>
+<p><img src="../images/ssd.png" title="fig-4 Single Shot Detector" class="img-fluid"></p>
+<p>As can be seen in the image above, the authors of the research paper used earlier layers of VGG-16 (until <code>Conv5_3 layer</code>) to extract some meaning/representation of the image first. Then, they build another CNN on top of this and get predictions at each step or after each convolution. Infact, the SSD was one of the first attempts at using CNNs pyramidal feature heirarchy as if it were a featurized image pyramid.</p>
+<p>But can you think of ways to improve this? Well, to avoid using low-level features from earlier layers in a CNN, SSD instead builts the pyramid starting from high up in the network already (VGG-16) and then adds several new layers. But, while doing this, it misses the opportunity to reuse the earlier layers which are important for detecting small objects as shown in the FPN research paper.</p>
+</section>
+<section id="feature-pyramid-network" class="level4" data-number="4.1.4">
+<h4 data-number="4.1.4" class="anchored" data-anchor-id="feature-pyramid-network"><span class="header-section-number">4.1.4</span> Feature Pyramid Network</h4>
+<p>So, finally to the Feature Pyramid Network. Having had a look at all the other approaches, now we can appreciate what the FPN paper introduced and why it was such a success. In the FPN paper, a new architecture was introduced that combines the low-resolution, semantically strong features in the later layers with high-resolution, semantically weak features in the earlier layers via a top-down pathway and lateral connections. Thus, leading to <strong>Multi-scale feature fusion</strong>.</p>
+<p>The result is a feaure pyramid that has rich semantics at all levels because the lower semantic features are interconnected to the higher semantics. Somewhat similar idea to a <a href="https://amaarora.github.io/2020/09/13/unet.html">U-Net</a>. Also, since the predictions are generated from a single original image, the FPN network does not compromise on power, speed or memory.</p>
+<hr>
+<p>Great, so now if someone woke you up while you were sleeping and asked “what are the main contributions in the Feature Pyramid Network research paper?” You should be able to say: &gt; In a feature pyramid network, the authors used the inherent pyramidal structure and multi-scale property of a CNN and used top-down and lateral connections to connect high semantic layers (later layers of a CNN) with low semantic layers (earlier layers of a CNN) such that a high-level semantic feature maps exists at all scales and thus leading to better multi-scale object detection from a single sized original image.</p>
+</section>
+</section>
+<section id="bifpn-bi-directional-feature-pyramid-network" class="level3" data-number="4.2">
+<h3 data-number="4.2" class="anchored" data-anchor-id="bifpn-bi-directional-feature-pyramid-network"><span class="header-section-number">4.2</span> BiFPN: Bi-directional Feature Pyramid Network</h3>
+<p>Now that you know what a FPN is, in this section we will look into one of the main contributions from the EfficientDet research paper and understand what’s a BiFPN. In fact, as mentioned, the authors identified multi-scale feature fusion as one of the key challenges that must be solved to create an Efficient object detector. So how do you achieve that? What are the various ways one could do multi-scale feature fusion?</p>
+<p>Well, we just looked at some in the previous section that existed before FPNs were introduced. As you can imagine, FPNs became the default go to network for a while after their introduction for multi-scale feature fusion. Recently, <a href="https://arxiv.org/abs/1803.01534">PANet</a>, <a href="https://arxiv.org/abs/1904.07392">NAS-FPN</a> and other studies developed more network structures for cross-scale feature fusion.</p>
+<p>The EfficientDet research paper has an excellent image on Feature Network Design that shows the various variations below:</p>
+<p><img src="../images/feature_network_design.png" title="fig-5 Feature Network Design for cross-scale feature fusion after the introduction of FPN" class="img-fluid"></p>
+<section id="fpn" class="level4" data-number="4.2.1">
+<h4 data-number="4.2.1" class="anchored" data-anchor-id="fpn"><span class="header-section-number">4.2.1</span> FPN</h4>
+<p>We already know what a FPN is, the above figure is just a different way to show what we have already learnt in the previous section. As we know, FPN introduces top-down and lateral connections to combine multi-scale features. One thing worth mentioning is that while fusing different features, FPNs simply sum them up without disctinction.</p>
+<p>Looking at <code>fig-5 (a)</code>, we can see that P<sub>7</sub><sup>out</sup> and other output features can be calculated as:</p>
+<p><img src="../images/p7out.png" title="eq-1 FPN multi-scale features" class="img-fluid"></p>
+<p>where, <code>Resize</code> is usually a upsampling or downsampling operation for resolution matching, and <code>Conv</code> is usually a convolution operation for feature processing.</p>
+</section>
+<section id="panet" class="level4" data-number="4.2.2">
+<h4 data-number="4.2.2" class="anchored" data-anchor-id="panet"><span class="header-section-number">4.2.2</span> PANet</h4>
+<p>Around 3 years after the FPNs were first introduced, PANet adds ab extra bottom-up path aggregation on top of FPN since the conventional FPN is inherently limited by the one-way information flow. The authors of PANet were able to enhave the feature heirarchy by not only sharing information from top-bottom layers but also by bottom-up path augmentation. Using this simple improvement over FPN, the PANet was able to achieve 1st place of COCO 2017 Challenge Instance Segmention Task and 2nd place in Object Detection Task without large-batch training.</p>
+</section>
+<section id="nas-fpn" class="level4" data-number="4.2.3">
+<h4 data-number="4.2.3" class="anchored" data-anchor-id="nas-fpn"><span class="header-section-number">4.2.3</span> NAS-FPN</h4>
+<p>More recently, researchers from google brain adopted Neural Architecture Search and aimed to discover a new feature pyramid architecture in a scalable search space covering all cross-scale connections. The discovered architecture, named NAS-FPN, consisted of a combination of top-down and bottom-up connections to fuse features across scales. Although NAS-FPN ahieved better performance, it requires thousands of GPU hours during search, and the resulting feature network as shown in <code>fig-5 (c)</code> is difficult to interpret.</p>
+</section>
+<section id="bi-fpn" class="level4" data-number="4.2.4">
+<h4 data-number="4.2.4" class="anchored" data-anchor-id="bi-fpn"><span class="header-section-number">4.2.4</span> Bi-FPN</h4>
+<p>Now that we have looked at various ways of multi-scale feature fusion, we are now ready to look into BiFPN. To get BiFPN network, the authors of the EfficientDet paper proposed several optimizations:</p>
+<ol type="1">
+<li>Remove all those nodes that have only one input edge. The intuition is that if a node has only one input edge with no feature fusion, then it will have less contribution to the feature network.</li>
+<li>Add an extra edge from the original input to the output node if they are at the same level in order to fuse more features without adding much cost</li>
+<li>Treat each bidirectional path as one single layer and have multiple of these to enable more high-level feature fusion.</li>
+</ol>
+<p>I believe that the optimizations 1,2 would be clear to the reader but perhaps not 3. That’s okay - 3 should become clearer once we look at the EfficientDet Architecture in the next section.</p>
+<p>There were also other notable optimizations that were introduced with the introduction of BiFPN such as <strong>Weighted Feature Fusion</strong>. As mentioned before and as seen in <code>eq-1</code>, when fusing features with different resolutions, a common way is to first resize them to the same resolution and then simply sum them up treating all input features equally without distinction.</p>
+<p>However, since different input features are at different resolutions, it is possible that they might contribute differently to the output feature. Thus, the authors introduced an additional weight for each input in Bi-FPN to address this issue and this is referred to as <strong>Weighted Feature Fusion</strong>. The weights are trained using backward propagation by the network. I won’t cover <strong>Fast-normalized fusion</strong> in this blog but it is merely a small improvement over <strong>Softmax-based fusion</strong> to avoid slowdown of GPU hardware by the extra softmax layer.</p>
+</section>
+</section>
+<section id="compound-scaling" class="level3" data-number="4.3">
+<h3 data-number="4.3" class="anchored" data-anchor-id="compound-scaling"><span class="header-section-number">4.3</span> Compound Scaling</h3>
+<p>They key idea of compound scaling has already been introduced <a href="https://amaarora.github.io/2020/08/13/efficientnet.html#comparing-conventional-methods-with-compound-scaling">here</a>. While previous object detection frameworks relied on bigger backbone networks or larger input image sizes, for higher accuracy, the authors of the EfficientDet paper observed that scaling up feature network and box/class prediction network is also critical when taking into account both accuracy and efficiency,</p>
+<p>Thus, by combining EfficientNet backbones with the proposed BiFPN feature fusion, a new family of object detectors EfficientDets were developed which consistently achieve better accuracy with much fewer parameters and FLOPs than previous object detectors.</p>
+</section>
+</section>
+<section id="efficientdet-architecture" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="efficientdet-architecture"><span class="header-section-number">5</span> EfficientDet Architecture</h2>
+<p>As mentioned earlier, the two main contributions of the EfficientDet architecture were: 1. BiFPN 2. Compound Scaling</p>
+<p>From the EfficientNet paper, we already know that compound scaling simply refers to scaling up all fimensions such as backbone, input image size, network width and depth at the same time to achieve maximum performance. For more information, refer <a href="https://amaarora.github.io/2020/08/13/efficientnet.html#comparing-conventional-methods-with-compound-scaling">here</a>.</p>
+<p>And we have also already looked at the BiFPN network - thus, we are now ready to cover off the EfficientDet Architecture. We have done all the hard work and not much is left in understanding the EfficientDet Architecture. If you have followed and understood my blog so far, I am sure that you will find the remaining part fairly easy to grasp.</p>
+<p><img src="../images/EfficientDet.png" title="fig-6 EfficientDet Architecture" class="img-fluid"></p>
+<p>To get the EfficientDet Architecture, the authors simply used the ImageNet pretrained EfficientNet as the backbone network. This backbone extracts features from the Input P1-P7 where P<sub>i</sub> represents feature level with resolution of 1/2<sup>i</sup> of the input image. For instance, if the input resolution is 640x640 then P<sub>3</sub><sup>in</sup> represents feature level with resolution 80x80.</p>
+<p>The proposed Bi-FPN accepts the P3-P7 features as input features and repeatedly applies cross-scale multi-scale fusion on these features as shown in <code>fig-6</code> to get a multi-scale feature representation of the image which is then fed to <code>Class predciction net</code> and <code>Box prediction net</code> to finally get class and bounding box outputs.</p>
+<p>This is it really.</p>
+</section>
+<section id="conclusion" class="level2" data-number="6">
+<h2 data-number="6" class="anchored" data-anchor-id="conclusion"><span class="header-section-number">6</span> Conclusion</h2>
+<p>I hope that today, I was able to help with your understanding of <strong>EfficientDets</strong>. In case, you haven’t understood something - that’s okay. Please wait for my next blog that explains how to implement the EfficientDet Architecture in PyTorch. By then, every small detail should become crystal clear.</p>
+<p>As usual, in case I have missed anything or to provide feedback, please feel free to reach out to me at <a href="https://twitter.com/amaarora"><span class="citation" data-cites="amaarora">@amaarora</span></a>.</p>
+<p>Also, feel free to <a href="https://amaarora.github.io/subscribe">subscribe to my blog here</a> to receive regular updates regarding new blog posts. Thanks for reading!</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

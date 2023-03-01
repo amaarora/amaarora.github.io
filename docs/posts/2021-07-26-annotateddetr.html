@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.335">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Aman Arora">
+<meta name="dcterms.date" content="2021-07-26">
+<meta name="description" content="DETR Model Architecture explained with PyTorch implementation line-by-line.">
+
+<title>The Annotated DETR</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html">
+ <span class="menu-text">Aman Arora’s Blog</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../about.html">
+ <span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/"><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com"><i class="bi bi-twitter" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">The Annotated DETR</h1>
+            <p class="subtitle lead">End-to-End Object Detection with Transformers</p>
+                  <div>
+        <div class="description">
+          <p>DETR Model Architecture explained with PyTorch implementation line-by-line.</p>
+        </div>
+      </div>
+                          <div class="quarto-categories">
+                <div class="quarto-category">Computer Vision</div>
+                <div class="quarto-category">Model Architecure</div>
+                <div class="quarto-category">Object Detection</div>
+                <div class="quarto-category">Transformers</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Aman Arora </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">July 26, 2021</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#foreword" id="toc-foreword" class="nav-link active" data-scroll-target="#foreword"><span class="toc-section-number">1</span>  Foreword</a></li>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link" data-scroll-target="#introduction"><span class="toc-section-number">2</span>  Introduction</a></li>
+  <li><a href="#data-preparation" id="toc-data-preparation" class="nav-link" data-scroll-target="#data-preparation"><span class="toc-section-number">3</span>  Data Preparation</a>
+  <ul class="collapse">
+  <li><a href="#coco-detection-dataset" id="toc-coco-detection-dataset" class="nav-link" data-scroll-target="#coco-detection-dataset"><span class="toc-section-number">3.1</span>  Coco Detection Dataset</a></li>
+  <li><a href="#tensor-and-mask" id="toc-tensor-and-mask" class="nav-link" data-scroll-target="#tensor-and-mask"><span class="toc-section-number">3.2</span>  Tensor and Mask</a></li>
+  <li><a href="#nestedtensor" id="toc-nestedtensor" class="nav-link" data-scroll-target="#nestedtensor"><span class="toc-section-number">3.3</span>  NestedTensor</a></li>
+  </ul></li>
+  <li><a href="#the-detr-architecture" id="toc-the-detr-architecture" class="nav-link" data-scroll-target="#the-detr-architecture"><span class="toc-section-number">4</span>  The DETR Architecture</a></li>
+  <li><a href="#backbone" id="toc-backbone" class="nav-link" data-scroll-target="#backbone"><span class="toc-section-number">5</span>  Backbone</a>
+  <ul class="collapse">
+  <li><a href="#backbonebase" id="toc-backbonebase" class="nav-link" data-scroll-target="#backbonebase"><span class="toc-section-number">5.1</span>  BackboneBase</a></li>
+  <li><a href="#positional-encoding" id="toc-positional-encoding" class="nav-link" data-scroll-target="#positional-encoding"><span class="toc-section-number">5.2</span>  Positional Encoding</a></li>
+  <li><a href="#joiner" id="toc-joiner" class="nav-link" data-scroll-target="#joiner"><span class="toc-section-number">5.3</span>  Joiner</a></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary"><span class="toc-section-number">5.4</span>  Summary</a></li>
+  </ul></li>
+  <li><a href="#detr-transformer" id="toc-detr-transformer" class="nav-link" data-scroll-target="#detr-transformer"><span class="toc-section-number">6</span>  DETR Transformer</a></li>
+  <li><a href="#transformer-encoder" id="toc-transformer-encoder" class="nav-link" data-scroll-target="#transformer-encoder"><span class="toc-section-number">7</span>  Transformer Encoder</a></li>
+  <li><a href="#transformer-decoder" id="toc-transformer-decoder" class="nav-link" data-scroll-target="#transformer-decoder"><span class="toc-section-number">8</span>  Transformer Decoder</a>
+  <ul class="collapse">
+  <li><a href="#transformer-decoder-layer" id="toc-transformer-decoder-layer" class="nav-link" data-scroll-target="#transformer-decoder-layer"><span class="toc-section-number">8.1</span>  Transformer Decoder Layer</a></li>
+  </ul></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion"><span class="toc-section-number">9</span>  Conclusion</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<section id="foreword" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="foreword"><span class="header-section-number">1</span> Foreword</h2>
+<p>Welcome to “<strong>The Annotated DETR</strong>”.</p>
+<p>One of the most brilliant and well-explained articles I have read is <a href="https://nlp.seas.harvard.edu/2018/04/03/attention.html">The Annotated Transformer</a>. It introduced <strong>Attention</strong> like no other post. The simple idea was to present an “annotated” version of the paper <a href="https://arxiv.org/abs/1706.03762">Attention is all you need</a> along with code.</p>
+<p>Something I have always believed in is that when you write things in code, the implementation and secrets become clearer. Nothing is hidden anymore. Reading the research paper with it’s code in front of me, is the best way for me to understand the paper.</p>
+<blockquote class="blockquote">
+<p>There is nothing magic about magic. The magician merely understands something simple which doesn’t appear to be simple or natural to the untrained audience. Once you learn how to hold a card while making your hand look empty, you only need practice before you, too, can “do magic.”</p>
+<p>– Jeffrey Friedl in the book <a href="https://learning.oreilly.com/library/view/mastering-regular-expressions/0596528124/ch01.html">Mastering Regular Expressions</a></p>
+</blockquote>
+<p>The <strong><a href="https://arxiv.org/abs/2005.12872">DETR Architecture</a></strong> might seem like magic at first with all it’s glitter and beauty too, but hopefully I would have uncovered that magic for you and revealed all the tricks by the time you finish reading this post. That is my goal -</p>
+<blockquote class="blockquote">
+<p>To make it as simple as possible for the readers to understand how the <strong>DETR</strong> model works underneath.</p>
+</blockquote>
+<p>In this post, I am not trying to reinvent the wheel, but merely bringing together a list of prexisting excellent resources to make it easier for the reader to grasp DETR. I leave it up to the reader to further build upon these foundations in any area they choose.</p>
+<blockquote class="blockquote">
+<p>You can’t build a great building on a weak foundation. You must have a solid foundation if you’re going to have a strong superstructure.</p>
+<p>– Gordon B. Hinckley</p>
+</blockquote>
+<p><strong>NOTE:</strong> All code referenced below has been copied from the <a href="https://github.com/facebookresearch/detr">official DETR implementation</a>. Also, text directly quoted from the research paper is in <em>Italics</em>.</p>
+</section>
+<section id="introduction" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="introduction"><span class="header-section-number">2</span> Introduction</h2>
+<p><em>We present a new method that views object detection as a direct set prediction problem. The main ingredients of the new framework, called DEtection TRansformer or DETR, are a set-based global loss that forces unique predictions via bi-partite matching, and a transformer encoder-decoder architecture. The new model is conceptually simple and does not require a specialized library, unlike many other modern detectors. DETR demonstrates accuracy and run-time performance on par with the well-established and highly-optimized Faster R-CNN baseline on the challenging COCO object detection dataset. Training code and pretrained models are available at <a href="https://github.com/facebookresearch/detr" class="uri">https://github.com/facebookresearch/detr</a>.</em></p>
+<p><em>The goal of object detection is to predict a set of bounding boxes and category labels for each object of interest. Modern detectors address this set prediction task in an indirect way, by defining surrogate regression and classification problems on a large set of proposals, anchors, or window centers. Their performances are significantly influenced by postprocessing steps to collapse near-duplicate predictions, by the design of the anchor sets and by the heuristics that assign target boxes to anchors. To simplify these pipelines, we propose a direct set prediction approach to bypass the surrogate tasks. This end-to-end philosophy has led to significant advances in complex structured prediction tasks such as machine translation or speech recognition, but not yet in object detection: previous attempts either add other forms of prior knowledge, or have not proven to be competitive with strong baselines on challenging benchmarks. This paper aims to bridge this gap.</em></p>
+<p><em>Our DEtection TRansformer (DETR, see Figure-1) predicts all objects at once, and is trained end-to-end with a set loss function which performs bipartite matching between predicted and ground-truth objects. DETR simplifies the detection pipeline by dropping multiple hand-designed components that encode prior knowledge, like spatial anchors or non-maximal suppression. Unlike most existing detection methods, DETR doesn’t require any customized layers, and thus can be reproduced easily in any framework that contains standard CNN and transformer classes.</em></p>
+<p><img src="../images/DETR_overall.png" title="Figure-1: DETR directly predicts (in parallel) the final set of detections by combining a common CNN with a transformer architecture. During training, bipartite matching uniquely assigns predictions with ground truth boxes. Prediction with no match should yield a “no object” (∅) class prediction." class="img-fluid"></p>
+<p><em>DETR, however, obtains lower performances on small objects. Also, training settings for DETR differ from standard object detectors in multiple ways.</em></p>
+</section>
+<section id="data-preparation" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="data-preparation"><span class="header-section-number">3</span> Data Preparation</h2>
+<p><em>The input images are batched together, applying <span class="math inline">\(0\)</span>-padding adequately to ensure they all have the same dimensions <span class="math inline">\((H_0,W_0)\)</span> as the largest image of the batch.</em></p>
+<blockquote class="blockquote">
+<p>If you haven’t worked with COCO before, the annotations are in a JSON format and must be converted to tensors before they can be fed to the model as labels. Refer to the <a href="https://cocodataset.org/#format-data">COCO website here</a> for more information on data format.</p>
+</blockquote>
+<section id="coco-detection-dataset" class="level3" data-number="3.1">
+<h3 data-number="3.1" class="anchored" data-anchor-id="coco-detection-dataset"><span class="header-section-number">3.1</span> Coco Detection Dataset</h3>
+<p>The <code>CocoDetection</code> class below inherits from <code>torchvision.datasets.CocoDetection</code>, and adds custom <code>_transforms</code> on top. There’s also <code>ConvertCocoPolysToMask</code> class that is able to prepare the dataset for both object detection and panoptic segmentation.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> CocoDetection(torchvision.datasets.CocoDetection):</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, img_folder, ann_file, transforms, return_masks):</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>(CocoDetection, <span class="va">self</span>).<span class="fu">__init__</span>(img_folder, ann_file)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._transforms <span class="op">=</span> transforms</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.prepare <span class="op">=</span> ConvertCocoPolysToMask(return_masks)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__getitem__</span>(<span class="va">self</span>, idx):</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>        img, target <span class="op">=</span> <span class="bu">super</span>(CocoDetection, <span class="va">self</span>).<span class="fu">__getitem__</span>(idx)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>        image_id <span class="op">=</span> <span class="va">self</span>.ids[idx]</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>        target <span class="op">=</span> {<span class="st">'image_id'</span>: image_id, <span class="st">'annotations'</span>: target}</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>        img, target <span class="op">=</span> <span class="va">self</span>.prepare(img, target)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="va">self</span>._transforms <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>            img, target <span class="op">=</span> <span class="va">self</span>._transforms(img, target)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> img, target</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Note that in <code>__getitem__</code>, we first use <code>torchvision.datasets.CocoDetection.__getitem__</code> to get <code>img, target</code>. The <code>img</code> here is returned as a <code>PIL.Image</code> instance and <code>target</code> is a list of <code>Dict</code>s for each annotation. Here, the <code>img, target</code> look like below:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>img </span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> <span class="op">&lt;</span>PIL.Image.Image image mode<span class="op">=</span>RGB size<span class="op">=</span><span class="dv">640</span><span class="er">x427</span> at <span class="bn">0x7F841F918520</span><span class="op">&gt;</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>target</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> [{<span class="st">'segmentation'</span>: [[<span class="fl">573.81</span>, <span class="fl">93.88</span>, <span class="fl">630.42</span>, <span class="fl">11.35</span>, <span class="fl">637.14</span>, <span class="fl">423.0</span>, <span class="fl">569.01</span>, <span class="fl">422.04</span>, <span class="fl">568.05</span>, <span class="fl">421.08</span>, <span class="fl">569.97</span>, <span class="fl">270.43</span>, <span class="fl">560.38</span>, <span class="fl">217.66</span>, <span class="fl">567.09</span>, <span class="fl">190.79</span>, <span class="fl">576.69</span>, <span class="fl">189.83</span>, <span class="fl">567.09</span>, <span class="fl">173.52</span>, <span class="fl">561.34</span>, <span class="fl">162.0</span>, <span class="fl">570.93</span>, <span class="fl">107.31</span>, <span class="fl">572.85</span>, <span class="fl">89.08</span>]], <span class="st">'area'</span>: <span class="fl">24373.2536</span>, <span class="st">'iscrowd'</span>: <span class="dv">0</span>, <span class="st">'image_id'</span>: <span class="dv">463309</span>, <span class="st">'bbox'</span>: [<span class="fl">560.38</span>, <span class="fl">11.35</span>, <span class="fl">76.76</span>, <span class="fl">411.65</span>], <span class="st">'category_id'</span>: <span class="dv">82</span>, <span class="st">'id'</span>: <span class="dv">331291</span>}, {<span class="st">'segmentation'</span>: [[<span class="fl">19.19</span>, <span class="fl">206.3</span>, <span class="fl">188.07</span>, <span class="fl">204.38</span>, <span class="fl">194.79</span>, <span class="fl">249.48</span>, <span class="fl">265.8</span>, <span class="fl">260.04</span>, <span class="fl">278.27</span>, <span class="fl">420.28</span>, <span class="fl">78.68</span>, <span class="fl">421.24</span>, <span class="fl">77.72</span>, <span class="fl">311.85</span>, <span class="fl">95.0</span>, <span class="fl">297.46</span>, <span class="fl">13.43</span>, <span class="fl">267.71</span>, <span class="fl">21.11</span>, <span class="fl">212.06</span>]], <span class="st">'area'</span>: <span class="fl">42141.60884999999</span>, <span class="st">'iscrowd'</span>: <span class="dv">0</span>, <span class="st">'image_id'</span>: <span class="dv">463309</span>, <span class="st">'bbox'</span>: [<span class="fl">13.43</span>, <span class="fl">204.38</span>, <span class="fl">264.84</span>, <span class="fl">216.86</span>], <span class="st">'category_id'</span>: <span class="dv">79</span>, <span class="st">'id'</span>: <span class="dv">1122176</span>}]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Next, we pass the <code>img</code> and <code>target</code> through <code>self.prepare</code> method which is an instance of <code>ConvertCocoPolysToMask</code> class, and perform pre-processing on the outputs from <code>torchvision.datasets.CocoDetection.__getitem__</code>.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>img</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> <span class="op">&lt;</span>PIL.Image.Image image mode<span class="op">=</span>RGB size<span class="op">=</span><span class="dv">640</span><span class="er">x427</span> at <span class="bn">0x7F841F918520</span><span class="op">&gt;</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>target</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> {<span class="st">'boxes'</span>: tensor([[<span class="fl">560.3800</span>,  <span class="fl">11.3500</span>, <span class="fl">637.1400</span>, <span class="fl">423.0000</span>], [ <span class="fl">13.4300</span>, <span class="fl">204.3800</span>, <span class="fl">278.2700</span>, <span class="fl">421.2400</span>]]), <span class="st">'labels'</span>: tensor([<span class="dv">82</span>, <span class="dv">79</span>]), <span class="st">'image_id'</span>: tensor([<span class="dv">463309</span>]), <span class="st">'area'</span>: tensor([<span class="fl">24373.2539</span>, <span class="fl">42141.6094</span>]),  <span class="st">'iscrowd'</span>: tensor([<span class="dv">0</span>, <span class="dv">0</span>]), <span class="st">'orig_size'</span>: tensor([<span class="dv">427</span>, <span class="dv">640</span>]), <span class="st">'size'</span>: tensor([<span class="dv">427</span>, <span class="dv">640</span>])}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>This is what happened inside the <code>self.prepare</code> method: 1. Converted <code>boxes</code>, <code>labels</code>, <code>image_id</code>, <code>area</code>.. to a <code>tensor</code>. 2. We no longer return segmentation masks since we are just working with Object Detection. 3. Filter out objects if <code>iscrowd=1</code>. 4. Convert annotation from <span class="math inline">\([X, Y, W, H]\)</span> to <span class="math inline">\([X_1, Y_1, X_2, Y_2]\)</span> format. 5. Filter out objects if <span class="math inline">\(X_2 &lt; X_1\)</span> or <span class="math inline">\(Y_2 &lt; Y_1\)</span>.</p>
+<blockquote class="blockquote">
+<p>I am going to skip over the source code of <code>ConvertCocoPolysToMask</code> but you can find it <a href="https://github.com/facebookresearch/detr/blob/master/datasets/coco.py#L50-L112">here</a> if interested. I am also going to skip over the transforms for brevity, but you can find them <a href="https://github.com/facebookresearch/detr/blob/master/datasets/coco.py#L115-L144">here</a> if interested.</p>
+</blockquote>
+<p>From the paper, transforms/augmentations that get applied are:</p>
+<p><em>We use scale augmentation, resizing the input images such that the shortest side is at least 480 and at most 800 pixels while the longest at most 1333. To help learning global relationships through the self-attention of the encoder, we also apply random crop augmentations during training, improving the performance by approximately 1 AP. Specifically, a train image is cropped with probability 0.5 to a random rectangular patch which is then resized again to 800-1333.</em></p>
+<p>The overall process of creating this dataset looks like below:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> detr.datasets.coco <span class="im">import</span> make_coco_transforms, CocoDetection</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>coco_img_folder <span class="op">=</span> <span class="st">'../../kaggle/mscoco/train2017/'</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>coco_ann_file   <span class="op">=</span> <span class="st">'../../kaggle/mscoco/annotations/instances_train2017.json'</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co"># create train transforms as in paper</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>coco_train_tfms <span class="op">=</span> make_coco_transforms(<span class="st">'train'</span>)</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>coco_dset       <span class="op">=</span> CocoDetection(img_folder<span class="op">=</span>coco_img_folder, ann_file<span class="op">=</span>coco_ann_file, transforms<span class="op">=</span>coco_train_tfms, return_masks<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="co"># first item in dataset</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>coco_dset[<span class="dv">0</span>][<span class="dv">0</span>].shape</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> torch.Size([<span class="dv">3</span>, <span class="dv">800</span>, <span class="dv">1066</span>])</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>coco_dset[<span class="dv">0</span>][<span class="dv">1</span>]</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> </span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>{<span class="st">'boxes'</span>: tensor([[<span class="fl">0.5205</span>, <span class="fl">0.6888</span>, <span class="fl">0.9556</span>, <span class="fl">0.5955</span>],</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>         [<span class="fl">0.2635</span>, <span class="fl">0.2472</span>, <span class="fl">0.4989</span>, <span class="fl">0.4764</span>],</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>         [<span class="fl">0.3629</span>, <span class="fl">0.7329</span>, <span class="fl">0.4941</span>, <span class="fl">0.5106</span>],</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>         [<span class="fl">0.6606</span>, <span class="fl">0.4189</span>, <span class="fl">0.6789</span>, <span class="fl">0.7815</span>],</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>         [<span class="fl">0.3532</span>, <span class="fl">0.1326</span>, <span class="fl">0.1180</span>, <span class="fl">0.0969</span>],</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>         [<span class="fl">0.2269</span>, <span class="fl">0.1298</span>, <span class="fl">0.0907</span>, <span class="fl">0.0972</span>],</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>         [<span class="fl">0.3317</span>, <span class="fl">0.2269</span>, <span class="fl">0.1313</span>, <span class="fl">0.1469</span>],</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>         [<span class="fl">0.3571</span>, <span class="fl">0.0792</span>, <span class="fl">0.1481</span>, <span class="fl">0.1481</span>]]),</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a> <span class="st">'labels'</span>: tensor([<span class="dv">51</span>, <span class="dv">51</span>, <span class="dv">56</span>, <span class="dv">51</span>, <span class="dv">55</span>, <span class="dv">55</span>, <span class="dv">55</span>, <span class="dv">55</span>]),</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a> <span class="st">'image_id'</span>: tensor([<span class="dv">9</span>]),</span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a> <span class="st">'area'</span>: tensor([<span class="fl">258072.8281</span>,  <span class="fl">95516.1953</span>, <span class="fl">106571.9219</span>,  <span class="fl">52219.3594</span>,   <span class="fl">4813.5459</span>,</span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>           <span class="fl">3565.9253</span>,   <span class="fl">7758.4976</span>,   <span class="fl">6395.6035</span>]),</span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a> <span class="st">'iscrowd'</span>: tensor([<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>]),</span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a> <span class="st">'orig_size'</span>: tensor([<span class="dv">480</span>, <span class="dv">640</span>]),</span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a> <span class="st">'size'</span>: tensor([<span class="dv">704</span>, <span class="dv">938</span>])}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>As can be seen, the <code>coco_dset</code> returns the image as a <code>tensor</code> and also returns the <code>target</code> which is of type <code>Dict</code>. But, right now, the images are of different shape, and we need to make them all to be of the same shape before they can be batched together and passed to the DETR model as input. Let’s see how that looks like next.</p>
+</section>
+<section id="tensor-and-mask" class="level3" data-number="3.2">
+<h3 data-number="3.2" class="anchored" data-anchor-id="tensor-and-mask"><span class="header-section-number">3.2</span> Tensor and Mask</h3>
+<p>From the paper - <strong>the input images are batched together, applying <span class="math inline">\(0\)</span>-padding adequately to ensure they all have the same dimensions <span class="math inline">\((H_0,W_0)\)</span> as the largest image of the batch.</strong></p>
+<p>Let’s suppose our <code>batch_size</code> is <span class="math inline">\(2\)</span>, where the first image is of shape <code>[3, 765, 512]</code> in blue and the second image is of shape <code>[3, 608, 911]</code> in orange. This has been shown in Figure-2 below:</p>
+<p><img src="../images/input_img_detr.png" title="Figure-2: Input images in batch of shapes - [[3, 765, 512], [3, 608, 911]]." class="img-fluid"></p>
+<p>This is how the collate function looks like:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> collate_fn(batch):</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    batch <span class="op">=</span> <span class="bu">list</span>(<span class="bu">zip</span>(<span class="op">*</span>batch))</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    batch[<span class="dv">0</span>] <span class="op">=</span> nested_tensor_from_tensor_list(batch[<span class="dv">0</span>])</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">tuple</span>(batch)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><code>nested_tensor_from_tensor_list</code> is responsible for zero padding the original images, to ensure they all have the same dimensions <span class="math inline">\((H_0,W_0)\)</span> as the largest image of the batch. Let’s look at its source code:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> nested_tensor_from_tensor_list(tensor_list: List[Tensor]):</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># </span><span class="al">TODO</span><span class="co"> make this more general</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> tensor_list[<span class="dv">0</span>].ndim <span class="op">==</span> <span class="dv">3</span>:</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> torchvision._is_tracing():</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>            <span class="co"># nested_tensor_from_tensor_list() does not export well to ONNX</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>            <span class="co"># call _onnx_nested_tensor_from_tensor_list() instead</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> _onnx_nested_tensor_from_tensor_list(tensor_list)</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>        <span class="co"># </span><span class="al">TODO</span><span class="co"> make it support different-sized images</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>        max_size <span class="op">=</span> _max_by_axis([<span class="bu">list</span>(img.shape) <span class="cf">for</span> img <span class="kw">in</span> tensor_list])</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>        <span class="co"># min_size = tuple(min(s) for s in zip(*[img.shape for img in tensor_list]))</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>        batch_shape <span class="op">=</span> [<span class="bu">len</span>(tensor_list)] <span class="op">+</span> max_size</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>        b, c, h, w <span class="op">=</span> batch_shape</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>        dtype <span class="op">=</span> tensor_list[<span class="dv">0</span>].dtype</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>        device <span class="op">=</span> tensor_list[<span class="dv">0</span>].device</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>        tensor <span class="op">=</span> torch.zeros(batch_shape, dtype<span class="op">=</span>dtype, device<span class="op">=</span>device)</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>        mask <span class="op">=</span> torch.ones((b, h, w), dtype<span class="op">=</span>torch.<span class="bu">bool</span>, device<span class="op">=</span>device)</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> img, pad_img, m <span class="kw">in</span> <span class="bu">zip</span>(tensor_list, tensor, mask):</span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>            pad_img[: img.shape[<span class="dv">0</span>], : img.shape[<span class="dv">1</span>], : img.shape[<span class="dv">2</span>]].copy_(img)</span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>            m[: img.shape[<span class="dv">1</span>], :img.shape[<span class="dv">2</span>]] <span class="op">=</span> <span class="va">False</span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>        <span class="cf">raise</span> <span class="pp">ValueError</span>(<span class="st">'not supported'</span>)</span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> NestedTensor(tensor, mask)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>This <code>nested_tensor_from_tensor_list</code> receives a <code>tensor_list</code>, which is a list of <code>img</code> tensors of varying shape - <code>[[3, 608, 911], [3, 765, 512]]</code>. We calculate the <code>max_size</code> in <code>max_size = _max_by_axis([list(img.shape) for img in tensor_list])</code>. This <code>_max_by_axis</code> function returns the maximum value for each axis. Therefore, the value of returned <code>max_size</code> is <code>[3, 765, 911]</code>.</p>
+<p>Next, our <code>batch_shape</code> is <code>[len(tensor_list)] + max_size</code>, which equals <code>[2, 3, 765, 911]</code> in our example so far.</p>
+<p>Next, we define <code>tensor</code> and <code>mask</code> which are of shapes <code>[2, 3, 765, 911]</code> and <code>[2, 765, 911]</code> respectively.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>tensor <span class="op">=</span> torch.zeros(batch_shape, dtype<span class="op">=</span>dtype, device<span class="op">=</span>device)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>mask <span class="op">=</span> torch.ones((b, h, w), dtype<span class="op">=</span>torch.<span class="bu">bool</span>, device<span class="op">=</span>device)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Finally, we fill the <code>tensor</code> and <code>mask</code> values with the <code>img</code> values which were of shapes <code>[[3, 608, 911], [3, 765, 512]]</code>, and also set the <code>mask</code> values to be <code>False</code> inside the actual image shape.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> img, pad_img, m <span class="kw">in</span> <span class="bu">zip</span>(tensor_list, tensor, mask):</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    pad_img[: img.shape[<span class="dv">0</span>], : img.shape[<span class="dv">1</span>], : img.shape[<span class="dv">2</span>]].copy_(img)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    m[: img.shape[<span class="dv">1</span>], :img.shape[<span class="dv">2</span>]] <span class="op">=</span> <span class="va">False</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>This has been illustrated in Figure-3 below:</p>
+<p><img src="../images/collate_img_detr.png" title="Figure-3: Zero padding input images and setting appropriate mask values." class="img-fluid"></p>
+<p>Here, the <code>blue</code> region and <code>orange</code> region in both respective resized images represent the filled values. For these <code>blue</code> and <code>orange</code> regions, the <code>mask</code> values are set to <code>False</code>, whereas in the grey region outside the <code>mask</code> values are set to <code>True</code>. In code, this looks like:</p>
+<blockquote class="blockquote">
+<p>Can you guess the <code>tensor</code> and <code>mask</code> shapes? <code>tensor</code> is of shape <code>[2, 3, 765, 911]</code>, where both images are zero-padded. The first image (Blue) is zero-padded in height, whereas the second image is zero-padded in width (Orange). Similarly, the <code>mask</code> has shape <code>[2, 765, 911]</code> where the blue and orange regions represent value <code>False</code>, and the gray region in Figure-3, represents value <code>True</code>.</p>
+</blockquote>
+<p>Finally, the <code>nested_tensor_from_tensor_list</code> returns a <code>NestedTensor</code> passing in <code>tensor</code> and <code>mask</code> - <code>NestedTensor(tensor, mask)</code>. So what is this <code>NestedTensor</code>? Let’s look at that next.</p>
+</section>
+<section id="nestedtensor" class="level3" data-number="3.3">
+<h3 data-number="3.3" class="anchored" data-anchor-id="nestedtensor"><span class="header-section-number">3.3</span> NestedTensor</h3>
+<p><code>NestedTensor</code> is a simple tensor class that puts <code>tensors</code> and <code>masks</code> together as below:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> NestedTensor(<span class="bu">object</span>):</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, tensors, mask: Optional[Tensor]):</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.tensors <span class="op">=</span> tensors</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.mask <span class="op">=</span> mask</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> to(<span class="va">self</span>, device):</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>        <span class="co"># type: (Device) -&gt; NestedTensor # noqa</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>        cast_tensor <span class="op">=</span> <span class="va">self</span>.tensors.to(device)</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>        mask <span class="op">=</span> <span class="va">self</span>.mask</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> mask <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>            <span class="cf">assert</span> mask <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>            cast_mask <span class="op">=</span> mask.to(device)</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>            cast_mask <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> NestedTensor(cast_tensor, cast_mask)</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> decompose(<span class="va">self</span>):</span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.tensors, <span class="va">self</span>.mask</span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__repr__</span>(<span class="va">self</span>):</span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="bu">str</span>(<span class="va">self</span>.tensors)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>As can be seen from the <code>NestedTensor</code> source code, it combines <code>tensors</code> and <code>mask</code> and stores them as <code>self.tensors</code> and <code>self.mask</code> attributes.</p>
+<p>This <code>NestedTensor</code> class is really simple - it has two main methods: 1. <code>to</code>: casts both <code>tensors</code> and <code>mask</code> to <code>device</code> (typically <code>"cuda"</code>) and returns a new <code>NestedTensor</code> containing <code>cast_tensor</code> and <code>cast_mask</code>. 2. <code>decompose</code>: returns <code>tensors</code> and <code>mask</code> as a tuple, thus decomposing the “nested” tensor.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> detr.util.misc <span class="im">import</span> NestedTensor</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="co"># represents outputs from custom collate function that we looked at before</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>tensor <span class="op">=</span> torch.randn(<span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">765</span>, <span class="dv">911</span>)</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>mask   <span class="op">=</span> torch.randn(<span class="dv">2</span>, <span class="dv">765</span>, <span class="dv">911</span>)</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>nested_tensor <span class="op">=</span> NestedTensor(tensor, mask)</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>nested_tensor.tensors.shape</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> torch.Size([<span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">765</span>, <span class="dv">911</span>])</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>nested_tensor.mask.shape</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> torch.Size([<span class="dv">2</span>, <span class="dv">765</span>, <span class="dv">911</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>And that’s it! This <code>NestedTensor</code> is what get’s fed as input to the DETR Backbone CNN in Figure-1.</p>
+</section>
+</section>
+<section id="the-detr-architecture" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="the-detr-architecture"><span class="header-section-number">4</span> The DETR Architecture</h2>
+<p><em>The overall DETR architecture is surprisingly simple and depicted in Figure-1 below. It contains three main components: a CNN backbone to extract a compact feature representation, an encoder-decoder transformer, and a simple feed forward network (FFN) that makes the final detection prediction.</em></p>
+<p><img src="../images/detr_architecture.png" title="Figure-4: DETR Architecture" class="img-fluid"></p>
+<p>The overall implementation of the DETR architecture has been shown below:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> DETR(nn.Module):</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">""" This is the DETR module that performs object detection """</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, backbone, transformer, num_classes, num_queries, aux_loss<span class="op">=</span><span class="va">False</span>):</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.num_queries <span class="op">=</span> num_queries</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.transformer <span class="op">=</span> transformer</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>        hidden_dim <span class="op">=</span> transformer.d_model</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.class_embed <span class="op">=</span> nn.Linear(hidden_dim, num_classes <span class="op">+</span> <span class="dv">1</span>)</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.bbox_embed <span class="op">=</span> MLP(hidden_dim, hidden_dim, <span class="dv">4</span>, <span class="dv">3</span>)</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.query_embed <span class="op">=</span> nn.Embedding(num_queries, hidden_dim)</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.input_proj <span class="op">=</span> nn.Conv2d(backbone.num_channels, hidden_dim, kernel_size<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.backbone <span class="op">=</span> backbone</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.aux_loss <span class="op">=</span> aux_loss</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, samples: NestedTensor):</span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>        features, pos <span class="op">=</span> <span class="va">self</span>.backbone(samples)</span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>        src, mask <span class="op">=</span> features[<span class="op">-</span><span class="dv">1</span>].decompose()</span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>        <span class="cf">assert</span> mask <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span></span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>        hs <span class="op">=</span> <span class="va">self</span>.transformer(<span class="va">self</span>.input_proj(src), mask, <span class="va">self</span>.query_embed.weight, pos[<span class="op">-</span><span class="dv">1</span>])[<span class="dv">0</span>]</span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>        outputs_class <span class="op">=</span> <span class="va">self</span>.class_embed(hs)</span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>        outputs_coord <span class="op">=</span> <span class="va">self</span>.bbox_embed(hs).sigmoid()</span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>        out <span class="op">=</span> {<span class="st">'pred_logits'</span>: outputs_class[<span class="op">-</span><span class="dv">1</span>], <span class="st">'pred_boxes'</span>: outputs_coord[<span class="op">-</span><span class="dv">1</span>]}</span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="va">self</span>.aux_loss:</span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a>            out[<span class="st">'aux_outputs'</span>] <span class="op">=</span> <span class="va">self</span>._set_aux_loss(outputs_class, outputs_coord)</span>
+<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> out</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>All the magic happens inside <code>backbone</code> and <code>transformer</code>, which we will look at next.</p>
+</section>
+<section id="backbone" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="backbone"><span class="header-section-number">5</span> Backbone</h2>
+<p><em>Starting from the initial image <span class="math inline">\(x_{img} ∈ R^3×H_0×W_0\)</span> (with 3 color channels), a conventional CNN backbone generates a lower-resolution activation map <span class="math inline">\(f ∈ R^{C×H×W}\)</span>. Typical values we use are C = 2048 and H,W = <span class="math inline">\(\frac{H0}{32} , \frac{W0}{32}\)</span>.</em></p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Backbone(BackboneBase):</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""ResNet backbone with frozen BatchNorm."""</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, name: <span class="bu">str</span>,</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>                 train_backbone: <span class="bu">bool</span>,</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>                 return_interm_layers: <span class="bu">bool</span>,</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>                 dilation: <span class="bu">bool</span>):</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>        backbone <span class="op">=</span> <span class="bu">getattr</span>(torchvision.models, name)(</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>            replace_stride_with_dilation<span class="op">=</span>[<span class="va">False</span>, <span class="va">False</span>, dilation],</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>            pretrained<span class="op">=</span>is_main_process(), norm_layer<span class="op">=</span>FrozenBatchNorm2d)</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>        num_channels <span class="op">=</span> <span class="dv">512</span> <span class="cf">if</span> name <span class="kw">in</span> (<span class="st">'resnet18'</span>, <span class="st">'resnet34'</span>) <span class="cf">else</span> <span class="dv">2048</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>(backbone, train_backbone, num_channels, return_interm_layers)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Above we create a simple backbone that inherits from <code>BackboneBase</code>. The backbone is created using <code>torchvision.models</code> and supports all models implemented in <code>torchvision</code>. For a complete list of supported models, refer <a href="https://pytorch.org/vision/stable/models.html">here</a>.</p>
+<p>As also mentioned above, the typical value for number of channels in the output feature map is 2048, therefore, for all models except <code>resnet18</code> &amp; <code>resnet34</code>, the <code>num_channels</code> variable is set to 2048. This <code>Backbone</code> accepts a three channel input image tensor of shape <span class="math inline">\(3×H_0×W_0\)</span>, where <span class="math inline">\(H_0\)</span> refers to the input image height, and <span class="math inline">\(W_0\)</span> refers to the input image width.</p>
+<p>Since all the fun happens inside the <code>BackboneBase</code> class including the <code>forward</code> method, let’s look at that next.</p>
+<section id="backbonebase" class="level3" data-number="5.1">
+<h3 data-number="5.1" class="anchored" data-anchor-id="backbonebase"><span class="header-section-number">5.1</span> BackboneBase</h3>
+<div class="sourceCode" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> BackboneBase(nn.Module):</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, backbone: nn.Module, train_backbone: <span class="bu">bool</span>, num_channels: <span class="bu">int</span>, return_interm_layers: <span class="bu">bool</span>):</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> name, parameter <span class="kw">in</span> backbone.named_parameters():</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="kw">not</span> train_backbone <span class="kw">or</span> <span class="st">'layer2'</span> <span class="kw">not</span> <span class="kw">in</span> name <span class="kw">and</span> <span class="st">'layer3'</span> <span class="kw">not</span> <span class="kw">in</span> name <span class="kw">and</span> <span class="st">'layer4'</span> <span class="kw">not</span> <span class="kw">in</span> name:</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>                parameter.requires_grad_(<span class="va">False</span>)</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> return_interm_layers:</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>            return_layers <span class="op">=</span> {<span class="st">"layer1"</span>: <span class="st">"0"</span>, <span class="st">"layer2"</span>: <span class="st">"1"</span>, <span class="st">"layer3"</span>: <span class="st">"2"</span>, <span class="st">"layer4"</span>: <span class="st">"3"</span>}</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>            return_layers <span class="op">=</span> {<span class="st">'layer4'</span>: <span class="st">"0"</span>}</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.body <span class="op">=</span> IntermediateLayerGetter(backbone, return_layers<span class="op">=</span>return_layers)</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.num_channels <span class="op">=</span> num_channels</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, tensor_list: NestedTensor):</span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>        xs <span class="op">=</span> <span class="va">self</span>.body(tensor_list.tensors)</span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>        out: Dict[<span class="bu">str</span>, NestedTensor] <span class="op">=</span> {}</span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> name, x <span class="kw">in</span> xs.items():</span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>            m <span class="op">=</span> tensor_list.mask</span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>            <span class="cf">assert</span> m <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span></span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>            mask <span class="op">=</span> F.interpolate(m[<span class="va">None</span>].<span class="bu">float</span>(), size<span class="op">=</span>x.shape[<span class="op">-</span><span class="dv">2</span>:]).to(torch.<span class="bu">bool</span>)[<span class="dv">0</span>]</span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>            out[name] <span class="op">=</span> NestedTensor(x, mask)</span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> out</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The <code>forward</code> method of <code>BackboneBase</code> accepts an instance of <code>NestedTensor</code> class that contains <code>tensors</code> and <code>mask</code> as we saw in secion <a href="https://amaarora.github.io/2021/07/26/annotateddetr.html#data-preparation">Data preparation</a>. <code>BackboneBase</code> then takes the <code>tensors</code> and passes that through <code>self.body</code> in <code>xs = self.body(tensor_list.tensors)</code>, which is responsible for getting the output feature map of shape <span class="math inline">\(f ∈ R^{C×H×W}\)</span>, where <span class="math inline">\(C\)</span> is typically set to 2048.</p>
+<p><strong>Note:</strong> The <code>self.body</code> either returns the output from the last layer of the backbone model, or from all intermediate layers and the final layer depending on the value of <code>return_layers</code>. For an introduction to <code>IntermediateLayerGetter</code>, please refer to <a href="https://visual.readthedocs.io/en/latest/_modules/visual/models/utils.html">torchvision docs</a>.</p>
+<p>The output of <code>self.body</code> is a <code>Dict</code> that looks something like <code>{"0": &lt;torch.Tensor&gt;}</code> or <code>{"0": &lt;torch.Tensor&gt;, "1": &lt;torch.Tensor&gt;, "2": &lt;torch.Tensor&gt;...}</code> depending on whether <code>return_interm_layers</code> is <code>True</code> or <code>False</code>. Finally, we iterate through this <code>Dict</code> output of <code>self.body</code> which we call <code>xs</code>, interpolate the mask to have the same <span class="math inline">\(H\)</span> and <span class="math inline">\(W\)</span> as the lower-resolution activation map <span class="math inline">\(f ∈ R^{C×H×W}\)</span> output from <code>Backbone</code> and store both <code>x</code> and <code>mask</code> in <code>NestedTensor</code> as shown below:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> name, x <span class="kw">in</span> xs.items():</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>            m <span class="op">=</span> tensor_list.mask</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>            <span class="cf">assert</span> m <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>            mask <span class="op">=</span> F.interpolate(m[<span class="va">None</span>].<span class="bu">float</span>(), size<span class="op">=</span>x.shape[<span class="op">-</span><span class="dv">2</span>:]).to(torch.<span class="bu">bool</span>)[<span class="dv">0</span>]</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>            out[name] <span class="op">=</span> NestedTensor(x, mask)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>In summary, the Backbone is responsible for accepting an input <code>NestedTensor</code> that consists of the input image as <code>tensors</code> and a <code>mask</code> corresponding to the image. The backbone merely extracts the features from this input image, interpolates the mask to match the feature map size and returns them as a <code>NestedTensor</code> in a <code>Dict</code>. Let’s see the Backbone in action in code:</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> detr.util.misc <span class="im">import</span> NestedTensor </span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> detr.models.backbone <span class="im">import</span> Backbone </span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="co"># resnet-50 backbone</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>backbone <span class="op">=</span> Backbone(<span class="st">'resnet50'</span>, train_backbone<span class="op">=</span><span class="va">True</span>, return_iterm_layers<span class="op">=</span><span class="va">False</span>, dilation<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="co"># create nested tensor, mimic output from dataset preparation as in last section </span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>tensor   <span class="op">=</span> torch.randn(<span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">765</span>, <span class="dv">911</span>)</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>mask     <span class="op">=</span> torch.randn(<span class="dv">2</span>, <span class="dv">765</span>, <span class="dv">911</span>)</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>bb_input <span class="op">=</span> NestedTensor(tensor, mask)</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a><span class="co"># get output from backbone </span></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>out <span class="op">=</span> backbone(bb_input)</span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>out.keys()</span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> dict_keys([<span class="st">'0'</span>])</span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>out[<span class="st">'0'</span>].__class__</span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> detr.util.misc.NestedTensor</span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>out[<span class="st">'0'</span>].tensors.shape</span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> torch.Size([<span class="dv">2</span>, <span class="dv">2048</span>, <span class="dv">24</span>, <span class="dv">29</span>])</span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a>out[<span class="st">'0'</span>].mask.shape</span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> torch.Size([<span class="dv">2</span>, <span class="dv">24</span>, <span class="dv">29</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Therefore, starting from the initial image <span class="math inline">\(x_{img} ∈ {3 x 765 x 911}\)</span> (with 3 color channels), a conventional CNN backbone generates a lower-resolution activation map <span class="math inline">\(f ∈ R^{2048 x 24 x 29}\)</span>.</p>
+</section>
+<section id="positional-encoding" class="level3" data-number="5.2">
+<h3 data-number="5.2" class="anchored" data-anchor-id="positional-encoding"><span class="header-section-number">5.2</span> Positional Encoding</h3>
+<blockquote class="blockquote">
+<p>Going back to Figure-4, it can be seen that Positional Encodings are added to the output lower-resolution activation map from the Backbone CNN. Also, in Figure-5, it can be seen that Positional Encodings are also added to the Attention layer’s input at every Decoder layer. Thus, there are two types of Positional Encodings in DETR.</p>
+</blockquote>
+<p><em>Since the transformer architecture is permutation-invariant, we supplement it with <a href="https://arxiv.org/abs/1904.09925">fixed positional encodings</a> that are added to the input of each attention layer. We defer to the supplementary material the detailed definition of the architecture, which follows the one described in <a href="https://arxiv.org/abs/1706.03762">Attention Is All You Need</a>.</em></p>
+<p><em>There are two kinds of positional encodings in our model: spatial positional encodings and output positional encodings (object queries).</em></p>
+<blockquote class="blockquote">
+<p><strong>IMPORTANT</strong> : The spatial positional encodings are the ones that refer to the spatial positions <span class="math inline">\(H\)</span> &amp; <span class="math inline">\(W\)</span> in the lower resolution feature map <span class="math inline">\(f ∈ R^{C x H x W}\)</span>. The output positional encodings are the ones that refer to the positions of the various objects in the image and these are always learnt.</p>
+</blockquote>
+<p>There are two options to define the spatial positional encodings: 1. Fixed positional encodings (<code>PositionEmbeddingSine</code>) 2. Learned positional encodings (<code>PositionEmbeddingLearned</code>)</p>
+<p>Below, we only look at <code>PositionEmbeddingSine</code> as an example:</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> PositionEmbeddingSine(nn.Module):</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="co">    This is a more standard version of the position embedding, very similar to the one</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="co">    used by the Attention is all you need paper, generalized to work on images.</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, num_pos_feats<span class="op">=</span><span class="dv">64</span>, temperature<span class="op">=</span><span class="dv">10000</span>, normalize<span class="op">=</span><span class="va">False</span>, scale<span class="op">=</span><span class="va">None</span>):</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.num_pos_feats <span class="op">=</span> num_pos_feats</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.temperature <span class="op">=</span> temperature</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.normalize <span class="op">=</span> normalize</span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> scale <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span> <span class="kw">and</span> normalize <span class="kw">is</span> <span class="va">False</span>:</span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>            <span class="cf">raise</span> <span class="pp">ValueError</span>(<span class="st">"normalize should be True if scale is passed"</span>)</span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> scale <span class="kw">is</span> <span class="va">None</span>:</span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>            scale <span class="op">=</span> <span class="dv">2</span> <span class="op">*</span> math.pi</span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.scale <span class="op">=</span> scale</span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, tensor_list: NestedTensor):</span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> tensor_list.tensors</span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a>        mask <span class="op">=</span> tensor_list.mask</span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a>        <span class="cf">assert</span> mask <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span></span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a>        not_mask <span class="op">=</span> <span class="op">~</span>mask</span>
+<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a>        y_embed <span class="op">=</span> not_mask.cumsum(<span class="dv">1</span>, dtype<span class="op">=</span>torch.float32)</span>
+<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a>        x_embed <span class="op">=</span> not_mask.cumsum(<span class="dv">2</span>, dtype<span class="op">=</span>torch.float32)</span>
+<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="va">self</span>.normalize:</span>
+<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a>            eps <span class="op">=</span> <span class="fl">1e-6</span></span>
+<span id="cb16-26"><a href="#cb16-26" aria-hidden="true" tabindex="-1"></a>            y_embed <span class="op">=</span> y_embed <span class="op">/</span> (y_embed[:, <span class="op">-</span><span class="dv">1</span>:, :] <span class="op">+</span> eps) <span class="op">*</span> <span class="va">self</span>.scale</span>
+<span id="cb16-27"><a href="#cb16-27" aria-hidden="true" tabindex="-1"></a>            x_embed <span class="op">=</span> x_embed <span class="op">/</span> (x_embed[:, :, <span class="op">-</span><span class="dv">1</span>:] <span class="op">+</span> eps) <span class="op">*</span> <span class="va">self</span>.scale</span>
+<span id="cb16-28"><a href="#cb16-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-29"><a href="#cb16-29" aria-hidden="true" tabindex="-1"></a>        dim_t <span class="op">=</span> torch.arange(<span class="va">self</span>.num_pos_feats, dtype<span class="op">=</span>torch.float32, device<span class="op">=</span>x.device)</span>
+<span id="cb16-30"><a href="#cb16-30" aria-hidden="true" tabindex="-1"></a>        dim_t <span class="op">=</span> <span class="va">self</span>.temperature <span class="op">**</span> (<span class="dv">2</span> <span class="op">*</span> (dim_t <span class="op">//</span> <span class="dv">2</span>) <span class="op">/</span> <span class="va">self</span>.num_pos_feats)</span>
+<span id="cb16-31"><a href="#cb16-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-32"><a href="#cb16-32" aria-hidden="true" tabindex="-1"></a>        pos_x <span class="op">=</span> x_embed[:, :, :, <span class="va">None</span>] <span class="op">/</span> dim_t</span>
+<span id="cb16-33"><a href="#cb16-33" aria-hidden="true" tabindex="-1"></a>        pos_y <span class="op">=</span> y_embed[:, :, :, <span class="va">None</span>] <span class="op">/</span> dim_t</span>
+<span id="cb16-34"><a href="#cb16-34" aria-hidden="true" tabindex="-1"></a>        pos_x <span class="op">=</span> torch.stack((pos_x[:, :, :, <span class="dv">0</span>::<span class="dv">2</span>].sin(), pos_x[:, :, :, <span class="dv">1</span>::<span class="dv">2</span>].cos()), dim<span class="op">=</span><span class="dv">4</span>).flatten(<span class="dv">3</span>)</span>
+<span id="cb16-35"><a href="#cb16-35" aria-hidden="true" tabindex="-1"></a>        pos_y <span class="op">=</span> torch.stack((pos_y[:, :, :, <span class="dv">0</span>::<span class="dv">2</span>].sin(), pos_y[:, :, :, <span class="dv">1</span>::<span class="dv">2</span>].cos()), dim<span class="op">=</span><span class="dv">4</span>).flatten(<span class="dv">3</span>)</span>
+<span id="cb16-36"><a href="#cb16-36" aria-hidden="true" tabindex="-1"></a>        pos <span class="op">=</span> torch.cat((pos_y, pos_x), dim<span class="op">=</span><span class="dv">3</span>).permute(<span class="dv">0</span>, <span class="dv">3</span>, <span class="dv">1</span>, <span class="dv">2</span>)</span>
+<span id="cb16-37"><a href="#cb16-37" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> pos</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>As we already know from the <a href="https://arxiv.org/abs/1706.03762">Attention is all you need</a> paper, the fixed positional encodings can be mathematically defined as:</p>
+<p><span class="math display">\[
+PE(pos, 2i) = \sin(\frac{pos}{10000^{\frac{2i}{d_{model}}}}) \tag{1}
+\]</span></p>
+<p><span class="math display">\[
+PE(pos, 2i) = \cos(\frac{pos}{10000^{\frac{2i}{d_{model}}}}) \tag{2}
+\]</span></p>
+<p>where <span class="math inline">\(pos\)</span> is the position and <span class="math inline">\(i\)</span> is the dimension.</p>
+<p>We defer the reader to <a href="https://kazemnejad.com/blog/transformer_architecture_positional_encoding/">Transformer Architecture: The Positional Encoding</a> by <a href="https://kazemnejad.com/about">Amirhossein Kazemnejad</a> for more information on Positional Encodings.</p>
+<p>As for the <code>PositionalEncoding</code> class, remember, the <code>Backbone</code> first converts input image tensor of shape <span class="math inline">\(3×H_0×W_0\)</span> to a lower-resolution activation map of size <span class="math inline">\(f ∈ R^{C×H×W}\)</span>. Positional Encodings are added to this lower-resolution feature map. Since, we need to be able to define positions both along the x-axis and y-axis, therefore, we have <code>y_embed</code> and <code>x_embed</code> variables that increase in value by 1 every time boolean <code>True</code> is present in <code>not_mask</code>.</p>
+<p>Next, we convert both <code>pos_x</code> and <code>pos_y</code> to be of dimension <code>dim_t</code> and finally take the alternate <code>.sin()</code> and <code>.cos()</code> to define <code>pos_x</code> and <code>pos_y</code>. In the end, <code>pos</code> becomes a concatenated tensor of <code>pos_x</code> and <code>pos_y</code>.</p>
+<blockquote class="blockquote">
+<p>We do not look at Positional Encodings in detail as many a good resource exist on this topic. Also, the positional encodings have been utilized from the <a href="https://arxiv.org/abs/1706.03762">Attention Is All You Need</a> paper as is.</p>
+</blockquote>
+</section>
+<section id="joiner" class="level3" data-number="5.3">
+<h3 data-number="5.3" class="anchored" data-anchor-id="joiner"><span class="header-section-number">5.3</span> Joiner</h3>
+<p><em>Since the transformer architecture is permutation-invariant, we supplement it with fixed positional encodings that are <strong>added to the input of each attention layer</strong>.</em></p>
+<p>The <code>Joiner</code> class below, is merely a convenience class, that accepts a <code>backbone</code> and <code>position_embedding</code> as defined previously, and a <code>NestedTensor</code> as input. It then generates a lower-resolution activation map of size <span class="math inline">\(f ∈ R^{C×H×W}\)</span> and positional embeddings of the same-size corresponding to the <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> positions on the grid.</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Joiner(nn.Sequential):</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, backbone, position_embedding):</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>(backbone, position_embedding)</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, tensor_list: NestedTensor):</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>        xs <span class="op">=</span> <span class="va">self</span>[<span class="dv">0</span>](tensor_list)</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>        out: List[NestedTensor] <span class="op">=</span> []</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>        pos <span class="op">=</span> []</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> name, x <span class="kw">in</span> xs.items():</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>            out.append(x)</span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>            <span class="co"># position encoding</span></span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>            pos.append(<span class="va">self</span>[<span class="dv">1</span>](x).to(x.tensors.dtype))</span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> out, pos</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Let’s see it in action below:</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch </span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> detr.util.misc <span class="im">import</span> NestedTensor</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> detr.models.backbone <span class="im">import</span> <span class="op">*</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> detr.models.position_encoding <span class="im">import</span> PositionEmbeddingSine</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a><span class="co"># create backbone, `Joiner` is what get's stored in DETR backbone, not `backbone`</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>backbone  <span class="op">=</span> Backbone(<span class="st">'resnet50'</span>, <span class="va">True</span>, <span class="va">False</span>, <span class="va">False</span>)   </span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>pos_embed <span class="op">=</span> PositionEmbeddingSine(num_pos_feats<span class="op">=</span><span class="dv">128</span>, normalize<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>joiner    <span class="op">=</span> Joiner(backbone, pos_embed)</span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a><span class="co"># mimic input </span></span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>tensor   <span class="op">=</span> torch.randn(<span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">765</span>, <span class="dv">911</span>)</span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>mask     <span class="op">=</span> torch.randn(<span class="dv">2</span>, <span class="dv">765</span>, <span class="dv">911</span>)</span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>bb_input <span class="op">=</span> NestedTensor(tensor, mask)</span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a><span class="co"># get output </span></span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a>out, pos <span class="op">=</span> joiner(bb_input)</span>
+<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a>out[<span class="op">-</span><span class="dv">1</span>].__class__</span>
+<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> detr.util.misc.NestedTensor</span>
+<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a><span class="co"># reduced lower-resolution feature map output from backbone</span></span>
+<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a>out[<span class="op">-</span><span class="dv">1</span>].tensors.shape</span>
+<span id="cb18-24"><a href="#cb18-24" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span>  torch.Size([<span class="dv">2</span>, <span class="dv">2048</span>, <span class="dv">24</span>, <span class="dv">29</span>])</span>
+<span id="cb18-25"><a href="#cb18-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-26"><a href="#cb18-26" aria-hidden="true" tabindex="-1"></a><span class="co"># positional encodings with same shape as lower-resolution feature map </span></span>
+<span id="cb18-27"><a href="#cb18-27" aria-hidden="true" tabindex="-1"></a>pos[<span class="op">-</span><span class="dv">1</span>].shape</span>
+<span id="cb18-28"><a href="#cb18-28" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span>  torch.Size([<span class="dv">2</span>, <span class="dv">256</span>, <span class="dv">24</span>, <span class="dv">29</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="summary" class="level3" data-number="5.4">
+<h3 data-number="5.4" class="anchored" data-anchor-id="summary"><span class="header-section-number">5.4</span> Summary</h3>
+<p>Therefore, in the offical code implementation of DETR, the Backbone, is actually an instance on <code>Joiner</code> class (how confusing!), that accepts an input, which is of type <code>NestedTensor</code> (how confusing again!). The <code>tensor</code> and <code>mask</code> of this <code>NestedTensor</code> input have been zero-padded to ensure that all have the same dimensions <span class="math inline">\((H_0,W_0)\)</span> as the largest image of the input batch. See Figure-3 for reference.</p>
+<p>Finally, this <code>NestedTensor</code> instance, is passed on the Backbone to get outputs <code>out</code> &amp; <code>pos</code>. Here, <code>out</code> is a list of <code>NestedTensor</code>, the length of the list depends on the value <code>return_interm_layers</code>. <code>out[-1].tensors</code> represents lower-resolution activation map <span class="math inline">\(f ∈ R^{C×H×W}\)</span>, where <span class="math inline">\(C\)</span> has value 2048. And <code>pos[-1]</code> represents the <strong>spatial positional encodings</strong> <span class="math inline">\(pos ∈ R^{256×H×W}\)</span> for each position on the grid.</p>
+</section>
+</section>
+<section id="detr-transformer" class="level2" data-number="6">
+<h2 data-number="6" class="anchored" data-anchor-id="detr-transformer"><span class="header-section-number">6</span> DETR Transformer</h2>
+<p><img src="../images/annotated_tfmr_detr.png" title="Figure-5: DETR Transformer" class="img-fluid"></p>
+<p>Now, before we can move on and look at the DETR Transformer in code, it’s really crucial to first understand the bigger picture. So far we know that the backbone upon accepting an input returns <code>out</code> and <code>pos</code>, where <code>out[-1].tensors.shape</code> is <span class="math inline">\(f ∈ R^{2048×H×W}\)</span> and <code>pos[-1].shape</code> is <span class="math inline">\(pos ∈ R^{256×H×W}\)</span>.</p>
+<p>Before the <code>out</code> is passed to the transformer, the number of channels are reduced as mentioned in the paper.</p>
+<p><em>First, a 1x1 convolution reduces the channel dimension of the high-level activation map <span class="math inline">\(f\)</span> from <span class="math inline">\(C\)</span> to a smaller dimension <span class="math inline">\(d\)</span>. creating a new feature map <span class="math inline">\(z_0 ∈ R^{d×H×W}\)</span>.</em></p>
+<p>Here, <span class="math inline">\(d\)</span> is set to 256, therefore, the new feature map size becomes <span class="math inline">\(f ∈ R^{256×H×W}\)</span> which matches that of the positional encodings.</p>
+<p>As also mentioned in the paper,</p>
+<p><em>The encoder expects a sequence as input, hence we collapse the spatial dimensions of <span class="math inline">\(z_0\)</span> into one dimension, resulting in a <span class="math inline">\(d×HW\)</span> feature map.</em></p>
+<p>Therefore, we can reshape both feature map and spatial positional encodings to shape <span class="math inline">\(696 x 1 x 256\)</span> as shown in Figure-5 above. The overall <code>Transformer</code> can be implemented as below:</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Transformer(nn.Module):</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, d_model<span class="op">=</span><span class="dv">512</span>, nhead<span class="op">=</span><span class="dv">8</span>, num_encoder_layers<span class="op">=</span><span class="dv">6</span>,</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>                 num_decoder_layers<span class="op">=</span><span class="dv">6</span>, dim_feedforward<span class="op">=</span><span class="dv">2048</span>, dropout<span class="op">=</span><span class="fl">0.1</span>,</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>                 activation<span class="op">=</span><span class="st">"relu"</span>, normalize_before<span class="op">=</span><span class="va">False</span>,</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>                 return_intermediate_dec<span class="op">=</span><span class="va">False</span>):</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>        encoder_layer <span class="op">=</span> TransformerEncoderLayer(d_model, nhead, dim_feedforward,</span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>                                                dropout, activation, normalize_before)</span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>        encoder_norm <span class="op">=</span> nn.LayerNorm(d_model) <span class="cf">if</span> normalize_before <span class="cf">else</span> <span class="va">None</span></span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.encoder <span class="op">=</span> TransformerEncoder(encoder_layer, num_encoder_layers, encoder_norm)</span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>        decoder_layer <span class="op">=</span> TransformerDecoderLayer(d_model, nhead, dim_feedforward,</span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>                                                dropout, activation, normalize_before)</span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>        decoder_norm <span class="op">=</span> nn.LayerNorm(d_model)</span>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.decoder <span class="op">=</span> TransformerDecoder(decoder_layer, num_decoder_layers, decoder_norm,</span>
+<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a>                                          return_intermediate<span class="op">=</span>return_intermediate_dec)</span>
+<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._reset_parameters()</span>
+<span id="cb19-21"><a href="#cb19-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-22"><a href="#cb19-22" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.d_model <span class="op">=</span> d_model</span>
+<span id="cb19-23"><a href="#cb19-23" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.nhead <span class="op">=</span> nhead</span>
+<span id="cb19-24"><a href="#cb19-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-25"><a href="#cb19-25" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> _reset_parameters(<span class="va">self</span>):</span>
+<span id="cb19-26"><a href="#cb19-26" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> p <span class="kw">in</span> <span class="va">self</span>.parameters():</span>
+<span id="cb19-27"><a href="#cb19-27" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> p.dim() <span class="op">&gt;</span> <span class="dv">1</span>:</span>
+<span id="cb19-28"><a href="#cb19-28" aria-hidden="true" tabindex="-1"></a>                nn.init.xavier_uniform_(p)</span>
+<span id="cb19-29"><a href="#cb19-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-30"><a href="#cb19-30" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, src, mask, query_embed, pos_embed):</span>
+<span id="cb19-31"><a href="#cb19-31" aria-hidden="true" tabindex="-1"></a>        <span class="co"># flatten NxCxHxW to HWxNxC</span></span>
+<span id="cb19-32"><a href="#cb19-32" aria-hidden="true" tabindex="-1"></a>        bs, c, h, w <span class="op">=</span> src.shape</span>
+<span id="cb19-33"><a href="#cb19-33" aria-hidden="true" tabindex="-1"></a>        src <span class="op">=</span> src.flatten(<span class="dv">2</span>).permute(<span class="dv">2</span>, <span class="dv">0</span>, <span class="dv">1</span>)</span>
+<span id="cb19-34"><a href="#cb19-34" aria-hidden="true" tabindex="-1"></a>        pos_embed <span class="op">=</span> pos_embed.flatten(<span class="dv">2</span>).permute(<span class="dv">2</span>, <span class="dv">0</span>, <span class="dv">1</span>)</span>
+<span id="cb19-35"><a href="#cb19-35" aria-hidden="true" tabindex="-1"></a>        query_embed <span class="op">=</span> query_embed.unsqueeze(<span class="dv">1</span>).repeat(<span class="dv">1</span>, bs, <span class="dv">1</span>)</span>
+<span id="cb19-36"><a href="#cb19-36" aria-hidden="true" tabindex="-1"></a>        mask <span class="op">=</span> mask.flatten(<span class="dv">1</span>)</span>
+<span id="cb19-37"><a href="#cb19-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-38"><a href="#cb19-38" aria-hidden="true" tabindex="-1"></a>        tgt <span class="op">=</span> torch.zeros_like(query_embed)</span>
+<span id="cb19-39"><a href="#cb19-39" aria-hidden="true" tabindex="-1"></a>        memory <span class="op">=</span> <span class="va">self</span>.encoder(src, src_key_padding_mask<span class="op">=</span>mask, pos<span class="op">=</span>pos_embed)</span>
+<span id="cb19-40"><a href="#cb19-40" aria-hidden="true" tabindex="-1"></a>        hs <span class="op">=</span> <span class="va">self</span>.decoder(tgt, memory, memory_key_padding_mask<span class="op">=</span>mask,</span>
+<span id="cb19-41"><a href="#cb19-41" aria-hidden="true" tabindex="-1"></a>                          pos<span class="op">=</span>pos_embed, query_pos<span class="op">=</span>query_embed)</span>
+<span id="cb19-42"><a href="#cb19-42" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> hs.transpose(<span class="dv">1</span>, <span class="dv">2</span>), memory.permute(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">0</span>).view(bs, c, h, w)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Below, let’s look at the <code>TransformerEncoder</code>, <code>TransformerEncoderLayer</code>, <code>TransformerDecoder</code> and <code>TransformerDecoderLayer</code> in detail.</p>
+</section>
+<section id="transformer-encoder" class="level2" data-number="7">
+<h2 data-number="7" class="anchored" data-anchor-id="transformer-encoder"><span class="header-section-number">7</span> Transformer Encoder</h2>
+<p>Each encoder layer has a standard architecture and consists of a multi-head self-attention module and a feed forward network (FFN).</p>
+<p>In terms of implementation, from this point on the Transformer architecture is implemented very similarly to the implementation as explained in The Annotated Transformer. But, for completeness, I will also share the implementations below.</p>
+<p>The Transformer Encoder consists of multiple Transformer Encoder layers. Thus, it can be easily implemented as below:</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> TransformerEncoder(nn.Module):</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, encoder_layer, num_layers, norm<span class="op">=</span><span class="va">None</span>):</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.layers <span class="op">=</span> _get_clones(encoder_layer, num_layers)</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.num_layers <span class="op">=</span> num_layers</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.norm <span class="op">=</span> norm</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, src,</span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>                mask: Optional[Tensor] <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>                src_key_padding_mask: Optional[Tensor] <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>                pos: Optional[Tensor] <span class="op">=</span> <span class="va">None</span>):</span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>        output <span class="op">=</span> src</span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> layer <span class="kw">in</span> <span class="va">self</span>.layers:</span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>            output <span class="op">=</span> layer(output, src_mask<span class="op">=</span>mask,</span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>                           src_key_padding_mask<span class="op">=</span>src_key_padding_mask, pos<span class="op">=</span>pos)</span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="va">self</span>.norm <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a>            output <span class="op">=</span> <span class="va">self</span>.norm(output)</span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> output</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><code>_get_clones</code> simply clones the Transformer Encoder layer (explained below), <code>num_layers</code> number of times and returns <code>nn.ModuleList</code>.</p>
+<p>Below, the <code>TransformerEncoderLayer</code> has been implemented.</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> TransformerEncoderLayer(nn.Module):</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, d_model, nhead, dim_feedforward<span class="op">=</span><span class="dv">2048</span>, dropout<span class="op">=</span><span class="fl">0.1</span>,</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>                 activation<span class="op">=</span><span class="st">"relu"</span>, normalize_before<span class="op">=</span><span class="va">False</span>):</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.self_attn <span class="op">=</span> nn.MultiheadAttention(d_model, nhead, dropout<span class="op">=</span>dropout)</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Implementation of Feedforward model</span></span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.linear1 <span class="op">=</span> nn.Linear(d_model, dim_feedforward)</span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.dropout <span class="op">=</span> nn.Dropout(dropout)</span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.linear2 <span class="op">=</span> nn.Linear(dim_feedforward, d_model)</span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.norm1 <span class="op">=</span> nn.LayerNorm(d_model)</span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.norm2 <span class="op">=</span> nn.LayerNorm(d_model)</span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.dropout1 <span class="op">=</span> nn.Dropout(dropout)</span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.dropout2 <span class="op">=</span> nn.Dropout(dropout)</span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.activation <span class="op">=</span> _get_activation_fn(activation)</span>
+<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.normalize_before <span class="op">=</span> normalize_before</span>
+<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> with_pos_embed(<span class="va">self</span>, tensor, pos: Optional[Tensor]):</span>
+<span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> tensor <span class="cf">if</span> pos <span class="kw">is</span> <span class="va">None</span> <span class="cf">else</span> tensor <span class="op">+</span> pos</span>
+<span id="cb21-22"><a href="#cb21-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-23"><a href="#cb21-23" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, src,</span>
+<span id="cb21-24"><a href="#cb21-24" aria-hidden="true" tabindex="-1"></a>                src_mask: Optional[Tensor] <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb21-25"><a href="#cb21-25" aria-hidden="true" tabindex="-1"></a>                src_key_padding_mask: Optional[Tensor] <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb21-26"><a href="#cb21-26" aria-hidden="true" tabindex="-1"></a>                pos: Optional[Tensor] <span class="op">=</span> <span class="va">None</span>):</span>
+<span id="cb21-27"><a href="#cb21-27" aria-hidden="true" tabindex="-1"></a>        src2 <span class="op">=</span> <span class="va">self</span>.norm1(src)</span>
+<span id="cb21-28"><a href="#cb21-28" aria-hidden="true" tabindex="-1"></a>        q <span class="op">=</span> k <span class="op">=</span> <span class="va">self</span>.with_pos_embed(src2, pos)</span>
+<span id="cb21-29"><a href="#cb21-29" aria-hidden="true" tabindex="-1"></a>        src2 <span class="op">=</span> <span class="va">self</span>.self_attn(q, k, value<span class="op">=</span>src2, attn_mask<span class="op">=</span>src_mask,</span>
+<span id="cb21-30"><a href="#cb21-30" aria-hidden="true" tabindex="-1"></a>                              key_padding_mask<span class="op">=</span>src_key_padding_mask)[<span class="dv">0</span>]</span>
+<span id="cb21-31"><a href="#cb21-31" aria-hidden="true" tabindex="-1"></a>        src <span class="op">=</span> src <span class="op">+</span> <span class="va">self</span>.dropout1(src2)</span>
+<span id="cb21-32"><a href="#cb21-32" aria-hidden="true" tabindex="-1"></a>        src2 <span class="op">=</span> <span class="va">self</span>.norm2(src)</span>
+<span id="cb21-33"><a href="#cb21-33" aria-hidden="true" tabindex="-1"></a>        src2 <span class="op">=</span> <span class="va">self</span>.linear2(<span class="va">self</span>.dropout(<span class="va">self</span>.activation(<span class="va">self</span>.linear1(src2))))</span>
+<span id="cb21-34"><a href="#cb21-34" aria-hidden="true" tabindex="-1"></a>        src <span class="op">=</span> src <span class="op">+</span> <span class="va">self</span>.dropout2(src2)</span>
+<span id="cb21-35"><a href="#cb21-35" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> src</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>It’s really straightforward, we accept an input which is called <code>src</code>, it is normalized using <code>nn.LayerNorm</code>, and finally we set the query and key matrices <span class="math inline">\(q\)</span> and <span class="math inline">\(k\)</span> as the same by adding positional encoding to the normalized input. Finally, self-attention operation is performed to get <code>src2</code> as the output. In this case, since we can attend to anywhere in the sequence - both forwards and backwards, <code>attn_mask</code> is set to <code>None</code>. Whereas, the <code>key_padding_mask</code> are the elements in the key that are ignored by attention.</p>
+<p>As per the PyTorch Docs for <code>key_padding_mask</code>, when given a binary mask and a value is True, the corresponding value on the attention layer will be ignored. We already from Data Preparation section that <code>mask</code> is set to <code>True</code> for the gray area in Figure-3, thus, it makes sense to not attend to these positions.</p>
+<p>Next, let’s look at the TransformerDecoder!</p>
+</section>
+<section id="transformer-decoder" class="level2" data-number="8">
+<h2 data-number="8" class="anchored" data-anchor-id="transformer-decoder"><span class="header-section-number">8</span> Transformer Decoder</h2>
+<p><em>The decoder follows the standard architecture of the transformer, transforming <span class="math inline">\(N\)</span> embeddings of size <span class="math inline">\(d\)</span> using multi-headed self-attention and encoder-decoder attention mechanisms. The difference with the original transformer is that our model decodes the <span class="math inline">\(N\)</span> objects in parallel at each decoder layer, while Vaswani et al.&nbsp;use an autoregressive model that predicts the output sequence one element at a time. We refer the reader unfamiliar with the concepts to the supplementary material. Since the decoder is also permutation-invariant, the <span class="math inline">\(N\)</span> input embeddings must be different to produce different results. These input embeddings are learnt positional encodings that we refer to as object queries, and similarly to the encoder, we add them to the input of each attention layer. The N object queries are transformed into an output embedding by the decoder. They are then independently decoded into box coordinates and class labels by a feed forward network (described in the next subsection), resulting <span class="math inline">\(N\)</span> final predictions. Using self-attention and encoder-decoder attention over these embeddings, the model globally reasons about all objects together using pair-wise relations between them, while being able to use the whole image as context.</em></p>
+<p>Similar to the Transformer Encoder, the Transformer Decoder consists of repeated Transformer Decoder layers and can be easily implemented as below:</p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> TransformerDecoder(nn.Module):</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, decoder_layer, num_layers, norm<span class="op">=</span><span class="va">None</span>, return_intermediate<span class="op">=</span><span class="va">False</span>):</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.layers <span class="op">=</span> _get_clones(decoder_layer, num_layers)</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.num_layers <span class="op">=</span> num_layers</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.norm <span class="op">=</span> norm</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.return_intermediate <span class="op">=</span> return_intermediate</span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, tgt, memory,</span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>                tgt_mask: Optional[Tensor] <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>                memory_mask: Optional[Tensor] <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>                tgt_key_padding_mask: Optional[Tensor] <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>                memory_key_padding_mask: Optional[Tensor] <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a>                pos: Optional[Tensor] <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a>                query_pos: Optional[Tensor] <span class="op">=</span> <span class="va">None</span>):</span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>        output <span class="op">=</span> tgt</span>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a>        intermediate <span class="op">=</span> []</span>
+<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> layer <span class="kw">in</span> <span class="va">self</span>.layers:</span>
+<span id="cb22-20"><a href="#cb22-20" aria-hidden="true" tabindex="-1"></a>            output <span class="op">=</span> layer(output, memory, tgt_mask<span class="op">=</span>tgt_mask,</span>
+<span id="cb22-21"><a href="#cb22-21" aria-hidden="true" tabindex="-1"></a>                           memory_mask<span class="op">=</span>memory_mask,</span>
+<span id="cb22-22"><a href="#cb22-22" aria-hidden="true" tabindex="-1"></a>                           tgt_key_padding_mask<span class="op">=</span>tgt_key_padding_mask,</span>
+<span id="cb22-23"><a href="#cb22-23" aria-hidden="true" tabindex="-1"></a>                           memory_key_padding_mask<span class="op">=</span>memory_key_padding_mask,</span>
+<span id="cb22-24"><a href="#cb22-24" aria-hidden="true" tabindex="-1"></a>                           pos<span class="op">=</span>pos, query_pos<span class="op">=</span>query_pos)</span>
+<span id="cb22-25"><a href="#cb22-25" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="va">self</span>.return_intermediate:</span>
+<span id="cb22-26"><a href="#cb22-26" aria-hidden="true" tabindex="-1"></a>                intermediate.append(<span class="va">self</span>.norm(output))</span>
+<span id="cb22-27"><a href="#cb22-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-28"><a href="#cb22-28" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="va">self</span>.norm <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
+<span id="cb22-29"><a href="#cb22-29" aria-hidden="true" tabindex="-1"></a>            output <span class="op">=</span> <span class="va">self</span>.norm(output)</span>
+<span id="cb22-30"><a href="#cb22-30" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="va">self</span>.return_intermediate:</span>
+<span id="cb22-31"><a href="#cb22-31" aria-hidden="true" tabindex="-1"></a>                intermediate.pop()</span>
+<span id="cb22-32"><a href="#cb22-32" aria-hidden="true" tabindex="-1"></a>                intermediate.append(output)</span>
+<span id="cb22-33"><a href="#cb22-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-34"><a href="#cb22-34" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="va">self</span>.return_intermediate:</span>
+<span id="cb22-35"><a href="#cb22-35" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> torch.stack(intermediate)</span>
+<span id="cb22-36"><a href="#cb22-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-37"><a href="#cb22-37" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> output.unsqueeze(<span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The main difference is the option to return intermediate outputs for Auxilary losses (we’ll look at losses later in the blog post). If <code>self.return_intermediate</code> is set to <code>True</code>, stacked output from every decoder layer is returned otherwise, output from the last decoder layer is returned.</p>
+<section id="transformer-decoder-layer" class="level3" data-number="8.1">
+<h3 data-number="8.1" class="anchored" data-anchor-id="transformer-decoder-layer"><span class="header-section-number">8.1</span> Transformer Decoder Layer</h3>
+<p>As for the Transformer Decoder layer, its implementation is also very similar to the Transformer Encoder layer.</p>
+<div class="sourceCode" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> TransformerDecoderLayer(nn.Module):</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, d_model, nhead, dim_feedforward<span class="op">=</span><span class="dv">2048</span>, dropout<span class="op">=</span><span class="fl">0.1</span>,</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>                 activation<span class="op">=</span><span class="st">"relu"</span>, normalize_before<span class="op">=</span><span class="va">False</span>):</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.self_attn <span class="op">=</span> nn.MultiheadAttention(d_model, nhead, dropout<span class="op">=</span>dropout)</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.multihead_attn <span class="op">=</span> nn.MultiheadAttention(d_model, nhead, dropout<span class="op">=</span>dropout)</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Implementation of Feedforward model</span></span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.linear1 <span class="op">=</span> nn.Linear(d_model, dim_feedforward)</span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.dropout <span class="op">=</span> nn.Dropout(dropout)</span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.linear2 <span class="op">=</span> nn.Linear(dim_feedforward, d_model)</span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.norm1 <span class="op">=</span> nn.LayerNorm(d_model)</span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.norm2 <span class="op">=</span> nn.LayerNorm(d_model)</span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.norm3 <span class="op">=</span> nn.LayerNorm(d_model)</span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.dropout1 <span class="op">=</span> nn.Dropout(dropout)</span>
+<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.dropout2 <span class="op">=</span> nn.Dropout(dropout)</span>
+<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.dropout3 <span class="op">=</span> nn.Dropout(dropout)</span>
+<span id="cb23-18"><a href="#cb23-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-19"><a href="#cb23-19" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.activation <span class="op">=</span> _get_activation_fn(activation)</span>
+<span id="cb23-20"><a href="#cb23-20" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.normalize_before <span class="op">=</span> normalize_before</span>
+<span id="cb23-21"><a href="#cb23-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-22"><a href="#cb23-22" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> with_pos_embed(<span class="va">self</span>, tensor, pos: Optional[Tensor]):</span>
+<span id="cb23-23"><a href="#cb23-23" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> tensor <span class="cf">if</span> pos <span class="kw">is</span> <span class="va">None</span> <span class="cf">else</span> tensor <span class="op">+</span> pos</span>
+<span id="cb23-24"><a href="#cb23-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-25"><a href="#cb23-25" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, tgt, memory,</span>
+<span id="cb23-26"><a href="#cb23-26" aria-hidden="true" tabindex="-1"></a>                tgt_mask: Optional[Tensor] <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb23-27"><a href="#cb23-27" aria-hidden="true" tabindex="-1"></a>                memory_mask: Optional[Tensor] <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb23-28"><a href="#cb23-28" aria-hidden="true" tabindex="-1"></a>                tgt_key_padding_mask: Optional[Tensor] <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb23-29"><a href="#cb23-29" aria-hidden="true" tabindex="-1"></a>                memory_key_padding_mask: Optional[Tensor] <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb23-30"><a href="#cb23-30" aria-hidden="true" tabindex="-1"></a>                pos: Optional[Tensor] <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb23-31"><a href="#cb23-31" aria-hidden="true" tabindex="-1"></a>                query_pos: Optional[Tensor] <span class="op">=</span> <span class="va">None</span>):</span>
+<span id="cb23-32"><a href="#cb23-32" aria-hidden="true" tabindex="-1"></a>        tgt2 <span class="op">=</span> <span class="va">self</span>.norm1(tgt)</span>
+<span id="cb23-33"><a href="#cb23-33" aria-hidden="true" tabindex="-1"></a>        q <span class="op">=</span> k <span class="op">=</span> <span class="va">self</span>.with_pos_embed(tgt2, query_pos)</span>
+<span id="cb23-34"><a href="#cb23-34" aria-hidden="true" tabindex="-1"></a>        tgt2 <span class="op">=</span> <span class="va">self</span>.self_attn(q, k, value<span class="op">=</span>tgt2, attn_mask<span class="op">=</span>tgt_mask,</span>
+<span id="cb23-35"><a href="#cb23-35" aria-hidden="true" tabindex="-1"></a>                              key_padding_mask<span class="op">=</span>tgt_key_padding_mask)[<span class="dv">0</span>]</span>
+<span id="cb23-36"><a href="#cb23-36" aria-hidden="true" tabindex="-1"></a>        tgt <span class="op">=</span> tgt <span class="op">+</span> <span class="va">self</span>.dropout1(tgt2)</span>
+<span id="cb23-37"><a href="#cb23-37" aria-hidden="true" tabindex="-1"></a>        tgt2 <span class="op">=</span> <span class="va">self</span>.norm2(tgt)</span>
+<span id="cb23-38"><a href="#cb23-38" aria-hidden="true" tabindex="-1"></a>        tgt2 <span class="op">=</span> <span class="va">self</span>.multihead_attn(query<span class="op">=</span><span class="va">self</span>.with_pos_embed(tgt2, query_pos),</span>
+<span id="cb23-39"><a href="#cb23-39" aria-hidden="true" tabindex="-1"></a>                                   key<span class="op">=</span><span class="va">self</span>.with_pos_embed(memory, pos),</span>
+<span id="cb23-40"><a href="#cb23-40" aria-hidden="true" tabindex="-1"></a>                                   value<span class="op">=</span>memory, attn_mask<span class="op">=</span>memory_mask,</span>
+<span id="cb23-41"><a href="#cb23-41" aria-hidden="true" tabindex="-1"></a>                                   key_padding_mask<span class="op">=</span>memory_key_padding_mask)[<span class="dv">0</span>]</span>
+<span id="cb23-42"><a href="#cb23-42" aria-hidden="true" tabindex="-1"></a>        tgt <span class="op">=</span> tgt <span class="op">+</span> <span class="va">self</span>.dropout2(tgt2)</span>
+<span id="cb23-43"><a href="#cb23-43" aria-hidden="true" tabindex="-1"></a>        tgt2 <span class="op">=</span> <span class="va">self</span>.norm3(tgt)</span>
+<span id="cb23-44"><a href="#cb23-44" aria-hidden="true" tabindex="-1"></a>        tgt2 <span class="op">=</span> <span class="va">self</span>.linear2(<span class="va">self</span>.dropout(<span class="va">self</span>.activation(<span class="va">self</span>.linear1(tgt2))))</span>
+<span id="cb23-45"><a href="#cb23-45" aria-hidden="true" tabindex="-1"></a>        tgt <span class="op">=</span> tgt <span class="op">+</span> <span class="va">self</span>.dropout3(tgt2)</span>
+<span id="cb23-46"><a href="#cb23-46" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> tgt</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The <code>TransformerDecoderLayer</code> requires a bit more attention than <code>TransformerEncoderLayer</code> (pun intended). First, the <code>tgt</code> variable in this case is just a bunch of zeroes of shape <span class="math inline">\(100 x 1 x 256\)</span> which represents Object Queries as in Figure-5.</p>
+<blockquote class="blockquote">
+<p>The difference with the original transformer is that the DETR model decodes the <span class="math inline">\(N\)</span> objects in parallel at each decoder layer, while Vaswani et al.&nbsp;used an autoregressive model that predicts the output sequence one element at a time. Since the decoder is also permutation-invariant, the <span class="math inline">\(N\)</span> input embeddings must be different to produce different results. These learnt positional encodings are called object queries and as can be seen in Figure-5, similar to the Encoder, these object queries are also added to the input at each attention layer in the Decoder.</p>
+</blockquote>
+<p>The Decoder layer can be divided into three parts: 1. Multi-Head self-attention (on object queries, output positional encodings) 2. Multi-Head Attention (Output from 1st part + output positional encodings, Output from encoder + Spatial Positional encodings) 3. Feed Forward Neural Network</p>
+<p>IMO, to make things crystal clear, it is important to note what’s going on in each of the Attention layers inside the Decoder.</p>
+<p>For the first Multi-Head Self-Attention layer, the Q, K &amp; V values are: 1. Query: Object queries (<code>tgt</code>, initialized as zeroes) + output positional encodings (<code>qpos</code>, learned positional encodings, initialized as <code>nn.Embedding</code> in PyTorch) 2. Key: Object queries (<code>tgt</code>, initialized as zeroes) + output positional encodings (<code>qpos</code>, learned positional encodings, initialized as <code>nn.Embedding</code> in PyTorch) 3. Value: Object queries (<code>tgt</code>)</p>
+<blockquote class="blockquote">
+<p>Note that the Query and Key values are the same in the first attention layer, hence, self-attention.</p>
+</blockquote>
+<p>For the second Multi-Head Attention layer, the Q, K &amp; V values are: 1. Query: Output from first Multi-Head Self-Attention layer (<code>tgt</code>) + ouput positional encodings (<code>qpos</code>) 2. Key: Output from encoder (<code>memory</code>) + Spatial Positional Encodings (<code>pos</code>) 3. Value: Output from encoder (<code>memory</code>)</p>
+<p>Therefore, it’s in the second attention layer that the Decoder interacts with/attends to the outputs from the Encoder and starts updating the input Object queries to possible object location information.</p>
+<p>As can be seen from Figure-5, the output from the Decoder is of shape <span class="math inline">\(6x1x100x256\)</span>, because it contains output from all Decoder layers, which is finally fed to Class FFN and Box FFN for bounding box prediction and classification.</p>
+<p>Next, we calculate the loss on the outputs of the Decoder, and continue this process over and over again, until the model learns to classify and locate the various objects in the input images. I am going to skip over the loss function for now, but that will be introduced in a separate blog post in the next few days.</p>
+</section>
+</section>
+<section id="conclusion" class="level2" data-number="9">
+<h2 data-number="9" class="anchored" data-anchor-id="conclusion"><span class="header-section-number">9</span> Conclusion</h2>
+<p>I hope that as part of this blog post, I’ve been able to explain the DETR architecture, and IMHO, this blog post is feature complete, barring the loss function, that will be added later.</p>
+<p>As usual, in case I have missed anything or to provide feedback, please feel free to reach out to me at <a href="https://twitter.com/amaarora"><span class="citation" data-cites="amaarora">@amaarora</span></a>.</p>
+<p>Also, feel free to <a href="https://amaarora.github.io/subscribe">subscribe to my blog here</a> to receive regular updates regarding new blog posts. Thanks for reading!</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
