@@ -13,6 +13,9 @@ website:
         href: https://github.com/
       - icon: twitter
         href: https://twitter.com
+
+  # (additional metadata excluded for brevity)
+  body-footer: subscribe.html
 format:
   html:
     theme: cosmo

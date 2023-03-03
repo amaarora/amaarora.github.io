@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.2.335">
+<meta name="generator" content="quarto-99.9.9">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -20,9 +20,10 @@ div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
 ul.task-list{list-style: none;}
 ul.task-list li input[type="checkbox"] {
   width: 0.8em;
-  margin: 0 0.8em 0.2em -1.6em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
 pre > code.sourceCode { white-space: pre; position: relative; }
 pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
@@ -49,43 +50,13 @@ pre.numberSource code > span > a:first-child::before
     -khtml-user-select: none; -moz-user-select: none;
     -ms-user-select: none; user-select: none;
     padding: 0 4px; width: 4em;
-    color: #aaaaaa;
   }
-pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
 div.sourceCode
   {   }
 @media screen {
 pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-code span.al { color: #ff0000; font-weight: bold; } /* Alert */
-code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
-code span.at { color: #7d9029; } /* Attribute */
-code span.bn { color: #40a070; } /* BaseN */
-code span.bu { color: #008000; } /* BuiltIn */
-code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
-code span.ch { color: #4070a0; } /* Char */
-code span.cn { color: #880000; } /* Constant */
-code span.co { color: #60a0b0; font-style: italic; } /* Comment */
-code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
-code span.do { color: #ba2121; font-style: italic; } /* Documentation */
-code span.dt { color: #902000; } /* DataType */
-code span.dv { color: #40a070; } /* DecVal */
-code span.er { color: #ff0000; font-weight: bold; } /* Error */
-code span.ex { } /* Extension */
-code span.fl { color: #40a070; } /* Float */
-code span.fu { color: #06287e; } /* Function */
-code span.im { color: #008000; font-weight: bold; } /* Import */
-code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
-code span.kw { color: #007020; font-weight: bold; } /* Keyword */
-code span.op { color: #666666; } /* Operator */
-code span.ot { color: #007020; } /* Other */
-code span.pp { color: #bc7a00; } /* Preprocessor */
-code span.sc { color: #4070a0; } /* SpecialChar */
-code span.ss { color: #bb6688; } /* SpecialString */
-code span.st { color: #4070a0; } /* String */
-code span.va { color: #19177c; } /* Variable */
-code span.vs { color: #4070a0; } /* VerbatimString */
-code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
 </style>
 
 
@@ -134,33 +105,35 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <header id="quarto-header" class="headroom fixed-top">
     <nav class="navbar navbar-expand-lg navbar-dark ">
       <div class="navbar-container container-fluid">
+            <div id="quarto-search" class="" title="Search"></div>
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
   <span class="navbar-toggler-icon"></span>
 </button>
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
-    <a class="nav-link" href="../index.html">
+    <a class="nav-link" href="../index.html" rel="" target="">
  <span class="menu-text">Aman Arora’s Blog</span></a>
   </li>  
 </ul>
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
-    <a class="nav-link" href="../about.html">
+    <a class="nav-link" href="../about.html" rel="" target="">
  <span class="menu-text">About</span></a>
   </li>  
   <li class="nav-item compact">
-    <a class="nav-link" href="https://github.com/"><i class="bi bi-github" role="img">
+    <a class="nav-link" href="https://github.com/" rel="" target=""><i class="bi bi-github" role="img">
 </i> 
  <span class="menu-text"></span></a>
   </li>  
   <li class="nav-item compact">
-    <a class="nav-link" href="https://twitter.com"><i class="bi bi-twitter" role="img">
+    <a class="nav-link" href="https://twitter.com" rel="" target=""><i class="bi bi-twitter" role="img">
 </i> 
  <span class="menu-text"></span></a>
   </li>  
 </ul>
-              <div id="quarto-search" class="" title="Search"></div>
+            <div class="quarto-navbar-tools">
+</div>
           </div> <!-- /navcollapse -->
       </div> <!-- /container-fluid -->
     </nav>
@@ -212,27 +185,27 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction"><span class="toc-section-number">1</span>  Introduction</a></li>
-  <li><a href="#prerequisites" id="toc-prerequisites" class="nav-link" data-scroll-target="#prerequisites"><span class="toc-section-number">2</span>  Prerequisites</a></li>
-  <li><a href="#abstract" id="toc-abstract" class="nav-link" data-scroll-target="#abstract"><span class="toc-section-number">3</span>  Abstract</a></li>
-  <li><a href="#model-architecture-gpt-2" id="toc-model-architecture-gpt-2" class="nav-link" data-scroll-target="#model-architecture-gpt-2"><span class="toc-section-number">4</span>  Model Architecture (GPT-2)</a></li>
-  <li><a href="#model-specifications-gpt" id="toc-model-specifications-gpt" class="nav-link" data-scroll-target="#model-specifications-gpt"><span class="toc-section-number">5</span>  Model Specifications (GPT)</a></li>
-  <li><a href="#imports" id="toc-imports" class="nav-link" data-scroll-target="#imports"><span class="toc-section-number">6</span>  Imports</a></li>
-  <li><a href="#transformer-decoder-inside-gpt-2" id="toc-transformer-decoder-inside-gpt-2" class="nav-link" data-scroll-target="#transformer-decoder-inside-gpt-2"><span class="toc-section-number">7</span>  Transformer Decoder inside GPT-2</a>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction"><span class="header-section-number">1</span> Introduction</a></li>
+  <li><a href="#prerequisites" id="toc-prerequisites" class="nav-link" data-scroll-target="#prerequisites"><span class="header-section-number">2</span> Prerequisites</a></li>
+  <li><a href="#abstract" id="toc-abstract" class="nav-link" data-scroll-target="#abstract"><span class="header-section-number">3</span> Abstract</a></li>
+  <li><a href="#model-architecture-gpt-2" id="toc-model-architecture-gpt-2" class="nav-link" data-scroll-target="#model-architecture-gpt-2"><span class="header-section-number">4</span> Model Architecture (GPT-2)</a></li>
+  <li><a href="#model-specifications-gpt" id="toc-model-specifications-gpt" class="nav-link" data-scroll-target="#model-specifications-gpt"><span class="header-section-number">5</span> Model Specifications (GPT)</a></li>
+  <li><a href="#imports" id="toc-imports" class="nav-link" data-scroll-target="#imports"><span class="header-section-number">6</span> Imports</a></li>
+  <li><a href="#transformer-decoder-inside-gpt-2" id="toc-transformer-decoder-inside-gpt-2" class="nav-link" data-scroll-target="#transformer-decoder-inside-gpt-2"><span class="header-section-number">7</span> Transformer Decoder inside GPT-2</a>
   <ul class="collapse">
-  <li><a href="#conv1d-layer-explained" id="toc-conv1d-layer-explained" class="nav-link" data-scroll-target="#conv1d-layer-explained"><span class="toc-section-number">7.1</span>  CONV1D Layer Explained</a></li>
-  <li><a href="#feedforward-layer-explained" id="toc-feedforward-layer-explained" class="nav-link" data-scroll-target="#feedforward-layer-explained"><span class="toc-section-number">7.2</span>  FEEDFORWARD Layer Explained</a></li>
-  <li><a href="#attention-layer-explained" id="toc-attention-layer-explained" class="nav-link" data-scroll-target="#attention-layer-explained"><span class="toc-section-number">7.3</span>  ATTENTION Layer Explained</a></li>
+  <li><a href="#conv1d-layer-explained" id="toc-conv1d-layer-explained" class="nav-link" data-scroll-target="#conv1d-layer-explained"><span class="header-section-number">7.1</span> CONV1D Layer Explained</a></li>
+  <li><a href="#feedforward-layer-explained" id="toc-feedforward-layer-explained" class="nav-link" data-scroll-target="#feedforward-layer-explained"><span class="header-section-number">7.2</span> FEEDFORWARD Layer Explained</a></li>
+  <li><a href="#attention-layer-explained" id="toc-attention-layer-explained" class="nav-link" data-scroll-target="#attention-layer-explained"><span class="header-section-number">7.3</span> ATTENTION Layer Explained</a></li>
   </ul></li>
-  <li><a href="#gpt-2-model-architecture-in-code" id="toc-gpt-2-model-architecture-in-code" class="nav-link" data-scroll-target="#gpt-2-model-architecture-in-code"><span class="toc-section-number">8</span>  GPT-2 Model Architecture in Code</a>
+  <li><a href="#gpt-2-model-architecture-in-code" id="toc-gpt-2-model-architecture-in-code" class="nav-link" data-scroll-target="#gpt-2-model-architecture-in-code"><span class="header-section-number">8</span> GPT-2 Model Architecture in Code</a>
   <ul class="collapse">
-  <li><a href="#transformer-decoder-block-explained" id="toc-transformer-decoder-block-explained" class="nav-link" data-scroll-target="#transformer-decoder-block-explained"><span class="toc-section-number">8.1</span>  Transformer Decoder Block Explained</a></li>
+  <li><a href="#transformer-decoder-block-explained" id="toc-transformer-decoder-block-explained" class="nav-link" data-scroll-target="#transformer-decoder-block-explained"><span class="header-section-number">8.1</span> Transformer Decoder Block Explained</a></li>
   </ul></li>
-  <li><a href="#the-gpt-2-architecture-explained" id="toc-the-gpt-2-architecture-explained" class="nav-link" data-scroll-target="#the-gpt-2-architecture-explained"><span class="toc-section-number">9</span>  The GPT-2 Architecture Explained</a></li>
-  <li><a href="#sample-text-generation-using-hugging-face-pretrained-weights" id="toc-sample-text-generation-using-hugging-face-pretrained-weights" class="nav-link" data-scroll-target="#sample-text-generation-using-hugging-face-pretrained-weights"><span class="toc-section-number">10</span>  Sample text generation using Hugging Face Pretrained Weights</a></li>
-  <li><a href="#extras" id="toc-extras" class="nav-link" data-scroll-target="#extras"><span class="toc-section-number">11</span>  Extras</a></li>
-  <li><a href="#credits" id="toc-credits" class="nav-link" data-scroll-target="#credits"><span class="toc-section-number">12</span>  Credits</a></li>
-  <li><a href="#feedback" id="toc-feedback" class="nav-link" data-scroll-target="#feedback"><span class="toc-section-number">13</span>  Feedback</a></li>
+  <li><a href="#the-gpt-2-architecture-explained" id="toc-the-gpt-2-architecture-explained" class="nav-link" data-scroll-target="#the-gpt-2-architecture-explained"><span class="header-section-number">9</span> The GPT-2 Architecture Explained</a></li>
+  <li><a href="#sample-text-generation-using-hugging-face-pretrained-weights" id="toc-sample-text-generation-using-hugging-face-pretrained-weights" class="nav-link" data-scroll-target="#sample-text-generation-using-hugging-face-pretrained-weights"><span class="header-section-number">10</span> Sample text generation using Hugging Face Pretrained Weights</a></li>
+  <li><a href="#extras" id="toc-extras" class="nav-link" data-scroll-target="#extras"><span class="header-section-number">11</span> Extras</a></li>
+  <li><a href="#credits" id="toc-credits" class="nav-link" data-scroll-target="#credits"><span class="header-section-number">12</span> Credits</a></li>
+  <li><a href="#feedback" id="toc-feedback" class="nav-link" data-scroll-target="#feedback"><span class="header-section-number">13</span> Feedback</a></li>
   </ul>
 </nav>
     </div>
@@ -704,7 +677,7 @@ This is brilliant stuff!!!
 
 </section>
 
-</main> <!-- /main -->
+<p>subscribe.html</p></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {
@@ -732,9 +705,23 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     icon: icon
   };
   anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
   const clipboard = new window.ClipboardJS('.code-copy-button', {
-    target: function(trigger) {
-      return trigger.previousElementSibling;
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
     }
   });
   clipboard.on('success', function(e) {
@@ -799,6 +786,92 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       return note.innerHTML;
     });
   }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
   const findCites = (el) => {
     const parentEl = el.parentElement;
     if (parentEl) {
