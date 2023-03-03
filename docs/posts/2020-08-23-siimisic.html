@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-99.9.9">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Aman Arora">
+<meta name="dcterms.date" content="2020-08-23">
+<meta name="description" content="As part of this blog post I share my winning solution for SIIM-ISIC Melanoma Classification Kaggle Competition.">
+
+<title>SIIM-ISIC Melanoma Classification - my journey to a top 5% solution and first silver medal on Kaggle</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html" rel="" target="">
+ <span class="menu-text">Aman Arora’s Blog</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../about.html" rel="" target="">
+ <span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/" rel="" target=""><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com" rel="" target=""><i class="bi bi-twitter" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+            <div class="quarto-navbar-tools">
+</div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar"><div class="quarto-margin-header"><div class="margin-header-item">
+<!-- Begin Mailchimp Signup Form -->
+<link href="//cdn-images.mailchimp.com/embedcode/classic-071822.css" rel="stylesheet" type="text/css">
+<style type="text/css">
+    #mc_embed_signup{background:#fff; clear:left; font:14px Helvetica,Arial,sans-serif;  width:600px;}
+    /* Add your own Mailchimp form style overrides in your site stylesheet or in this style block.
+       We recommend moving this block and the preceding CSS link to the HEAD of your HTML file. */
+</style>
+<div id="mc_embed_signup">
+    <form action="https://github.us4.list-manage.com/subscribe/post?u=e847230346a7c78d4745ae796&amp;id=7a63b2b273&amp;f_id=005f58e8f0" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate="">
+        <div id="mc_embed_signup_scroll">
+        <h2>Subscribe to Aman Arora's Blog</h2>
+        <div class="indicates-required"><span class="asterisk">*</span> indicates required</div>
+<div class="mc-field-group">
+    <label for="mce-EMAIL">Email Address  <span class="asterisk">*</span>
+</label>
+    <input type="email" value="" name="EMAIL" class="required email" id="mce-EMAIL" required="">
+    <span id="mce-EMAIL-HELPERTEXT" class="helper_text"></span>
+</div>
+<div class="mc-field-group">
+    <label for="mce-FNAME">First Name </label>
+    <input type="text" value="" name="FNAME" class="" id="mce-FNAME">
+    <span id="mce-FNAME-HELPERTEXT" class="helper_text"></span>
+</div>
+<div class="mc-field-group">
+    <label for="mce-LNAME">Last Name </label>
+    <input type="text" value="" name="LNAME" class="" id="mce-LNAME">
+    <span id="mce-LNAME-HELPERTEXT" class="helper_text"></span>
+</div>
+    <div id="mce-responses" class="clear foot">
+        <div class="response" id="mce-error-response" style="display:none"></div>
+        <div class="response" id="mce-success-response" style="display:none"></div>
+    </div>    <!-- real people should not fill this in and expect good things - do not remove this or risk form bot signups-->
+    <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_e847230346a7c78d4745ae796_7a63b2b273" tabindex="-1" value=""></div>
+        <div class="optionalParent">
+            <div class="clear foot">
+                <input type="submit" value="Subscribe" name="subscribe" id="mc-embedded-subscribe" class="button">
+                <p class="brandingLogo"><a href="http://eepurl.com/il3baM" title="Mailchimp - email marketing made easy and fun"><img src="https://eep.io/mc-cdn-images/template_images/branding_logo_text_dark_dtp.svg"></a></p>
+            </div>
+        </div>
+    </div>
+</form>
+</div>
+<script type="text/javascript" src="//s3.amazonaws.com/downloads.mailchimp.com/js/mc-validate.js"></script><script type="text/javascript">(function($) {window.fnames = new Array(); window.ftypes = new Array();fnames[0]='EMAIL';ftypes[0]='email';fnames[1]='FNAME';ftypes[1]='text';fnames[2]='LNAME';ftypes[2]='text';fnames[3]='ADDRESS';ftypes[3]='address';fnames[4]='PHONE';ftypes[4]='phone';fnames[5]='BIRTHDAY';ftypes[5]='birthday';}(jQuery));var $mcj = jQuery.noConflict(true);</script>
+<!--End mc_embed_signup-->
+</div></div>
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction"><span class="header-section-number">1</span> Introduction</a></li>
+  <li><a href="#key-learnings" id="toc-key-learnings" class="nav-link" data-scroll-target="#key-learnings"><span class="header-section-number">2</span> Key learnings</a>
+  <ul class="collapse">
+  <li><a href="#keep-fighting-until-the-end" id="toc-keep-fighting-until-the-end" class="nav-link" data-scroll-target="#keep-fighting-until-the-end"><span class="header-section-number">2.1</span> Keep fighting until the end</a></li>
+  <li><a href="#research-past-solutions" id="toc-research-past-solutions" class="nav-link" data-scroll-target="#research-past-solutions"><span class="header-section-number">2.2</span> Research past solutions</a></li>
+  <li><a href="#use-a-standard-code-structure" id="toc-use-a-standard-code-structure" class="nav-link" data-scroll-target="#use-a-standard-code-structure"><span class="header-section-number">2.3</span> Use a standard code structure</a></li>
+  <li><a href="#keep-a-log-of-your-experiments" id="toc-keep-a-log-of-your-experiments" class="nav-link" data-scroll-target="#keep-a-log-of-your-experiments"><span class="header-section-number">2.4</span> Keep a log of your experiments</a></li>
+  </ul></li>
+  <li><a href="#solution-summary" id="toc-solution-summary" class="nav-link" data-scroll-target="#solution-summary"><span class="header-section-number">3</span> Solution Summary</a>
+  <ul class="collapse">
+  <li><a href="#image-preprocessing" id="toc-image-preprocessing" class="nav-link" data-scroll-target="#image-preprocessing"><span class="header-section-number">3.1</span> Image Preprocessing</a></li>
+  <li><a href="#cross-validation" id="toc-cross-validation" class="nav-link" data-scroll-target="#cross-validation"><span class="header-section-number">3.2</span> Cross Validation</a></li>
+  <li><a href="#model-architecture" id="toc-model-architecture" class="nav-link" data-scroll-target="#model-architecture"><span class="header-section-number">3.3</span> Model Architecture</a></li>
+  <li><a href="#loss-function" id="toc-loss-function" class="nav-link" data-scroll-target="#loss-function"><span class="header-section-number">3.4</span> Loss Function</a></li>
+  <li><a href="#external-data" id="toc-external-data" class="nav-link" data-scroll-target="#external-data"><span class="header-section-number">3.5</span> External Data</a></li>
+  <li><a href="#public-kernels" id="toc-public-kernels" class="nav-link" data-scroll-target="#public-kernels"><span class="header-section-number">3.6</span> Public Kernels</a></li>
+  <li><a href="#ensemble" id="toc-ensemble" class="nav-link" data-scroll-target="#ensemble"><span class="header-section-number">3.7</span> Ensemble</a></li>
+  <li><a href="#unstable-public-lb" id="toc-unstable-public-lb" class="nav-link" data-scroll-target="#unstable-public-lb"><span class="header-section-number">3.8</span> Unstable Public LB</a></li>
+  </ul></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion"><span class="header-section-number">4</span> Conclusion</a></li>
+  <li><a href="#credits" id="toc-credits" class="nav-link" data-scroll-target="#credits"><span class="header-section-number">5</span> Credits</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">SIIM-ISIC Melanoma Classification - my journey to a top 5% solution and first silver medal on Kaggle</h1>
+<p class="subtitle lead">Winning solution for SIIM-ISIC Melanoma Classification</p>
+  <div class="quarto-categories">
+    <div class="quarto-category">Computer Vision</div>
+    <div class="quarto-category">Kaggle</div>
+  </div>
+  </div>
+
+<div>
+  <div class="description">
+    <p>As part of this blog post I share my winning solution for SIIM-ISIC Melanoma Classification Kaggle Competition.</p>
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Aman Arora </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">August 23, 2020</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+</header>
+
+<section id="introduction" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="introduction"><span class="header-section-number">1</span> Introduction</h2>
+<p>Recently, <a href="https://www.kaggle.com/">Kaggle</a> launched an interesting <a href="https://www.kaggle.com/c/siim-isic-melanoma-classification">competition</a> to identify melanoma in images of skin lesions. Skin cancer is the most prevalent type of cancer. Melanoma, specifically, is responsible for 75% of skin cancer deaths, despite being the least common skin cancer. The American Cancer Society estimates over 100,000 new melanoma cases will be diagnosed in 2020. It’s also expected that almost 7,000 people will die from the disease. This was an important competition as with other cancers, early and accurate detection—potentially aided by data science can make treatment more effective.</p>
+<p>It was also a particularly challenging competition with highly imbalanced dataset with only 2% positive cases and the rest 98% negative cases.</p>
+<p>In this blog post, I will be sharing my journey from the start and also the solution that led to 153 private leaderboard rank from a total of 3314 teams.</p>
+</section>
+<section id="key-learnings" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="key-learnings"><span class="header-section-number">2</span> Key learnings</h2>
+<p>Before we begin with the solution summary, I want to highlight some of my key learnings from having participated and worked on this competition for over two months.</p>
+<section id="keep-fighting-until-the-end" class="level3" data-number="2.1">
+<h3 data-number="2.1" class="anchored" data-anchor-id="keep-fighting-until-the-end"><span class="header-section-number">2.1</span> Keep fighting until the end</h3>
+<p>I wasn’t much of a Kaggler until before this competition and as a result usually ended up in bottom 50% pretty much in all competitions I had participated in before this one. It was disheartening and I usually blamed hardware, lack of knowledge in CV or made up any other excuses I could come up with for my bad results and would leave past competitions mid way - I was wrong! As you’ll read, the complete solution for ISIC was built using a single GPU and Kaggle TPUs(free resource).</p>
+<p>Something I promised myself at the start of this competition was to not make an excuse and actually finish the whole project regardless of the position I would end up with. This was one of the biggest and key difference in my approach compared to before. And with this mindset, I took the first step.</p>
+</section>
+<section id="research-past-solutions" class="level3" data-number="2.2">
+<h3 data-number="2.2" class="anchored" data-anchor-id="research-past-solutions"><span class="header-section-number">2.2</span> Research past solutions</h3>
+<p>I was quick to find out in the early days that this wasn’t the first time SIIM (Society for Imaging Informatics in Medicine) was hosting such a competition. In fact, <a href="https://www.isic-archive.com/#!/topWithHeader/tightContentTop/challenges">such competitions have been held</a> before in 2016, 2017, 2018 and 2019.</p>
+<p>The first step I took was to read pretty much all the <a href="https://challenge2019.isic-archive.com/leaderboard.html">solutions that did well in ISIC 2019</a>. For someone who didn’t know much about medical imaging - this was a gold mine of hidden treasures. I remember making notes on: - How to do image preprocessing - Which data augmentations to use - How to run inference - Which Model architectures work best for this type of data - Is it also possible to use patient metadata to improve results</p>
+<p>And many more similar details. Just doing this filled me with a lot of confidence - now my mind was filled with ideas and I couldn’t wait to try them on!</p>
+<p><img src="../images/ideas.png" title="fig-1 List of ideas" class="img-fluid"></p>
+</section>
+<section id="use-a-standard-code-structure" class="level3" data-number="2.3">
+<h3 data-number="2.3" class="anchored" data-anchor-id="use-a-standard-code-structure"><span class="header-section-number">2.3</span> Use a standard code structure</h3>
+<p>Thanks to <a href="https://www.youtube.com/watch?v=WaCFd-vL4HA">Abhishek Thakur’s code walkthrough</a> for this very competition - I was quick to adapt a standard code structure. This really proved as a good baseline to begin experimenting with.</p>
+</section>
+<section id="keep-a-log-of-your-experiments" class="level3" data-number="2.4">
+<h3 data-number="2.4" class="anchored" data-anchor-id="keep-a-log-of-your-experiments"><span class="header-section-number">2.4</span> Keep a log of your experiments</h3>
+<p>This is one of the most important steps that really helped me steer towards a top 5% solution. Having a log of my experiments, I could quickly find out things that worked for me and things that didn’t and then try again.</p>
+<p>I ran more than 80 different experiments and you can find them <a href="https://github.com/amaarora/melonama">here</a>.</p>
+<p><img src="../images/logs.JPG" title="fig-2 Sample logs" class="img-fluid"></p>
+</section>
+</section>
+<section id="solution-summary" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="solution-summary"><span class="header-section-number">3</span> Solution Summary</h2>
+<p>Above were some of the key learnings that really helped me get my first silver medal. In this section, we focus on the technical and theoretical details of the solution and the complete code can be found <a href="https://github.com/amaarora/melonama">here</a>.</p>
+<section id="image-preprocessing" class="level3" data-number="3.1">
+<h3 data-number="3.1" class="anchored" data-anchor-id="image-preprocessing"><span class="header-section-number">3.1</span> Image Preprocessing</h3>
+<p>The first challenge was to preprocess the medical images - particularly mostly all images were rectangular and of different shapes and sizes.</p>
+<p><img src="../images/img_dist.png" title="fig-3 Raw image sizes" class="img-fluid"></p>
+<p>As can be seen in the image above, most of the images are of height 6000px and width 4000px. And the complete training set consists of images with various sizes. We cannot use this raw data directly as input to our network and therefore need to resize the images.</p>
+<p>So the first step is to be able to resize images. There were many approaches that the winners used: - Center crop the image to square with size equal to shorter side and resize to required input training resolution - Use image segmentation to segment the images to area of interest - Directly resize the images to required input resolution</p>
+<p>We ended up using another approach of resizing the images such that shorter side of the image is equal to the input training resolution while mantaining the aspect raio. This approach was also used by the 2019 ISIC competition winners as mentioned <a href="https://isic-challenge-stade.s3.amazonaws.com/99bdfa5c-4b6b-4c3c-94c0-f614e6a05bc4/method_description.pdf?AWSAccessKeyId=AKIA2FPBP3II4S6KTWEU&amp;Signature=nXwY%2BI7mHPE0Nf%2BhY14z4PpajSU%3D&amp;Expires=1598164223">here</a>.</p>
+<p>While the reshaped images are still rectangular, adding extra data augmentation of <code>RandomCrop</code> makes them square and also our models then see a different part of the image in every epoch - thus reducing overfitting. Also, this way we do not lose any information of the image in the resized images as opposed to the center crop approach.</p>
+<p>The resized images look like below:</p>
+<p><img src="../images/no_cc.png" title="fig-4 Resized and cropped raw images" class="img-fluid"></p>
+<p>But as you can see, the images have different colors, varying brightness and contrast. This is because the dataset was collected by using images from different distributions. To make sure that our models don’t have to deal with this much noise, another key step was to use <a href="https://en.wikipedia.org/wiki/Color_constancy">color constancy</a> techniques. Preprocessing images using color constancy makes sure that the images appear to be from the same distribution with similar brightness and contrast.</p>
+<p>After applying this preprocessing step, the images now look like:</p>
+<p><img src="../images/with_cc.png" title="fig-5 Resized and cropped raw images with color constancy" class="img-fluid"></p>
+<p>As you can see, now there is much less variability in between the images and just using this one step of preprocessing significantly improved validation scores. This approach was also used by the 2019 winners.</p>
+<p>To preprocess images, using color constancy, simply follow the steps mentioned in code repository <a href="https://github.com/amaarora/melonama">here</a>.</p>
+<p>Now that we have preprocessed our images, we are ready to train the models.</p>
+</section>
+<section id="cross-validation" class="level3" data-number="3.2">
+<h3 data-number="3.2" class="anchored" data-anchor-id="cross-validation"><span class="header-section-number">3.2</span> Cross Validation</h3>
+<p>We used Chris Deotte’s triple stratified folds for validation. These can be found <a href="https://www.kaggle.com/c/siim-isic-melanoma-classification/discussion/165526">here</a>.</p>
+<p>There were some duplicate images that were part of both train and test set and therefore, using a <a href="https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.GroupKFold.html">GroupKFold</a> wasn’t sufficient.</p>
+</section>
+<section id="model-architecture" class="level3" data-number="3.3">
+<h3 data-number="3.3" class="anchored" data-anchor-id="model-architecture"><span class="header-section-number">3.3</span> Model Architecture</h3>
+<p>Particularly for this competition, we used <code>EfficientNets</code>. I have written a previous blog post explaining EfficientNet model architecture <a href="https://amaarora.github.io/2020/08/13/efficientnet.html">here</a>.</p>
+<p>Many participants in this competition also found <code>EfficientNets</code> to work best for this competition - particularly an ensemble of them. We also tried <code>SeResnext-50</code>, <code>DenseNet</code>, <code>MobileNet</code> model architectures, but found <code>EfficientNets</code> to have the highest CV score.</p>
+<p>Chris Deotte shared an excellent post on how to ensemble different model architectures trained on different input resolutions <a href="https://www.kaggle.com/c/siim-isic-melanoma-classification/discussion/160147">here</a>. We used a similar approach and trained a total of 15 five-fold models and used weighted average predictions based on out of fold (OOF) score. Models performing better on OOF were given higher weights.</p>
+<p>The final ensemble consisted of various models trained on various input resolutions - 224, 384, 480, 512 and 672.</p>
+</section>
+<section id="loss-function" class="level3" data-number="3.4">
+<h3 data-number="3.4" class="anchored" data-anchor-id="loss-function"><span class="header-section-number">3.4</span> Loss Function</h3>
+<p>All models were trained using <a href="https://amaarora.github.io/2020/06/29/FocalLoss.html">Focal Loss</a>. We found this loss function to work better than Binary Cross Entropy loss due to the high imbalance in the dataset. We also tried Weighted Binary Cross Entropy but Focal Loss gave us the best CV score so we trained all models(except the ones from public kernel) using <code>Focal Loss</code>.</p>
+</section>
+<section id="external-data" class="level3" data-number="3.5">
+<h3 data-number="3.5" class="anchored" data-anchor-id="external-data"><span class="header-section-number">3.5</span> External Data</h3>
+<p>Some of the models were also trained using ISIC 2018 and <a href="https://challenge2019.isic-archive.com/">2019</a> external data. There were two strategies that were tried before adding external data: - Add only positive classes - Add complete training data</p>
+<p>We found adding positive cases worked better than adding complete external data.</p>
+</section>
+<section id="public-kernels" class="level3" data-number="3.6">
+<h3 data-number="3.6" class="anchored" data-anchor-id="public-kernels"><span class="header-section-number">3.6</span> Public Kernels</h3>
+<p>Chris Deotte’s <a href="https://www.kaggle.com/cdeotte/triple-stratified-kfold-with-tfrecords">kernel</a> used TPUs and was one of the best Public kernel for this competition. We re-trained 5 different models of varying image sizes that were part of the final ensemble.</p>
+</section>
+<section id="ensemble" class="level3" data-number="3.7">
+<h3 data-number="3.7" class="anchored" data-anchor-id="ensemble"><span class="header-section-number">3.7</span> Ensemble</h3>
+<p>The final predictions were based on a weighted average ensemble with higher weights given to those models with higher CV scores. The final ensemble consisted of the following models:</p>
+<ol type="1">
+<li>384x384 eff-B6 TPU without cc</li>
+<li>224x224 eff-b1 GPU with cc</li>
+<li>256x256 eff-b3 GPU with cc</li>
+<li>384x384 eff-b4 GPU with cc</li>
+<li>672x672 eff-b3 GPU with cc</li>
+<li>480x480 eff-b4 GPU with cc and center crop images</li>
+<li>384x384 eff-b4 GPU with cc + external data</li>
+<li>512x512 eff-b4 TPU without cc + external data (only 2019)</li>
+<li>256x256 eff-b4 TPU without cc + external data (only 2018)</li>
+<li>256x256 eff-b4 TPU without cc + external data (2018 &amp; 2019)</li>
+<li>384x384 eff-b5 TPU without cc + external data (2018)</li>
+<li>512x512 eff-b3 GPU without cc + external data (2018)</li>
+<li>512x512 eff-b5 GPU without cc</li>
+<li>384x384 eff-b5 GPU with cc pseudo labeled</li>
+<li>256x256 eff-b4 GPU with cc pseudo labeled</li>
+</ol>
+</section>
+<section id="unstable-public-lb" class="level3" data-number="3.8">
+<h3 data-number="3.8" class="anchored" data-anchor-id="unstable-public-lb"><span class="header-section-number">3.8</span> Unstable Public LB</h3>
+<p>Due to such a low number of positive classes, the Public LB scores were found to be pretty unstable and did not match the CV scores. To counter this, we created an ensemble of models trained using different data augmentation strategies, image sizes and preprocessing techniques.</p>
+</section>
+</section>
+<section id="conclusion" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="conclusion"><span class="header-section-number">4</span> Conclusion</h2>
+<p>It doesn’t take something magical to produce a good quality solution, however it does take hard work. I remember working really hard for the past 2 months on this competition - starting from the scratch not knowing what works is quite a challenge. At the beginning of the competition running lots of different experiments with smaller image size helps get a better understanding of the challenge and generally of what works. Once, a baseline solution exists, it is then much easier to further improve and finetune the pipeline.</p>
+<p>To re run the experiments - refer to <a href="https://github.com/amaarora/melonama">this</a> GitHub repo.</p>
+<p>If you feel I have missed out on anything - please feel free to ask any questions regarding my approach at <a href="https://twitter.com/amaarora"><span class="citation" data-cites="amaarora">@amaarora</span></a>.</p>
+<p>Also, feel free to <a href="https://amaarora.github.io/subscribe">subscribe to my blog here</a> to receive regular updates regarding new blog posts. Thanks for reading!</p>
+</section>
+<section id="credits" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="credits"><span class="header-section-number">5</span> Credits</h2>
+<p>Thanks to <a href="https://www.kaggle.com/cdeotte">Chris Deotte</a> for his selfless work in this competition - it definitely made participating in this competition a lot more easier and fun!</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

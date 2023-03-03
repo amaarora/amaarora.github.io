@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-99.9.9">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Aman Arora">
+<meta name="dcterms.date" content="2020-02-18">
+<meta name="description" content="This post presents an annotated version of the paper in the form of a line-by-line implementation in PyTorch. This document itself is a working notebook, and should be a completely usable implementation.">
+
+<title>The Annotated GPT-2</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html" rel="" target="">
+ <span class="menu-text">Aman Arora’s Blog</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../about.html" rel="" target="">
+ <span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/" rel="" target=""><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com" rel="" target=""><i class="bi bi-twitter" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+            <div class="quarto-navbar-tools">
+</div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">The Annotated GPT-2</h1>
+            <p class="subtitle lead">Better language models and their implications</p>
+                  <div>
+        <div class="description">
+          <p>This post presents an annotated version of the paper in the form of a line-by-line implementation in PyTorch. This document itself is a working notebook, and should be a completely usable implementation.</p>
+        </div>
+      </div>
+                          <div class="quarto-categories">
+                <div class="quarto-category">NLP</div>
+                <div class="quarto-category">Transformers</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Aman Arora </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">February 18, 2020</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction"><span class="header-section-number">1</span> Introduction</a></li>
+  <li><a href="#prerequisites" id="toc-prerequisites" class="nav-link" data-scroll-target="#prerequisites"><span class="header-section-number">2</span> Prerequisites</a></li>
+  <li><a href="#abstract" id="toc-abstract" class="nav-link" data-scroll-target="#abstract"><span class="header-section-number">3</span> Abstract</a></li>
+  <li><a href="#model-architecture-gpt-2" id="toc-model-architecture-gpt-2" class="nav-link" data-scroll-target="#model-architecture-gpt-2"><span class="header-section-number">4</span> Model Architecture (GPT-2)</a></li>
+  <li><a href="#model-specifications-gpt" id="toc-model-specifications-gpt" class="nav-link" data-scroll-target="#model-specifications-gpt"><span class="header-section-number">5</span> Model Specifications (GPT)</a></li>
+  <li><a href="#imports" id="toc-imports" class="nav-link" data-scroll-target="#imports"><span class="header-section-number">6</span> Imports</a></li>
+  <li><a href="#transformer-decoder-inside-gpt-2" id="toc-transformer-decoder-inside-gpt-2" class="nav-link" data-scroll-target="#transformer-decoder-inside-gpt-2"><span class="header-section-number">7</span> Transformer Decoder inside GPT-2</a>
+  <ul class="collapse">
+  <li><a href="#conv1d-layer-explained" id="toc-conv1d-layer-explained" class="nav-link" data-scroll-target="#conv1d-layer-explained"><span class="header-section-number">7.1</span> CONV1D Layer Explained</a></li>
+  <li><a href="#feedforward-layer-explained" id="toc-feedforward-layer-explained" class="nav-link" data-scroll-target="#feedforward-layer-explained"><span class="header-section-number">7.2</span> FEEDFORWARD Layer Explained</a></li>
+  <li><a href="#attention-layer-explained" id="toc-attention-layer-explained" class="nav-link" data-scroll-target="#attention-layer-explained"><span class="header-section-number">7.3</span> ATTENTION Layer Explained</a></li>
+  </ul></li>
+  <li><a href="#gpt-2-model-architecture-in-code" id="toc-gpt-2-model-architecture-in-code" class="nav-link" data-scroll-target="#gpt-2-model-architecture-in-code"><span class="header-section-number">8</span> GPT-2 Model Architecture in Code</a>
+  <ul class="collapse">
+  <li><a href="#transformer-decoder-block-explained" id="toc-transformer-decoder-block-explained" class="nav-link" data-scroll-target="#transformer-decoder-block-explained"><span class="header-section-number">8.1</span> Transformer Decoder Block Explained</a></li>
+  </ul></li>
+  <li><a href="#the-gpt-2-architecture-explained" id="toc-the-gpt-2-architecture-explained" class="nav-link" data-scroll-target="#the-gpt-2-architecture-explained"><span class="header-section-number">9</span> The GPT-2 Architecture Explained</a></li>
+  <li><a href="#sample-text-generation-using-hugging-face-pretrained-weights" id="toc-sample-text-generation-using-hugging-face-pretrained-weights" class="nav-link" data-scroll-target="#sample-text-generation-using-hugging-face-pretrained-weights"><span class="header-section-number">10</span> Sample text generation using Hugging Face Pretrained Weights</a></li>
+  <li><a href="#extras" id="toc-extras" class="nav-link" data-scroll-target="#extras"><span class="header-section-number">11</span> Extras</a></li>
+  <li><a href="#credits" id="toc-credits" class="nav-link" data-scroll-target="#credits"><span class="header-section-number">12</span> Credits</a></li>
+  <li><a href="#feedback" id="toc-feedback" class="nav-link" data-scroll-target="#feedback"><span class="header-section-number">13</span> Feedback</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<section id="introduction" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="introduction"><span class="header-section-number">1</span> Introduction</h2>
+<p>Welcome to “<strong>The Annotated GPT-2</strong>”.</p>
+<p>One of the most brilliant and well-explained articles I have ever read is <a href="https://nlp.seas.harvard.edu/2018/04/03/attention.html">The Annotated Transformer</a>. It introduced <strong>Attention</strong> like no other post ever written. The simple idea was to present an “annotated” version of the paper <a href="https://arxiv.org/abs/1706.03762">Attention is all you need</a> along with code.</p>
+<p>Something I have come to realize with my little experience in Machine Learning, when you write things in code, the implementation and the secrets become clearer. It is not magic anymore.</p>
+<blockquote class="blockquote">
+<p>There is nothing magic about magic. The magician merely understands something simple which doesn’t appear to be simple or natural to the untrained audience. Once you learn how to hold a card while making your hand look empty, you only need practice before you, too, can “do magic.”</p>
+<p>– Jeffrey Friedl in the book <a href="https://learning.oreilly.com/library/view/mastering-regular-expressions/0596528124/ch01.html">Mastering Regular Expressions</a></p>
+</blockquote>
+<p>The <strong><a href="https://openai.com/blog/better-language-models/">GPT-2</a></strong> might seem like magic at first with all it’s glitter and beauty too, but hopefully I would have uncovered that magic for you and revealed all the tricks by the time you finish reading this post. That is my goal. To make it as simple as possible for the keen to understand how the <strong>GPT-2</strong> model works underneath.</p>
+<p><strong>Note:</strong> Pretty much the entirety of the code has been copied, inspired and referenced from <a href="https://github.com/huggingface/transformers/blob/master/src/transformers/modeling_gpt2.py">Hugging Face’s implementation</a> of the GPT-2, keeping merely the essentials for simplicity. If you want to train the GPT-2 model on parallel GPUs, save checkpoints while fine-tuning, run inference tasks on multiple CPUs and much more, I would recommend using the Hugging Face API. A simple tutorial on how to do so was recently released by Hugging Face and can be found <a href="https://huggingface.co/blog/how-to-train">here</a>.</p>
+<p>In this post, I am not trying to reinvent the wheel, but merely bringing together a list of prexisting excellent resources to make it easier for the reader to grasp GPT-2. I leave it up to the reader to further build upon these foundations in any area they choose.</p>
+<blockquote class="blockquote">
+<p>You can’t build a great building on a weak foundation. You must have a solid foundation if you’re going to have a strong superstructure.</p>
+<p>– Gordon B. Hinckley</p>
+</blockquote>
+</section>
+<section id="prerequisites" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="prerequisites"><span class="header-section-number">2</span> Prerequisites</h2>
+<p>This post assumes that the reader has a solid understanding of Attention and Transformers. The GPT-2 utilizes a 12-layer Decoder Only Transformer architecture. If you want a refresher or understand Attention and Transformers, here is an excellent list of resources to aid your understanding regarding:</p>
+<ol type="1">
+<li><a href="http://jalammar.github.io/illustrated-transformer/">The illustrated Transformer</a> by Jay Alammar</li>
+<li><a href="https://nlp.seas.harvard.edu/2018/04/03/attention.html">The Annotated Transformer</a> by Harvard NLP</li>
+<li><a href="https://www.youtube.com/watch?v=AFkGPmU16QA&amp;list=PLtmWHNX-gukKocXQOkQjuVxglSDYWsSh9&amp;index=18&amp;t=0s">Introduction to the Transformer</a> by Rachel Thomas and Jeremy Howard</li>
+</ol>
+<blockquote class="blockquote">
+<p>If you’re just beginning your journey into NLP or you’re an expert, I would definitely recommend the <a href="https://www.fast.ai/2019/07/08/fastai-nlp/">fast.ai NLP course</a> taught by <a href="https://twitter.com/math_rachel">Rachel Thomas</a> and <a href="https://twitter.com/jeremyphoward">Jeremy Howard</a>. The course starts with the basics including <em>Sentiment Classification using Naive Bayes and Logistic Regression</em>, moves on to <em>RNNs</em> and also talks about <em>Transfer Learning</em>, <em>ULMFiT</em>, <em>Seq2Seq translation</em> and <em>Transformers</em> amongst other things. It is an excellent resource put together by the fast.ai team free of cost.</p>
+<p>Another amazing resource on GPT-2 itself, is <a href="http://jalammar.github.io/illustrated-gpt2/">The Illustrated GPT-2</a> by Jay Alammar. This post starts with a basic introduction to Language Models and explains the GPT-2 model step-by-step in a very easy to understand manner. I would highly recommend the reader to give this post a read.</p>
+<p><a href="https://nlp.seas.harvard.edu/2018/04/03/attention.html">The Annotated Transformer</a> by Harvard NLP implements the complete Transformer architecture using PyTorch and is great way to understand Attention in depth.</p>
+<p>Let’s then build upon these excellent existing resources and implement GPT-2 in code.</p>
+</blockquote>
+</section>
+<section id="abstract" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="abstract"><span class="header-section-number">3</span> Abstract</h2>
+<p>Natural language processing tasks, such as question answering, machine translation, reading comprehension, and summarization, are typically approached with supervised learning on taskspecific datasets. We demonstrate that language models begin to learn these tasks without any explicit supervision when trained on a new dataset of millions of webpages called WebText. Our largest model, GPT-2, is a 1.5B parameter Transformer that achieves state of the art results on 7 out of 8 tested language modeling datasets in a zero-shot setting but still underfits WebText. Samples from the model reflect these improvements and contain coherent paragraphs of text. These findings suggest a promising path towards building language processing systems which learn to perform tasks from their naturally occurring demonstrations.</p>
+<blockquote class="blockquote">
+<p>A Zero-shot setting is one where you do not finetune the language model and directly run inference on the target dataset. For example, pretrain a LM on WebText and directly try and predict the next words of Amazon Movie reviews dataset.</p>
+</blockquote>
+</section>
+<section id="model-architecture-gpt-2" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="model-architecture-gpt-2"><span class="header-section-number">4</span> Model Architecture (GPT-2)</h2>
+<p>We use a <a href="https://arxiv.org/abs/1706.03762">Transformer</a> (Vaswani et al., 2017) based architecture for our LMs. The model largely follows the details of the <a href="https://s3-us-west-2.amazonaws.com/openai-assets/research-covers/language-unsupervised/language_understanding_paper.pdf">OpenAI GPT model</a> (Radford et al., 2018) with a few modifications. <a href="https://arxiv.org/abs/1607.06450">Layer normalization</a> (Ba et al., 2016) was moved to the input of each sub-block, similar to a pre-activation residual network (He et al., 2016) and an additional layer normalization was added after the final self-attention block. We scale the weights of residual layers at initialization by a factor of <code>1/√N</code> where N is the number of residual layers. The vocabulary is expanded to 50,257 words. We also <strong>increase the context size from 512 to 1024</strong> tokens and a larger batchsize of 512 is used.</p>
+<blockquote class="blockquote">
+<p>This is the entirety of model explanation inside the <code>GPT-2</code> research paper. This warrants a need for us to look at the architecture inside the <code>GPT</code> model.</p>
+</blockquote>
+</section>
+<section id="model-specifications-gpt" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="model-specifications-gpt"><span class="header-section-number">5</span> Model Specifications (GPT)</h2>
+<p>Our model largely follows the original transformer work. We trained a <strong>12-layer decoder-only transformer</strong> with <strong>masked self-attention heads</strong> (768 dimensional states and 12 attention heads). <strong>For the position-wise feed-forward networks, we used 3072 dimensional inner states.</strong> We used the Adam optimization scheme with a max learning rate of 2.5e-4. The learning rate was increased linearly from zero over the first 2000 updates and annealed to 0 using a cosine schedule. We train for 100 epochs on minibatches of 64 randomly sampled, contiguous sequences of 512 tokens. Since <a href="https://arxiv.org/abs/1607.06450">layernorm</a> is used extensively throughout the model, a simple weight initialization of <strong>N(0, 0.02)</strong> was sufficient. We used a <strong><a href="https://arxiv.org/abs/1508.07909">bytepair encoding (BPE)</a></strong> vocabulary with 40,000 merges and residual, embedding, and attention dropouts with a rate of 0.1 for regularization. We also employed a modified version of L2 regularization proposed in, with w = 0.01 on all non bias or gain weights. For the activation function, we used the <a href="https://arxiv.org/abs/1606.08415">Gaussian Error Linear Unit (GELU)</a>.</p>
+<p><img src="../images/gpt-architecture.PNG" title="GPT Architecture" class="img-fluid"></p>
+<blockquote class="blockquote">
+<p>As can be seen from the <code>GPT Architecture</code>, to implement it, we will first need to implement <code>Masked Self Attention</code> and <code>Feed Forward</code> layer.</p>
+</blockquote>
+</section>
+<section id="imports" class="level2" data-number="6">
+<h2 data-number="6" class="anchored" data-anchor-id="imports"><span class="header-section-number">6</span> Imports</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> copy</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn <span class="im">as</span> nn</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn.functional <span class="im">as</span> F</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torch.nn.modules <span class="im">import</span> ModuleList</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torch.nn.modules.normalization <span class="im">import</span> LayerNorm</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> tqdm <span class="im">import</span> tqdm_notebook, trange</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> logging</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>logging.basicConfig(level <span class="op">=</span> logging.INFO)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>logger <span class="op">=</span> logging.getLogger()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="transformer-decoder-inside-gpt-2" class="level2" data-number="7">
+<h2 data-number="7" class="anchored" data-anchor-id="transformer-decoder-inside-gpt-2"><span class="header-section-number">7</span> <a href="https://arxiv.org/abs/1801.10198">Transformer Decoder inside GPT-2</a></h2>
+<p>To re-use the terminology used to describe the Transformer, the attention is a function of a query (Q) and set of key (K) and value (V) pairs. To handle longer sequences, we modify the multi-head self-attention of the Transformer to reduce memory usage by limiting the dot products between Q and K in:</p>
+<p><img src="../images/Attention-formula.PNG" title="Attention as a combination of query, key &amp; value" class="img-fluid"></p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Conv1D(nn.Module):</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, nx, nf):</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.nf <span class="op">=</span> nf</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>        w <span class="op">=</span> torch.empty(nx, nf)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>        nn.init.normal_(w, std<span class="op">=</span><span class="fl">0.02</span>)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.weight <span class="op">=</span> nn.Parameter(w)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.bias <span class="op">=</span> nn.Parameter(torch.zeros(nf))</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x):</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>        size_out <span class="op">=</span> x.size()[:<span class="op">-</span><span class="dv">1</span>] <span class="op">+</span> (<span class="va">self</span>.nf,)</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> torch.addmm(<span class="va">self</span>.bias, x.view(<span class="op">-</span><span class="dv">1</span>, x.size(<span class="op">-</span><span class="dv">1</span>)), <span class="va">self</span>.weight)</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> x.view(<span class="op">*</span>size_out)</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> x</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="conv1d-layer-explained" class="level3" data-number="7.1">
+<h3 data-number="7.1" class="anchored" data-anchor-id="conv1d-layer-explained"><span class="header-section-number">7.1</span> CONV1D Layer Explained</h3>
+<p>The <code>CONV1D</code> layer can be thought of as a LINEAR layer itself. Essentially, it is casting an initial tensor <code>x</code> (having the final dimension of <code>x.size(-1)</code>) being passed to it to have a final dimension of size <code>self.nf</code>.</p>
+<p>Here’s an example output of the same:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>d_model <span class="op">=</span> <span class="dv">768</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>conv1d  <span class="op">=</span> Conv1D(d_model, d_model<span class="op">*</span><span class="dv">3</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>x       <span class="op">=</span> torch.rand(<span class="dv">1</span>,<span class="dv">4</span>,d_model) <span class="co">#represents a sequence of batch_size=1, seq_len=4 and embedding_sz=768, something like "Hello how are you"</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>x       <span class="op">=</span> conv1d(x)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>x.shape</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> torch.Size([<span class="dv">1</span>, <span class="dv">4</span>, <span class="dv">2304</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>As can be seen in the example above, the final dimension of tensor returned by <code>CONV1D</code> is 3 times the initial size. We do this to be able to cast the input to <code>query</code>, <code>key</code> and <code>value</code> matrices.</p>
+<p>It is possible then to retrieve the query, key and value matrices like so:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>query, key, value <span class="op">=</span> x.split(d_model, dim<span class="op">=-</span><span class="dv">1</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>query.shape, key.shape, value.shape </span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> (torch.Size([<span class="dv">1</span>, <span class="dv">4</span>, <span class="dv">768</span>]), torch.Size([<span class="dv">1</span>, <span class="dv">4</span>, <span class="dv">768</span>]), torch.Size([<span class="dv">1</span>, <span class="dv">4</span>, <span class="dv">768</span>]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<blockquote class="blockquote">
+<p>Another way to cast the input to <code>Q</code>, <code>K</code> and <code>V</code> matrices would have to been to have separate <code>Wq</code>, <code>Wk</code> and <code>Wv</code> matrices. I have explained this under the <strong>EXTRA</strong> section of this post at the bottom. I find this other approach more intuitive and relatable, but we use the <code>CONV1D</code> layer in this post, because we reuse the <code>CONV1D</code> pretrained weights from Hugging Face.</p>
+</blockquote>
+</section>
+<section id="feedforward-layer-explained" class="level3" data-number="7.2">
+<h3 data-number="7.2" class="anchored" data-anchor-id="feedforward-layer-explained"><span class="header-section-number">7.2</span> FEEDFORWARD Layer Explained</h3>
+<div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> FeedForward(nn.Module):</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, dropout, d_model<span class="op">=</span><span class="dv">768</span>, nx<span class="op">=</span><span class="dv">768</span><span class="op">*</span><span class="dv">4</span>):</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.c_fc    <span class="op">=</span> Conv1D(d_model, nx)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.c_proj  <span class="op">=</span> Conv1D(nx, d_model)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.act     <span class="op">=</span> F.gelu</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.dropout <span class="op">=</span> nn.Dropout(dropout)</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x):</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.dropout(<span class="va">self</span>.c_proj(<span class="va">self</span>.act(<span class="va">self</span>.c_fc(x))))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Something, that’s just so well explained in Jay Alammar’s post - also referenced above, is how the inputs are passed through <code>ATTENTION</code> layer first and then on to <code>FEEDFORWARD</code> layer. The Feedforward network, is a normal neural network that accepts the outputs from the <code>ATTENTION</code> layer (768), casts them to <code>nx</code> (768*4) dimension, adds an activation function <code>self.act</code> (GELU), casts them back to <code>d_model</code> (768) and adds dropout (0.1).</p>
+<p>This is also mentioned in the <strong>GPT</strong> research paper referenced below. &gt; For the position-wise feed-forward networks, we used 3072 dimensional inner states</p>
+</section>
+<section id="attention-layer-explained" class="level3" data-number="7.3">
+<h3 data-number="7.3" class="anchored" data-anchor-id="attention-layer-explained"><span class="header-section-number">7.3</span> ATTENTION Layer Explained</h3>
+<blockquote class="blockquote">
+<p>The below extract is from the paper <a href="https://arxiv.org/abs/1706.03762">Attention is all you need</a>.</p>
+</blockquote>
+<section id="scaled-dot-product-attention" class="level4" data-number="7.3.1">
+<h4 data-number="7.3.1" class="anchored" data-anchor-id="scaled-dot-product-attention"><span class="header-section-number">7.3.1</span> Scaled Dot-Product Attention</h4>
+<p>We call our particular attention “Scaled Dot-Product Attention”. The input consists of queries and keys of dimension dk, and values of dimension dv. We compute the dot products of the query with all keys, divide each by √dk, and apply a softmax function to obtain the weights on the values.</p>
+<p><img src="../images/Attention-dot-product.PNG" title="Attention Dot Product" class="img-fluid"></p>
+<p>In practice, we compute the attention function on a set of queries simultaneously, packed together into a matrix Q. The keys and values are also packed together into matrices K and V . We compute the matrix of outputs as:</p>
+<p><img src="../images/Attention-formula.PNG" title="Output matrix as a combination of `Q`, `K` and `V`" class="img-fluid"></p>
+<p>The two most commonly used attention functions are additive attention, and dot-product (multiplicative) attention. Dot-product attention is identical to our algorithm, except for the scaling factor of <code>1/√dk</code>. Additive attention computes the compatibility function using a feed-forward network with a single hidden layer. While the two are similar in theoretical complexity, dot-product attention is much faster and more space-efficient in practice, since it can be implemented using highly optimized matrix multiplication code. While for small values of dk the two mechanisms perform similarly, additive attention outperforms dot product attention without scaling for larger values of <code>dk</code>. We suspect that for large values of <code>dk</code>, the dot products grow large in magnitude, pushing the softmax function into regions where it has extremely small gradients. To counteract this effect, we scale the dot products by <code>1/√dk</code>.</p>
+<blockquote class="blockquote">
+<p>To implement the The Attention layer in code, we first utilize the <code>CONV1D</code> layer and get the <code>q</code>, <code>k</code> and <code>v</code> matrices as explained before.</p>
+<p>Once we have the <code>q</code>, <code>k</code> and <code>v</code> matrices, we can perform attention using the function <code>_attn</code>. This function replicates the formula mentioned above inside <code>Attention Dot Product</code>.</p>
+</blockquote>
+<div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Attention(nn.Module):</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, d_model<span class="op">=</span><span class="dv">768</span>, n_head<span class="op">=</span><span class="dv">12</span>, n_ctx<span class="op">=</span><span class="dv">1024</span>, d_head<span class="op">=</span><span class="dv">64</span>, bias<span class="op">=</span><span class="va">True</span>, scale<span class="op">=</span><span class="va">False</span>):</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.n_head  <span class="op">=</span> n_head</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.d_model <span class="op">=</span> d_model</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.c_attn  <span class="op">=</span> Conv1D(d_model, d_model<span class="op">*</span><span class="dv">3</span>)</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.scale   <span class="op">=</span> scale</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.softmax <span class="op">=</span> nn.Softmax(dim<span class="op">=-</span><span class="dv">1</span>)</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.register_buffer(<span class="st">"bias"</span>, torch.tril(torch.ones(n_ctx, n_ctx)).view(<span class="dv">1</span>, <span class="dv">1</span>, n_ctx, n_ctx))</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.dropout <span class="op">=</span> nn.Dropout(<span class="fl">0.1</span>)</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.c_proj  <span class="op">=</span> Conv1D(d_model, d_model)</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> split_heads(<span class="va">self</span>, x):</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>        <span class="co">"return shape [`batch`, `head`, `sequence`, `features`]"</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>        new_shape <span class="op">=</span> x.size()[:<span class="op">-</span><span class="dv">1</span>] <span class="op">+</span> (<span class="va">self</span>.n_head, x.size(<span class="op">-</span><span class="dv">1</span>)<span class="op">//</span><span class="va">self</span>.n_head) </span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> x.view(<span class="op">*</span>new_shape)</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> x.permute(<span class="dv">0</span>, <span class="dv">2</span>, <span class="dv">1</span>, <span class="dv">3</span>) </span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> _attn(<span class="va">self</span>, q, k, v, attn_mask<span class="op">=</span><span class="va">None</span>):</span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>        scores  <span class="op">=</span> torch.matmul(q, k.transpose(<span class="op">-</span><span class="dv">2</span>, <span class="op">-</span><span class="dv">1</span>))</span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="va">self</span>.scale: scores <span class="op">=</span> scores<span class="op">/</span>math.sqrt(v.size(<span class="op">-</span><span class="dv">1</span>))</span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>        nd, ns  <span class="op">=</span> scores.size(<span class="op">-</span><span class="dv">2</span>), scores.size(<span class="op">-</span><span class="dv">1</span>)</span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> attn_mask <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>: scores <span class="op">=</span> scores <span class="op">+</span> attn_mask</span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>        scores  <span class="op">=</span> <span class="va">self</span>.softmax(scores)</span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>        scores  <span class="op">=</span> <span class="va">self</span>.dropout(scores)</span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>        outputs <span class="op">=</span> torch.matmul(scores, v)</span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> outputs</span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> merge_heads(<span class="va">self</span>, x):</span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>        x         <span class="op">=</span> x.permute(<span class="dv">0</span>, <span class="dv">2</span>, <span class="dv">1</span>, <span class="dv">3</span>).contiguous()</span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>        new_shape <span class="op">=</span> x.size()[:<span class="op">-</span><span class="dv">2</span>] <span class="op">+</span> (x.size(<span class="op">-</span><span class="dv">2</span>)<span class="op">*</span>x.size(<span class="op">-</span><span class="dv">1</span>),)</span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> x.view(<span class="op">*</span>new_shape)</span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x):</span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a>        x        <span class="op">=</span> <span class="va">self</span>.c_attn(x) <span class="co">#new `x` shape - `[1,3,2304]`</span></span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a>        q, k, v  <span class="op">=</span> x.split(<span class="va">self</span>.d_model, dim<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a>        q, k, v  <span class="op">=</span> <span class="va">self</span>.split_heads(q), <span class="va">self</span>.split_heads(k), <span class="va">self</span>.split_heads(v)</span>
+<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a>        out      <span class="op">=</span> <span class="va">self</span>._attn(q, k, v)</span>
+<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a>        out      <span class="op">=</span> <span class="va">self</span>.merge_heads(out)</span>
+<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a>        out      <span class="op">=</span> <span class="va">self</span>.c_proj(out)</span>
+<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> out</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<blockquote class="blockquote">
+<p>Another way to implement <code>Attention</code> is explained in the <code>Extras</code> section at the bottom of this blog. I find it to be more intuitive and easy to compare with the research paper. It utilizes Linear layers instead of <code>CONV1D</code> to cast inputs to <code>Q</code>, <code>K</code> and <code>V</code> matrices. The reason why we haven’t used it is because we use the pretrained weights for <code>CONV1D</code> layer from Hugging Face.</p>
+</blockquote>
+</section>
+<section id="multi-head-attention" class="level4" data-number="7.3.2">
+<h4 data-number="7.3.2" class="anchored" data-anchor-id="multi-head-attention"><span class="header-section-number">7.3.2</span> Multi-Head Attention</h4>
+<blockquote class="blockquote">
+<p>The below extract is from the paper <a href="https://arxiv.org/abs/1706.03762">Attention is all you need</a>.</p>
+</blockquote>
+<p>Instead of performing a single attention function with dmodel-dimensional keys, values and queries, we found it beneficial to linearly project the <code>queries</code>, <code>keys</code> and <code>values</code> h times with different, learned linear projections to <code>dk</code>, <code>dk</code> and <code>dv</code> dimensions, respectively. On each of these projected versions of <code>queries</code>, <code>keys</code> and <code>values</code> we then perform the attention function in parallel, yielding <code>dv</code>-dimensional output values. These are <strong>concatenated</strong> and once again projected, resulting in the final values, as depicted in Figure below.</p>
+<p><img src="../images/Transformers-multi-head-attention.PNG" title="Multi Head Attention" class="img-fluid"></p>
+<p>Multi-head attention allows the model to jointly attend to information from different representation subspaces at different positions. With a single attention head, averaging inhibits this.</p>
+<p><img src="../images/multi-head-attn-formula.PNG" title="Multi Head Attention as an equation" class="img-fluid"></p>
+<p>In this work we employ h = 8 parallel attention layers, or heads. For each of these we use dk = dv = dmodel/h = 64. Due to the reduced dimension of each head, the total computational cost is similar to that of single-head attention with full dimensionality.</p>
+<blockquote class="blockquote">
+<p>Not to be confused by this, in essence all that’s being done is to add another dimension to the <code>Q</code>, <code>K</code> and <code>V</code> matrices. That is, if the matrices were before of size <code>[1, 4, 768]</code> which represents <code>[bs, seq_len, d_model]</code>, these matrices are projected to dimension <code>[1, 12, 4, 64]</code> which represents <code>[bs, n_head, seq_len, d_model//n_head]</code>. GPT-2 utizes 12 parallel heads. We split the <code>Q</code>, <code>K</code>, <code>V</code> matrices inside <code>split_heads</code> function. Finally, once we get an output from applying parallel attentions we concatenate it inside <code>merge_heads</code> back to matrices of dimension <code>[bs, seq_len, d_model]</code>.</p>
+</blockquote>
+</section>
+</section>
+</section>
+<section id="gpt-2-model-architecture-in-code" class="level2" data-number="8">
+<h2 data-number="8" class="anchored" data-anchor-id="gpt-2-model-architecture-in-code"><span class="header-section-number">8</span> GPT-2 Model Architecture in Code</h2>
+<p><img src="../images/gpt-architecture.PNG" title="GPT Architecture" class="img-fluid"></p>
+<p>So far, we have implemented <code>Multi Head Attention</code> and <code>FeedForward</code> layers. The two layers form the building blocks of the <code>Transformer Decoder</code> block, shown in the picture above. The GPT-2 consists of 12 of these Transformer Blocks.</p>
+<p>This has been shown in Jay Alammar’s post like so: <img src="../images/GPT-transformer-block.PNG" title="GPT Architecture consisting of 12 Decoder Blocks" class="img-fluid"></p>
+<section id="transformer-decoder-block-explained" class="level3" data-number="8.1">
+<h3 data-number="8.1" class="anchored" data-anchor-id="transformer-decoder-block-explained"><span class="header-section-number">8.1</span> Transformer Decoder Block Explained</h3>
+<div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> TransformerBlock(nn.Module):</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, d_model<span class="op">=</span><span class="dv">768</span>, n_head<span class="op">=</span><span class="dv">12</span>, dropout<span class="op">=</span><span class="fl">0.1</span>):</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>(TransformerBlock, <span class="va">self</span>).<span class="fu">__init__</span>()</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.attn        <span class="op">=</span> Attention(d_model<span class="op">=</span><span class="dv">768</span>, n_head<span class="op">=</span><span class="dv">12</span>, d_head<span class="op">=</span><span class="dv">64</span>, n_ctx<span class="op">=</span><span class="dv">1024</span>, bias<span class="op">=</span><span class="va">True</span>, scale<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.feedforward <span class="op">=</span> FeedForward(dropout<span class="op">=</span><span class="fl">0.1</span>, d_model<span class="op">=</span><span class="dv">768</span>, nx<span class="op">=</span><span class="dv">768</span><span class="op">*</span><span class="dv">4</span>)</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.ln_1        <span class="op">=</span> LayerNorm(d_model)</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.ln_2        <span class="op">=</span> LayerNorm(d_model)</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>                </span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x):</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> x <span class="op">+</span> <span class="va">self</span>.attn(<span class="va">self</span>.ln_1(x))</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> x <span class="op">+</span> <span class="va">self</span>.feedforward(<span class="va">self</span>.ln_2(x))</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> x</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The <code>Transformer Block</code> consists of Attention and FeedForward Layers. As referenced from the GPT-2 Architecture Model Specification, &gt; <a href="https://arxiv.org/abs/1607.06450">Layer normalization</a> (Ba et al., 2016) was moved to the input of each sub-block Here are the sub-blocks are Attention and FeedForward.</p>
+<p>Thus, inside a Transformer Decoder Block, essentially we first pass the inputs to a <code>LayerNorm</code> followed by the first sub-block <code>Attention</code>. Next, we pass the outputs of this sub-block to <code>LayerNorm</code> again and finally to <code>FeedForward</code> layer.</p>
+</section>
+</section>
+<section id="the-gpt-2-architecture-explained" class="level2" data-number="9">
+<h2 data-number="9" class="anchored" data-anchor-id="the-gpt-2-architecture-explained"><span class="header-section-number">9</span> The GPT-2 Architecture Explained</h2>
+<p>As referenced from the GPT paper,</p>
+<blockquote class="blockquote">
+<p>We trained a 12-layer decoder-only transformer with masked self-attention heads (768 dimensional states and 12 attention heads).</p>
+</blockquote>
+<p>Thus, the complete GPT-2 architecture is the <code>TransformerBlock</code> copied over 12 times.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _get_clones(module, n):</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> ModuleList([copy.deepcopy(module) <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(n)])</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> GPT2(nn.Module):</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, nlayers<span class="op">=</span><span class="dv">12</span>, n_ctx<span class="op">=</span><span class="dv">1024</span>, d_model<span class="op">=</span><span class="dv">768</span>, vcb_sz<span class="op">=</span><span class="dv">50257</span>):</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>(GPT2, <span class="va">self</span>).<span class="fu">__init__</span>()</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.nlayers <span class="op">=</span> nlayers</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>        block        <span class="op">=</span> TransformerBlock(d_model<span class="op">=</span><span class="dv">768</span>, n_head<span class="op">=</span><span class="dv">12</span>, dropout<span class="op">=</span><span class="fl">0.1</span>)</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.h       <span class="op">=</span> _get_clones(block, <span class="dv">12</span>)</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.wte     <span class="op">=</span> nn.Embedding(vcb_sz, d_model)</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.wpe     <span class="op">=</span> nn.Embedding(n_ctx, d_model)</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.drop    <span class="op">=</span> nn.Dropout(<span class="fl">0.1</span>)</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.ln_f    <span class="op">=</span> LayerNorm(d_model)</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.out     <span class="op">=</span> nn.Linear(d_model, vcb_sz, bias<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.loss_fn <span class="op">=</span> nn.CrossEntropyLoss()</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.init_weights()</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> init_weights(<span class="va">self</span>):</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.out.weight <span class="op">=</span> <span class="va">self</span>.wte.weight</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.<span class="bu">apply</span>(<span class="va">self</span>._init_weights)</span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> _init_weights(<span class="va">self</span>, module):</span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="bu">isinstance</span>(module, (nn.Linear, nn.Embedding, Conv1D)):</span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>            module.weight.data.normal_(mean<span class="op">=</span><span class="fl">0.0</span>, std<span class="op">=</span><span class="fl">0.02</span>)</span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="bu">isinstance</span>(module, (nn.Linear, Conv1D)) <span class="kw">and</span> module.bias <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>                module.bias.data.zero_()</span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>        <span class="cf">elif</span> <span class="bu">isinstance</span>(module, nn.LayerNorm):</span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>            module.bias.data.zero_()</span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>            module.weight.data.fill_(<span class="fl">1.0</span>)</span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, src, labels<span class="op">=</span><span class="va">None</span>, pos_ids<span class="op">=</span><span class="va">None</span>):</span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> pos_ids <span class="kw">is</span> <span class="va">None</span>: pos_ids <span class="op">=</span> torch.arange(<span class="dv">0</span>, src.size(<span class="op">-</span><span class="dv">1</span>)).unsqueeze(<span class="dv">0</span>)</span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>        inp <span class="op">=</span> <span class="va">self</span>.drop((<span class="va">self</span>.wte(src)<span class="op">+</span><span class="va">self</span>.wpe(pos_ids)))</span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="va">self</span>.nlayers): inp <span class="op">=</span> <span class="va">self</span>.h[i](inp)</span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>        inp     <span class="op">=</span> <span class="va">self</span>.ln_f(inp)</span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a>        logits  <span class="op">=</span> <span class="va">self</span>.out(inp)</span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a>        outputs <span class="op">=</span> (logits,) <span class="op">+</span> (inp,)</span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> labels <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
+<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a>            shift_logits <span class="op">=</span> logits[..., :<span class="op">-</span><span class="dv">1</span>, :].contiguous()</span>
+<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a>            shift_labels <span class="op">=</span> labels[..., <span class="dv">1</span>:].contiguous()</span>
+<span id="cb8-42"><a href="#cb8-42" aria-hidden="true" tabindex="-1"></a>            loss <span class="op">=</span> <span class="va">self</span>.loss_fn(shift_logits.view(<span class="op">-</span><span class="dv">1</span>, shift_logits.size(<span class="op">-</span><span class="dv">1</span>)), shift_labels.view(<span class="op">-</span><span class="dv">1</span>))</span>
+<span id="cb8-43"><a href="#cb8-43" aria-hidden="true" tabindex="-1"></a>            outputs <span class="op">=</span> (loss,) <span class="op">+</span> outputs</span>
+<span id="cb8-44"><a href="#cb8-44" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> outputs</span>
+<span id="cb8-45"><a href="#cb8-45" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> logits</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<blockquote class="blockquote">
+<p>Something I have not mentioned yet is <code>Positional Encoding</code> and <code>Token Embeddings</code>. Since, we cannot pass words such as “hey” or “hello” directly to the model, we first <code>Tokenize</code> our inputs. Next, we use <code>Embeddings</code> to represent the tokens as numbers. This <a href="http://jalammar.github.io/illustrated-word2vec/">post</a> by Jay Alammar again explains Embeddings very well.</p>
+<p>Also, since unlike the RNNs where the input words are passed sequentially, Transformers take input matrices in parallel thus losing the sense of position for the words being input. To make up for the loss, before handling the <code>Token Embeddings</code> to the model, we add <code>Positional Encoding</code> - a signal that indicates the order of the words in the sequence. Since, as mentioned before, the context size of GPT-2 is 1024, the positional encodings are of dimensions <code>[1024, 768]</code>.</p>
+</blockquote>
+<p><img src="../images/PositionalEncodings.PNG" title="Positional Encodings referenced from [The Illustrated GPT-2](http://jalammar.github.io/illustrated-gpt2/)" class="img-fluid"></p>
+<p>Thus, the inputs to the GPT-2 architecture is the sum of <code>Token Embeddings</code> and <code>Positional Encodings</code> passed through a <code>Dropout</code>, to add regularization. Once, we have the input matrix, we pass this through each of the 12 Layers of the GPT-2 architecure, where each layer is a <code>Transformer Decoder Block</code> that consists of two sublayers - <code>Attention</code> and <code>FeedForward Network</code>.</p>
+<section id="language-modeling-or-classification" class="level4" data-number="9.0.1">
+<h4 data-number="9.0.1" class="anchored" data-anchor-id="language-modeling-or-classification"><span class="header-section-number">9.0.1</span> Language Modeling or Classification</h4>
+<p>When using GPT-2 as a language model, we pass the inputs to a final <code>LayerNorm</code> and through a Linear layer with a final dimension of size <code>[768, vocab_sz]</code> (50257) and get an output of size <code>[1, 4, 50257]</code>. This output represents the next word logits and we can very easily now pass this through a Softmax layer and take <code>argmax</code> to get the positional of the word inside the vocabulary with the highest probability.</p>
+<p>For classification task, we can pass the outputs received from the GPT-2 architecture through a Linear layer with a dimension of size <code>[768, n]</code> to get probabilities for each category (where <code>n</code> represents number of categories), pass it through a softmax, get the highest predicted category and use <code>CrossEntropyLoss</code> to train the architecture to do classification.</p>
+<blockquote class="blockquote">
+<p>And that’s really all the magic behind GPT-2. It’s a Decoder only Transformer Based architecture that takes inputs parallely with Positional Encodings unlike RNNs, passes them through each of it’s 12 Transformer Decoder layers (which consist of Multi head Attention and FeedForward Network) to return the final output.</p>
+<p>Let’s see this model in action in a language model task.</p>
+</blockquote>
+</section>
+</section>
+<section id="sample-text-generation-using-hugging-face-pretrained-weights" class="level2" data-number="10">
+<h2 data-number="10" class="anchored" data-anchor-id="sample-text-generation-using-hugging-face-pretrained-weights"><span class="header-section-number">10</span> Sample text generation using Hugging Face Pretrained Weights</h2>
+<p>First, let’s initialize the model with the Pretrained Weights already provided by Hugging Face.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> GPT2()</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="co"># load pretrained_weights from hugging face</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="co"># download file https://s3.amazonaws.com/models.huggingface.co/bert/gpt2-pytorch_model.bin to `.`</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>model_dict <span class="op">=</span> model.state_dict() <span class="co">#currently with random initialization</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>state_dict <span class="op">=</span> torch.load(<span class="st">"./gpt2-pytorch_model.bin"</span>) <span class="co">#pretrained weights</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>old_keys <span class="op">=</span> []</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>new_keys <span class="op">=</span> []</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> key <span class="kw">in</span> state_dict.keys(): </span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="st">"mlp"</span> <span class="kw">in</span> key: <span class="co">#The hugging face state dict references the feedforward network as mlp, need to replace to `feedforward` be able to reuse these weights</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>        new_key <span class="op">=</span> key.replace(<span class="st">"mlp"</span>, <span class="st">"feedforward"</span>)</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>        new_keys.append(new_key)</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>        old_keys.append(key)</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> old_key, new_key <span class="kw">in</span> <span class="bu">zip</span>(old_keys, new_keys): </span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>    state_dict[new_key]<span class="op">=</span>state_dict.pop(old_key)</span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>pretrained_dict <span class="op">=</span> {k: v <span class="cf">for</span> k, v <span class="kw">in</span> state_dict.items() <span class="cf">if</span> k <span class="kw">in</span> model_dict}</span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>model_dict.update(pretrained_dict)</span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>model.load_state_dict(model_dict)</span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>model.<span class="bu">eval</span>() <span class="co">#model in inference mode as it's now initialized with pretrained weights</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Let’s now generate text. We will utilize Hugging Face’s pretrained <code>Tokenizer</code> to convert words to input embeddings.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> transformers <span class="im">import</span> GPT2Tokenizer</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>tokenizer <span class="op">=</span> GPT2Tokenizer.from_pretrained(<span class="st">"gpt2"</span>)</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>context   <span class="op">=</span> torch.tensor([tokenizer.encode(<span class="st">"The planet earth"</span>)])</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> generate(context, ntok<span class="op">=</span><span class="dv">20</span>):</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(ntok):</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>        out <span class="op">=</span> model(context)</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>        logits <span class="op">=</span> out[:, <span class="op">-</span><span class="dv">1</span>, :]</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>        indices_to_remove <span class="op">=</span> logits <span class="op">&lt;</span> torch.topk(logits, <span class="dv">10</span>)[<span class="dv">0</span>][..., <span class="op">-</span><span class="dv">1</span>, <span class="va">None</span>]</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>        logits[indices_to_remove] <span class="op">=</span> np.NINF</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>        next_tok <span class="op">=</span> torch.multinomial(F.softmax(logits, dim<span class="op">=-</span><span class="dv">1</span>), num_samples<span class="op">=</span><span class="dv">1</span>).squeeze(<span class="dv">1</span>)</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>        context <span class="op">=</span> torch.cat([context, next_tok.unsqueeze(<span class="op">-</span><span class="dv">1</span>)], dim<span class="op">=-</span><span class="dv">1</span>)</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> context</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>out <span class="op">=</span> generate(context, ntok<span class="op">=</span><span class="dv">20</span>)</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>tokenizer.decode(out[<span class="dv">0</span>])</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> <span class="st">'The planet earth is the source of all of all the light," says the study that the government will'</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="extras" class="level2" data-number="11">
+<h2 data-number="11" class="anchored" data-anchor-id="extras"><span class="header-section-number">11</span> Extras</h2>
+<p>Another way to implement <code>Attention</code> as shown in the NLP Course by fast.ai referenced from <a href="https://github.com/fastai/course-nlp/blob/master/8-translation-transformer.ipynb">here</a>, that I find to be more intuitive is as below:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Attention_FASTAI(nn.Module):</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, d_model<span class="op">=</span><span class="dv">768</span>, n_head<span class="op">=</span><span class="dv">12</span>, d_head<span class="op">=</span><span class="dv">64</span>, n_ctx<span class="op">=</span><span class="dv">1024</span>, bias<span class="op">=</span><span class="va">True</span>, scale<span class="op">=</span><span class="va">False</span>):</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.n_head   <span class="op">=</span> n_head</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.d_head   <span class="op">=</span> d_head</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.softmax  <span class="op">=</span> nn.Softmax(dim<span class="op">=-</span><span class="dv">1</span>)</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.scale    <span class="op">=</span> scale</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.atn_drop <span class="op">=</span> nn.Dropout(<span class="fl">0.1</span>)</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.wq, <span class="va">self</span>.wk, <span class="va">self</span>.wv <span class="op">=</span> [nn.Linear(d_model, n_head<span class="op">*</span>d_head, </span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>                                               bias<span class="op">=</span>bias) <span class="cf">for</span> o <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">3</span>)]</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> split_heads(<span class="va">self</span>, x, layer, bs):</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> layer(x)</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> x.view(bs, x.size(<span class="dv">1</span>), <span class="va">self</span>.n_head, <span class="va">self</span>.d_head).permute(<span class="dv">0</span>,<span class="dv">2</span>,<span class="dv">1</span>,<span class="dv">3</span>)</span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> _attn(<span class="va">self</span>, q, k, v, attn_mask<span class="op">=</span><span class="va">None</span>):</span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>        scores  <span class="op">=</span> torch.matmul(q, k.transpose(<span class="op">-</span><span class="dv">2</span>, <span class="op">-</span><span class="dv">1</span>))</span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="va">self</span>.scale: scores <span class="op">=</span> scores<span class="op">/</span>math.sqrt(v.size(<span class="op">-</span><span class="dv">1</span>))</span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> attn_mask <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>: </span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>            scores <span class="op">=</span> scores.<span class="bu">float</span>().masked_fill(attn_mask, <span class="op">-</span><span class="bu">float</span>(<span class="st">'inf'</span>)).type_as(scores)</span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>        attn_prob  <span class="op">=</span> <span class="va">self</span>.atn_drop(<span class="va">self</span>.softmax(scores))</span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>        attn_vec   <span class="op">=</span> attn_prob <span class="op">@</span> v</span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> attn_vec</span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> merge_heads(<span class="va">self</span>, x, bs, seq_len):</span>
+<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a>        x         <span class="op">=</span> x.permute(<span class="dv">0</span>, <span class="dv">2</span>, <span class="dv">1</span>, <span class="dv">3</span>).contiguous()</span>
+<span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> x.view(bs, seq_len, <span class="op">-</span><span class="dv">1</span>)</span>
+<span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb11-30"><a href="#cb11-30" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, q, k, v, mask<span class="op">=</span><span class="va">None</span>):</span>
+<span id="cb11-31"><a href="#cb11-31" aria-hidden="true" tabindex="-1"></a>        bs, seq_len <span class="op">=</span> q.size(<span class="dv">0</span>), q.size(<span class="dv">1</span>)</span>
+<span id="cb11-32"><a href="#cb11-32" aria-hidden="true" tabindex="-1"></a>        wq, wk, wv  <span class="op">=</span> <span class="bu">map</span>(<span class="kw">lambda</span> o:<span class="va">self</span>.split_heads(<span class="op">*</span>o, bs),</span>
+<span id="cb11-33"><a href="#cb11-33" aria-hidden="true" tabindex="-1"></a>                        <span class="bu">zip</span>((q,k,v), (<span class="va">self</span>.wq, <span class="va">self</span>.wk, <span class="va">self</span>.wv)))</span>
+<span id="cb11-34"><a href="#cb11-34" aria-hidden="true" tabindex="-1"></a>        attn_vec    <span class="op">=</span> <span class="va">self</span>._attn(wq, wk, wv)</span>
+<span id="cb11-35"><a href="#cb11-35" aria-hidden="true" tabindex="-1"></a>        attn_vec    <span class="op">=</span> <span class="va">self</span>.merge_heads(attn_vec, bs, seq_len)</span>
+<span id="cb11-36"><a href="#cb11-36" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> attn_vec</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The key difference between the implementation above and the one we have used is that this implementation does not use <code>CONV1D</code>. Instead, we first pass the input <code>x</code> to <code>self.wq</code>, <code>self.wk</code> and <code>self.wv</code> Linear Layers to get <code>wq</code>, <code>wk</code> and <code>wv</code> matrices and then perform attention as before.</p>
+</section>
+<section id="credits" class="level2" data-number="12">
+<h2 data-number="12" class="anchored" data-anchor-id="credits"><span class="header-section-number">12</span> Credits</h2>
+<blockquote class="blockquote">
+<p>I just want to take the time to thank <a href="https://twitter.com/math_rachel">Rachel Thomas</a> and <a href="https://twitter.com/jeremyphoward">Jeremy Howard</a> for a great <a href="https://www.fast.ai/2019/07/08/fastai-nlp/">NLP course</a> and the fast.ai course in general, which has helped me bolster my understanding of RNNs, GRUs, AWD-LSTM and Transformers. Also, a special thanks to <a href="https://huggingface.co/">Hugging Face</a> for creating an open source NLP library and providing a number of <a href="https://huggingface.co/transformers/pretrained_models.html">Pretrained Models</a> to use. As mentioned the code in this blog post comes directly from the Hugging Face library. And, <a href="http://jalammar.github.io/">Jay Alammar</a> for the excellent work that he has been doing to Visualise machine learning concepts. <a href="http://jalammar.github.io/illustrated-gpt2/">The Illustrated GPT-2</a> is one of the most comprehensive blog posts on GPT-2. Finally, to Harvard NLP, for <a href="https://nlp.seas.harvard.edu/2018/04/03/attention.html">The Annotated Transformer</a>, a beautiful and easy to follow implementation of Transformers in PyTorch.</p>
+</blockquote>
+</section>
+<section id="feedback" class="level2" data-number="13">
+<h2 data-number="13" class="anchored" data-anchor-id="feedback"><span class="header-section-number">13</span> Feedback</h2>
+<p>Comments or feedback? Please tweet me at <a href="https://twitter.com/amaarora"><span class="citation" data-cites="amaarora">@amaarora</span></a></p>
+<blockquote class="twitter-tweet blockquote" data-theme="light">
+<p lang="en" dir="ltr">
+This is a really wonderful resource, and draws together many very nice pieces of work. <a href="https://t.co/CM16ByNrbt">https://t.co/CM16ByNrbt</a>
+</p>
+— Jeremy Howard (<span class="citation" data-cites="jeremyphoward">@jeremyphoward</span>) <a href="https://twitter.com/jeremyphoward/status/1230252636256919552?ref_src=twsrc%5Etfw">February 19, 2020</a>
+</blockquote>
+<script async="" src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+<blockquote class="twitter-tweet blockquote">
+<p lang="en" dir="ltr">
+Great work pairing GPT2 concepts with the key excerpts from the code. <a href="https://t.co/IkFlAf3Ua8">https://t.co/IkFlAf3Ua8</a>
+</p>
+— Jay Alammar جهاد العمار (<span class="citation" data-cites="jalammar">@jalammar</span>) <a href="https://twitter.com/jalammar/status/1230376378777952256?ref_src=twsrc%5Etfw">February 20, 2020</a>
+</blockquote>
+<script async="" src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+<blockquote class="twitter-tweet blockquote">
+<p lang="en" dir="ltr">
+"The Annotated GPT-2" blogpost seems to start out a a simple question of asking why use conv-1d vs linear. <br><br>An awesome read!! <a href="https://t.co/GCju0z3Wri">https://t.co/GCju0z3Wri</a><br><br> <a href="https://twitter.com/hashtag/nlproc?src=hash&amp;ref_src=twsrc%5Etfw">#nlproc</a> <a href="https://twitter.com/hashtag/nlposs?src=hash&amp;ref_src=twsrc%5Etfw">#nlposs</a> <a href="https://twitter.com/hashtag/distiller?src=hash&amp;ref_src=twsrc%5Etfw">#distiller</a> <a href="https://t.co/cvSdEah8gT">https://t.co/cvSdEah8gT</a>
+</p>
+— Liling Tan (<span class="citation" data-cites="alvations">@alvations</span>) <a href="https://twitter.com/alvations/status/1230409491834753027?ref_src=twsrc%5Etfw">February 20, 2020</a>
+</blockquote>
+<script async="" src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+<blockquote class="twitter-tweet blockquote">
+<p lang="en" dir="ltr">
+A must-read blog about GPT-2. <a href="https://t.co/EuDil5Dm07">https://t.co/EuDil5Dm07</a>
+</p>
+— Xinhao Li (<span class="citation" data-cites="XinhaoLi1">@XinhaoLi1</span>) <a href="https://twitter.com/XinhaoLi1/status/1230325895719718912?ref_src=twsrc%5Etfw">February 20, 2020</a>
+</blockquote>
+<script async="" src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+<blockquote class="twitter-tweet blockquote">
+<p lang="en" dir="ltr">
+One of the best NLP Blogposts I've read: A definitive and complete writeup. 🍵<br><br>This is a blog, I wish I had when I was tinkering with the GPT-2. <br><br>Must read for everyone: <a href="https://t.co/yLRFywYgm6">https://t.co/yLRFywYgm6</a>
+</p>
+— Sanyam Bhutani (<span class="citation" data-cites="bhutanisanyam1">@bhutanisanyam1</span>) <a href="https://twitter.com/bhutanisanyam1/status/1230317239305326592?ref_src=twsrc%5Etfw">February 20, 2020</a>
+</blockquote>
+<script async="" src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+<blockquote class="twitter-tweet blockquote">
+<p lang="en" dir="ltr">
+Neat! <a href="https://t.co/eLt3o180Qr">https://t.co/eLt3o180Qr</a>
+</p>
+— Antônio Horta Ribeiro (<span class="citation" data-cites="ahortaribeiro">@ahortaribeiro</span>) <a href="https://twitter.com/ahortaribeiro/status/1230295505680334848?ref_src=twsrc%5Etfw">February 20, 2020</a>
+</blockquote>
+<script async="" src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+<blockquote class="twitter-tweet blockquote">
+<p lang="en" dir="ltr">
+Fantastic work!! Looking forward to learning what is it behind the scenes of this language model! <a href="https://t.co/Ml1DY22NxQ">https://t.co/Ml1DY22NxQ</a>
+</p>
+— Data Enigma (<span class="citation" data-cites="EnigmaData">@EnigmaData</span>) <a href="https://twitter.com/EnigmaData/status/1230279492926611457?ref_src=twsrc%5Etfw">February 19, 2020</a>
+</blockquote>
+<script async="" src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+<blockquote class="twitter-tweet blockquote">
+<p lang="en" dir="ltr">
+The Annotated GPT-2 - Understand how the GPT-2 model works underneath with explanations and source code<br><br>Blogpost <a href="https://t.co/anLqVhZQPN">https://t.co/anLqVhZQPN</a><a href="https://twitter.com/amaarora?ref_src=twsrc%5Etfw"><span class="citation" data-cites="amaarora">@amaarora</span></a><br><br>𝐬𝐩𝐫𝐞𝐚𝐝 𝐭𝐡𝐞 𝐰𝐨𝐫𝐝 𝐨𝐟 <a href="https://twitter.com/hashtag/%F0%9D%90%8D%F0%9D%90%8B%F0%9D%90%8F?src=hash&amp;ref_src=twsrc%5Etfw">#𝐍𝐋𝐏</a> 💜<a href="https://twitter.com/hashtag/datascience?src=hash&amp;ref_src=twsrc%5Etfw">#datascience</a> <a href="https://twitter.com/hashtag/pytorch?src=hash&amp;ref_src=twsrc%5Etfw">#pytorch</a> <a href="https://twitter.com/hashtag/deeplearning?src=hash&amp;ref_src=twsrc%5Etfw">#deeplearning</a> <a href="https://twitter.com/hashtag/machinelearning?src=hash&amp;ref_src=twsrc%5Etfw">#machinelearning</a> <a href="https://t.co/n5QIQBAIfH">pic.twitter.com/n5QIQBAIfH</a>
+</p>
+— Philip Vollet (ﾉ◕ヮ◕)ﾉ*:・ﾟ✧ (<span class="citation" data-cites="philipvollet">@philipvollet</span>) <a href="https://twitter.com/philipvollet/status/1230377455141126144?ref_src=twsrc%5Etfw">February 20, 2020</a>
+</blockquote>
+<script async="" src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+<blockquote class="twitter-tweet blockquote">
+<p lang="en" dir="ltr">
+This is fantastic <a href="https://twitter.com/amaarora?ref_src=twsrc%5Etfw"><span class="citation" data-cites="amaarora">@amaarora</span></a>, thanks 👍
+</p>
+— Manpreet Singh (<span class="citation" data-cites="ms_ghotratweet">@ms_ghotratweet</span>) <a href="https://twitter.com/ms_ghotratweet/status/1230333834542977025?ref_src=twsrc%5Etfw">February 20, 2020</a>
+</blockquote>
+<script async="" src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+<blockquote class="twitter-tweet blockquote">
+<p lang="en" dir="ltr">
+This is brilliant stuff!!!
+</p>
+— Arron Hovingham (<span class="citation" data-cites="AnalystiaArron">@AnalystiaArron</span>) <a href="https://twitter.com/AnalystiaArron/status/1230429756111409153?ref_src=twsrc%5Etfw">February 20, 2020</a>
+</blockquote>
+<script async="" src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+
+</section>
+
+<p>subscribe.html</p></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

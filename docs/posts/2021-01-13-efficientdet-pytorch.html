@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-99.9.9">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Aman Arora">
+<meta name="dcterms.date" content="2021-01-13">
+<meta name="description" content="In this blog post, we will look at how to implement the EfficientDet architecture in PyTorch from scratch.">
+
+<title>The EfficientDet Architecture in PyTorch</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html" rel="" target="">
+ <span class="menu-text">Aman Arora’s Blog</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../about.html" rel="" target="">
+ <span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/" rel="" target=""><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com" rel="" target=""><i class="bi bi-twitter" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+            <div class="quarto-navbar-tools">
+</div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar"><div class="quarto-margin-header"><div class="margin-header-item">
+<!-- Begin Mailchimp Signup Form -->
+<link href="//cdn-images.mailchimp.com/embedcode/classic-071822.css" rel="stylesheet" type="text/css">
+<style type="text/css">
+    #mc_embed_signup{background:#fff; clear:left; font:14px Helvetica,Arial,sans-serif;  width:600px;}
+    /* Add your own Mailchimp form style overrides in your site stylesheet or in this style block.
+       We recommend moving this block and the preceding CSS link to the HEAD of your HTML file. */
+</style>
+<div id="mc_embed_signup">
+    <form action="https://github.us4.list-manage.com/subscribe/post?u=e847230346a7c78d4745ae796&amp;id=7a63b2b273&amp;f_id=005f58e8f0" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate="">
+        <div id="mc_embed_signup_scroll">
+        <h2>Subscribe to Aman Arora's Blog</h2>
+        <div class="indicates-required"><span class="asterisk">*</span> indicates required</div>
+<div class="mc-field-group">
+    <label for="mce-EMAIL">Email Address  <span class="asterisk">*</span>
+</label>
+    <input type="email" value="" name="EMAIL" class="required email" id="mce-EMAIL" required="">
+    <span id="mce-EMAIL-HELPERTEXT" class="helper_text"></span>
+</div>
+<div class="mc-field-group">
+    <label for="mce-FNAME">First Name </label>
+    <input type="text" value="" name="FNAME" class="" id="mce-FNAME">
+    <span id="mce-FNAME-HELPERTEXT" class="helper_text"></span>
+</div>
+<div class="mc-field-group">
+    <label for="mce-LNAME">Last Name </label>
+    <input type="text" value="" name="LNAME" class="" id="mce-LNAME">
+    <span id="mce-LNAME-HELPERTEXT" class="helper_text"></span>
+</div>
+    <div id="mce-responses" class="clear foot">
+        <div class="response" id="mce-error-response" style="display:none"></div>
+        <div class="response" id="mce-success-response" style="display:none"></div>
+    </div>    <!-- real people should not fill this in and expect good things - do not remove this or risk form bot signups-->
+    <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_e847230346a7c78d4745ae796_7a63b2b273" tabindex="-1" value=""></div>
+        <div class="optionalParent">
+            <div class="clear foot">
+                <input type="submit" value="Subscribe" name="subscribe" id="mc-embedded-subscribe" class="button">
+                <p class="brandingLogo"><a href="http://eepurl.com/il3baM" title="Mailchimp - email marketing made easy and fun"><img src="https://eep.io/mc-cdn-images/template_images/branding_logo_text_dark_dtp.svg"></a></p>
+            </div>
+        </div>
+    </div>
+</form>
+</div>
+<script type="text/javascript" src="//s3.amazonaws.com/downloads.mailchimp.com/js/mc-validate.js"></script><script type="text/javascript">(function($) {window.fnames = new Array(); window.ftypes = new Array();fnames[0]='EMAIL';ftypes[0]='email';fnames[1]='FNAME';ftypes[1]='text';fnames[2]='LNAME';ftypes[2]='text';fnames[3]='ADDRESS';ftypes[3]='address';fnames[4]='PHONE';ftypes[4]='phone';fnames[5]='BIRTHDAY';ftypes[5]='birthday';}(jQuery));var $mcj = jQuery.noConflict(true);</script>
+<!--End mc_embed_signup-->
+</div></div>
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#resamplefeaturemap" id="toc-resamplefeaturemap" class="nav-link active" data-scroll-target="#resamplefeaturemap"><span class="header-section-number">1</span> ResampleFeatureMap</a></li>
+  <li><a href="#bifpn-layer" id="toc-bifpn-layer" class="nav-link" data-scroll-target="#bifpn-layer"><span class="header-section-number">2</span> BiFPN Layer</a>
+  <ul class="collapse">
+  <li><a href="#fnode" id="toc-fnode" class="nav-link" data-scroll-target="#fnode"><span class="header-section-number">2.1</span> FNode</a></li>
+  </ul></li>
+  <li><a href="#bifpn-layer-implementation" id="toc-bifpn-layer-implementation" class="nav-link" data-scroll-target="#bifpn-layer-implementation"><span class="header-section-number">3</span> BiFPN Layer Implementation</a></li>
+  <li><a href="#bifpn" id="toc-bifpn" class="nav-link" data-scroll-target="#bifpn"><span class="header-section-number">4</span> BiFPN</a></li>
+  <li><a href="#efficientdet-architecture" id="toc-efficientdet-architecture" class="nav-link" data-scroll-target="#efficientdet-architecture"><span class="header-section-number">5</span> EfficientDet Architecture</a></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion"><span class="header-section-number">6</span> Conclusion</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">The EfficientDet Architecture in PyTorch</h1>
+  <div class="quarto-categories">
+    <div class="quarto-category">Computer Vision</div>
+    <div class="quarto-category">Model Architecture</div>
+    <div class="quarto-category">Object Detection</div>
+  </div>
+  </div>
+
+<div>
+  <div class="description">
+    <p>In this blog post, we will look at how to implement the EfficientDet architecture in PyTorch from scratch.</p>
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Aman Arora </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">January 13, 2021</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+</header>
+
+<p>This blog post is a direct continuation of my <a href="https://amaarora.github.io/2021/01/11/efficientdet.html">previous blog post</a> explaining EfficientDets. In my previous post, we looked and understood what’s inside an <strong>EfficientDet</strong> and also read about the various components such as <strong>BiFPN</strong> and <strong>Compound Scaling</strong> that make an EfficientDet network so powerful.</p>
+<p>Today, our focus will be to build on top of that knowledge and showcase how to implement the network using PyTorch step-by-step. Throughout this blog post I have added some side notes to be able to explain things better.</p>
+<blockquote class="blockquote">
+<p>These side-notes would look something like this.</p>
+</blockquote>
+<p><strong>NOTE</strong>: The code implementations shared below are not my own. All code shown below has been directly copied from <a href="https://twitter.com/wightmanr">Ross Wightman’s</a> wonderful repo <a href="https://github.com/rwightman/efficientdet-pytorch">efficientdet-pytorch</a>. <code>efficientdet-pytorch</code> makes heavy use of <a href="https://github.com/rwightman/pytorch-image-models">timm</a> to create the backbone network and also for several other operations.</p>
+<blockquote class="blockquote">
+<p>As part of this blog post - we will not be looking at the source code of <code>timm</code>. We will only be looking at the implementation inside <code>efficientdet-pytorch</code> repo. This is a conscious decision to keep this blog post from blowing up. Also, everything below is based on “my understanding” of the code. It is possible that Ross might have implemented things differently than the way in which I have understood them.</p>
+</blockquote>
+<p><img src="../images/EfficientDet.png" title="fig-1 EfficientDet Architecture" class="img-fluid"></p>
+<p>There are few notable things in the architecture above that we must look at before starting with the implementation: 1. The BiFPN Layer only interacts with the feature maps at level 3-7 of the backbone network. 2. <a href="https://amaarora.github.io/2020/08/13/efficientnet.html">EfficientNets</a> are used as the backbone network for EfficientDets. 3. There are bottom-up and top-down connections between the feature maps at different levels. Thus, we would need to be able to <strong>Upsample</strong> or <strong>Downsample</strong> the features. 4. The BiFPN Network consists of multiple BiFPN Layers and the number of BiFPN layers depends on the size of the EfficientDet (compound scaling). 5. The EfficientDet Architecture consists of two main components - Backbone + BiFPN network. 6. Each “Node” inside a BiFPN layer can accept either 2 or 3 inputs and it combines them to produce a single output.</p>
+<p>We are going to be using a bottom-up approach in coding this time and build the EfficientDet together component by component.</p>
+<section id="resamplefeaturemap" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="resamplefeaturemap"><span class="header-section-number">1</span> ResampleFeatureMap</h2>
+<p>So, the first thing we are going to implement is a class called <code>ResampleFeatureMap</code> that is able to upsample or downsample an input feature map based on a parameter called <code>reduction_ratio</code>. This class typically represents the “arrows” in the architecture diagram above.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> ResampleFeatureMap(nn.Sequential):</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>, in_channels, out_channels, reduction_ratio<span class="op">=</span><span class="fl">1.</span>, pad_type<span class="op">=</span><span class="st">''</span>, downsample<span class="op">=</span><span class="va">None</span>, upsample<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>            norm_layer<span class="op">=</span>nn.BatchNorm2d, apply_bn<span class="op">=</span><span class="va">False</span>, conv_after_downsample<span class="op">=</span><span class="va">False</span>, redundant_bias<span class="op">=</span><span class="va">False</span>):</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>(ResampleFeatureMap, <span class="va">self</span>).<span class="fu">__init__</span>()</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>        downsample <span class="op">=</span> downsample <span class="kw">or</span> <span class="st">'max'</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>        upsample <span class="op">=</span> upsample <span class="kw">or</span> <span class="st">'nearest'</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.in_channels <span class="op">=</span> in_channels</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.out_channels <span class="op">=</span> out_channels</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.reduction_ratio <span class="op">=</span> reduction_ratio</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.conv_after_downsample <span class="op">=</span> conv_after_downsample</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>        conv <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> in_channels <span class="op">!=</span> out_channels:</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>            conv <span class="op">=</span> ConvBnAct2d(</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>                in_channels, out_channels, kernel_size<span class="op">=</span><span class="dv">1</span>, padding<span class="op">=</span>pad_type,</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>                norm_layer<span class="op">=</span>norm_layer <span class="cf">if</span> apply_bn <span class="cf">else</span> <span class="va">None</span>,</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>                bias<span class="op">=</span><span class="kw">not</span> apply_bn <span class="kw">or</span> redundant_bias, act_layer<span class="op">=</span><span class="va">None</span>)</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> reduction_ratio <span class="op">&gt;</span> <span class="dv">1</span>:</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> conv <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span> <span class="kw">and</span> <span class="kw">not</span> <span class="va">self</span>.conv_after_downsample:</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>                <span class="va">self</span>.add_module(<span class="st">'conv'</span>, conv)</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> downsample <span class="kw">in</span> (<span class="st">'max'</span>, <span class="st">'avg'</span>):</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>                stride_size <span class="op">=</span> <span class="bu">int</span>(reduction_ratio)</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>                downsample <span class="op">=</span> create_pool2d(</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>                     downsample, kernel_size<span class="op">=</span>stride_size <span class="op">+</span> <span class="dv">1</span>, stride<span class="op">=</span>stride_size, padding<span class="op">=</span>pad_type)</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>            <span class="cf">else</span>:</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>                downsample <span class="op">=</span> Interpolate2d(scale_factor<span class="op">=</span><span class="fl">1.</span><span class="op">/</span>reduction_ratio, mode<span class="op">=</span>downsample)</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.add_module(<span class="st">'downsample'</span>, downsample)</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> conv <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span> <span class="kw">and</span> <span class="va">self</span>.conv_after_downsample:</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>                <span class="va">self</span>.add_module(<span class="st">'conv'</span>, conv)</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> conv <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>                <span class="va">self</span>.add_module(<span class="st">'conv'</span>, conv)</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> reduction_ratio <span class="op">&lt;</span> <span class="dv">1</span>:</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>                scale <span class="op">=</span> <span class="bu">int</span>(<span class="dv">1</span> <span class="op">//</span> reduction_ratio)</span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>                <span class="va">self</span>.add_module(<span class="st">'upsample'</span>, Interpolate2d(scale_factor<span class="op">=</span>scale, mode<span class="op">=</span>upsample))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Here is the general idea - if <code>out_channels</code> is not equal to <code>in_channels</code>, then use a 1x1 convolution operation to make them the same. Also, if the reduction ratio is not equal to 1, then either upsample or downsample the input feature map based on the requirements. If <code>reduction_ratio&lt;1</code> then, <strong>Upsample</strong> the input, otherwise if <code>reduction_ratio&gt;1</code> then, <strong>Downsample</strong> the input.</p>
+<p>Upsampling or Downsampling in simple terms refers to making the spatial dimensions of the input feature map larger or smaller. Upsampling is generally done using bilinear interpolation and downsampling is generally done using pooling.</p>
+<p>So an example of using this class, assuming all imports work, would be:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># downsampling</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>inp <span class="op">=</span> torch.randn(<span class="dv">1</span>, <span class="dv">40</span>, <span class="dv">64</span>, <span class="dv">64</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>resample <span class="op">=</span> ResampleFeatureMap(in_channels<span class="op">=</span><span class="dv">40</span>, out_channels<span class="op">=</span><span class="dv">112</span>, reduction_ratio<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>out <span class="op">=</span> resample(inp)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(inp.shape, out.shape) </span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> torch.Size([<span class="dv">1</span>, <span class="dv">40</span>, <span class="dv">64</span>, <span class="dv">64</span>]) torch.Size([<span class="dv">1</span>, <span class="dv">112</span>, <span class="dv">32</span>, <span class="dv">32</span>])</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co"># upsampling</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>inp <span class="op">=</span> torch.randn(<span class="dv">1</span>, <span class="dv">40</span>, <span class="dv">64</span>, <span class="dv">64</span>)</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>resample <span class="op">=</span> ResampleFeatureMap(in_channels<span class="op">=</span><span class="dv">40</span>, out_channels<span class="op">=</span><span class="dv">112</span>, reduction_ratio<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>out <span class="op">=</span> resample(inp)</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(inp.shape, out.shape) </span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> torch.Size([<span class="dv">1</span>, <span class="dv">40</span>, <span class="dv">64</span>, <span class="dv">64</span>]) torch.Size([<span class="dv">1</span>, <span class="dv">112</span>, <span class="dv">128</span>, <span class="dv">128</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>One key thing that’s part of this class, is that the class does not have a <code>forward</code> method defined that is common to almost all layers in PyTorch. The reason is that this class inherits from <code>nn.Sequential</code> instead of <code>nn.Module</code>. This class does not need a <code>forward</code> method to be defined and automatically calls the modules defined in this class one by one. That is why we do things like <code>self.add_module</code> inside the <code>ResampleFeatureMap</code> class.</p>
+<p>Another thing, the convolution operation inside this <code>ResampleFeatureMap</code> calls <code>ConvBnAct2d</code> and not <code>nn.Conv2d</code>. <code>ConvBnAct2d</code> as the name suggests is a Convolution operation followed by Batch Normalization and an Activation function.</p>
+<p>So, here is the implementation of <code>ConvBnAct2d</code>:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> ConvBnAct2d(nn.Module):</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, in_channels, out_channels, kernel_size, stride<span class="op">=</span><span class="dv">1</span>, dilation<span class="op">=</span><span class="dv">1</span>, padding<span class="op">=</span><span class="st">''</span>, bias<span class="op">=</span><span class="va">False</span>,</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>                 norm_layer<span class="op">=</span>nn.BatchNorm2d, act_layer<span class="op">=</span>_ACT_LAYER):</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>(ConvBnAct2d, <span class="va">self</span>).<span class="fu">__init__</span>()</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.conv <span class="op">=</span> create_conv2d(</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>            in_channels, out_channels, kernel_size, stride<span class="op">=</span>stride, dilation<span class="op">=</span>dilation, padding<span class="op">=</span>padding, bias<span class="op">=</span>bias)</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.bn <span class="op">=</span> <span class="va">None</span> <span class="cf">if</span> norm_layer <span class="kw">is</span> <span class="va">None</span> <span class="cf">else</span> norm_layer(out_channels)</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.act <span class="op">=</span> <span class="va">None</span> <span class="cf">if</span> act_layer <span class="kw">is</span> <span class="va">None</span> <span class="cf">else</span> act_layer(inplace<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x):</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="va">self</span>.conv(x)</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="va">self</span>.bn <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>            x <span class="op">=</span> <span class="va">self</span>.bn(x)</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="va">self</span>.act <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>            x <span class="op">=</span> <span class="va">self</span>.act(x)</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> x</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The <code>create_conv2d</code> is a function from <code>timm</code>, that creates a <code>nn.Conv2d</code> layer in our case. We won’t go into the source code of this function as it is part of the <code>timm</code> library, which we will look into a series of blog posts later.</p>
+<p>Now, let’s start to get into the tricky bits. Let’s see how could we implement a single <code>BiFpnLayer</code>.</p>
+</section>
+<section id="bifpn-layer" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="bifpn-layer"><span class="header-section-number">2</span> BiFPN Layer</h2>
+<p><img src="../images/BiFPN_layer.png" title="fig-2 Annotated EfficientDet-D0 Architecture assuming EfficientNet-B0 backbone" class="img-fluid"></p>
+<p>Looking at the image above, we can see that a <code>BiFPN Layer</code> has <code>Nodes</code>. To be specific, each <code>BiFPN Layer</code> has <strong>5 input Nodes</strong> (number 0-4) and <strong>8 internal nodes</strong> (number 5-12). The input nodes for the first <code>BiFPN Layer</code> are feature outputs from the EfficientNet Backbone. For the subsequent <code>BiFpn Layer</code>s, the feature outputs come from the previous <code>BiFPN Layer</code>.</p>
+<p>Also, each arrow is the <code>ResampleFeatureMap</code> class where the <span style="color:blue">blue arrows</span> perform <span style="color:blue"><strong>DownSampling</strong></span> and the <span style="color:red">red arrows</span> perform <span style="color:red"><strong>Upsampling</strong></span>. From a code perspective, there are some things that we need to be able to implement the BiFPN Layer: 1. We need to be able to extract the feature maps from the EfficientNet Backbone. <code>timm</code> will do this for us. As you’ll notice later, we call <code>timm.create_model</code> method passing in a parameter called <code>out_indices</code> and also <code>features_only=True</code>. This tells <code>timm</code> to create a model that extracts the required feature maps for us at the correct level. 2. We need to be able to combine the features coming from different nodes at different levels. The class <code>FpnCombine</code> will take care of this for us which we will look at below. 3. We need to define the numbers and structures of the nodes in Python similar to the diagram. &gt; For example, our implementation should know that <code>Node-6</code> is the intermediate Node at level <code>**P5**</code> and it accepts the outputs of <code>Node-5</code> and <code>Node-2</code> as inputs. 4. Not all <code>Node</code>s accept the same number of inputs. Some accept 2 inputs whereas some nodes (such as 9, 10, 11) accept 3 inputs as shown in the <code>fig-2</code>. We can clearly satisfy this requirement by passing the inputs as a <code>List</code> of <code>tensors</code>. 5. The output features from the <code>EfficientNet-B0</code>backbone at level <strong>P3</strong>-<strong>P5</strong> have 40, 112, 320 number of channels respectively and each spatial dimension is half that of the previous level. &gt; This is important to note: considering an input image of size <code>[3, 512, 512]</code>, the size of feature maps at levels <strong>P3</strong>-<strong>P5</strong> would be <code>[40, 64, 64]</code>, <code>[112, 32, 32]</code>, <code>[320, 16, 16]</code> respectively.</p>
+<p>With this general understanding, let’s get to work.</p>
+<p>First things first, how could our implementation get to know about the numbers and structures of the nodes? There is a function called <code>get_fpn_config</code> that returns a Python dictionary like so:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>fpn_config <span class="op">=</span> get_fpn_config()</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>fpn_config </span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> {<span class="st">'nodes'</span>: [{<span class="st">'reduction'</span>: <span class="dv">64</span>, <span class="st">'inputs_offsets'</span>: [<span class="dv">3</span>, <span class="dv">4</span>], <span class="st">'weight_method'</span>: <span class="st">'fastattn'</span>}, {<span class="st">'reduction'</span>: <span class="dv">32</span>, <span class="st">'inputs_offsets'</span>: [<span class="dv">2</span>, <span class="dv">5</span>], <span class="st">'weight_method'</span>: <span class="st">'fastattn'</span>}, {<span class="st">'reduction'</span>: <span class="dv">16</span>, <span class="st">'inputs_offsets'</span>: [<span class="dv">1</span>, <span class="dv">6</span>], <span class="st">'weight_method'</span>: <span class="st">'fastattn'</span>}, {<span class="st">'reduction'</span>: <span class="dv">8</span>, <span class="st">'inputs_offsets'</span>: [<span class="dv">0</span>, <span class="dv">7</span>], <span class="st">'weight_method'</span>: <span class="st">'fastattn'</span>}, {<span class="st">'reduction'</span>: <span class="dv">16</span>, <span class="st">'inputs_offsets'</span>: [<span class="dv">1</span>, <span class="dv">7</span>, <span class="dv">8</span>], <span class="st">'weight_method'</span>: <span class="st">'fastattn'</span>}, {<span class="st">'reduction'</span>: <span class="dv">32</span>, <span class="st">'inputs_offsets'</span>: [<span class="dv">2</span>, <span class="dv">6</span>, <span class="dv">9</span>], <span class="st">'weight_method'</span>: <span class="st">'fastattn'</span>}, {<span class="st">'reduction'</span>: <span class="dv">64</span>, <span class="st">'inputs_offsets'</span>: [<span class="dv">3</span>, <span class="dv">5</span>, <span class="dv">10</span>], <span class="st">'weight_method'</span>: <span class="st">'fastattn'</span>}, {<span class="st">'reduction'</span>: <span class="dv">128</span>, <span class="st">'inputs_offsets'</span>: [<span class="dv">4</span>, <span class="dv">11</span>], <span class="st">'weight_method'</span>: <span class="st">'fastattn'</span>}]}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<blockquote class="blockquote">
+<p>For now, let’s not worry about where this function comes from. Let’s just consider we know that such a function exists which returns a dictionary output like above. And let’s assume that we need to build our <code>BiFPN Layer</code> using the config returned from the <code>get_fpn_config()</code>.</p>
+</blockquote>
+<p>By looking at the <code>fpn_config</code>, we can see that <code>nodes</code> is a <code>List</code> of <code>Dict</code>s and each item in the <code>List</code> represents a single <code>Node</code>. Specifically, the list represents <strong>Nodes 5-12</strong>. As can be seen and confirmed with the help of <code>fig-2</code>, <code>Node-5</code> which is the first item in the <code>List</code> accepts the outputs from <strong>Nodes 3 &amp; 4</strong> as represented by <code>{'reduction': 64, 'inputs_offsets': [3, 4], 'weight_method': 'fastattn'}</code> in the <code>List</code>, <code>Node-6</code> which is the second item in the <code>List</code> accepts the outputs from <strong>Nodes 2 &amp; 5</strong> as represented by <code>{'reduction': 32, 'inputs_offsets': [2, 5], 'weight_method': 'fastattn'}</code> in the <code>List</code> and so on..</p>
+<blockquote class="blockquote">
+<p>I repeat, let’s not worry about where the <code>fpn_config</code> comes from but let’s just say there is such a config that god created for us and we will use it to build the <code>BiFPN Layer</code>.</p>
+</blockquote>
+<p>You might ask what’s this <code>reduction</code> inside the <code>fpn_config</code>? Can you see in <code>fig-2</code> that there are somethings written like <strong>“input, P1/2, P2/4, </strong>P3<strong>/8…</strong>, well the denominator number is the <code>reduction</code>. For example, at level <strong>P5</strong>, where <code>Node-5</code> exists, the <code>reduction</code> is 32. What this means is that the spatial dimensions of the feature map at this level are of size <code>H/32 x W/32</code> where <code>H</code> and <code>W</code> are the original image <em>Height</em> and <em>Width</em>.</p>
+<p>Great, good work so far! At least now we have a basic structure to build our <code>BiFPN Layer</code> on top of. Also, now we know which <code>Node</code>s are linked to which other <code>Node</code>s as defined inside the <code>fpn_config</code>.</p>
+<p>So, for now, let’s move on to implementing <code>Node</code>s without implementing the <code>BiFPNLayer</code> first.</p>
+<section id="fnode" class="level3" data-number="2.1">
+<h3 data-number="2.1" class="anchored" data-anchor-id="fnode"><span class="header-section-number">2.1</span> FNode</h3>
+<p>Now inside a <code>Node</code>, we need to be able to accept some iputs, combine those together, perform some computation on this combined input and output a <code>tensor</code>.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Fnode(nn.Module):</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">""" A simple wrapper used in place of nn.Sequential for torchscript typing</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co">    Handles input type List[Tensor] -&gt; output type Tensor</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, combine: nn.Module, after_combine: nn.Module):</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>(Fnode, <span class="va">self</span>).<span class="fu">__init__</span>()</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.combine <span class="op">=</span> combine</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.after_combine <span class="op">=</span> after_combine</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x: List[torch.Tensor]) <span class="op">-&gt;</span> torch.Tensor:</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.after_combine(<span class="va">self</span>.combine(x))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>This is exactly what this class <code>Fnode</code> does above. As can be seen in the <code>forward</code> method, it accepts <code>List</code> of <code>Tensors</code>, performs the <code>combine</code> to combine the inputs together and also performs the computations <code>after_combine</code> operation on them and returns the output.</p>
+<p>Now what are these <code>combine</code> and <code>after_combine</code> operations? The <code>combine</code> operation is the one that will make sure that the input tensors are changed to be of the same resolution and once they are of the same size, it will combine them together. Remember <code>fig-2</code>? A <code>Node</code> can accept inputs from various other <code>Nodes</code> that might not necessarily be at the same level. Thus there might be a need to do a <code>resampling</code> operation before we can combine the inputs to make them be of the same size and same number of channels. Only then can we sum the inputs up.</p>
+<blockquote class="blockquote">
+<p>In the actual implementation, we do not actually sum the input tensors but rather do something called <code>Fast normalized fusion</code> that has been described in section 3.3 of the paper. But, it is completely okay if for now we assume that combine the inputs by simply summing them up once they are of the same size.</p>
+</blockquote>
+<p>Next, we still need to perform the “fusion”. Simply combining the inputs up might not be enough and we still need to do some more computation on top to get a good representation or do the actual “fusion” of the Node outputs. This “fusion” operation is a <a href="https://www.youtube.com/watch?v=T7o3xvJLuHk">Depthwise Separable Convolution</a> followed by a BatchNorm and activation layer.</p>
+<p>This has been mentioned in the paper at the end of section-3 as well. &gt; Notably, to further improve the efficiency, we use depthwise separable convolution for feature fusion, and add batch normalization and activation after each convolution.</p>
+<p>Great, now that we have a general understanding of the <code>combine</code> and <code>after_combine</code> operations, let’s implement them below.</p>
+<section id="the-combine-method---fpncombine" class="level4" data-number="2.1.1">
+<h4 data-number="2.1.1" class="anchored" data-anchor-id="the-combine-method---fpncombine"><span class="header-section-number">2.1.1</span> The “combine” method - <code>FpnCombine</code></h4>
+<p><strong>Note</strong>: This is the most complicated part of the code. So, please, bear with me. Re-read this section multiple times if needed.:)</p>
+<p>Let’s understand the general idea of this class before looking at the code.</p>
+<p><img src="../images/FpnCombine.png" title="fig-3 `FpnCombine` for Node-5" class="img-fluid"></p>
+<p>Assuming that the combine operation is simply a <code>sum</code> operation for now. As can be seen from the figure above, <code>Node-5</code> accepts the inputs from <code>Node-3</code> and <code>Node-4</code>. Now these feature maps are of <strong>different sizes and have different number of channels</strong> so we simply can’t sum them up. The feature map size at <code>Node-4</code> is <code>[64, 4, 4]</code> whereas at <code>Node-3</code> is <code>[64, 8, 8]</code>. So to be able to combine at <code>Node-5</code>, we will convert both feature maps to be of the size <code>[64, 8, 8]</code> cause that’s what the size of feature map at <code>Node-5</code> should be.</p>
+<p>This class, merely does this operation. It will first <code>resample</code> both feature maps to be of the same size as the required <code>[64, 8, 8]</code> and then it will combine them together.</p>
+<p>So, now that we have some idea of what we want to accomplish, let’s look at the code implementation.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> FpnCombine(nn.Module):</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, feature_info, fpn_config, fpn_channels, inputs_offsets, target_reduction, pad_type<span class="op">=</span><span class="st">''</span>,</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>                 downsample<span class="op">=</span><span class="va">None</span>, upsample<span class="op">=</span><span class="va">None</span>, norm_layer<span class="op">=</span>nn.BatchNorm2d, apply_resample_bn<span class="op">=</span><span class="va">False</span>,</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>                 conv_after_downsample<span class="op">=</span><span class="va">False</span>, redundant_bias<span class="op">=</span><span class="va">False</span>, weight_method<span class="op">=</span><span class="st">'attn'</span>):</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>(FpnCombine, <span class="va">self</span>).<span class="fu">__init__</span>()</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.inputs_offsets <span class="op">=</span> inputs_offsets</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.weight_method <span class="op">=</span> weight_method</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.resample <span class="op">=</span> nn.ModuleDict()</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> idx, offset <span class="kw">in</span> <span class="bu">enumerate</span>(inputs_offsets):</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>            in_channels <span class="op">=</span> fpn_channels</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> offset <span class="op">&lt;</span> <span class="bu">len</span>(feature_info):</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>                in_channels <span class="op">=</span> feature_info[offset][<span class="st">'num_chs'</span>]</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>                input_reduction <span class="op">=</span> feature_info[offset][<span class="st">'reduction'</span>]</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>            <span class="cf">else</span>:</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>                node_idx <span class="op">=</span> offset <span class="op">-</span> <span class="bu">len</span>(feature_info)</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>                input_reduction <span class="op">=</span> fpn_config.nodes[node_idx][<span class="st">'reduction'</span>]</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>            reduction_ratio <span class="op">=</span> target_reduction <span class="op">/</span> input_reduction</span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.resample[<span class="bu">str</span>(offset)] <span class="op">=</span> ResampleFeatureMap(</span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>                in_channels, fpn_channels, reduction_ratio<span class="op">=</span>reduction_ratio, pad_type<span class="op">=</span>pad_type,</span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>                downsample<span class="op">=</span>downsample, upsample<span class="op">=</span>upsample, norm_layer<span class="op">=</span>norm_layer, apply_bn<span class="op">=</span>apply_resample_bn,</span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>                conv_after_downsample<span class="op">=</span>conv_after_downsample, redundant_bias<span class="op">=</span>redundant_bias)</span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> weight_method <span class="op">==</span> <span class="st">'attn'</span> <span class="kw">or</span> weight_method <span class="op">==</span> <span class="st">'fastattn'</span>:</span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.edge_weights <span class="op">=</span> nn.Parameter(torch.ones(<span class="bu">len</span>(inputs_offsets)), requires_grad<span class="op">=</span><span class="va">True</span>)  <span class="co"># WSM</span></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.edge_weights <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x: List[torch.Tensor]):</span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>        dtype <span class="op">=</span> x[<span class="dv">0</span>].dtype</span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>        nodes <span class="op">=</span> []</span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> offset, resample <span class="kw">in</span> <span class="bu">zip</span>(<span class="va">self</span>.inputs_offsets, <span class="va">self</span>.resample.values()):</span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a>            input_node <span class="op">=</span> x[offset]</span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a>            input_node <span class="op">=</span> resample(input_node)</span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a>            nodes.append(input_node)</span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="va">self</span>.weight_method <span class="op">==</span> <span class="st">'attn'</span>:</span>
+<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a>            normalized_weights <span class="op">=</span> torch.softmax(<span class="va">self</span>.edge_weights.to(dtype<span class="op">=</span>dtype), dim<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a>            out <span class="op">=</span> torch.stack(nodes, dim<span class="op">=-</span><span class="dv">1</span>) <span class="op">*</span> normalized_weights</span>
+<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a>        <span class="cf">elif</span> <span class="va">self</span>.weight_method <span class="op">==</span> <span class="st">'fastattn'</span>:</span>
+<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a>            edge_weights <span class="op">=</span> nn.functional.relu(<span class="va">self</span>.edge_weights.to(dtype<span class="op">=</span>dtype))</span>
+<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a>            weights_sum <span class="op">=</span> torch.<span class="bu">sum</span>(edge_weights)</span>
+<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a>            out <span class="op">=</span> torch.stack(</span>
+<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a>                [(nodes[i] <span class="op">*</span> edge_weights[i]) <span class="op">/</span> (weights_sum <span class="op">+</span> <span class="fl">0.0001</span>) <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(nodes))], dim<span class="op">=-</span><span class="dv">1</span>)</span>
+<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a>        <span class="cf">elif</span> <span class="va">self</span>.weight_method <span class="op">==</span> <span class="st">'sum'</span>:</span>
+<span id="cb6-46"><a href="#cb6-46" aria-hidden="true" tabindex="-1"></a>            out <span class="op">=</span> torch.stack(nodes, dim<span class="op">=-</span><span class="dv">1</span>)</span>
+<span id="cb6-47"><a href="#cb6-47" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="cb6-48"><a href="#cb6-48" aria-hidden="true" tabindex="-1"></a>            <span class="cf">raise</span> <span class="pp">ValueError</span>(<span class="st">'unknown weight_method </span><span class="sc">{}</span><span class="st">'</span>.<span class="bu">format</span>(<span class="va">self</span>.weight_method))</span>
+<span id="cb6-49"><a href="#cb6-49" aria-hidden="true" tabindex="-1"></a>        out <span class="op">=</span> torch.<span class="bu">sum</span>(out, dim<span class="op">=-</span><span class="dv">1</span>)</span>
+<span id="cb6-50"><a href="#cb6-50" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> out</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>There’s actually quite a bit happening in this layer but hey, don’t be worried. Take a deep breath and read on! This layer will make sense. :)</p>
+<p>Something new that we have encountered in this class is <code>feature_info</code>. What is it? It’s something that comes from <code>timm</code>. Do you remember that we are using the <code>EfficientNet</code> backbone? This backbone has something called a <code>feature_info</code> which we can see below.</p>
+<blockquote class="blockquote">
+<p>Let’s not worry about how this <code>get_feature_info</code> function is actually implemented. But, let’s just assume there is this beatiful function that gives us the desired outputs.</p>
+</blockquote>
+<div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>backbone <span class="op">=</span> timm.create_model(</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>        config.backbone_name, features_only<span class="op">=</span><span class="va">True</span>, out_indices<span class="op">=</span>(<span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>),</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>        pretrained<span class="op">=</span><span class="va">True</span>, <span class="op">**</span>config.backbone_args)</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>feature_info <span class="op">=</span> get_feature_info(backbone)</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(feature_info, <span class="st">'</span><span class="ch">\n</span><span class="st">'</span>)</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> [{<span class="st">'num_chs'</span>: <span class="dv">40</span>, <span class="st">'reduction'</span>: <span class="dv">8</span>}, {<span class="st">'num_chs'</span>: <span class="dv">112</span>, <span class="st">'reduction'</span>: <span class="dv">16</span>}, {<span class="st">'num_chs'</span>: <span class="dv">320</span>, <span class="st">'reduction'</span>: <span class="dv">32</span>}]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>So the <code>feature_info</code> is something that tells us how many channels are there at each <code>reduction</code> level. For example, the number of channels at level <strong>P5</strong> or <code>reduction</code> 32 is 320 as shown in the <code>feature_info</code> dictionary. Note that this matches the number of channels shown in <code>fig-2</code>. Note that this <code>feature_info</code> is actually missing levels <strong>P6</strong> and <strong>P7</strong> where the <code>reduction</code> is 64 and 128 respectively. Let’s again assume there is some part of code that updates this <code>feature_info</code> so it actually looks something like below for the first <code>BiFpnLayer</code>:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> [{<span class="st">'num_chs'</span>: <span class="dv">40</span>, <span class="st">'reduction'</span>: <span class="dv">8</span>}, {<span class="st">'num_chs'</span>: <span class="dv">112</span>, <span class="st">'reduction'</span>: <span class="dv">16</span>}, {<span class="st">'num_chs'</span>: <span class="dv">320</span>, <span class="st">'reduction'</span>: <span class="dv">32</span>}, {<span class="st">'num_chs'</span>: <span class="dv">64</span>, <span class="st">'reduction'</span>: <span class="dv">64</span>}, {<span class="st">'num_chs'</span>: <span class="dv">64</span>, <span class="st">'reduction'</span>: <span class="dv">128</span>}]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Great, now let’s dissect the <code>__init__</code> method of this <code>FpnCombine</code> class.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, feature_info, fpn_config, fpn_channels, inputs_offsets, target_reduction, pad_type<span class="op">=</span><span class="st">''</span>,</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>                downsample<span class="op">=</span><span class="va">None</span>, upsample<span class="op">=</span><span class="va">None</span>, norm_layer<span class="op">=</span>nn.BatchNorm2d, apply_resample_bn<span class="op">=</span><span class="va">False</span>,</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>                conv_after_downsample<span class="op">=</span><span class="va">False</span>, redundant_bias<span class="op">=</span><span class="va">False</span>, weight_method<span class="op">=</span><span class="st">'attn'</span>):</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    <span class="bu">super</span>(FpnCombine, <span class="va">self</span>).<span class="fu">__init__</span>()</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    <span class="va">self</span>.inputs_offsets <span class="op">=</span> inputs_offsets</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    <span class="va">self</span>.weight_method <span class="op">=</span> weight_method</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    <span class="va">self</span>.resample <span class="op">=</span> nn.ModuleDict()</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> idx, offset <span class="kw">in</span> <span class="bu">enumerate</span>(inputs_offsets):</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>        in_channels <span class="op">=</span> fpn_channels</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> offset <span class="op">&lt;</span> <span class="bu">len</span>(feature_info):</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>            in_channels <span class="op">=</span> feature_info[offset][<span class="st">'num_chs'</span>]</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>            input_reduction <span class="op">=</span> feature_info[offset][<span class="st">'reduction'</span>]</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>            node_idx <span class="op">=</span> offset <span class="op">-</span> <span class="bu">len</span>(feature_info)</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>            input_reduction <span class="op">=</span> fpn_config.nodes[node_idx][<span class="st">'reduction'</span>]</span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>        reduction_ratio <span class="op">=</span> target_reduction <span class="op">/</span> input_reduction</span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.resample[<span class="bu">str</span>(offset)] <span class="op">=</span> ResampleFeatureMap(</span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>            in_channels, fpn_channels, reduction_ratio<span class="op">=</span>reduction_ratio, pad_type<span class="op">=</span>pad_type,</span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>            downsample<span class="op">=</span>downsample, upsample<span class="op">=</span>upsample, norm_layer<span class="op">=</span>norm_layer, apply_bn<span class="op">=</span>apply_resample_bn,</span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>            conv_after_downsample<span class="op">=</span>conv_after_downsample, redundant_bias<span class="op">=</span>redundant_bias)</span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> weight_method <span class="op">==</span> <span class="st">'attn'</span> <span class="kw">or</span> weight_method <span class="op">==</span> <span class="st">'fastattn'</span>:</span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.edge_weights <span class="op">=</span> nn.Parameter(torch.ones(<span class="bu">len</span>(inputs_offsets)), requires_grad<span class="op">=</span><span class="va">True</span>)  <span class="co"># WSM</span></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.edge_weights <span class="op">=</span> <span class="va">None</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>As a general idea: &gt; This <code>FpnCombine</code> layer accepts a list of nodes as input nodes. Then it calculates some parameters which are then passed to <code>ResampleFeatureMap</code> to make sure that we resample/resize the feature maps from the input nodes such that we can combine them.</p>
+<p>The class accepts <code>feature_info</code>, <code>fpn_config</code>, <code>fpn_channels</code>, <code>inputs_offsets</code> and <code>target_reduction</code> as required inputs. We will focus just on these. We already know the values of <code>feature_info</code> and <code>fpn_config</code>. Let me share them below once again for reference:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> feature_info <span class="op">=</span>  [{<span class="st">'num_chs'</span>: <span class="dv">40</span>, <span class="st">'reduction'</span>: <span class="dv">8</span>}, {<span class="st">'num_chs'</span>: <span class="dv">112</span>, <span class="st">'reduction'</span>: <span class="dv">16</span>}, {<span class="st">'num_chs'</span>: <span class="dv">320</span>, <span class="st">'reduction'</span>: <span class="dv">32</span>}, {<span class="st">'num_chs'</span>: <span class="dv">64</span>, <span class="st">'reduction'</span>: <span class="dv">64</span>}, {<span class="st">'num_chs'</span>: <span class="dv">64</span>, <span class="st">'reduction'</span>: <span class="dv">128</span>}]</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> fpn_config <span class="op">=</span> {<span class="st">'nodes'</span>: [{<span class="st">'reduction'</span>: <span class="dv">64</span>, <span class="st">'inputs_offsets'</span>: [<span class="dv">3</span>, <span class="dv">4</span>], <span class="st">'weight_method'</span>: <span class="st">'fastattn'</span>}, {<span class="st">'reduction'</span>: <span class="dv">32</span>, <span class="st">'inputs_offsets'</span>: [<span class="dv">2</span>, <span class="dv">5</span>], <span class="st">'weight_method'</span>: <span class="st">'fastattn'</span>}, {<span class="st">'reduction'</span>: <span class="dv">16</span>, <span class="st">'inputs_offsets'</span>: [<span class="dv">1</span>, <span class="dv">6</span>], <span class="st">'weight_method'</span>: <span class="st">'fastattn'</span>}, {<span class="st">'reduction'</span>: <span class="dv">8</span>, <span class="st">'inputs_offsets'</span>: [<span class="dv">0</span>, <span class="dv">7</span>], <span class="st">'weight_method'</span>: <span class="st">'fastattn'</span>}, {<span class="st">'reduction'</span>: <span class="dv">16</span>, <span class="st">'inputs_offsets'</span>: [<span class="dv">1</span>, <span class="dv">7</span>, <span class="dv">8</span>], <span class="st">'weight_method'</span>: <span class="st">'fastattn'</span>}, {<span class="st">'reduction'</span>: <span class="dv">32</span>, <span class="st">'inputs_offsets'</span>: [<span class="dv">2</span>, <span class="dv">6</span>, <span class="dv">9</span>], <span class="st">'weight_method'</span>: <span class="st">'fastattn'</span>}, {<span class="st">'reduction'</span>: <span class="dv">64</span>, <span class="st">'inputs_offsets'</span>: [<span class="dv">3</span>, <span class="dv">5</span>, <span class="dv">10</span>], <span class="st">'weight_method'</span>: <span class="st">'fastattn'</span>}, {<span class="st">'reduction'</span>: <span class="dv">128</span>, <span class="st">'inputs_offsets'</span>: [<span class="dv">4</span>, <span class="dv">11</span>], <span class="st">'weight_method'</span>: <span class="st">'fastattn'</span>}]}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><strong>Let’s just assume that we are currently creating an instance of this class for <code>Node-5</code> as an example.</strong></p>
+<p>The <code>inputs_offsets</code> would be a list of <code>Node</code> id’s such as <code>[3,4]</code> for <code>Node-5</code>. This states that <code>Node-5</code> accepts the outputs of <code>Node-3</code> and <code>Node-4</code> as inputs and has to combine them.</p>
+<p>The only variables that we do not know the values of are <code>fpn_channels</code> and <code>target_reduction</code>. The <code>fpn_channels</code> has a value of 64.Great, what about <code>target_reduction</code>? <code>target_reduction</code> just refers to the <code>reduction</code> value of the current <code>Node</code> for which we are creating this <code>FpnCombine</code> class. So, from the <code>fpn_config</code> we can see the <code>reduction</code> for <code>Node-5</code> is <code>64</code>. Thus <code>target_reduction=64</code>.</p>
+<blockquote class="blockquote">
+<p>Note that the value of <code>target_reduction</code> for <code>Node-6</code> be 32, for <code>Node-7</code> it will be 16 and so on..</p>
+</blockquote>
+<p>I leave it to the reader to see how the <code>self.resample</code> inside the <code>FpnCombine</code> is a list of <code>ResampleFeatureMap</code> that looks something like below for <code>Node-5</code>:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> <span class="va">self</span>.resample</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>ModuleDict(</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  (<span class="dv">3</span>): ResampleFeatureMap: (inp_ch:<span class="dv">64</span>, out_ch:<span class="dv">64</span>, reduction:<span class="fl">1.0</span>)</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  (<span class="dv">4</span>): ResampleFeatureMap: (inp_ch:<span class="dv">64</span>, out_ch:<span class="dv">64</span>, reduction:<span class="fl">0.5</span>)</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>For <code>Node-6</code>, this looks something like:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> ModuleDict(</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  (<span class="dv">2</span>): ResampleFeatureMap: (inp_ch:<span class="dv">320</span>, out_ch:<span class="dv">64</span>, reduction:<span class="fl">1.0</span>)</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  (<span class="dv">5</span>): ResampleFeatureMap: (inp_ch:<span class="dv">64</span>, out_ch:<span class="dv">64</span>, reduction:<span class="fl">0.5</span>)</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>And finally for <code>Node-7</code> as an example, this looks like:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>ModuleDict(</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  (<span class="dv">1</span>): ResampleFeatureMap: (inp_ch:<span class="dv">112</span>, out_ch:<span class="dv">64</span>, reduction:<span class="fl">1.0</span>)</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  (<span class="dv">6</span>): ResampleFeatureMap: (inp_ch:<span class="dv">64</span>, out_ch:<span class="dv">64</span>, reduction:<span class="fl">0.5</span>)</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<blockquote class="blockquote">
+<p>If you follow along the <code>for</code> loop inside the <code>__init__</code> method, what I have stated above will become pretty clear to you. It might be a good idea right now to take out a pen and paper, and actually try to guess the values that get passed to <code>ResampleFeatureMap</code> for each input offset. If you don’t get it, feel free to reach out to me and I’ll share the solution. Contact details have been provided at the last of this blog post.</p>
+</blockquote>
+<p>I hope that you’ve been able to trace the values of <code>self.resample</code> for the various <code>Node</code>s. Now that we have already looked at <code>__init__</code>, the <code>forward</code> method is pretty straightforward:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x: List[torch.Tensor]):</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>        dtype <span class="op">=</span> x[<span class="dv">0</span>].dtype</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>        nodes <span class="op">=</span> []</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> offset, resample <span class="kw">in</span> <span class="bu">zip</span>(<span class="va">self</span>.inputs_offsets, <span class="va">self</span>.resample.values()):</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>            input_node <span class="op">=</span> x[offset]</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>            input_node <span class="op">=</span> resample(input_node)</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>            nodes.append(input_node)</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="va">self</span>.weight_method <span class="op">==</span> <span class="st">'attn'</span>:</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>            normalized_weights <span class="op">=</span> torch.softmax(<span class="va">self</span>.edge_weights.to(dtype<span class="op">=</span>dtype), dim<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>            out <span class="op">=</span> torch.stack(nodes, dim<span class="op">=-</span><span class="dv">1</span>) <span class="op">*</span> normalized_weights</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">elif</span> <span class="va">self</span>.weight_method <span class="op">==</span> <span class="st">'fastattn'</span>:</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>            edge_weights <span class="op">=</span> nn.functional.relu(<span class="va">self</span>.edge_weights.to(dtype<span class="op">=</span>dtype))</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>            weights_sum <span class="op">=</span> torch.<span class="bu">sum</span>(edge_weights)</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>            out <span class="op">=</span> torch.stack(</span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>                [(nodes[i] <span class="op">*</span> edge_weights[i]) <span class="op">/</span> (weights_sum <span class="op">+</span> <span class="fl">0.0001</span>) <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(nodes))], dim<span class="op">=-</span><span class="dv">1</span>)</span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>        <span class="cf">elif</span> <span class="va">self</span>.weight_method <span class="op">==</span> <span class="st">'sum'</span>:</span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>            out <span class="op">=</span> torch.stack(nodes, dim<span class="op">=-</span><span class="dv">1</span>)</span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>            <span class="cf">raise</span> <span class="pp">ValueError</span>(<span class="st">'unknown weight_method </span><span class="sc">{}</span><span class="st">'</span>.<span class="bu">format</span>(<span class="va">self</span>.weight_method))</span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>        out <span class="op">=</span> torch.<span class="bu">sum</span>(out, dim<span class="op">=-</span><span class="dv">1</span>)</span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> out</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>There isn’t a lot happening. We just go over the inputs one by one, perform the required <code>resample</code> operation as in <code>self.resample</code> to make the input feature maps to be of the required size and finally do the “combination” inside the forward.</p>
+</section>
+<section id="the-after_combine-method" class="level4" data-number="2.1.2">
+<h4 data-number="2.1.2" class="anchored" data-anchor-id="the-after_combine-method"><span class="header-section-number">2.1.2</span> The <code>after_combine</code> method</h4>
+<p>The <code>after_combine</code> method is nothing but a** Depthwise Separable Convolution** that we will look at as part of the <code>BiFpnLayer</code> implementation. But for completeness of <code>FNode</code>, I state it below too:</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>conv_kwargs <span class="op">=</span> <span class="bu">dict</span>(</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>                in_channels<span class="op">=</span>fpn_channels, out_channels<span class="op">=</span>fpn_channels, kernel_size<span class="op">=</span><span class="dv">3</span>, padding<span class="op">=</span>pad_type,</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>                bias<span class="op">=</span><span class="va">False</span>, norm_layer<span class="op">=</span>norm_layer, act_layer<span class="op">=</span>act_layer)</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>after_combine <span class="op">=</span> nn.Sequential()</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>after_combine.add_module(</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>                <span class="st">'conv'</span>, SeparableConv2d(<span class="op">**</span>conv_kwargs))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+</section>
+</section>
+<section id="bifpn-layer-implementation" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="bifpn-layer-implementation"><span class="header-section-number">3</span> BiFPN Layer Implementation</h2>
+<p>Finally, we are ready to look at the implementation of the <code>BiFPN Layer</code>.</p>
+<blockquote class="blockquote">
+<p>If you have understood the implementation of <code>FpnCombine</code>, and also the general idea so far, then you will find the implementation of <code>BiFPN Layer</code> as something that brings all the pieces together. It should be intuitive rather than complex.</p>
+</blockquote>
+<p>So, let’s have a look at it.</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> BiFpnLayer(nn.Module):</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, feature_info, fpn_config, fpn_channels, num_levels<span class="op">=</span><span class="dv">5</span>, pad_type<span class="op">=</span><span class="st">''</span>,</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>                 downsample<span class="op">=</span><span class="va">None</span>, upsample<span class="op">=</span><span class="va">None</span>, norm_layer<span class="op">=</span>nn.BatchNorm2d, act_layer<span class="op">=</span>_ACT_LAYER,</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>                 apply_resample_bn<span class="op">=</span><span class="va">False</span>, conv_after_downsample<span class="op">=</span><span class="va">True</span>, conv_bn_relu_pattern<span class="op">=</span><span class="va">False</span>,</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>                 separable_conv<span class="op">=</span><span class="va">True</span>, redundant_bias<span class="op">=</span><span class="va">False</span>):</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>(BiFpnLayer, <span class="va">self</span>).<span class="fu">__init__</span>()</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.num_levels <span class="op">=</span> num_levels</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.conv_bn_relu_pattern <span class="op">=</span> <span class="va">False</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.feature_info <span class="op">=</span> []</span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.fnode <span class="op">=</span> nn.ModuleList()</span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> i, fnode_cfg <span class="kw">in</span> <span class="bu">enumerate</span>(fpn_config.nodes):</span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>            logging.debug(<span class="st">'fnode </span><span class="sc">{}</span><span class="st"> : </span><span class="sc">{}</span><span class="st">'</span>.<span class="bu">format</span>(i, fnode_cfg))</span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>            reduction <span class="op">=</span> fnode_cfg[<span class="st">'reduction'</span>]</span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>            combine <span class="op">=</span> FpnCombine(</span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>                feature_info, fpn_config, fpn_channels, <span class="bu">tuple</span>(fnode_cfg[<span class="st">'inputs_offsets'</span>]),</span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>                target_reduction<span class="op">=</span>reduction, pad_type<span class="op">=</span>pad_type, downsample<span class="op">=</span>downsample, upsample<span class="op">=</span>upsample,</span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>                norm_layer<span class="op">=</span>norm_layer, apply_resample_bn<span class="op">=</span>apply_resample_bn, conv_after_downsample<span class="op">=</span>conv_after_downsample,</span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a>                redundant_bias<span class="op">=</span>redundant_bias, weight_method<span class="op">=</span>fnode_cfg[<span class="st">'weight_method'</span>])</span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a>            after_combine <span class="op">=</span> nn.Sequential()</span>
+<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a>            conv_kwargs <span class="op">=</span> <span class="bu">dict</span>(</span>
+<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a>                in_channels<span class="op">=</span>fpn_channels, out_channels<span class="op">=</span>fpn_channels, kernel_size<span class="op">=</span><span class="dv">3</span>, padding<span class="op">=</span>pad_type,</span>
+<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a>                bias<span class="op">=</span><span class="va">False</span>, norm_layer<span class="op">=</span>norm_layer, act_layer<span class="op">=</span>act_layer)</span>
+<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="kw">not</span> conv_bn_relu_pattern:</span>
+<span id="cb16-26"><a href="#cb16-26" aria-hidden="true" tabindex="-1"></a>                conv_kwargs[<span class="st">'bias'</span>] <span class="op">=</span> redundant_bias</span>
+<span id="cb16-27"><a href="#cb16-27" aria-hidden="true" tabindex="-1"></a>                conv_kwargs[<span class="st">'act_layer'</span>] <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb16-28"><a href="#cb16-28" aria-hidden="true" tabindex="-1"></a>                after_combine.add_module(<span class="st">'act'</span>, act_layer(inplace<span class="op">=</span><span class="va">True</span>))</span>
+<span id="cb16-29"><a href="#cb16-29" aria-hidden="true" tabindex="-1"></a>            after_combine.add_module(</span>
+<span id="cb16-30"><a href="#cb16-30" aria-hidden="true" tabindex="-1"></a>                <span class="st">'conv'</span>, SeparableConv2d(<span class="op">**</span>conv_kwargs) <span class="cf">if</span> separable_conv <span class="cf">else</span> ConvBnAct2d(<span class="op">**</span>conv_kwargs))</span>
+<span id="cb16-31"><a href="#cb16-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-32"><a href="#cb16-32" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.fnode.append(Fnode(combine<span class="op">=</span>combine, after_combine<span class="op">=</span>after_combine))</span>
+<span id="cb16-33"><a href="#cb16-33" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.feature_info.append(<span class="bu">dict</span>(num_chs<span class="op">=</span>fpn_channels, reduction<span class="op">=</span>reduction))</span>
+<span id="cb16-34"><a href="#cb16-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-35"><a href="#cb16-35" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.feature_info <span class="op">=</span> <span class="va">self</span>.feature_info[<span class="op">-</span>num_levels::]</span>
+<span id="cb16-36"><a href="#cb16-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-37"><a href="#cb16-37" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x: List[torch.Tensor]):</span>
+<span id="cb16-38"><a href="#cb16-38" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> fn <span class="kw">in</span> <span class="va">self</span>.fnode:</span>
+<span id="cb16-39"><a href="#cb16-39" aria-hidden="true" tabindex="-1"></a>            x.append(fn(x))</span>
+<span id="cb16-40"><a href="#cb16-40" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> x[<span class="op">-</span><span class="va">self</span>.num_levels::]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>We already know what the values of the required parameters are <code>feature_info</code>, <code>fpn_config</code> and <code>fpn_channels</code>. I share them for reference below once again:</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>feature_info <span class="op">=</span> [{<span class="st">'num_chs'</span>: <span class="dv">40</span>, <span class="st">'reduction'</span>: <span class="dv">8</span>}, {<span class="st">'num_chs'</span>: <span class="dv">112</span>, <span class="st">'reduction'</span>: <span class="dv">16</span>}, {<span class="st">'num_chs'</span>: <span class="dv">320</span>, <span class="st">'reduction'</span>: <span class="dv">32</span>}, {<span class="st">'num_chs'</span>: <span class="dv">64</span>, <span class="st">'reduction'</span>: <span class="dv">64</span>}, {<span class="st">'num_chs'</span>: <span class="dv">64</span>, <span class="st">'reduction'</span>: <span class="dv">128</span>}]</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>fpn_config <span class="op">=</span> {<span class="st">'nodes'</span>: [{<span class="st">'reduction'</span>: <span class="dv">64</span>, <span class="st">'inputs_offsets'</span>: [<span class="dv">3</span>, <span class="dv">4</span>], <span class="st">'weight_method'</span>: <span class="st">'fastattn'</span>}, {<span class="st">'reduction'</span>: <span class="dv">32</span>, <span class="st">'inputs_offsets'</span>: [<span class="dv">2</span>, <span class="dv">5</span>], <span class="st">'weight_method'</span>: <span class="st">'fastattn'</span>}, {<span class="st">'reduction'</span>: <span class="dv">16</span>, <span class="st">'inputs_offsets'</span>: [<span class="dv">1</span>, <span class="dv">6</span>], <span class="st">'weight_method'</span>: <span class="st">'fastattn'</span>}, {<span class="st">'reduction'</span>: <span class="dv">8</span>, <span class="st">'inputs_offsets'</span>: [<span class="dv">0</span>, <span class="dv">7</span>], <span class="st">'weight_method'</span>: <span class="st">'fastattn'</span>}, {<span class="st">'reduction'</span>: <span class="dv">16</span>, <span class="st">'inputs_offsets'</span>: [<span class="dv">1</span>, <span class="dv">7</span>, <span class="dv">8</span>], <span class="st">'weight_method'</span>: <span class="st">'fastattn'</span>}, {<span class="st">'reduction'</span>: <span class="dv">32</span>, <span class="st">'inputs_offsets'</span>: [<span class="dv">2</span>, <span class="dv">6</span>, <span class="dv">9</span>], <span class="st">'weight_method'</span>: <span class="st">'fastattn'</span>}, {<span class="st">'reduction'</span>: <span class="dv">64</span>, <span class="st">'inputs_offsets'</span>: [<span class="dv">3</span>, <span class="dv">5</span>, <span class="dv">10</span>], <span class="st">'weight_method'</span>: <span class="st">'fastattn'</span>}, {<span class="st">'reduction'</span>: <span class="dv">128</span>, <span class="st">'inputs_offsets'</span>: [<span class="dv">4</span>, <span class="dv">11</span>], <span class="st">'weight_method'</span>: <span class="st">'fastattn'</span>}]}</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>fpn_channels <span class="op">=</span> <span class="dv">64</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The BiFPN Layer implementation is the glue that binds the <code>FNode</code>, <code>FpnCombine</code>, <code>ResampleFeatureMap</code> classes together. Let’s see how?</p>
+<p>Inside the <code>__init__</code> method, we iterate over the <code>Nodes</code>. For each node, <code>combine</code> is an instance of <code>FpnCombine</code> and <code>after_combine</code> is a <code>SeparableConv2d</code> nn Module. Next, we create a <code>FNode</code> for each of the <code>Node</code>s inside the <code>fpn_config</code> with each <code>FNode</code> having it’s own <code>combine</code> and <code>after_combine</code> values.</p>
+<p>Finally, in the <code>forward</code> method, where the input <code>x</code> is list of feature maps from levels <strong>P3</strong>-<strong>P7</strong>, is passed through to each node and we append the outputs. Finally, we return the last 5 outputs (feature maps), that are then passed on to another <code>BiFpnLayer</code> which does the same thing again.</p>
+<blockquote class="blockquote">
+<p>If this sounds confusing, then please feel free to reach out to me. I will share the solution. But I really want you to think about what I have stated above. It’s better if you spend some time trying to think about it than just asking me for the solution that explains this.</p>
+</blockquote>
+</section>
+<section id="bifpn" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="bifpn"><span class="header-section-number">4</span> BiFPN</h2>
+<p>Having already understood how to implement the <code>BiFPN Layer</code>, let’s now look at how to implement the <code>BiFPN</code> network. It’s really a simple case of having multiple <code>BiFPN layers</code> inside a single <code>BiFPN</code> network.</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> BiFpn(nn.Module):</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, config, feature_info):</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>(BiFpn, <span class="va">self</span>).<span class="fu">__init__</span>()</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.num_levels <span class="op">=</span> config.num_levels</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>        norm_layer <span class="op">=</span> config.norm_layer <span class="kw">or</span> nn.BatchNorm2d</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> config.norm_kwargs:</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>            norm_layer <span class="op">=</span> partial(norm_layer, <span class="op">**</span>config.norm_kwargs)</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>        act_layer <span class="op">=</span> get_act_layer(config.act_type) <span class="kw">or</span> _ACT_LAYER</span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>        fpn_config <span class="op">=</span> config.fpn_config <span class="kw">or</span> get_fpn_config(</span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>            config.fpn_name, min_level<span class="op">=</span>config.min_level, max_level<span class="op">=</span>config.max_level)</span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.resample <span class="op">=</span> nn.ModuleDict()</span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> level <span class="kw">in</span> <span class="bu">range</span>(config.num_levels):</span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> level <span class="op">&lt;</span> <span class="bu">len</span>(feature_info):</span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a>                in_chs <span class="op">=</span> feature_info[level][<span class="st">'num_chs'</span>]</span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a>                reduction <span class="op">=</span> feature_info[level][<span class="st">'reduction'</span>]</span>
+<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a>            <span class="cf">else</span>:</span>
+<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a>                <span class="co"># Adds a coarser level by downsampling the last feature map</span></span>
+<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a>                reduction_ratio <span class="op">=</span> <span class="dv">2</span></span>
+<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a>                <span class="va">self</span>.resample[<span class="bu">str</span>(level)] <span class="op">=</span> ResampleFeatureMap(</span>
+<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a>                    in_channels<span class="op">=</span>in_chs,</span>
+<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a>                    out_channels<span class="op">=</span>config.fpn_channels,</span>
+<span id="cb18-24"><a href="#cb18-24" aria-hidden="true" tabindex="-1"></a>                    pad_type<span class="op">=</span>config.pad_type,</span>
+<span id="cb18-25"><a href="#cb18-25" aria-hidden="true" tabindex="-1"></a>                    downsample<span class="op">=</span>config.downsample_type,</span>
+<span id="cb18-26"><a href="#cb18-26" aria-hidden="true" tabindex="-1"></a>                    upsample<span class="op">=</span>config.upsample_type,</span>
+<span id="cb18-27"><a href="#cb18-27" aria-hidden="true" tabindex="-1"></a>                    norm_layer<span class="op">=</span>norm_layer,</span>
+<span id="cb18-28"><a href="#cb18-28" aria-hidden="true" tabindex="-1"></a>                    reduction_ratio<span class="op">=</span>reduction_ratio,</span>
+<span id="cb18-29"><a href="#cb18-29" aria-hidden="true" tabindex="-1"></a>                    apply_bn<span class="op">=</span>config.apply_resample_bn,</span>
+<span id="cb18-30"><a href="#cb18-30" aria-hidden="true" tabindex="-1"></a>                    conv_after_downsample<span class="op">=</span>config.conv_after_downsample,</span>
+<span id="cb18-31"><a href="#cb18-31" aria-hidden="true" tabindex="-1"></a>                    redundant_bias<span class="op">=</span>config.redundant_bias,</span>
+<span id="cb18-32"><a href="#cb18-32" aria-hidden="true" tabindex="-1"></a>                )</span>
+<span id="cb18-33"><a href="#cb18-33" aria-hidden="true" tabindex="-1"></a>                in_chs <span class="op">=</span> config.fpn_channels</span>
+<span id="cb18-34"><a href="#cb18-34" aria-hidden="true" tabindex="-1"></a>                reduction <span class="op">=</span> <span class="bu">int</span>(reduction <span class="op">*</span> reduction_ratio)</span>
+<span id="cb18-35"><a href="#cb18-35" aria-hidden="true" tabindex="-1"></a>                feature_info.append(<span class="bu">dict</span>(num_chs<span class="op">=</span>in_chs, reduction<span class="op">=</span>reduction))</span>
+<span id="cb18-36"><a href="#cb18-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-37"><a href="#cb18-37" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.cell <span class="op">=</span> SequentialList()</span>
+<span id="cb18-38"><a href="#cb18-38" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> rep <span class="kw">in</span> <span class="bu">range</span>(config.fpn_cell_repeats):</span>
+<span id="cb18-39"><a href="#cb18-39" aria-hidden="true" tabindex="-1"></a>            logging.debug(<span class="st">'building cell </span><span class="sc">{}</span><span class="st">'</span>.<span class="bu">format</span>(rep))</span>
+<span id="cb18-40"><a href="#cb18-40" aria-hidden="true" tabindex="-1"></a>            fpn_layer <span class="op">=</span> BiFpnLayer(</span>
+<span id="cb18-41"><a href="#cb18-41" aria-hidden="true" tabindex="-1"></a>                feature_info<span class="op">=</span>feature_info,</span>
+<span id="cb18-42"><a href="#cb18-42" aria-hidden="true" tabindex="-1"></a>                fpn_config<span class="op">=</span>fpn_config,</span>
+<span id="cb18-43"><a href="#cb18-43" aria-hidden="true" tabindex="-1"></a>                fpn_channels<span class="op">=</span>config.fpn_channels,</span>
+<span id="cb18-44"><a href="#cb18-44" aria-hidden="true" tabindex="-1"></a>                num_levels<span class="op">=</span>config.num_levels,</span>
+<span id="cb18-45"><a href="#cb18-45" aria-hidden="true" tabindex="-1"></a>                pad_type<span class="op">=</span>config.pad_type,</span>
+<span id="cb18-46"><a href="#cb18-46" aria-hidden="true" tabindex="-1"></a>                downsample<span class="op">=</span>config.downsample_type,</span>
+<span id="cb18-47"><a href="#cb18-47" aria-hidden="true" tabindex="-1"></a>                upsample<span class="op">=</span>config.upsample_type,</span>
+<span id="cb18-48"><a href="#cb18-48" aria-hidden="true" tabindex="-1"></a>                norm_layer<span class="op">=</span>norm_layer,</span>
+<span id="cb18-49"><a href="#cb18-49" aria-hidden="true" tabindex="-1"></a>                act_layer<span class="op">=</span>act_layer,</span>
+<span id="cb18-50"><a href="#cb18-50" aria-hidden="true" tabindex="-1"></a>                separable_conv<span class="op">=</span>config.separable_conv,</span>
+<span id="cb18-51"><a href="#cb18-51" aria-hidden="true" tabindex="-1"></a>                apply_resample_bn<span class="op">=</span>config.apply_resample_bn,</span>
+<span id="cb18-52"><a href="#cb18-52" aria-hidden="true" tabindex="-1"></a>                conv_after_downsample<span class="op">=</span>config.conv_after_downsample,</span>
+<span id="cb18-53"><a href="#cb18-53" aria-hidden="true" tabindex="-1"></a>                conv_bn_relu_pattern<span class="op">=</span>config.conv_bn_relu_pattern,</span>
+<span id="cb18-54"><a href="#cb18-54" aria-hidden="true" tabindex="-1"></a>                redundant_bias<span class="op">=</span>config.redundant_bias,</span>
+<span id="cb18-55"><a href="#cb18-55" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb18-56"><a href="#cb18-56" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.cell.add_module(<span class="bu">str</span>(rep), fpn_layer)</span>
+<span id="cb18-57"><a href="#cb18-57" aria-hidden="true" tabindex="-1"></a>            feature_info <span class="op">=</span> fpn_layer.feature_info</span>
+<span id="cb18-58"><a href="#cb18-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-59"><a href="#cb18-59" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x: List[torch.Tensor]):</span>
+<span id="cb18-60"><a href="#cb18-60" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> resample <span class="kw">in</span> <span class="va">self</span>.resample.values():</span>
+<span id="cb18-61"><a href="#cb18-61" aria-hidden="true" tabindex="-1"></a>            x.append(resample(x[<span class="op">-</span><span class="dv">1</span>]))</span>
+<span id="cb18-62"><a href="#cb18-62" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="va">self</span>.cell(x)</span>
+<span id="cb18-63"><a href="#cb18-63" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> x</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>So let’s have a look at what is <code>self.resample</code> inside here? As you will see in the implementation of the <code>EfficientDet</code> Architecture in the next section, the backbone <code>EfficientNet</code> only returns a total of 3 feature maps for levels <strong>P3</strong>-<strong>P5</strong>. We still need to calculate feature maps for levels <strong>P6</strong> &amp; <strong>P7</strong>. This is what the <code>self.resample</code> layer does here.</p>
+<p>As you can see in the forward method:</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> resample <span class="kw">in</span> <span class="va">self</span>.resample.values():</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>            x.append(resample(x[<span class="op">-</span><span class="dv">1</span>]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>As I mentioned, <code>x</code> has total of 3 feature maps reprenting levels <strong>P3</strong>-<strong>P5</strong>. We call the <code>resample</code> method and append 2 more feature maps to <code>x</code> to make the total length 5 representing the feature maps for levels <strong>P3</strong>-<strong>P7</strong>.</p>
+<p>Finally, what is <code>self.cell</code>? It’s simply a repetition of <code>BiFPN Layers</code> to represent the <code>BiFPN Network</code>. Since the <code>self.cell</code> is a <code>SequentialList</code>, each <code>BiFPNLayer</code> is called one by one.:)</p>
+</section>
+<section id="efficientdet-architecture" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="efficientdet-architecture"><span class="header-section-number">5</span> EfficientDet Architecture</h2>
+<p>This class is the main one - or is it? Considering we have all the pieces already, this class merely puts them all together.</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> EfficientDet(nn.Module):</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, config, pretrained_backbone<span class="op">=</span><span class="va">True</span>, alternate_init<span class="op">=</span><span class="va">False</span>):</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>(EfficientDet, <span class="va">self</span>).<span class="fu">__init__</span>()</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.config <span class="op">=</span> config</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>        set_config_readonly(<span class="va">self</span>.config)</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.backbone <span class="op">=</span> create_model(</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>            config.backbone_name, features_only<span class="op">=</span><span class="va">True</span>, out_indices<span class="op">=</span>(<span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>),</span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>            pretrained<span class="op">=</span>pretrained_backbone, <span class="op">**</span>config.backbone_args)</span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>        feature_info <span class="op">=</span> get_feature_info(<span class="va">self</span>.backbone)</span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.fpn <span class="op">=</span> BiFpn(<span class="va">self</span>.config, feature_info)</span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.class_net <span class="op">=</span> HeadNet(<span class="va">self</span>.config, num_outputs<span class="op">=</span><span class="va">self</span>.config.num_classes)</span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.box_net <span class="op">=</span> HeadNet(<span class="va">self</span>.config, num_outputs<span class="op">=</span><span class="dv">4</span>)</span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> n, m <span class="kw">in</span> <span class="va">self</span>.named_modules():</span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="st">'backbone'</span> <span class="kw">not</span> <span class="kw">in</span> n:</span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> alternate_init:</span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a>                    _init_weight_alt(m, n)</span>
+<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a>                <span class="cf">else</span>:</span>
+<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a>                    _init_weight(m, n)</span>
+<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x):</span>
+<span id="cb20-23"><a href="#cb20-23" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="va">self</span>.backbone(x)</span>
+<span id="cb20-24"><a href="#cb20-24" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="va">self</span>.fpn(x)</span>
+<span id="cb20-25"><a href="#cb20-25" aria-hidden="true" tabindex="-1"></a>        x_class <span class="op">=</span> <span class="va">self</span>.class_net(x)</span>
+<span id="cb20-26"><a href="#cb20-26" aria-hidden="true" tabindex="-1"></a>        x_box <span class="op">=</span> <span class="va">self</span>.box_net(x)</span>
+<span id="cb20-27"><a href="#cb20-27" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> x_class, x_box</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The reader should by now be able to read this code and understand what’s going on. We have already done the bulk of the work together here. Though there are some notable things that I would like to mention: 1. <code>self.backbone</code> returns a total of 3 feature maps because we passed the <code>out_indices=(2, 3, 4)</code>. As to how? This comes from <code>timm</code>. 2. I have not explained what a <code>HeadNet</code> is. It is basically a custom head that takes the final outputs of the <code>BiFPN</code> network and either returns a class or bounding box coordinates. The <code>self.class_net</code> and <code>self.box_net</code> together represent the Box Prediction Net as in <code>fig-1</code>.</p>
+</section>
+<section id="conclusion" class="level2" data-number="6">
+<h2 data-number="6" class="anchored" data-anchor-id="conclusion"><span class="header-section-number">6</span> Conclusion</h2>
+<p>I truly believe that it wasn’t easy to understand how to implement <code>EfficientDet</code>s in Tensorflow or PyTorch. The official implementation exists <a href="https://github.com/google/automl/tree/master/efficientdet">here</a> and the PyTorch version is <a href="https://github.com/rwightman/efficientdet-pytorch">here</a>.</p>
+<p>Thanks to <a href="https://twitter.com/wightmanr">Ross Wightman</a> for his wonderful work in providing us with a PyTorch implementation of the <strong>EfficientDet</strong> network. It really makes things super easy for the native PyTorch users.</p>
+<p>Something I have realised during this exercise, is that, when we are doing something like:</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> effdet <span class="im">import</span> get_efficientdet_config, EfficientDet</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>config <span class="op">=</span> get_efficientdet_config(<span class="st">'efficientdet_d0'</span>)</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>efficientdet <span class="op">=</span> EfficientDet(config)</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>output <span class="op">=</span> efficientdet(inputs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>When we are merely using the library, it is hard to appreciate the hard work that the author has put into making things so simple for us. In doing this exercise of going through the source code and to try and explain it to everyone, I have noticed the minor details and have tremendous appreciation for Ross’s hard work. So, thanks so much Ross! And of course to the authors of the <strong>EfficientDet</strong> for open sourcing the implementation in Tensorflow.</p>
+<p>I hope that in today’s blog post I have been able to explain how to implement <code>EfficientDet</code>s in Code and take away all the confusion and doubt in case you had any.</p>
+<p>As always, constructive feedback is always welcome at <a href="https://twitter.com/amaarora"><span class="citation" data-cites="amaarora">@amaarora</span></a>.</p>
+<p>Also, feel free to <a href="https://amaarora.github.io/subscribe">subscribe to my blog here</a> to receive regular updates regarding new blog posts. Thanks for reading!</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

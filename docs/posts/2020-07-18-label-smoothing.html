@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-99.9.9">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Aman Arora">
+<meta name="dcterms.date" content="2020-07-18">
+<meta name="description" content="In this blogpost, we re-implement Label Smoothing in Microsoft Excel step by step.">
+
+<title>Label Smoothing Explained using Microsoft Excel</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html" rel="" target="">
+ <span class="menu-text">Aman Arora’s Blog</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../about.html" rel="" target="">
+ <span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/" rel="" target=""><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com" rel="" target=""><i class="bi bi-twitter" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+            <div class="quarto-navbar-tools">
+</div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar"><div class="quarto-margin-header"><div class="margin-header-item">
+<!-- Begin Mailchimp Signup Form -->
+<link href="//cdn-images.mailchimp.com/embedcode/classic-071822.css" rel="stylesheet" type="text/css">
+<style type="text/css">
+    #mc_embed_signup{background:#fff; clear:left; font:14px Helvetica,Arial,sans-serif;  width:600px;}
+    /* Add your own Mailchimp form style overrides in your site stylesheet or in this style block.
+       We recommend moving this block and the preceding CSS link to the HEAD of your HTML file. */
+</style>
+<div id="mc_embed_signup">
+    <form action="https://github.us4.list-manage.com/subscribe/post?u=e847230346a7c78d4745ae796&amp;id=7a63b2b273&amp;f_id=005f58e8f0" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate="">
+        <div id="mc_embed_signup_scroll">
+        <h2>Subscribe to Aman Arora's Blog</h2>
+        <div class="indicates-required"><span class="asterisk">*</span> indicates required</div>
+<div class="mc-field-group">
+    <label for="mce-EMAIL">Email Address  <span class="asterisk">*</span>
+</label>
+    <input type="email" value="" name="EMAIL" class="required email" id="mce-EMAIL" required="">
+    <span id="mce-EMAIL-HELPERTEXT" class="helper_text"></span>
+</div>
+<div class="mc-field-group">
+    <label for="mce-FNAME">First Name </label>
+    <input type="text" value="" name="FNAME" class="" id="mce-FNAME">
+    <span id="mce-FNAME-HELPERTEXT" class="helper_text"></span>
+</div>
+<div class="mc-field-group">
+    <label for="mce-LNAME">Last Name </label>
+    <input type="text" value="" name="LNAME" class="" id="mce-LNAME">
+    <span id="mce-LNAME-HELPERTEXT" class="helper_text"></span>
+</div>
+    <div id="mce-responses" class="clear foot">
+        <div class="response" id="mce-error-response" style="display:none"></div>
+        <div class="response" id="mce-success-response" style="display:none"></div>
+    </div>    <!-- real people should not fill this in and expect good things - do not remove this or risk form bot signups-->
+    <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_e847230346a7c78d4745ae796_7a63b2b273" tabindex="-1" value=""></div>
+        <div class="optionalParent">
+            <div class="clear foot">
+                <input type="submit" value="Subscribe" name="subscribe" id="mc-embedded-subscribe" class="button">
+                <p class="brandingLogo"><a href="http://eepurl.com/il3baM" title="Mailchimp - email marketing made easy and fun"><img src="https://eep.io/mc-cdn-images/template_images/branding_logo_text_dark_dtp.svg"></a></p>
+            </div>
+        </div>
+    </div>
+</form>
+</div>
+<script type="text/javascript" src="//s3.amazonaws.com/downloads.mailchimp.com/js/mc-validate.js"></script><script type="text/javascript">(function($) {window.fnames = new Array(); window.ftypes = new Array();fnames[0]='EMAIL';ftypes[0]='email';fnames[1]='FNAME';ftypes[1]='text';fnames[2]='LNAME';ftypes[2]='text';fnames[3]='ADDRESS';ftypes[3]='address';fnames[4]='PHONE';ftypes[4]='phone';fnames[5]='BIRTHDAY';ftypes[5]='birthday';}(jQuery));var $mcj = jQuery.noConflict(true);</script>
+<!--End mc_embed_signup-->
+</div></div>
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction"><span class="header-section-number">1</span> Introduction</a></li>
+  <li><a href="#why-do-we-need-label-smoothing" id="toc-why-do-we-need-label-smoothing" class="nav-link" data-scroll-target="#why-do-we-need-label-smoothing"><span class="header-section-number">2</span> Why do we need Label Smoothing?</a></li>
+  <li><a href="#what-is-label-smoothing" id="toc-what-is-label-smoothing" class="nav-link" data-scroll-target="#what-is-label-smoothing"><span class="header-section-number">3</span> What is Label Smoothing?</a></li>
+  <li><a href="#label-smoothing-in-microsoft-excel" id="toc-label-smoothing-in-microsoft-excel" class="nav-link" data-scroll-target="#label-smoothing-in-microsoft-excel"><span class="header-section-number">4</span> Label Smoothing in Microsoft Excel</a></li>
+  <li><a href="#fastaipytorch-implementation-of-label-smoothing-cross-entropy-loss" id="toc-fastaipytorch-implementation-of-label-smoothing-cross-entropy-loss" class="nav-link" data-scroll-target="#fastaipytorch-implementation-of-label-smoothing-cross-entropy-loss"><span class="header-section-number">5</span> Fastai/PyTorch Implementation of Label Smoothing Cross Entropy loss</a></li>
+  <li><a href="#comparing-microsoft-excel-results-with-pytorch" id="toc-comparing-microsoft-excel-results-with-pytorch" class="nav-link" data-scroll-target="#comparing-microsoft-excel-results-with-pytorch"><span class="header-section-number">6</span> Comparing Microsoft Excel results with PyTorch</a></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion"><span class="header-section-number">7</span> Conclusion</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">8</span> References</a></li>
+  <li><a href="#credits" id="toc-credits" class="nav-link" data-scroll-target="#credits"><span class="header-section-number">9</span> Credits</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Label Smoothing Explained using Microsoft Excel</h1>
+<p class="subtitle lead">Better language models and their implications</p>
+  <div class="quarto-categories">
+    <div class="quarto-category">Computer Vision</div>
+  </div>
+  </div>
+
+<div>
+  <div class="description">
+    <p>In this blogpost, we re-implement Label Smoothing in Microsoft Excel step by step.</p>
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Aman Arora </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">July 18, 2020</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+</header>
+
+<section id="introduction" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="introduction"><span class="header-section-number">1</span> Introduction</h2>
+<p>In this blogpost, together, we: - Read and understand about Label Smoothing from <a href="https://arxiv.org/abs/1512.00567">Rethinking the Inception Architecture for Computer Vision</a> research paper - Look at why we need Label Smoothing? - Re-implement Label Smoothing in Microsoft Excel step by step - Compare the results from our MS Excel implementation with <code>Fastai</code>/<code>PyTorch</code> versions of Label Smoothing</p>
+<p><strong>Why are we using Microsoft Excel?</strong></p>
+<p>It’s a valid question you might ask and I wasn’t a big fan of MS Excel either until I saw <a href="https://youtu.be/CJKnDu2dxOE?t=7482">this</a> video by <a href="https://twitter.com/jeremyphoward">Jeremy Howard</a> about <a href="https://en.wikipedia.org/wiki/Cross_entropy">Cross Entropy Loss</a>. In the video Jeremy explains Cross Entropy Loss using Microsoft Excel. It clicked and I understood it very well even with the fancy math in the <a href="https://leimao.github.io/blog/Cross-Entropy-KL-Divergence-MLE/">cross entropy loss formula</a>.</p>
+<p><img src="../images/cross_entropy.png" title="cross entropy loss" class="img-fluid"></p>
+<p>And that is my hope here too! In this blogpost I hope that together we can see past the math and get the intuition for <strong>Label Smoothing</strong> and then later be able to implement it in a language/framework of our choice.</p>
+<p>So, let’s get started!</p>
+</section>
+<section id="why-do-we-need-label-smoothing" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="why-do-we-need-label-smoothing"><span class="header-section-number">2</span> Why do we need Label Smoothing?</h2>
+<p>Let’s consider we are faced with a multi-class image classification problem. Someone presents to us five images with labels -</p>
+<table class="table">
+<thead>
+<tr class="header">
+<th>Image Name</th>
+<th>Label</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>img-1.jpg</td>
+<td>Dog</td>
+</tr>
+<tr class="even">
+<td>img-2.jpg</td>
+<td>Cat</td>
+</tr>
+<tr class="odd">
+<td>img-3.jpg</td>
+<td>Horse</td>
+</tr>
+<tr class="even">
+<td>img-4.jpg</td>
+<td>Bear</td>
+</tr>
+<tr class="odd">
+<td>img-5.jpg</td>
+<td>Kangaroo</td>
+</tr>
+</tbody>
+</table>
+<p>As humans, we will quickly be able to assign labels to the image just by looking at them, for example we know that <code>img-1.jpg</code> is that of a dog, <code>img-2.jpg</code> is a cat and so on.</p>
+<p>Let’s one-hot encode the labels, so our labels get updated to:</p>
+<table class="table">
+<thead>
+<tr class="header">
+<th>Image Name</th>
+<th>is_dog</th>
+<th>is_cat</th>
+<th>is_horse</th>
+<th>is_bear</th>
+<th>is_kroo</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>img-1.jpg</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td>img-2.jpg</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td>img-3.jpg</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td>img-4.jpg</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td>img-5.jpg</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<p>Let’s imagine that we used the above set of 5 images and the labels and trained a deep learning model which in it’s early stages learns to predict a set of logits for each class like so:</p>
+<table class="table">
+<colgroup>
+<col style="width: 21%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 17%">
+<col style="width: 16%">
+<col style="width: 16%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Image Name</th>
+<th>is_dog</th>
+<th>is_cat</th>
+<th>is_horse</th>
+<th>is_bear</th>
+<th>is_kroo</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>img-1.jpg</td>
+<td>4.7</td>
+<td>-2.5</td>
+<td>0.6</td>
+<td>1.2</td>
+<td>0.4</td>
+</tr>
+<tr class="even">
+<td>img-2.jpg</td>
+<td>-1.2</td>
+<td>2.4</td>
+<td>2.6</td>
+<td>-0.6</td>
+<td>2.34</td>
+</tr>
+<tr class="odd">
+<td>img-3.jpg</td>
+<td>-2.4</td>
+<td>1.2</td>
+<td>1.1</td>
+<td>0.8</td>
+<td>1.2</td>
+</tr>
+<tr class="even">
+<td>img-4.jpg</td>
+<td>1.2</td>
+<td>0.2</td>
+<td>0.8</td>
+<td>1.9</td>
+<td>-0.6</td>
+</tr>
+<tr class="odd">
+<td>img-5.jpg</td>
+<td>-0.9</td>
+<td>-0.1</td>
+<td>-0.2</td>
+<td>-0.5</td>
+<td>1.6</td>
+</tr>
+</tbody>
+</table>
+<p>This is pretty standard - right? This is what we do when we’re training an image classifier anyway. We pass a list of images and labels, make the model predict something, then calculate the cross-entropy loss and backpropogate to update the model’s parameters. And we keep doing this until the model learns to assign the correct labels to the corresponding images. So what’s the problem?</p>
+<p><strong>Here’s the important part:</strong></p>
+<p>For the cross-Entropy loss to really be at a minimum, each logit corresponding to the correct class needs to be <strong>significantly higher</strong> than the rest. That is, for example for row-1, <code>img-1.jpg</code> the logit of 4.7 corresponding to <code>is_dog</code> needs to be significantly higher than the rest. This is also the case for all the other rows.</p>
+<p>A mathematical proof is presented <a href="https://leimao.github.io/blog/Cross-Entropy-KL-Divergence-MLE/">here</a> by Lei Mao where he explains why minimizing cross entropy loss is equivalent to do maximum likelihood estimation.</p>
+<p>This case where, in order to minimise the cross-entropy loss, the logits corresponding to the true label need to be significantly higher than the rest can actually cause two problems.</p>
+<p>From the paper, &gt; This, however, can cause two problems. First, it may result in over-fitting: if the model learns to assign full probability to the ground- truth label for each training example, it is not guaranteed to generalize. Second, it encourages the differences between the largest logit and all others to become large, and this, combined with the bounded gradient <code>∂ℓ/∂z,k</code> , reduces the ability of the model to adapt.</p>
+<p>In other words, our model could become overconfident of it’s predictions because to really minimise the loss, our model needs to be very sure of everything that it predicts. This is bad because it is then harder for the model to generalise and easier for it to overfit to the training data. We want the model to generalize and be able to look at other dogs, cats.. images that weren’t part of the training set and still be able to predict them well.</p>
+</section>
+<section id="what-is-label-smoothing" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="what-is-label-smoothing"><span class="header-section-number">3</span> What is Label Smoothing?</h2>
+<p>Label Smoothing was first introduced in <a href="https://arxiv.org/abs/1512.00567">Rethinking the Inception Architecture for Computer Vision</a>.</p>
+<p>From Section-7 - <strong>Model Regularization via Label Smoothing</strong> in the paper, &gt; We propose a mechanism for encouraging the model to be less confident. While this may not be desired if the goal is to maximize the log-likelihood of training labels, it does regularize the model and makes it more adaptable. The method is very simple. Consider a distribution over labels u(k), independent of the training example x, and a smoothing parameter Є. For a training example with ground-truth label y, we replace the label distribution q(k/x) = δ(k,y) with</p>
+<p><img src="../images/Label_Smoothing_Formula.png" title="eq-1" class="img-fluid"></p>
+<blockquote class="blockquote">
+<p>which is a mixture of the original ground-truth distribution q(k|x) and the fixed distribution u(k), with weights 1 − Є. and Є, respectively. In our experiments, we used the uniform distribution u(k) = 1/K, so that</p>
+</blockquote>
+<p><img src="../images/label_smoothing_eq2.png" title="eq-2" class="img-fluid"></p>
+<p>In other words, instead of using the hard labels or the one-hot encoded variables where the true label is 1, let’s replace them with <code>(1-Є) * 1</code> where Є refers to the smoothing parameter. Once that’s done, we add some uniform noise <code>1/K</code> to the labels where K: total number of labels.</p>
+<p>So the updated distribution for the our examples with label smoothing factor <code>Є = 0.1</code> becomes:</p>
+<table class="table">
+<colgroup>
+<col style="width: 21%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 17%">
+<col style="width: 16%">
+<col style="width: 16%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Image Name</th>
+<th>is_dog</th>
+<th>is_cat</th>
+<th>is_horse</th>
+<th>is_bear</th>
+<th>is_kroo</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>img-1.jpg</td>
+<td>0.92</td>
+<td>0.02</td>
+<td>0.02</td>
+<td>0.02</td>
+<td>0.02</td>
+</tr>
+<tr class="even">
+<td>img-2.jpg</td>
+<td>0.02</td>
+<td>0.92</td>
+<td>0.02</td>
+<td>0.02</td>
+<td>0.02</td>
+</tr>
+<tr class="odd">
+<td>img-3.jpg</td>
+<td>0.02</td>
+<td>0.02</td>
+<td>0.92</td>
+<td>0.02</td>
+<td>0.02</td>
+</tr>
+<tr class="even">
+<td>img-4.jpg</td>
+<td>0.02</td>
+<td>0.02</td>
+<td>0.02</td>
+<td>0.92</td>
+<td>0.02</td>
+</tr>
+<tr class="odd">
+<td>img-5.jpg</td>
+<td>0.02</td>
+<td>0.02</td>
+<td>0.02</td>
+<td>0.02</td>
+<td>0.92</td>
+</tr>
+</tbody>
+</table>
+<p>We get the updated distribution above because <code>1-Є = 0.9</code>. So as a first step, we replace all the true labels with <code>0.9</code> instead of 1. Next, we add a uniform noise <code>1/K = 0.02</code> because in our case <code>K</code> equals 5. Finally we get the above update distribution with uniform noise.</p>
+<p>The authors refer to the above change as <em>label-smoothing regularization</em> or LSR. And then we calculate the cross-entropy loss with the updated distribution LSR above.</p>
+<p>Now we train the model with the updated LSR instead and therefore, cross-entropy loss get’s updated to:</p>
+<p><img src="../images/LSR.png" title="eq-3" class="img-fluid"></p>
+<p>Basically, the new loss <code>H(q′, p)</code> equals <code>1-Є</code> times the old loss <code>H(q, p)</code> + <code>Є</code> times the cross entropy loss of the noisy labels <code>H(u, p)</code>. This is key in understanding Label Smoothing - it is essentially the cross entropy loss with the noisy labels.</p>
+<p>Let’s now cut the math and implement this in Microsoft Excel step by step.</p>
+</section>
+<section id="label-smoothing-in-microsoft-excel" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="label-smoothing-in-microsoft-excel"><span class="header-section-number">4</span> Label Smoothing in Microsoft Excel</h2>
+<p>In this section we implement label smoothing in Microsoft Excel. We know that cross-entropy loss equals:</p>
+<p><img src="../images/cross_entropy.png" title="eq-4" class="img-fluid"></p>
+<p>Great, and from <a href="https://amaarora.github.io/2020/07/18/label-smoothing.html#what-is-label-smoothing">section-2</a>, we also know that Label Smoothing loss is actually the cross entropy loss with the noisy labels.</p>
+<p>Let’s consider we have five images again, but this time of only cats and dogs.</p>
+<p><img src="../images/ce_loss_ex1.png" title="fig-1: one-hot encoded labels" class="img-fluid"></p>
+<p>At the moment, the labels are one-hot encoded. Let’s consider we are using a smoothing factor <code>Є</code> of <code>0.1</code>. In this case, the updated labels become:</p>
+<p><img src="../images/ce_loss_ex2.png" title="fig-2: Label Smoothing Regularized labels" class="img-fluid"></p>
+<p>We get <code>fig-2</code> by implementing <code>eq-2</code> on <code>fig-1</code>. So, now we have our <em>LSR labels</em>. Next step is to simply calculate the cross-entropy loss. We will use the <a href="https://github.com/fastai/fastai/blob/master/courses/dl1/excel/entropy_example.xlsx">fastai implementation of cross-entropy loss in excel</a>, and use it on our <em>LSR labels</em> to calculate the <code>Label Smoothing Cross Entropy</code> Loss.</p>
+<p>Let’s consider that our model learns to predict the following logits for each class like so:</p>
+<p><img src="../images/ce_loss_ex3.png" title="fig-3: Model logits" class="img-fluid"></p>
+<p>Also, to calculate the cross-entropy loss, we first need to convert the logits to probabilities. The logits are the outputs from the last linear layer of our deep learning model. To convert them to probabilities, we generally have a softmax layer in the end. Jeremy explains how to implement <strong>Cross-Entropy</strong> loss in Microsoft Excel <a href="https://youtu.be/AcA8HAYh7IE?t=1844">here</a> including <strong>Softmax</strong> implementation.</p>
+<p>This is the where you PAUSE, look at the video and understand how Jeremy implements <strong>Softmax</strong> and <strong>Cross-Entropy</strong> loss in Microsoft Excel. If you already know how, great, let’s move on.</p>
+<p>We repeat the same process of applying <strong>Softmax</strong> operation to the logits to then get our probabilities like so:</p>
+<p><img src="../images/ce_loss_ex4.png" title="fig-4" class="img-fluid"></p>
+<p>What we have essentially done, is that we take the exponential of the logits, to get <code>exp (cat)</code> and <code>exp (dog)</code> from <code>logit (cat)</code> and <code>logit (dog)</code>. Next, we take get the <code>sum (exp)</code> by adding <code>exp (cat)</code> and <code>exp (dog)</code> along the rows. Finally, we get <code>prob (cat)</code> by dividing <code>exp (cat)</code> with <code>sum (exp)</code> and we get <code>prob (dog)</code> by <code>sum (exp)</code>. This is how we implement Softmax operation in Microsoft Excel.</p>
+<p>So, now that we have successfully converted logits to Probabilities for each image. The next step is simply to calculate the <strong>Cross-Entropy</strong> loss which from <code>eq-4</code>, is <code>∑q(x)log(p(x))</code> where <code>p(x)</code> refers to the predicted probability and <code>q(x)</code> refers to the ground truth label. In our case <code>q(x)</code> are the noisy labels, so, we get the <em>LabelSmoothingCrossEntropy</em> loss like so:</p>
+<p><img src="../images/ce_loss_ex6.png" title="fig-5" class="img-fluid"></p>
+<p>Believe it or not, we have just successfully implemented <strong>Label Smoothing Cross Entropy</strong> loss in Microsoft Excel.</p>
+</section>
+<section id="fastaipytorch-implementation-of-label-smoothing-cross-entropy-loss" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="fastaipytorch-implementation-of-label-smoothing-cross-entropy-loss"><span class="header-section-number">5</span> Fastai/PyTorch Implementation of Label Smoothing Cross Entropy loss</h2>
+<p>The Label Smoothing Cross Entropy loss has been implemented in the wonderful fastai library like so:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Helper functions from fastai</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> reduce_loss(loss, reduction<span class="op">=</span><span class="st">'mean'</span>):</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> loss.mean() <span class="cf">if</span> reduction<span class="op">==</span><span class="st">'mean'</span> <span class="cf">else</span> loss.<span class="bu">sum</span>() <span class="cf">if</span> reduction<span class="op">==</span><span class="st">'sum'</span> <span class="cf">else</span> loss</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Implementation from fastai https://github.com/fastai/fastai2/blob/master/fastai2/layers.py#L338</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> LabelSmoothingCrossEntropy(nn.Module):</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, ε:<span class="bu">float</span><span class="op">=</span><span class="fl">0.1</span>, reduction<span class="op">=</span><span class="st">'mean'</span>):</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.ε,<span class="va">self</span>.reduction <span class="op">=</span> ε,reduction</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, output, target):</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>        <span class="co"># number of classes</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>        c <span class="op">=</span> output.size()[<span class="op">-</span><span class="dv">1</span>]</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>        log_preds <span class="op">=</span> F.log_softmax(output, dim<span class="op">=-</span><span class="dv">1</span>)</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>        loss <span class="op">=</span> reduce_loss(<span class="op">-</span>log_preds.<span class="bu">sum</span>(dim<span class="op">=-</span><span class="dv">1</span>), <span class="va">self</span>.reduction)</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>        nll <span class="op">=</span> F.nll_loss(log_preds, target, reduction<span class="op">=</span><span class="va">self</span>.reduction)</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>        <span class="co"># (1-ε)* H(q,p) + ε*H(u,p)</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> (<span class="dv">1</span><span class="op">-</span><span class="va">self</span>.ε)<span class="op">*</span>nll <span class="op">+</span> <span class="va">self</span>.ε<span class="op">*</span>(loss<span class="op">/</span>c) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>In PyTorch, <code>nn.CrossEntropyLoss()</code> is the same as <code>F.nll_loss(F.log_softmax(...))</code>. Therefore, in the implementation above, <code>nll</code> equates to <code>H(q,p)</code> from <strong>eq-3</strong>. And then, the <code>loss/c</code> equates to <code>H(u,p)</code> from <strong>eq-3</strong> as well where, <code>c</code> equals total number of classes.</p>
+<p>For reference again, we know that <strong>eq-3</strong> was:</p>
+<p><img src="../images/LSR.png" title="eq-3" class="img-fluid"></p>
+<p>So, the above implementation can directly be compared to <strong>eq-3</strong> and the <strong>Label Smoothing Cross Entropy</strong> loss then becomes <code>(1-self.ε)*nll + self.ε*(loss/c)</code>.</p>
+</section>
+<section id="comparing-microsoft-excel-results-with-pytorch" class="level2" data-number="6">
+<h2 data-number="6" class="anchored" data-anchor-id="comparing-microsoft-excel-results-with-pytorch"><span class="header-section-number">6</span> Comparing Microsoft Excel results with PyTorch</h2>
+<p>Great, now that we know how to implement <strong>Label Smoothing Cross Entropy</strong> loss in both Microsoft Excel and PyTorch, let’s compare the results. We take the same example as fig-3, and assume that our model in PyTorch predicts the same logits.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># X: model logits or outputs, y: true labels</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> torch.tensor([</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    [<span class="fl">4.2</span>, <span class="op">-</span><span class="fl">2.4</span>], </span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    [<span class="fl">1.6</span>, <span class="op">-</span><span class="fl">0.6</span>], </span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    [<span class="fl">3.6</span>, <span class="fl">1.2</span>], </span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    [<span class="op">-</span><span class="fl">0.5</span>, <span class="fl">0.5</span>], </span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    [<span class="op">-</span><span class="fl">0.25</span>, <span class="fl">1.7</span>]</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>])</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> torch.tensor([<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">0</span>,<span class="dv">0</span>])</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(X, <span class="st">'</span><span class="ch">\n\n</span><span class="st">'</span>, y)</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> <span class="co">#out</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>tensor([[ <span class="fl">4.2000</span>, <span class="op">-</span><span class="fl">2.4000</span>],</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>        [ <span class="fl">1.6000</span>, <span class="op">-</span><span class="fl">0.6000</span>],</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>        [ <span class="fl">3.6000</span>,  <span class="fl">1.2000</span>],</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>        [<span class="op">-</span><span class="fl">0.5000</span>,  <span class="fl">0.5000</span>],</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>        [<span class="op">-</span><span class="fl">0.2500</span>,  <span class="fl">1.7000</span>]]) </span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a> tensor([<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">0</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>This is the same as Microsoft Excel and label <code>0</code> corresponds to <code>is_cat</code> and label <code>1</code> corresponds to <code>is_dog</code>. Let’s now calculate the <strong>Label Smoothing Cross Entropy</strong> loss.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>LabelSmoothingCrossEntropy(ε<span class="op">=</span><span class="fl">0.1</span>, reduction<span class="op">=</span><span class="st">'none'</span>)(X,y)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> <span class="co">#out</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>tensor([<span class="fl">0.3314</span>, <span class="fl">2.1951</span>, <span class="fl">2.3668</span>, <span class="fl">1.2633</span>, <span class="fl">1.9855</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The results match our Microsoft Excel <code>LS X-entropy</code> results from fig-5.</p>
+</section>
+<section id="conclusion" class="level2" data-number="7">
+<h2 data-number="7" class="anchored" data-anchor-id="conclusion"><span class="header-section-number">7</span> Conclusion</h2>
+<p>I hope that through this blog post, I have been able to help you get a thorough understanding of <strong>Label Smoothing</strong>. By implementing Label Smoothing Cross Entropy loss in Microsoft Excel, step by step, I also hope that I’ve been clear in my attempt to explain everything that goes on behind the scenes. Please feel free to reach out to me via Twitter at <a href="http://twitter.com/amaarora"><span class="citation" data-cites="amaarora">@amaarora</span></a> - constructive feedback is always welcome.</p>
+</section>
+<section id="references" class="level2" data-number="8">
+<h2 data-number="8" class="anchored" data-anchor-id="references"><span class="header-section-number">8</span> References</h2>
+<ol type="1">
+<li><a href="https://towardsdatascience.com/a-simple-guide-to-the-versions-of-the-inception-network-7fc52b863202">A Simple Guide to the Versions of the Inception Network</a> by Bharat Raj</li>
+<li><a href="https://papers.nips.cc/paper/8717-when-does-label-smoothing-help.pdf">When does label smoothing help</a> by Hinton et al</li>
+<li><a href="https://arxiv.org/abs/1706.04599">On Calibration of Modern Neural Networks</a> aka Temperature Scaling by Pleiss et al</li>
+<li><a href="https://leimao.github.io/blog/Label-Smoothing/">Mathematical explainations and proofs for label smoothing by Lei Mao</a></li>
+<li><a href="https://youtu.be/vnOpEwmtFJ8">Label Smoothing + Mixup by Jeremy Howard</a></li>
+<li><a href="https://youtu.be/CJKnDu2dxOE?t=7482">Cross Entropy Loss in Microsoft Excel by Jeremy Howard</a></li>
+</ol>
+</section>
+<section id="credits" class="level2" data-number="9">
+<h2 data-number="9" class="anchored" data-anchor-id="credits"><span class="header-section-number">9</span> Credits</h2>
+<p>This blogpost wouldn’t have been possible without the help of my very talented friend <a href="https://twitter.com/abanerjee99">Atmadeep Banerjee</a>. Atmadeep, is currently interning and researching about <a href="https://paperswithcode.com/task/instance-segmentation/codeless">Instance Segmentation</a> at Harvard! You can find some of his very cool projects at his GitHub <a href="https://github.com/Atom-101">here</a>.</p>
+<p>Atmadeep was very kind to jump on a call with me for over an hour, when I was unable to replicate the results in Excel and help me find my mistake - <code>LOG</code> function in excel has base 10 whereas in <code>numpy</code> and <code>pytorch</code> it’s <code>LOG</code> to the base <code>e</code>! In MS Excel, <code>LOG</code> to the base <code>e</code> is referred to as <code>LN</code>.</p>
+<p>It was really funny to have spent the day reading numerous blog posts, few research papers and source code for PyTorch and then finding out that MS Excel implements <code>LOG</code> function differently than <code>numpy</code> and <code>pytorch</code>. But hey, lesson learnt, when in doubt, contact <a href="https://twitter.com/abanerjee99"><span class="citation" data-cites="Atmadeep">@Atmadeep</span> Banerjee</a> - he has an eye for detail.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

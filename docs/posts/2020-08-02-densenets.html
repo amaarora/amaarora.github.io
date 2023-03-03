@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-99.9.9">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Aman Arora">
+<meta name="dcterms.date" content="2020-08-02">
+<meta name="description" content="In this blog post, we introduce dense blocks, transition layers and look at the TorchVision implementation of DenseNet step-by-step.">
+
+<title>DenseNet Architecture Explained with PyTorch Implementation from TorchVision</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html" rel="" target="">
+ <span class="menu-text">Aman Arora’s Blog</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../about.html" rel="" target="">
+ <span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/" rel="" target=""><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com" rel="" target=""><i class="bi bi-twitter" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+            <div class="quarto-navbar-tools">
+</div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar"><div class="quarto-margin-header"><div class="margin-header-item">
+<!-- Begin Mailchimp Signup Form -->
+<link href="//cdn-images.mailchimp.com/embedcode/classic-071822.css" rel="stylesheet" type="text/css">
+<style type="text/css">
+    #mc_embed_signup{background:#fff; clear:left; font:14px Helvetica,Arial,sans-serif;  width:600px;}
+    /* Add your own Mailchimp form style overrides in your site stylesheet or in this style block.
+       We recommend moving this block and the preceding CSS link to the HEAD of your HTML file. */
+</style>
+<div id="mc_embed_signup">
+    <form action="https://github.us4.list-manage.com/subscribe/post?u=e847230346a7c78d4745ae796&amp;id=7a63b2b273&amp;f_id=005f58e8f0" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate="">
+        <div id="mc_embed_signup_scroll">
+        <h2>Subscribe to Aman Arora's Blog</h2>
+        <div class="indicates-required"><span class="asterisk">*</span> indicates required</div>
+<div class="mc-field-group">
+    <label for="mce-EMAIL">Email Address  <span class="asterisk">*</span>
+</label>
+    <input type="email" value="" name="EMAIL" class="required email" id="mce-EMAIL" required="">
+    <span id="mce-EMAIL-HELPERTEXT" class="helper_text"></span>
+</div>
+<div class="mc-field-group">
+    <label for="mce-FNAME">First Name </label>
+    <input type="text" value="" name="FNAME" class="" id="mce-FNAME">
+    <span id="mce-FNAME-HELPERTEXT" class="helper_text"></span>
+</div>
+<div class="mc-field-group">
+    <label for="mce-LNAME">Last Name </label>
+    <input type="text" value="" name="LNAME" class="" id="mce-LNAME">
+    <span id="mce-LNAME-HELPERTEXT" class="helper_text"></span>
+</div>
+    <div id="mce-responses" class="clear foot">
+        <div class="response" id="mce-error-response" style="display:none"></div>
+        <div class="response" id="mce-success-response" style="display:none"></div>
+    </div>    <!-- real people should not fill this in and expect good things - do not remove this or risk form bot signups-->
+    <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_e847230346a7c78d4745ae796_7a63b2b273" tabindex="-1" value=""></div>
+        <div class="optionalParent">
+            <div class="clear foot">
+                <input type="submit" value="Subscribe" name="subscribe" id="mc-embedded-subscribe" class="button">
+                <p class="brandingLogo"><a href="http://eepurl.com/il3baM" title="Mailchimp - email marketing made easy and fun"><img src="https://eep.io/mc-cdn-images/template_images/branding_logo_text_dark_dtp.svg"></a></p>
+            </div>
+        </div>
+    </div>
+</form>
+</div>
+<script type="text/javascript" src="//s3.amazonaws.com/downloads.mailchimp.com/js/mc-validate.js"></script><script type="text/javascript">(function($) {window.fnames = new Array(); window.ftypes = new Array();fnames[0]='EMAIL';ftypes[0]='email';fnames[1]='FNAME';ftypes[1]='text';fnames[2]='LNAME';ftypes[2]='text';fnames[3]='ADDRESS';ftypes[3]='address';fnames[4]='PHONE';ftypes[4]='phone';fnames[5]='BIRTHDAY';ftypes[5]='birthday';}(jQuery));var $mcj = jQuery.noConflict(true);</script>
+<!--End mc_embed_signup-->
+</div></div>
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction"><span class="header-section-number">1</span> Introduction</a></li>
+  <li><a href="#densenet-architecture-introduction" id="toc-densenet-architecture-introduction" class="nav-link" data-scroll-target="#densenet-architecture-introduction"><span class="header-section-number">2</span> DenseNet Architecture Introduction</a></li>
+  <li><a href="#but-is-feature-concatenation-possible" id="toc-but-is-feature-concatenation-possible" class="nav-link" data-scroll-target="#but-is-feature-concatenation-possible"><span class="header-section-number">3</span> But is feature concatenation possible?</a>
+  <ul class="collapse">
+  <li><a href="#transition-layers" id="toc-transition-layers" class="nav-link" data-scroll-target="#transition-layers"><span class="header-section-number">3.1</span> Transition Layers</a></li>
+  </ul></li>
+  <li><a href="#dense-connectivity" id="toc-dense-connectivity" class="nav-link" data-scroll-target="#dense-connectivity"><span class="header-section-number">4</span> Dense connectivity</a>
+  <ul class="collapse">
+  <li><a href="#inside-a-single-denseblock" id="toc-inside-a-single-denseblock" class="nav-link" data-scroll-target="#inside-a-single-denseblock"><span class="header-section-number">4.1</span> Inside a single DenseBlock</a></li>
+  </ul></li>
+  <li><a href="#densenet-architecture-as-a-collection-of-denseblocks" id="toc-densenet-architecture-as-a-collection-of-denseblocks" class="nav-link" data-scroll-target="#densenet-architecture-as-a-collection-of-denseblocks"><span class="header-section-number">5</span> DenseNet Architecture as a collection of DenseBlocks</a>
+  <ul class="collapse">
+  <li><a href="#bottleneck-layers" id="toc-bottleneck-layers" class="nav-link" data-scroll-target="#bottleneck-layers"><span class="header-section-number">5.1</span> Bottleneck Layers</a></li>
+  </ul></li>
+  <li><a href="#densenet-implementation" id="toc-densenet-implementation" class="nav-link" data-scroll-target="#densenet-implementation"><span class="header-section-number">6</span> DenseNet Implementation</a>
+  <ul class="collapse">
+  <li><a href="#denselayer-implementation" id="toc-denselayer-implementation" class="nav-link" data-scroll-target="#denselayer-implementation"><span class="header-section-number">6.1</span> DenseLayer Implementation</a></li>
+  <li><a href="#denseblock-implementation" id="toc-denseblock-implementation" class="nav-link" data-scroll-target="#denseblock-implementation"><span class="header-section-number">6.2</span> DenseBlock Implementation</a></li>
+  </ul></li>
+  <li><a href="#densenet-architecture-implementation" id="toc-densenet-architecture-implementation" class="nav-link" data-scroll-target="#densenet-architecture-implementation"><span class="header-section-number">7</span> DenseNet Architecture Implementation</a></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion"><span class="header-section-number">8</span> Conclusion</a></li>
+  <li><a href="#credits" id="toc-credits" class="nav-link" data-scroll-target="#credits"><span class="header-section-number">9</span> Credits</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">DenseNet Architecture Explained with PyTorch Implementation from TorchVision</h1>
+<p class="subtitle lead">Densely Connected Convolutional Networks</p>
+  <div class="quarto-categories">
+    <div class="quarto-category">Programming</div>
+    <div class="quarto-category">Computer Vision</div>
+    <div class="quarto-category">Model Architecture</div>
+  </div>
+  </div>
+
+<div>
+  <div class="description">
+    <p>In this blog post, we introduce dense blocks, transition layers and look at the TorchVision implementation of DenseNet step-by-step.</p>
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Aman Arora </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">August 2, 2020</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+</header>
+
+<section id="introduction" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="introduction"><span class="header-section-number">1</span> Introduction</h2>
+<p>In this post today, we will be looking at <strong>DenseNet</strong> architecture from the research paper <a href="https://arxiv.org/abs/1608.06993">Densely Connected Convolutional Networks</a>.</p>
+<p>The overall agenda is to: - Understand what DenseNet architecture is - Introduce dense blocks, transition layers and look at a single dense block in more detail - Understand step-by-step the TorchVision implementation of DenseNet</p>
+</section>
+<section id="densenet-architecture-introduction" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="densenet-architecture-introduction"><span class="header-section-number">2</span> DenseNet Architecture Introduction</h2>
+<p>In a standard <strong>Convolutional Neural Network</strong>, we have an input image, that is then passed through the network to get an output predicted label in a way where the forward pass is pretty straightforward as shown in the image below:</p>
+<p><img src="../images/CNN.png" title="fig-1 Convolutional Neural Network; src: https://cezannec.github.io/Convolutional_Neural_Networks/" class="img-fluid"></p>
+<p>Each convolutional layer except the first one (which takes in the input image), takes in the output of the previous convolutional layer and produces an output feature map that is then passed to next convolutional layer. For <code>L</code> layers, there are <code>L</code> direct connections - one between each layer and its subsequent layer.</p>
+<p>The <strong>DenseNet</strong> architecture is all about modifying this standard CNN architecture like so:</p>
+<p><img src="../images/densenet.png" title="fig-2 DenseNet Architecture" class="img-fluid"></p>
+<p>In a <strong>DenseNet</strong> architecture, each layer is connected to every other layer, hence the name <strong>Densely Connected Convolutional Network</strong>. For <code>L</code> layers, there are <code>L(L+1)/2</code> direct connections. For each layer, the feature maps of all the preceding layers are used as inputs, and its own feature maps are used as input for each subsequent layers.</p>
+<p>This is really it, as simple as this may sound, DenseNets essentially conect every layer to every other layer. This is the main idea that is extremely powerful. The input of a layer inside <strong>DenseNet</strong> is the concatenation of feature maps from previous layers.</p>
+<p>From the paper: &gt; DenseNets have several compelling advantages: they alleviate the vanishing-gradient problem, strengthen feature propagation, encourage feature reuse, and substantially reduce the number of parameters.</p>
+</section>
+<section id="but-is-feature-concatenation-possible" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="but-is-feature-concatenation-possible"><span class="header-section-number">3</span> But is feature concatenation possible?</h2>
+<p>Okay, so then, now we know the input of <strong>L<sub>th</sub></strong> layer are the feature maps from [<strong>L<sub>1</sub></strong>, <strong>L<sub>1</sub></strong>, <strong>L<sub>1</sub></strong>.. <strong>L-1<sub>th</sub></strong>] concatenated but is this concatenation possible?</p>
+<p>At this point in time, I want you to think about whether we can concat the features from the first layer of a <strong>DenseNet</strong> with the last layer of the <strong>DenseNet</strong>? If we can, why? If we can’t, what do we need to do to make this possible?</p>
+<p>This is a good time to take a minute and think about this question.</p>
+<p>So, here’s what I think - it would not be possible to concatenate the feature maps if the size of feature maps is different. So, to be able to perform the concatenation operation, we need to make sure that the size of the feature maps that we are concatenating is the same. Right?</p>
+<p>But we can’t just keep the feature maps the same size throughout the network - <strong>an essential part of concvolutional networks is down-sampling layers that change the size of feature maps</strong>. For example, look at the VGG architecture below:</p>
+<p><img src="../images/imagenet_vgg16.png" title="fig-3 VGG architecture" class="img-fluid"></p>
+<p>The input of shape <em>224x224x3</em> is downsampled to <em>7x7x512</em> towards the end of the network.</p>
+<p>To facilitate both down-sampling in the architecture and feature concatenation - the authors divided the network into multiple densely connected dense blocks. Inside the dense blocks, the feature map size remains the same.</p>
+<p><img src="../images/denseblock.png" title="fig-4 A DenseNet Architecture with 3 dense blocks" class="img-fluid"></p>
+<p>Dividing the network into densely connected blocks solves the problem that we discussed above.</p>
+<p>Now, the <code>Convolution + Pooling</code> operations outside the dense blocks can perform the downsampling operation and inside the dense block we can make sure that the size of the feature maps is the same to be able to perform feature concatenation.</p>
+<section id="transition-layers" class="level3" data-number="3.1">
+<h3 data-number="3.1" class="anchored" data-anchor-id="transition-layers"><span class="header-section-number">3.1</span> Transition Layers</h3>
+<p>The authors refer to the layers between the dense blocks as <strong>transition layers</strong> which do the convolution and pooling.</p>
+<p>From the paper, we know that the <strong>transition layers</strong> used in the <strong>DenseNet</strong> architecture consist of a batch-norm layer, 1x1 convolution followed by a 2x2 average pooling layer.</p>
+<p>Given that the transition layers are pretty easy, let’s quickly implement them here:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> _Transition(nn.Sequential):</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, num_input_features, num_output_features):</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>(_Transition, <span class="va">self</span>).<span class="fu">__init__</span>()</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.add_module(<span class="st">'norm'</span>, nn.BatchNorm2d(num_input_features))</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.add_module(<span class="st">'relu'</span>, nn.ReLU(inplace<span class="op">=</span><span class="va">True</span>))</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.add_module(<span class="st">'conv'</span>, nn.Conv2d(num_input_features, num_output_features,</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>                                          kernel_size<span class="op">=</span><span class="dv">1</span>, stride<span class="op">=</span><span class="dv">1</span>, bias<span class="op">=</span><span class="va">False</span>))</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.add_module(<span class="st">'pool'</span>, nn.AvgPool2d(kernel_size<span class="op">=</span><span class="dv">2</span>, stride<span class="op">=</span><span class="dv">2</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Essentially the <code>1x1 conv</code> performs the downsampling from <code>num_input_features</code> to <code>num_output_features</code>.</p>
+</section>
+</section>
+<section id="dense-connectivity" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="dense-connectivity"><span class="header-section-number">4</span> Dense connectivity</h2>
+<p>Let’s consider a network with <code>L</code> layers, each of which performs a non-linear transformation <strong>H<sub>L</sub></strong>. The output of the <strong>L<sub>th</sub></strong> layer of the network is denoted as <strong>x<sub>L</sub></strong> and the input image is represented as <strong>x<sub>0</sub></strong>.</p>
+<p>We know that traditional feed-forward netowrks connect the output of the <strong>L<sub>th</sub></strong> layer to <strong>L+1<sub>th</sub></strong> layer. And the skip connection can be represented as:</p>
+<p><img src="../images/resnet_out.png" title="eq-1 ResNet architecture output" class="img-fluid"></p>
+<p>In <strong>DenseNet</strong> architecture, the dense connectivity can be represented as:</p>
+<p><img src="../images/densenet_out.png" title="eq-2 DenseNet architecture output" class="img-fluid"></p>
+<p>where [x<sub>0</sub>, x<sub>1</sub>, x<sub>2</sub>..] represents concatenation of the feature maps produced by [0,1,.. L<sub>th</sub>] layers.</p>
+<section id="inside-a-single-denseblock" class="level3" data-number="4.1">
+<h3 data-number="4.1" class="anchored" data-anchor-id="inside-a-single-denseblock"><span class="header-section-number">4.1</span> Inside a single DenseBlock</h3>
+<p>Now that we understand that a <strong>DenseNet</strong> architecture is divided into multiple dense blocks, let’s look at a single dense block in a little more detail. Essentially, we know, that inside a dense block, each layer is connected to every other layer and the feature map size remains the same.</p>
+<p><img src="../images/denseblock_single.jpeg" title="fig-5 A view inside the dense block" class="img-fluid"></p>
+<p>Let’s try and understand what’s really going on inside a <strong>dense block</strong>. We have some <span style="color:gray"><strong>gray</strong></span> input features that are then passed to <code>LAYER_0</code>. The <code>LAYER_0</code> performs a non-linear transformation to add <span style="color:purple"><strong>purple</strong></span> features to the <span style="color:gray"><strong>gray</strong></span> features. These are then used as input to <code>LAYER_1</code> which performs a non-linear transformation to also add <span style="color:orange"><strong>orange</strong></span> features to the <span style="color:gray"><strong>gray</strong></span> and <span style="color:purple"><strong>purple</strong></span> ones. And so on until the final output for this 3 layer denseblock is a concatenation of <span style="color:gray"><strong>gray</strong></span>, <span style="color:purple"><strong>purple</strong></span>, <span style="color:orange"><strong>orange</strong></span> and <span style="color:green"><strong>green</strong></span> features.</p>
+<p>So, in a dense block, each layer adds some features on top of the existing feature maps.</p>
+<p>Therefore, as you can see the size of the feature map grows after a pass through each dense layer and the new features are concatenated to the existing features. One can think of the features as a global state of the network and each layer adds <code>K</code> features on top to the global state.</p>
+<p>This parameter <code>K</code> is referred to as <strong>growth rate</strong> of the network.</p>
+</section>
+</section>
+<section id="densenet-architecture-as-a-collection-of-denseblocks" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="densenet-architecture-as-a-collection-of-denseblocks"><span class="header-section-number">5</span> DenseNet Architecture as a collection of DenseBlocks</h2>
+<p>We already know by now from fig-4, that DenseNets are divided into multiple DenseBlocks.</p>
+<p>The various architectures of DenseNets have been summarized in the paper.</p>
+<p><img src="../images/densenet_archs.png" title="table-1 DenseNet Architectures" class="img-fluid"></p>
+<p>Each architecture consists of four DenseBlocks with varying number of layers. For example, the <code>DenseNet-121</code> has <code>[6,12,24,16]</code> layers in the four dense blocks whereas <code>DenseNet-169</code> has <code>[6, 12, 32, 32]</code> layers.</p>
+<p>We can see that the first part of the DenseNet architecture consists of a <code>7x7 stride 2 Conv Layer</code> followed by a <code>3x3 stride-2 MaxPooling layer</code>. And the fourth dense block is followed by a <strong>Classification Layer</strong> that accepts the feature maps of all layers of the network to perform the classification.</p>
+<p>Also, the convolution operations inside each of the architectures are the Bottle Neck layers. What this means is that the <code>1x1 conv</code> reduces the number of channels in the input and <code>3x3 conv</code> performs the convolution operation on the transformed version of the input with reduced number of channels rather than the input.</p>
+<section id="bottleneck-layers" class="level3" data-number="5.1">
+<h3 data-number="5.1" class="anchored" data-anchor-id="bottleneck-layers"><span class="header-section-number">5.1</span> Bottleneck Layers</h3>
+<p>By now, we know that each layer produces <code>K</code> feature maps which are then concatenated to previous feature maps. Therefore, the number of inputs are quite high especially for later layers in the network.</p>
+<p>This has huge computational requirements and to make it more efficient, the authors decided to utilize Bottleneck layers. From the paper: &gt; 1×1 convolution can be introduced as bottleneck layer before each 3×3 convolution to reduce the number of input feature-maps, and thus to improve computational efficiency. In our experiments, we let each 1×1 convolution produce <strong>4k</strong> feature-maps.</p>
+<p>We know <code>K</code> refers to the growth rate, so what the authors have finalized on is for <code>1x1 conv</code> to first produce <code>4*K</code> feature maps and then perform <code>3x3 conv</code> on these <code>4*k</code> size feature maps.</p>
+</section>
+</section>
+<section id="densenet-implementation" class="level2" data-number="6">
+<h2 data-number="6" class="anchored" data-anchor-id="densenet-implementation"><span class="header-section-number">6</span> DenseNet Implementation</h2>
+<p>We are now ready and have all the building blocks to implement DenseNet in PyTorch.</p>
+<section id="denselayer-implementation" class="level3" data-number="6.1">
+<h3 data-number="6.1" class="anchored" data-anchor-id="denselayer-implementation"><span class="header-section-number">6.1</span> DenseLayer Implementation</h3>
+<p>The first thing we need is to implement the dense layer inside a dense block.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> _DenseLayer(nn.Module):</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, num_input_features, growth_rate, bn_size, drop_rate, memory_efficient<span class="op">=</span><span class="va">False</span>):</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>(_DenseLayer, <span class="va">self</span>).<span class="fu">__init__</span>()</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.add_module(<span class="st">'norm1'</span>, nn.BatchNorm2d(num_input_features)),</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.add_module(<span class="st">'relu1'</span>, nn.ReLU(inplace<span class="op">=</span><span class="va">True</span>)),</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.add_module(<span class="st">'conv1'</span>, nn.Conv2d(num_input_features, bn_size <span class="op">*</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>                                           growth_rate, kernel_size<span class="op">=</span><span class="dv">1</span>, stride<span class="op">=</span><span class="dv">1</span>,</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>                                           bias<span class="op">=</span><span class="va">False</span>)),</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.add_module(<span class="st">'norm2'</span>, nn.BatchNorm2d(bn_size <span class="op">*</span> growth_rate)),</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.add_module(<span class="st">'relu2'</span>, nn.ReLU(inplace<span class="op">=</span><span class="va">True</span>)),</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.add_module(<span class="st">'conv2'</span>, nn.Conv2d(bn_size <span class="op">*</span> growth_rate, growth_rate,</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>                                           kernel_size<span class="op">=</span><span class="dv">3</span>, stride<span class="op">=</span><span class="dv">1</span>, padding<span class="op">=</span><span class="dv">1</span>,</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>                                           bias<span class="op">=</span><span class="va">False</span>)),</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.drop_rate <span class="op">=</span> <span class="bu">float</span>(drop_rate)</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.memory_efficient <span class="op">=</span> memory_efficient</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> bn_function(<span class="va">self</span>, inputs):</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>        <span class="co">"Bottleneck function"</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>        <span class="co"># type: (List[Tensor]) -&gt; Tensor</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>        concated_features <span class="op">=</span> torch.cat(inputs, <span class="dv">1</span>)</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>        bottleneck_output <span class="op">=</span> <span class="va">self</span>.conv1(<span class="va">self</span>.relu1(<span class="va">self</span>.norm1(concated_features)))  <span class="co"># noqa: T484</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> bottleneck_output</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, <span class="bu">input</span>):  <span class="co"># noqa: F811</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="bu">isinstance</span>(<span class="bu">input</span>, Tensor):</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>            prev_features <span class="op">=</span> [<span class="bu">input</span>]</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>            prev_features <span class="op">=</span> <span class="bu">input</span></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>        bottleneck_output <span class="op">=</span> <span class="va">self</span>.bn_function(prev_features)</span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>        new_features <span class="op">=</span> <span class="va">self</span>.conv2(<span class="va">self</span>.relu2(<span class="va">self</span>.norm2(bottleneck_output)))</span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="va">self</span>.drop_rate <span class="op">&gt;</span> <span class="dv">0</span>:</span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>            new_features <span class="op">=</span> F.dropout(new_features, p<span class="op">=</span><span class="va">self</span>.drop_rate,</span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>                                     training<span class="op">=</span><span class="va">self</span>.training)</span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> new_features</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>A <code>DenseLayer</code> accepts an input, concatenates the input together and performs <code>bn_function</code> on these feature maps to get <code>bottleneck_output</code>. This is done for computational efficiency. Finally, the convolution operation is performed to get <code>new_features</code> which are of size <code>K</code> or <code>growth_rate</code>.</p>
+<p>It should now be easy to map the above implementation with fig-5 shown below for reference again:</p>
+<p><img src="../images/denseblock_single.jpeg" title="fig-5 A view inside the dense block" class="img-fluid"></p>
+<p>Let’s say the above is an implementation of <code>LAYER_2</code>. First, <code>LAYER_2</code> accepts the <span style="color:gray"><strong>gray</strong></span>, <span style="color:purple"><strong>purple</strong></span>, <span style="color:orange"><strong>orange</strong></span> feature maps and concatenates them. Next, the <code>LAYER_2</code> performs a bottleneck operation to create <code>bottleneck_output</code> for computational efficiency. Finally, the layer performs the <strong>H<sub>L</sub></strong> operation as in eq-2 to generate <code>new_features</code>. These <code>new_features</code> are the <span style="color:green"><strong>green</strong></span> features as in fig-5.</p>
+<p>Great! So far we have successfully implemented Transition and Dense layers.</p>
+</section>
+<section id="denseblock-implementation" class="level3" data-number="6.2">
+<h3 data-number="6.2" class="anchored" data-anchor-id="denseblock-implementation"><span class="header-section-number">6.2</span> DenseBlock Implementation</h3>
+<p>Now, we are ready to implement the DenseBlock which consists of multiple such <code>DenseLayer</code>s.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> _DenseBlock(nn.ModuleDict):</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    _version <span class="op">=</span> <span class="dv">2</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, num_layers, num_input_features, bn_size, growth_rate, drop_rate, memory_efficient<span class="op">=</span><span class="va">False</span>):</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>(_DenseBlock, <span class="va">self</span>).<span class="fu">__init__</span>()</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(num_layers):</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>            layer <span class="op">=</span> _DenseLayer(</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>                num_input_features <span class="op">+</span> i <span class="op">*</span> growth_rate,</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>                growth_rate<span class="op">=</span>growth_rate,</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>                bn_size<span class="op">=</span>bn_size,</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>                drop_rate<span class="op">=</span>drop_rate,</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>                memory_efficient<span class="op">=</span>memory_efficient,</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.add_module(<span class="st">'denselayer</span><span class="sc">%d</span><span class="st">'</span> <span class="op">%</span> (i <span class="op">+</span> <span class="dv">1</span>), layer)</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, init_features):</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>        features <span class="op">=</span> [init_features]</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> name, layer <span class="kw">in</span> <span class="va">self</span>.items():</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>            new_features <span class="op">=</span> layer(features)</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>            features.append(new_features)</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> torch.cat(features, <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Let’s map the implementation of this <code>DenseBlock</code> with fig-5 again. Let’s say we pass the number of layers <code>num_layers</code> as <em>3</em> to create fig-5 block. In this case, let’s imagine that the <code>num_input_features</code> in <span style="color:gray"><strong>gray</strong></span> in the figure is <em>64</em>. We already know that the authors choose the bottleneck size <code>bn_size</code> for <code>1x1 conv</code> to be <em>4</em>. Let’s consider the <code>growth_rate</code> is 32 (same for all networks as in the paper).</p>
+<p>Great, so the first layer <code>LAYER_0</code> accepts <em>64</em> <code>num_input_features</code> and outputs extra <em>32</em> features. Excellent. Now, <code>LAYER_1</code> accepts the <em>96</em> features <code>num_input_features + 1 * growth rate</code> and outputs extra <em>32</em> features again. Finally, <code>LAYER_2</code> accepts <em>128</em> features <code>num_input_features + 2 * growth rate</code> and adds the <em>32</em> <span style="color:green"><strong>green</strong></span> features on top with are then concatenated to existing features and returned by the <code>DenseBlock</code>.</p>
+<p>At this stage, it should be really easy for you to map the implementation of dense block with fig-5.</p>
+</section>
+</section>
+<section id="densenet-architecture-implementation" class="level2" data-number="7">
+<h2 data-number="7" class="anchored" data-anchor-id="densenet-architecture-implementation"><span class="header-section-number">7</span> DenseNet Architecture Implementation</h2>
+<p>Finally, we are now ready to implement the DenseNet architecture as we have already implemented the <code>DenseLayer</code> and <code>DenseBlock</code>.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> DenseNet(nn.Module):</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, growth_rate<span class="op">=</span><span class="dv">32</span>, block_config<span class="op">=</span>(<span class="dv">6</span>, <span class="dv">12</span>, <span class="dv">24</span>, <span class="dv">16</span>),</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>                 num_init_features<span class="op">=</span><span class="dv">64</span>, bn_size<span class="op">=</span><span class="dv">4</span>, drop_rate<span class="op">=</span><span class="dv">0</span>, num_classes<span class="op">=</span><span class="dv">1000</span>, memory_efficient<span class="op">=</span><span class="va">False</span>):</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>(DenseNet, <span class="va">self</span>).<span class="fu">__init__</span>()</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Convolution and pooling part from table-1</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.features <span class="op">=</span> nn.Sequential(OrderedDict([</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>            (<span class="st">'conv0'</span>, nn.Conv2d(<span class="dv">3</span>, num_init_features, kernel_size<span class="op">=</span><span class="dv">7</span>, stride<span class="op">=</span><span class="dv">2</span>,</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>                                padding<span class="op">=</span><span class="dv">3</span>, bias<span class="op">=</span><span class="va">False</span>)),</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>            (<span class="st">'norm0'</span>, nn.BatchNorm2d(num_init_features)),</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>            (<span class="st">'relu0'</span>, nn.ReLU(inplace<span class="op">=</span><span class="va">True</span>)),</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>            (<span class="st">'pool0'</span>, nn.MaxPool2d(kernel_size<span class="op">=</span><span class="dv">3</span>, stride<span class="op">=</span><span class="dv">2</span>, padding<span class="op">=</span><span class="dv">1</span>)),</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>        ]))</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Add multiple denseblocks based on config </span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>        <span class="co"># for densenet-121 config: [6,12,24,16]</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>        num_features <span class="op">=</span> num_init_features</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> i, num_layers <span class="kw">in</span> <span class="bu">enumerate</span>(block_config):</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>            block <span class="op">=</span> _DenseBlock(</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>                num_layers<span class="op">=</span>num_layers,</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>                num_input_features<span class="op">=</span>num_features,</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>                bn_size<span class="op">=</span>bn_size,</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>                growth_rate<span class="op">=</span>growth_rate,</span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>                drop_rate<span class="op">=</span>drop_rate,</span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>                memory_efficient<span class="op">=</span>memory_efficient</span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.features.add_module(<span class="st">'denseblock</span><span class="sc">%d</span><span class="st">'</span> <span class="op">%</span> (i <span class="op">+</span> <span class="dv">1</span>), block)</span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>            num_features <span class="op">=</span> num_features <span class="op">+</span> num_layers <span class="op">*</span> growth_rate</span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> i <span class="op">!=</span> <span class="bu">len</span>(block_config) <span class="op">-</span> <span class="dv">1</span>:</span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>                <span class="co"># add transition layer between denseblocks to </span></span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>                <span class="co"># downsample</span></span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>                trans <span class="op">=</span> _Transition(num_input_features<span class="op">=</span>num_features,</span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>                                    num_output_features<span class="op">=</span>num_features <span class="op">//</span> <span class="dv">2</span>)</span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>                <span class="va">self</span>.features.add_module(<span class="st">'transition</span><span class="sc">%d</span><span class="st">'</span> <span class="op">%</span> (i <span class="op">+</span> <span class="dv">1</span>), trans)</span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>                num_features <span class="op">=</span> num_features <span class="op">//</span> <span class="dv">2</span></span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Final batch norm</span></span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.features.add_module(<span class="st">'norm5'</span>, nn.BatchNorm2d(num_features))</span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Linear layer</span></span>
+<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.classifier <span class="op">=</span> nn.Linear(num_features, num_classes)</span>
+<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Official init from torch repo.</span></span>
+<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> m <span class="kw">in</span> <span class="va">self</span>.modules():</span>
+<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="bu">isinstance</span>(m, nn.Conv2d):</span>
+<span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a>                nn.init.kaiming_normal_(m.weight)</span>
+<span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a>            <span class="cf">elif</span> <span class="bu">isinstance</span>(m, nn.BatchNorm2d):</span>
+<span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a>                nn.init.constant_(m.weight, <span class="dv">1</span>)</span>
+<span id="cb4-50"><a href="#cb4-50" aria-hidden="true" tabindex="-1"></a>                nn.init.constant_(m.bias, <span class="dv">0</span>)</span>
+<span id="cb4-51"><a href="#cb4-51" aria-hidden="true" tabindex="-1"></a>            <span class="cf">elif</span> <span class="bu">isinstance</span>(m, nn.Linear):</span>
+<span id="cb4-52"><a href="#cb4-52" aria-hidden="true" tabindex="-1"></a>                nn.init.constant_(m.bias, <span class="dv">0</span>)</span>
+<span id="cb4-53"><a href="#cb4-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-54"><a href="#cb4-54" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x):</span>
+<span id="cb4-55"><a href="#cb4-55" aria-hidden="true" tabindex="-1"></a>        features <span class="op">=</span> <span class="va">self</span>.features(x)</span>
+<span id="cb4-56"><a href="#cb4-56" aria-hidden="true" tabindex="-1"></a>        out <span class="op">=</span> F.relu(features, inplace<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb4-57"><a href="#cb4-57" aria-hidden="true" tabindex="-1"></a>        out <span class="op">=</span> F.adaptive_avg_pool2d(out, (<span class="dv">1</span>, <span class="dv">1</span>))</span>
+<span id="cb4-58"><a href="#cb4-58" aria-hidden="true" tabindex="-1"></a>        out <span class="op">=</span> torch.flatten(out, <span class="dv">1</span>)</span>
+<span id="cb4-59"><a href="#cb4-59" aria-hidden="true" tabindex="-1"></a>        out <span class="op">=</span> <span class="va">self</span>.classifier(out)</span>
+<span id="cb4-60"><a href="#cb4-60" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> out</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Let’s use the above implementation to create <code>densenet-121</code> architecture.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _densenet(arch, growth_rate, block_config, num_init_features, pretrained, progress,</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>              <span class="op">**</span>kwargs):</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    model <span class="op">=</span> DenseNet(growth_rate, block_config, num_init_features, <span class="op">**</span>kwargs)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> model</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> densenet121(pretrained<span class="op">=</span><span class="va">False</span>, progress<span class="op">=</span><span class="va">True</span>, <span class="op">**</span>kwargs):</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> _densenet(<span class="st">'densenet121'</span>, <span class="dv">32</span>, (<span class="dv">6</span>, <span class="dv">12</span>, <span class="dv">24</span>, <span class="dv">16</span>), <span class="dv">64</span>, pretrained, progress,</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>                     <span class="op">**</span>kwargs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Here’s what happens. First, we initialize the stem of the DenseNet architecture - this is the <code>convolution and pooling</code> part from table-1.</p>
+<p>This part of the code does that:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.features <span class="op">=</span> nn.Sequential(OrderedDict([</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>            (<span class="st">'conv0'</span>, nn.Conv2d(<span class="dv">3</span>, num_init_features, kernel_size<span class="op">=</span><span class="dv">7</span>, stride<span class="op">=</span><span class="dv">2</span>,</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>                                padding<span class="op">=</span><span class="dv">3</span>, bias<span class="op">=</span><span class="va">False</span>)),</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>            (<span class="st">'norm0'</span>, nn.BatchNorm2d(num_init_features)),</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>            (<span class="st">'relu0'</span>, nn.ReLU(inplace<span class="op">=</span><span class="va">True</span>)),</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>            (<span class="st">'pool0'</span>, nn.MaxPool2d(kernel_size<span class="op">=</span><span class="dv">3</span>, stride<span class="op">=</span><span class="dv">2</span>, padding<span class="op">=</span><span class="dv">1</span>)),</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>        ]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Next, based on the config, we create a <code>DenseBlock</code> based on the number of layers in the config.</p>
+<p>This part of the code does this:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, num_layers <span class="kw">in</span> <span class="bu">enumerate</span>(block_config):</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>            block <span class="op">=</span> _DenseBlock(</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>                num_layers<span class="op">=</span>num_layers,</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>                num_input_features<span class="op">=</span>num_features,</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>                bn_size<span class="op">=</span>bn_size,</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>                growth_rate<span class="op">=</span>growth_rate,</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>                drop_rate<span class="op">=</span>drop_rate,</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>                memory_efficient<span class="op">=</span>memory_efficient</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.features.add_module(<span class="st">'denseblock</span><span class="sc">%d</span><span class="st">'</span> <span class="op">%</span> (i <span class="op">+</span> <span class="dv">1</span>), block)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Finally, we add <code>Transition</code> Layers between <code>DenseBlock</code>s.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> i <span class="op">!=</span> <span class="bu">len</span>(block_config) <span class="op">-</span> <span class="dv">1</span>:</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>                <span class="co"># add transition layer between denseblocks to </span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>                <span class="co"># downsample</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>                trans <span class="op">=</span> _Transition(num_input_features<span class="op">=</span>num_features,</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>                                    num_output_features<span class="op">=</span>num_features <span class="op">//</span> <span class="dv">2</span>)</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>                <span class="va">self</span>.features.add_module(<span class="st">'transition</span><span class="sc">%d</span><span class="st">'</span> <span class="op">%</span> (i <span class="op">+</span> <span class="dv">1</span>), trans)</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>                num_features <span class="op">=</span> num_features <span class="op">//</span> <span class="dv">2</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>And that’s all the magic behind <strong>DenseNet</strong>s!</p>
+</section>
+<section id="conclusion" class="level2" data-number="8">
+<h2 data-number="8" class="anchored" data-anchor-id="conclusion"><span class="header-section-number">8</span> Conclusion</h2>
+<p>Congratulations! Today, together, we successfully understood what <strong>DenseNet</strong>s are and also understood the torchvision implementation of <strong>DenseNet</strong>s. I hope that by now you have a very thorough understanding of the <strong>DenseNet</strong> architecture.</p>
+<p>As always, constructive feedback is always welcome at <a href="https://twitter.com/amaarora"><span class="citation" data-cites="amaarora">@amaarora</span></a>.</p>
+<p>Also, feel free to <a href="https://amaarora.github.io/subscribe">subscribe to my blog here</a> to receive regular updates regarding new blog posts. Thanks for reading!</p>
+</section>
+<section id="credits" class="level2" data-number="9">
+<h2 data-number="9" class="anchored" data-anchor-id="credits"><span class="header-section-number">9</span> Credits</h2>
+<p>All code implementations have been directly copied from <a href="https://github.com/pytorch/vision/blob/master/torchvision/models/densenet.py">torchvision</a>.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

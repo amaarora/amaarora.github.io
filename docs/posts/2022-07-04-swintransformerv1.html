@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-99.9.9">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Aman Arora">
+<meta name="dcterms.date" content="2022-07-04">
+<meta name="description" content="Swin Transformer Model Architecture explained with PyTorch implementation line-by-line.">
+
+<title>Swin Transformer</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html" rel="" target="">
+ <span class="menu-text">Aman Arora’s Blog</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../about.html" rel="" target="">
+ <span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/" rel="" target=""><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com" rel="" target=""><i class="bi bi-twitter" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+            <div class="quarto-navbar-tools">
+</div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Swin Transformer</h1>
+            <p class="subtitle lead">Hierarchical Vision Transformer using Shifted Windows</p>
+                  <div>
+        <div class="description">
+          <p>Swin Transformer Model Architecture explained with PyTorch implementation line-by-line.</p>
+        </div>
+      </div>
+                          <div class="quarto-categories">
+                <div class="quarto-category">Computer Vision</div>
+                <div class="quarto-category">Model Architecure</div>
+                <div class="quarto-category">Transformers</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Aman Arora </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">July 4, 2022</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#personal-update" id="toc-personal-update" class="nav-link active" data-scroll-target="#personal-update"><span class="header-section-number">1</span> Personal Update</a></li>
+  <li><a href="#prerequisites" id="toc-prerequisites" class="nav-link" data-scroll-target="#prerequisites"><span class="header-section-number">2</span> Prerequisites</a></li>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link" data-scroll-target="#introduction"><span class="header-section-number">3</span> Introduction</a></li>
+  <li><a href="#key-conceptsideas" id="toc-key-conceptsideas" class="nav-link" data-scroll-target="#key-conceptsideas"><span class="header-section-number">4</span> Key Concepts/Ideas</a></li>
+  <li><a href="#swin-transformer-overview" id="toc-swin-transformer-overview" class="nav-link" data-scroll-target="#swin-transformer-overview"><span class="header-section-number">5</span> Swin Transformer Overview</a>
+  <ul class="collapse">
+  <li><a href="#patch-partitionembedding" id="toc-patch-partitionembedding" class="nav-link" data-scroll-target="#patch-partitionembedding"><span class="header-section-number">5.1</span> Patch Partition/Embedding</a></li>
+  <li><a href="#swin-transformer-stages-overview" id="toc-swin-transformer-stages-overview" class="nav-link" data-scroll-target="#swin-transformer-stages-overview"><span class="header-section-number">5.2</span> Swin Transformer Stages Overview</a></li>
+  <li><a href="#patch-merging-layer" id="toc-patch-merging-layer" class="nav-link" data-scroll-target="#patch-merging-layer"><span class="header-section-number">5.3</span> Patch Merging Layer</a></li>
+  </ul></li>
+  <li><a href="#swin-transformer-block" id="toc-swin-transformer-block" class="nav-link" data-scroll-target="#swin-transformer-block"><span class="header-section-number">6</span> Swin Transformer Block</a>
+  <ul class="collapse">
+  <li><a href="#shifted-windows-based-self-atention" id="toc-shifted-windows-based-self-atention" class="nav-link" data-scroll-target="#shifted-windows-based-self-atention"><span class="header-section-number">6.1</span> Shifted Windows based Self Atention</a></li>
+  <li><a href="#efficient-batch-computation-for-shifted-configuration" id="toc-efficient-batch-computation-for-shifted-configuration" class="nav-link" data-scroll-target="#efficient-batch-computation-for-shifted-configuration"><span class="header-section-number">6.2</span> Efficient batch computation for shifted configuration</a></li>
+  <li><a href="#window-attention-and-shifted-window-attention-using-microsoft-excel" id="toc-window-attention-and-shifted-window-attention-using-microsoft-excel" class="nav-link" data-scroll-target="#window-attention-and-shifted-window-attention-using-microsoft-excel"><span class="header-section-number">6.3</span> Window Attention and Shifted Window Attention using Microsoft Excel</a></li>
+  <li><a href="#swin-transformer-block-in-pytorch" id="toc-swin-transformer-block-in-pytorch" class="nav-link" data-scroll-target="#swin-transformer-block-in-pytorch"><span class="header-section-number">6.4</span> Swin Transformer Block in PyTorch</a></li>
+  <li><a href="#window-partition" id="toc-window-partition" class="nav-link" data-scroll-target="#window-partition"><span class="header-section-number">6.5</span> Window Partition</a></li>
+  </ul></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion"><span class="header-section-number">7</span> Conclusion</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<section id="personal-update" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="personal-update"><span class="header-section-number">1</span> Personal Update</h2>
+<p>For someone who was actively releasing blogs almost all throughout 2020 &amp; 2021, I am kinda sad to admit that this is my first blog for the year 2022. But, at the same time, I am super excited to be back. My personal responsibilities took priority for the last 1 year and I had to give up on releasing blog posts. Now that the storm has settled, I am happy to be back.</p>
+<p>I also resigned from my position as Machine Learning Engineer from Weights and Biases (W&amp;B) earlier this year and have joined <a href="https://www.realestate.com.au/">REA Group</a> as <strong>Data Science Lead</strong>. It’s quite a big change in my day to day work life, but I am up for the challenge and enjoying every second of my new job so far. :)</p>
+<p>I wrote many blogs on various different research papers during my time at W&amp;B that can be found <a href="https://amaarora.github.io/">here</a>.</p>
+<p>A lot has changed in the past 1 year or so since I have been away. As I catch-up with the latest research, I hope to continue releasing more blog posts <strong>fortnightly</strong> and take you on this journey with me as well. Let’s learn together!</p>
+</section>
+<section id="prerequisites" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="prerequisites"><span class="header-section-number">2</span> Prerequisites</h2>
+<p>As part of this blog post I am going to assume that the reader has a basic understanding of CNNs and the Transformer architecture.</p>
+<p>Here are a couple good resources on the Transformer architecture if you’d like some revision: 1. <a href="https://nlp.seas.harvard.edu/2018/04/03/attention.html">The Annotated Transformer</a> 2. <a href="https://amaarora.github.io/2021/01/18/ViT.html">Vision Transformer (ViT)</a></p>
+<p>For CNNs, there are various architectures that have been introduced. I have previously written blogs about a few of them: 1. <a href="https://amaarora.github.io/2020/07/24/SeNet.html">Squeeze and Excitation Networks</a> 2. <a href="https://amaarora.github.io/2020/08/02/densenets.html">DenseNet</a> 3. <a href="https://amaarora.github.io/2020/08/13/efficientnet.html">EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks</a></p>
+</section>
+<section id="introduction" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="introduction"><span class="header-section-number">3</span> Introduction</h2>
+<p>As part of today’s blog post, I want to cover <a href="https://arxiv.org/abs/2103.14030">Swin Transformers</a>. As is usual for my blog posts, I will be covering every related concept in theory along with a working PyTorch implementation of the architecture from <a href="https://github.com/rwightman/pytorch-image-models">TIMM</a>. Also, all text presented in this blog post copied directly from the paper will be in <em>Italics</em>.</p>
+<blockquote class="blockquote">
+<p><strong>Note</strong>: At the time of writing this blog post, we already have a <a href="https://arxiv.org/abs/2111.09883">Swin Transformer V2</a> architecture. This architecture will be covered in a future blog post.</p>
+</blockquote>
+<p>While the Transformer architecture before this paper had proved to be performing better than CNNs on the ImageNet dataset, it was yet to be utilised as a general purpose backbone for other tasks such as object detection &amp; semantic segmentation. This paper solves that problem and Swin Transformers can capably serve as general purpose backbones for computer vision.</p>
+<p>From the Abstract of the paper:</p>
+<p><em>Swin Transformer is compatible for a broad range of vision tasks, including image classification (87.3 top-1 accuracy on ImageNet-1K) and dense prediction tasks such as object detection (58.7 box AP and 51.1 mask AP on COCO testdev) and semantic segmentation (53.5 mIoU on ADE20K val). Its performance surpasses the previous state-of-the art by a large margin of +2.7 box AP and +2.6 mask AP on COCO, and +3.2 mIoU on ADE20K, demonstrating the potential of Transformer-based models as vision backbones. The hierarchical design and the shifted window approach also prove beneficial for all-MLP architectures.</em></p>
+</section>
+<section id="key-conceptsideas" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="key-conceptsideas"><span class="header-section-number">4</span> Key Concepts/Ideas</h2>
+<p>I might be oversimplifying here, but in my head there are only two new key concepts that we need to understand on top of <a href="https://arxiv.org/abs/2010.11929">ViT</a> to get a complete grasp of the Swin Transformer architecture.</p>
+<ol type="1">
+<li><a href="https://amaarora.github.io/2022/07/04/swintransformerv1.html#window-attention-and-shifted-window-attention-using-microsoft-excel">Shifted Window Attention</a></li>
+<li><a href="https://amaarora.github.io/2022/07/04/swintransformerv1.html#patch-merging-layer">Patch Merging</a></li>
+</ol>
+<p>Everything else to me looks pretty much the same as <a href="https://arxiv.org/abs/2010.11929">ViT</a> (with some minor modifications). So, what are the two concepts? We will get to them later in this blog post.</p>
+<p>First, let’s get a high level overview of the architecture.</p>
+</section>
+<section id="swin-transformer-overview" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="swin-transformer-overview"><span class="header-section-number">5</span> Swin Transformer Overview</h2>
+<p><img src="../images/swin-transformer.png" title="Figure-1: Swin Transformer Architecture" class="img-fluid"></p>
+<p>From section 3.1 of the paper:</p>
+<p><em>An overview of the Swin Transformer architecture is presented in the Figure above, which illustrates the tiny version (SwinT). It first splits an input RGB image into non-overlapping patches by a patch splitting module, like <a href="https://arxiv.org/abs/2010.11929">ViT</a>. Each patch is treated as a “token” and its feature is set as a concatenation of the raw pixel RGB values. In our implementation, we use a patch size of 4 × 4 and thus the feature dimension of each patch is 4 × 4 × 3 = 48. A linear embedding layer is applied on this raw-valued feature to project it to an arbitrary dimension (denoted as C).</em></p>
+<section id="patch-partitionembedding" class="level3" data-number="5.1">
+<h3 data-number="5.1" class="anchored" data-anchor-id="patch-partitionembedding"><span class="header-section-number">5.1</span> Patch Partition/Embedding</h3>
+<p>So first step is to take in an input image and convert it to Patch Embeddings. This is the exact same as <a href="https://arxiv.org/abs/2010.11929">ViT</a> with the difference being that each patch size in Swin Transformer is 4x4 instead of 16x16 as in <a href="https://arxiv.org/abs/2010.11929">ViT</a>. I have previously explained Patch Embeddings <a href="https://amaarora.github.io/2021/01/18/ViT.html#patch-embeddings">here</a> and therefore won’t be going into detail here.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> timm.models.layers <span class="im">import</span> PatchEmbed</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> torch.randn(<span class="dv">1</span>, <span class="dv">3</span>, <span class="dv">224</span>, <span class="dv">224</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>patch_embed <span class="op">=</span> PatchEmbed(img_size<span class="op">=</span><span class="dv">224</span>, patch_size<span class="op">=</span><span class="dv">4</span>, embed_dim<span class="op">=</span><span class="dv">96</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>patch_embed(x).shape</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> torch.Size([<span class="dv">1</span>, <span class="dv">3136</span>, <span class="dv">96</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>As can be seen, that the output of the Patch Embedding layer is of shape <span class="math inline">\((1, 3136, 96)\)</span>, that is, <span class="math inline">\((1, (H/4, W/4), 96)\)</span> where 96 is the embedding dimension C.</p>
+<blockquote class="blockquote">
+<p>NOTE: The embedding dimension 96 for Swin-T (architecture covered as part of this blog post) has been mentioned in section 3.3 of the paper under <strong>Architecture Variants</strong>.</p>
+</blockquote>
+</section>
+<section id="swin-transformer-stages-overview" class="level3" data-number="5.2">
+<h3 data-number="5.2" class="anchored" data-anchor-id="swin-transformer-stages-overview"><span class="header-section-number">5.2</span> Swin Transformer Stages Overview</h3>
+<p>Continuing from section 3.1 of the paper:</p>
+<p><em>Several Transformer blocks with modified self-attention computation (Swin Transformer blocks) are applied to these patch tokens. The Transformer blocks maintain the number of tokens H/4 × W/4, and together with the linear embedding are referred to as “Stage 1”. To produce a hierarchical representation, the number of tokens is reduced by patch merging layers as the network gets deeper. The first block of patch merging and feature transformation is denoted as “Stage 2”. The procedure is repeated twice, as “Stage 3” and “Stage 4”</em></p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>stage_1 <span class="op">=</span> BasicLayer(dim<span class="op">=</span><span class="dv">96</span>, out_dim<span class="op">=</span><span class="dv">192</span>,</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>                     input_resolution<span class="op">=</span>(<span class="dv">56</span>, <span class="dv">56</span>),</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>                     depth<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>inp <span class="op">=</span> torch.randn(<span class="dv">1</span>, <span class="dv">56</span><span class="op">*</span><span class="dv">56</span>, <span class="dv">96</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>stage_1(inp).shape</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> torch.Size([<span class="dv">1</span>, <span class="dv">3136</span>, <span class="dv">96</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>As can be seen from the code snippet above, there is no change in the dimension of the input as it passes through “Stage-1”. In fact, the dimension of the inputs doesn’t change as it passes through every stage. It is in between stages, that a <strong>Patch Merging</strong> layer is applied to reduce the number of tokens as the network get’s deeper.</p>
+</section>
+<section id="patch-merging-layer" class="level3" data-number="5.3">
+<h3 data-number="5.3" class="anchored" data-anchor-id="patch-merging-layer"><span class="header-section-number">5.3</span> Patch Merging Layer</h3>
+<p>From section 3.1 of the paper:</p>
+<p><em>The first patch merging layer concatenates the features of each group of 2×2 neighboring patches, and applies a linear layer on the 4C - dimensional concatenated features. This reduces the number of tokens by a multiple of 2×2 = 4 (2× downsampling of resolution), and the output dimension is set to 2C.</em></p>
+<p>Here, <span class="math inline">\(C\)</span> is the number of channels (embedding dimension). For the tiny version that has been explained as part of this blog post, <span class="math inline">\(C=96\)</span>.</p>
+<p><img src="../images/PatchMerging.png" title="Figure-2: Patch Merging" class="img-fluid"></p>
+<p>As can be seen below, the Patch-Merging layer merges four patches. So with every merge, both height and width of the image are further reduced by a factor of 2. In stage-1, the input resolution is <span class="math inline">\((H/4,W/4)\)</span>, but after patch merging, the resolution will change to <span class="math inline">\((H/8, W/8)\)</span> which will be the input for stage-2. For stage-3 the input resolution would be <span class="math inline">\((H/16, W/16)\)</span> and for stage-4, the input resolution would be <span class="math inline">\((H/32, W/32)\)</span>.</p>
+<p>Let’s understand the inputs and outputs for PatchMerging in code:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> timm.models.swin_transformer <span class="im">import</span> PatchMerging</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> torch.randn(<span class="dv">1</span>, <span class="dv">56</span><span class="op">*</span><span class="dv">56</span>, <span class="dv">96</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>l <span class="op">=</span> PatchMerging(input_resolution<span class="op">=</span>(<span class="dv">56</span>, <span class="dv">56</span>), dim<span class="op">=</span><span class="dv">96</span>, out_dim<span class="op">=</span><span class="dv">192</span>, norm_layer<span class="op">=</span>nn.LayerNorm)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>l(x).shape</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> torch.Size([<span class="dv">1</span>, <span class="dv">784</span>, <span class="dv">192</span>]) <span class="co"># (1, 28x28, 192)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>As can be seen, the output width and height are both reduced by a factor of 2 and the number of output channels is <strong>2C</strong> where C is the number of input channels, here for Swin-T, <span class="math inline">\(C=96\)</span>.</p>
+<p>Let’s look at the source code for Patch Merging now that we understand it’s functionality:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> PatchMerging(nn.Module):</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, input_resolution, dim, out_dim<span class="op">=</span><span class="va">None</span>, norm_layer<span class="op">=</span>nn.LayerNorm):</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.input_resolution <span class="op">=</span> input_resolution</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.dim <span class="op">=</span> dim</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.out_dim <span class="op">=</span> out_dim <span class="kw">or</span> <span class="dv">2</span> <span class="op">*</span> dim</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.norm <span class="op">=</span> norm_layer(<span class="dv">4</span> <span class="op">*</span> dim)</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.reduction <span class="op">=</span> nn.Linear(<span class="dv">4</span> <span class="op">*</span> dim, <span class="va">self</span>.out_dim, bias<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x):</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="co">        x: B, H*W, C</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="co">        B: Batch size </span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="co">        """</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>        H, W <span class="op">=</span> <span class="va">self</span>.input_resolution</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>        B, L, C <span class="op">=</span> x.shape</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> x.view(B, H, W, C)</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>        x0 <span class="op">=</span> x[:, <span class="dv">0</span>::<span class="dv">2</span>, <span class="dv">0</span>::<span class="dv">2</span>, :]  <span class="co"># B H/2 W/2 C</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>        x1 <span class="op">=</span> x[:, <span class="dv">1</span>::<span class="dv">2</span>, <span class="dv">0</span>::<span class="dv">2</span>, :]  <span class="co"># B H/2 W/2 C</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>        x2 <span class="op">=</span> x[:, <span class="dv">0</span>::<span class="dv">2</span>, <span class="dv">1</span>::<span class="dv">2</span>, :]  <span class="co"># B H/2 W/2 C</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>        x3 <span class="op">=</span> x[:, <span class="dv">1</span>::<span class="dv">2</span>, <span class="dv">1</span>::<span class="dv">2</span>, :]  <span class="co"># B H/2 W/2 C</span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> torch.cat([x0, x1, x2, x3], <span class="op">-</span><span class="dv">1</span>)  <span class="co"># B H/2 W/2 4*C      </span></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> x.view(B, <span class="op">-</span><span class="dv">1</span>, <span class="dv">4</span> <span class="op">*</span> C)  <span class="co"># B H/2*W/2 4*C</span></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="va">self</span>.norm(x)</span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="va">self</span>.reduction(x)</span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> x</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>To help understand the code above, I used Microsoft Excel again. In the figure below,</p>
+<ul>
+<li><span class="math inline">\(X_0\)</span> is represented by <code>✔️</code> - starting at row 0, column 0;</li>
+<li><span class="math inline">\(X_1\)</span> is represented by <code>❌</code> - starting at row 1, column 0;</li>
+<li><span class="math inline">\(X_2\)</span> is represented by <code>⚫</code> - starting at row 0, column 1;</li>
+<li><span class="math inline">\(X_0\)</span> is represented by <code>⬛</code> - starting at row 1, column 1</li>
+</ul>
+<p><img src="../images/patch-merging-excel.png" title="Figure-3: Patch Merging Layer in Excel" class="img-fluid"></p>
+<p>Therefore, when we concatenate in code using <code>x = torch.cat([x0, x1, x2, x3], -1)</code>, we are actually merging four patches together, and therefore here <span class="math inline">\(X\)</span> would have dimension size of 4C. Next, as was mentioned in the paper - <em>the output dimension is set to 2C</em>, therefore, we make use of a <code>nn.Linear</code> layer in code to reduce the dimension side to 2C.</p>
+<p>Now that we’ve looked at Patch Merging layer, let’s get to the meat of the paper - which is the <strong>Swin Transformer Block</strong>.</p>
+</section>
+</section>
+<section id="swin-transformer-block" class="level2" data-number="6">
+<h2 data-number="6" class="anchored" data-anchor-id="swin-transformer-block"><span class="header-section-number">6</span> Swin Transformer Block</h2>
+<p>At every stage in <em>Swin-T</em> Architecture, there are at two consecutive Swin Transformer Blocks except in Stage-3, where there are 6 Swin Transformer Blocks in tandem.</p>
+<p><img src="../images/swin-transformer-block.png" title="Figure-4: Two successive Swin Transformer Blocks" class="img-fluid"></p>
+<p>From section Swin Transformer Block heading under section 3.1 of the paper:</p>
+<p><em>Swin Transformer is built by replacing the standard multi-head self attention (MSA) module in a Transformer block by a module based on shifted windows, with other layers kept the same. As illustrated in Figure above, a Swin Transformer block consists of a shifted window based MSA module, followed by a 2-layer MLP with GELU nonlinearity in between. A LayerNorm (LN) layer is applied before each MSA module and each MLP, and a residual connection is applied after each module.</em></p>
+<p>Okay, so pretty much everything is the same as <a href="https://arxiv.org/abs/2010.11929">ViT</a> except this idea of shifted windows based attention. So, that’s what we should really at next before looking at the code implementation of Swin Transformer Block.</p>
+<section id="shifted-windows-based-self-atention" class="level3" data-number="6.1">
+<h3 data-number="6.1" class="anchored" data-anchor-id="shifted-windows-based-self-atention"><span class="header-section-number">6.1</span> Shifted Windows based Self Atention</h3>
+<p>From section 3.2 of the paper:</p>
+<p><em>The standard Transformer architecture and its adaptation for image classification both conduct global selfattention, where the relationships between a token and all other tokens are computed. The global computation leads to quadratic complexity with respect to the number of tokens, making it unsuitable for many vision problems requiring an immense set of tokens for dense prediction or to represent a high-resolution image.</em></p>
+<p><em>For efficient modeling, we propose to compute self-attention within local windows. The windows are arranged to evenly partition the image in a non-overlapping manner.</em></p>
+<p><em>The window-based self-attention module lacks connections across windows, which limits its modeling power. To introduce cross-window connections while maintaining the efficient computation of non-overlapping windows, we propose a shifted window partitioning approach which alternates between two partitioning configurations in consecutive Swin Transformer blocks.</em></p>
+<p><em>As illustrated in Figure below, the first module uses a regular window partitioning strategy which starts from the top-left pixel, and the 8 × 8 feature map is evenly partitioned into 2 × 2 windows of size 4 × 4 (M = 4). Then, the next module adopts a windowing configuration that is shifted from that of the preceding layer, by displacing the windows by <span class="math inline">\(([M/2], [M/2])\)</span> pixels from the regularly partitioned windows.</em></p>
+<p><img src="../images/shifted-windows.png" title="Figure-5: An illustration of the shifted window approach for computing self-attention in the proposed Swin Transformer architecture." class="img-fluid"></p>
+<p>Before looking at the code implementation of shifted window based attention, we first need to understand what’s exactly going on. And if the above doesn’t make much sense, let me try and break it down for you. It’s really simple. Trust me!</p>
+<p>So on the left, we have an 8x8 feature map which is evenly partitioned into 4 windows of size 4 x 4. Here, the window size <span class="math inline">\(M=4\)</span>. Now in the first part of the two successive blocks, we calculate attention inside these windows. But, remember we also need cross-window attention for our network to learn better! Why? (Because we are no longer using a global context). So, in the second part of the swin transformer block, we displace the windows by <span class="math inline">\(([M/2], [M/2])\)</span> pixels from the regularly partitioned windows, and perform attention between these new windows! This leads to cross-window connections. In this case, since <span class="math inline">\(M=4\)</span>, we displace the windows by <span class="math inline">\((2, 2)\)</span>. Now, we perform self-attention inside the shifted local windows.</p>
+<blockquote class="blockquote">
+<p><strong>Note:</strong> After the shifting windows by (2,2), we have a total of 9 windows, whereas previously we only had 4 windows. There might be a better way to perform shifted window attention. That has been explained in the next section.</p>
+</blockquote>
+</section>
+<section id="efficient-batch-computation-for-shifted-configuration" class="level3" data-number="6.2">
+<h3 data-number="6.2" class="anchored" data-anchor-id="efficient-batch-computation-for-shifted-configuration"><span class="header-section-number">6.2</span> Efficient batch computation for shifted configuration</h3>
+<p><img src="../images/window-partition.png" title="Figure-6: Illustration of an efficient batch computation approach for self-attention in shifted window partitioning." class="img-fluid"></p>
+<p>From section 3.2 of the paper:</p>
+<p><em>An issue with shifted window partitioning is that it will result in more windows, from <span class="math inline">\([h/M] x [w/M]\)</span> to <span class="math inline">\(([h/M]+1) X ([w/M]+1)\)</span> in the shifted configuration, and some of the windows will be smaller than <span class="math inline">\(M × M\)</span>. Here, we propose a more efficient batch computation approach by cyclic-shifting toward the top-left direction, as illustrated in Figure 4. After this shift, a batched window may be composed of several sub-windows that are not adjacent in the feature map, so a masking mechanism is employed to limit self-attention computation to within each sub-window. With the cyclic-shift, the number of batched windows remains the same as that of regular window partitioning, and thus is also efficient.</em></p>
+<p>I’ll be honest, none of the above made complete sense to me for the first few days when I read the paper until recently! So, I’ll try to explain shifted window attention in the easiest way possible using <strong>Microsoft Excel</strong>.</p>
+</section>
+<section id="window-attention-and-shifted-window-attention-using-microsoft-excel" class="level3" data-number="6.3">
+<h3 data-number="6.3" class="anchored" data-anchor-id="window-attention-and-shifted-window-attention-using-microsoft-excel"><span class="header-section-number">6.3</span> Window Attention and Shifted Window Attention using Microsoft Excel</h3>
+<p>Remember that we always have two consecutive Swin Transformer Blocks. The first one performs window attention and the second one performs “shifted” window attention. Here, window attention just means attention inside local windows. Performing a “shifted” window attention makes sure that there is cross-window connections while maintaining the efficient computation of non-overlapping windows.</p>
+<p><img src="../images/shifted-window-excel.png" title="Figure-7: Shifted Window using Excel" class="img-fluid"></p>
+<p>Let’s assume that we have a 8x8 feature map as was shown in the paper. Let this be called as feature map “A”. Now, if the window size <span class="math inline">\(M=4\)</span>, then we can divide this feature map into 4 windows each of size 4x4. The first Swin Transformer block performs self-attention within these 4 local windows that have been highlighted with different colours.</p>
+<p>Now, before passing on the feature map to the second Swin Transformer Block, we shift the windows by <span class="math inline">\((M/2, M/2)\)</span> as mentioned in the paper. Therefore, we shift the windows by <span class="math inline">\((2, 2)\)</span>. This leads to feature map “B” where again, each window has been again highlighted with a different color.</p>
+<p>But, there is one simple problem - there are now 9 (3x3) windows. This was also mentioned in the paper before in this language - <em>An issue with shifted window partitioning is that it will result in more windows, from <span class="math inline">\([h/M] x [w/M]\)</span> to <span class="math inline">\(([h/M]+1) X ([w/M]+1)\)</span> in the shifted configuration, and some of the windows will be smaller than <span class="math inline">\(M × M\)</span>.</em></p>
+<p>I hope that the paper’s language now makes sense. We have 3x3 windows after shifted the windows by (2, 2), and also some of the windows are smaller than size 4x4. A naive solution could have been to pad the windows that are of size less than 4x4, but this would lead to computation overhead.</p>
+<p>So the authors of the paper suggested something really neat - “Efficient batch computation for shifted configuration”! The idea is to create a feature map “C” by cyclic shifting the feature map “A”. But as you can see, this leads to a feature map, where except the top-left window, all other windows consist of sub-windows that aren’t really next to each other. The local attention should be as per the highlighted colours in feature map “C” and not the dashed boundaries. Therefore, next step is to use masking when performing local attention. A mask for feature map “C” can be created using the following code:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>cnt <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>m   <span class="op">=</span> np.arange(<span class="dv">1</span>, <span class="dv">65</span>).reshape(<span class="dv">8</span>,<span class="dv">8</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> h <span class="kw">in</span> (<span class="bu">slice</span>(<span class="dv">0</span>, <span class="op">-</span><span class="dv">4</span>), <span class="bu">slice</span>(<span class="op">-</span><span class="dv">4</span>, <span class="op">-</span><span class="dv">2</span>), <span class="bu">slice</span>(<span class="op">-</span><span class="dv">2</span>, <span class="va">None</span>)):</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> w <span class="kw">in</span> (<span class="bu">slice</span>(<span class="dv">0</span>, <span class="op">-</span><span class="dv">4</span>), <span class="bu">slice</span>(<span class="op">-</span><span class="dv">4</span>, <span class="op">-</span><span class="dv">2</span>), <span class="bu">slice</span>(<span class="op">-</span><span class="dv">2</span>, <span class="va">None</span>)):</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>        m[h, w] <span class="op">=</span> cnt</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>        cnt <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>m</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> </span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>array([[<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">2</span>],</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>       [<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">2</span>],</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>       [<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">2</span>],</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>       [<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">2</span>],</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>       [<span class="dv">3</span>, <span class="dv">3</span>, <span class="dv">3</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">5</span>, <span class="dv">5</span>],</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>       [<span class="dv">3</span>, <span class="dv">3</span>, <span class="dv">3</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">4</span>, <span class="dv">5</span>, <span class="dv">5</span>],</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>       [<span class="dv">6</span>, <span class="dv">6</span>, <span class="dv">6</span>, <span class="dv">6</span>, <span class="dv">7</span>, <span class="dv">7</span>, <span class="dv">8</span>, <span class="dv">8</span>],</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>       [<span class="dv">6</span>, <span class="dv">6</span>, <span class="dv">6</span>, <span class="dv">6</span>, <span class="dv">7</span>, <span class="dv">7</span>, <span class="dv">8</span>, <span class="dv">8</span>]])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>As can be seen above, the mask completely matches the highlighted colors in feature map “C”. Thus we can perform attention with masking while using cyclic-shift. This will be equivalent to performing window-attention in feature map “B”! I hope that now this concept of window attention and shifted window attenion makes sense. And that now you understand how the authors proposed to use “Efficient batch computation for shifted configuration”! We are now ready to look at the PyTorch implementation of <code>SwinTransformerBlock</code> along with <code>WindowAttention</code>.</p>
+<blockquote class="blockquote">
+<p>Please feel free to pause at this point, and re read the above three sections. Everything I’ve written above, should make complete sense. If it does, then, you’ve really understood how Swin Transformer works! If it doesn’t, feel free to reach out to me. :)</p>
+</blockquote>
+</section>
+<section id="swin-transformer-block-in-pytorch" class="level3" data-number="6.4">
+<h3 data-number="6.4" class="anchored" data-anchor-id="swin-transformer-block-in-pytorch"><span class="header-section-number">6.4</span> Swin Transformer Block in PyTorch</h3>
+<div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> SwinTransformerBlock(nn.Module):</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>, dim, input_resolution, num_heads<span class="op">=</span><span class="dv">4</span>, head_dim<span class="op">=</span><span class="va">None</span>, window_size<span class="op">=</span><span class="dv">7</span>, shift_size<span class="op">=</span><span class="dv">0</span>,</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>            mlp_ratio<span class="op">=</span><span class="fl">4.</span>, qkv_bias<span class="op">=</span><span class="va">True</span>, drop<span class="op">=</span><span class="fl">0.</span>, attn_drop<span class="op">=</span><span class="fl">0.</span>, drop_path<span class="op">=</span><span class="fl">0.</span>,</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>            act_layer<span class="op">=</span>nn.GELU, norm_layer<span class="op">=</span>nn.LayerNorm):</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.dim <span class="op">=</span> dim</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.input_resolution <span class="op">=</span> input_resolution</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.window_size <span class="op">=</span> window_size</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.shift_size <span class="op">=</span> shift_size</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.mlp_ratio <span class="op">=</span> mlp_ratio</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="bu">min</span>(<span class="va">self</span>.input_resolution) <span class="op">&lt;=</span> <span class="va">self</span>.window_size:</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>            <span class="co"># if window size is larger than input resolution, we don't partition windows</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.shift_size <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.window_size <span class="op">=</span> <span class="bu">min</span>(<span class="va">self</span>.input_resolution)</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.norm1 <span class="op">=</span> norm_layer(dim)</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.attn <span class="op">=</span> WindowAttention(</span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>            dim, num_heads<span class="op">=</span>num_heads, head_dim<span class="op">=</span>head_dim, window_size<span class="op">=</span>to_2tuple(<span class="va">self</span>.window_size),</span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>            qkv_bias<span class="op">=</span>qkv_bias, attn_drop<span class="op">=</span>attn_drop, proj_drop<span class="op">=</span>drop)</span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.drop_path <span class="op">=</span> DropPath(drop_path) <span class="cf">if</span> drop_path <span class="op">&gt;</span> <span class="fl">0.</span> <span class="cf">else</span> nn.Identity()</span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.norm2 <span class="op">=</span> norm_layer(dim)</span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.mlp <span class="op">=</span> Mlp(in_features<span class="op">=</span>dim, hidden_features<span class="op">=</span><span class="bu">int</span>(dim <span class="op">*</span> mlp_ratio), act_layer<span class="op">=</span>act_layer, drop<span class="op">=</span>drop)</span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="va">self</span>.shift_size <span class="op">&gt;</span> <span class="dv">0</span>:</span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>            H, W <span class="op">=</span> <span class="va">self</span>.input_resolution</span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>            img_mask <span class="op">=</span> torch.zeros((<span class="dv">1</span>, H, W, <span class="dv">1</span>))  <span class="co"># 1 H W 1</span></span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>            cnt <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> h <span class="kw">in</span> (</span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>                    <span class="bu">slice</span>(<span class="dv">0</span>, <span class="op">-</span><span class="va">self</span>.window_size),</span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a>                    <span class="bu">slice</span>(<span class="op">-</span><span class="va">self</span>.window_size, <span class="op">-</span><span class="va">self</span>.shift_size),</span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a>                    <span class="bu">slice</span>(<span class="op">-</span><span class="va">self</span>.shift_size, <span class="va">None</span>)):</span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a>                <span class="cf">for</span> w <span class="kw">in</span> (</span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a>                        <span class="bu">slice</span>(<span class="dv">0</span>, <span class="op">-</span><span class="va">self</span>.window_size),</span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a>                        <span class="bu">slice</span>(<span class="op">-</span><span class="va">self</span>.window_size, <span class="op">-</span><span class="va">self</span>.shift_size),</span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a>                        <span class="bu">slice</span>(<span class="op">-</span><span class="va">self</span>.shift_size, <span class="va">None</span>)):</span>
+<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a>                    img_mask[:, h, w, :] <span class="op">=</span> cnt</span>
+<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a>                    cnt <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a>            mask_windows <span class="op">=</span> window_partition(img_mask, <span class="va">self</span>.window_size)  <span class="co"># num_win, window_size, window_size, 1</span></span>
+<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a>            mask_windows <span class="op">=</span> mask_windows.view(<span class="op">-</span><span class="dv">1</span>, <span class="va">self</span>.window_size <span class="op">*</span> <span class="va">self</span>.window_size)</span>
+<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a>            attn_mask <span class="op">=</span> mask_windows.unsqueeze(<span class="dv">1</span>) <span class="op">-</span> mask_windows.unsqueeze(<span class="dv">2</span>)</span>
+<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a>            attn_mask <span class="op">=</span> attn_mask.masked_fill(attn_mask <span class="op">!=</span> <span class="dv">0</span>, <span class="bu">float</span>(<span class="op">-</span><span class="fl">100.0</span>)).masked_fill(attn_mask <span class="op">==</span> <span class="dv">0</span>, <span class="bu">float</span>(<span class="fl">0.0</span>))</span>
+<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a>            attn_mask <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb6-46"><a href="#cb6-46" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.register_buffer(<span class="st">"attn_mask"</span>, attn_mask)</span>
+<span id="cb6-47"><a href="#cb6-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-48"><a href="#cb6-48" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x):</span>
+<span id="cb6-49"><a href="#cb6-49" aria-hidden="true" tabindex="-1"></a>        H, W <span class="op">=</span> <span class="va">self</span>.input_resolution</span>
+<span id="cb6-50"><a href="#cb6-50" aria-hidden="true" tabindex="-1"></a>        B, L, C <span class="op">=</span> x.shape</span>
+<span id="cb6-51"><a href="#cb6-51" aria-hidden="true" tabindex="-1"></a>        _assert(L <span class="op">==</span> H <span class="op">*</span> W, <span class="st">"input feature has wrong size"</span>)</span>
+<span id="cb6-52"><a href="#cb6-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-53"><a href="#cb6-53" aria-hidden="true" tabindex="-1"></a>        shortcut <span class="op">=</span> x</span>
+<span id="cb6-54"><a href="#cb6-54" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="va">self</span>.norm1(x)</span>
+<span id="cb6-55"><a href="#cb6-55" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> x.view(B, H, W, C)</span>
+<span id="cb6-56"><a href="#cb6-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-57"><a href="#cb6-57" aria-hidden="true" tabindex="-1"></a>        <span class="co"># cyclic shift</span></span>
+<span id="cb6-58"><a href="#cb6-58" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="va">self</span>.shift_size <span class="op">&gt;</span> <span class="dv">0</span>:</span>
+<span id="cb6-59"><a href="#cb6-59" aria-hidden="true" tabindex="-1"></a>            shifted_x <span class="op">=</span> torch.roll(x, shifts<span class="op">=</span>(<span class="op">-</span><span class="va">self</span>.shift_size, <span class="op">-</span><span class="va">self</span>.shift_size), dims<span class="op">=</span>(<span class="dv">1</span>, <span class="dv">2</span>))</span>
+<span id="cb6-60"><a href="#cb6-60" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="cb6-61"><a href="#cb6-61" aria-hidden="true" tabindex="-1"></a>            shifted_x <span class="op">=</span> x</span>
+<span id="cb6-62"><a href="#cb6-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-63"><a href="#cb6-63" aria-hidden="true" tabindex="-1"></a>        <span class="co"># partition windows</span></span>
+<span id="cb6-64"><a href="#cb6-64" aria-hidden="true" tabindex="-1"></a>        x_windows <span class="op">=</span> window_partition(shifted_x, <span class="va">self</span>.window_size)  <span class="co"># num_win*B, window_size, window_size, C</span></span>
+<span id="cb6-65"><a href="#cb6-65" aria-hidden="true" tabindex="-1"></a>        x_windows <span class="op">=</span> x_windows.view(<span class="op">-</span><span class="dv">1</span>, <span class="va">self</span>.window_size <span class="op">*</span> <span class="va">self</span>.window_size, C)  <span class="co"># num_win*B, window_size*window_size, C</span></span>
+<span id="cb6-66"><a href="#cb6-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-67"><a href="#cb6-67" aria-hidden="true" tabindex="-1"></a>        <span class="co"># W-MSA/SW-MSA</span></span>
+<span id="cb6-68"><a href="#cb6-68" aria-hidden="true" tabindex="-1"></a>        attn_windows <span class="op">=</span> <span class="va">self</span>.attn(x_windows, mask<span class="op">=</span><span class="va">self</span>.attn_mask)  <span class="co"># num_win*B, window_size*window_size, C</span></span>
+<span id="cb6-69"><a href="#cb6-69" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-70"><a href="#cb6-70" aria-hidden="true" tabindex="-1"></a>        <span class="co"># merge windows</span></span>
+<span id="cb6-71"><a href="#cb6-71" aria-hidden="true" tabindex="-1"></a>        attn_windows <span class="op">=</span> attn_windows.view(<span class="op">-</span><span class="dv">1</span>, <span class="va">self</span>.window_size, <span class="va">self</span>.window_size, C)</span>
+<span id="cb6-72"><a href="#cb6-72" aria-hidden="true" tabindex="-1"></a>        shifted_x <span class="op">=</span> window_reverse(attn_windows, <span class="va">self</span>.window_size, H, W)  <span class="co"># B H' W' C</span></span>
+<span id="cb6-73"><a href="#cb6-73" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-74"><a href="#cb6-74" aria-hidden="true" tabindex="-1"></a>        <span class="co"># reverse cyclic shift</span></span>
+<span id="cb6-75"><a href="#cb6-75" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="va">self</span>.shift_size <span class="op">&gt;</span> <span class="dv">0</span>:</span>
+<span id="cb6-76"><a href="#cb6-76" aria-hidden="true" tabindex="-1"></a>            x <span class="op">=</span> torch.roll(shifted_x, shifts<span class="op">=</span>(<span class="va">self</span>.shift_size, <span class="va">self</span>.shift_size), dims<span class="op">=</span>(<span class="dv">1</span>, <span class="dv">2</span>))</span>
+<span id="cb6-77"><a href="#cb6-77" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="cb6-78"><a href="#cb6-78" aria-hidden="true" tabindex="-1"></a>            x <span class="op">=</span> shifted_x</span>
+<span id="cb6-79"><a href="#cb6-79" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> x.view(B, H <span class="op">*</span> W, C)</span>
+<span id="cb6-80"><a href="#cb6-80" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-81"><a href="#cb6-81" aria-hidden="true" tabindex="-1"></a>        <span class="co"># FFN</span></span>
+<span id="cb6-82"><a href="#cb6-82" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> shortcut <span class="op">+</span> <span class="va">self</span>.drop_path(x)</span>
+<span id="cb6-83"><a href="#cb6-83" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> x <span class="op">+</span> <span class="va">self</span>.drop_path(<span class="va">self</span>.mlp(<span class="va">self</span>.norm2(x)))</span>
+<span id="cb6-84"><a href="#cb6-84" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-85"><a href="#cb6-85" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> x</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>In the implementation above, we are also using <code>window_reverse</code> &amp; <code>WindowAttention</code>, but as part of this blog post I will be skipping over them as they contain minor details (such as relative position bias) that are not needed for an overall understanding of the <code>SwinTransformerBlock</code>.</p>
+<blockquote class="blockquote">
+<p>If you’d still want me to go over, or want to pair with me on <code>WindowAttention</code>, please feel free to reach out to me.</p>
+</blockquote>
+<p>The main part of the <code>__init__</code> method is below:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="va">self</span>.shift_size <span class="op">&gt;</span> <span class="dv">0</span>:</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    H, W <span class="op">=</span> <span class="va">self</span>.input_resolution</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    img_mask <span class="op">=</span> torch.zeros((<span class="dv">1</span>, H, W, <span class="dv">1</span>))  <span class="co"># 1 H W 1</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    cnt <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> h <span class="kw">in</span> (</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>            <span class="bu">slice</span>(<span class="dv">0</span>, <span class="op">-</span><span class="va">self</span>.window_size),</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>            <span class="bu">slice</span>(<span class="op">-</span><span class="va">self</span>.window_size, <span class="op">-</span><span class="va">self</span>.shift_size),</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>            <span class="bu">slice</span>(<span class="op">-</span><span class="va">self</span>.shift_size, <span class="va">None</span>)):</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> w <span class="kw">in</span> (</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>                <span class="bu">slice</span>(<span class="dv">0</span>, <span class="op">-</span><span class="va">self</span>.window_size),</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>                <span class="bu">slice</span>(<span class="op">-</span><span class="va">self</span>.window_size, <span class="op">-</span><span class="va">self</span>.shift_size),</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>                <span class="bu">slice</span>(<span class="op">-</span><span class="va">self</span>.shift_size, <span class="va">None</span>)):</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>            img_mask[:, h, w, :] <span class="op">=</span> cnt</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>            cnt <span class="op">+=</span> <span class="dv">1</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>I hope this is easily understandable to the reader based on the explanations in <a href="https://amaarora.github.io/2022/07/04/swintransformerv1.html#window-attention-and-shifted-window-attention-using-microsoft-excel">Window Attention and Shifted Window Attention using Microsoft Excel</a>. Apart from that, we are just creating the architecture as in Figure-4.</p>
+<p>We can create Stage-1 of the Swin-T architecture using <code>SwinTransformerBlock</code> as below:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> timm.models.swin_transformer <span class="im">import</span> SwinTransformerBlock</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> torch.randn(<span class="dv">1</span>, <span class="dv">56</span><span class="op">*</span><span class="dv">56</span>, <span class="dv">96</span>)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>t_1 <span class="op">=</span> SwinTransformerBlock(dim<span class="op">=</span><span class="dv">96</span>, input_resolution<span class="op">=</span>(<span class="dv">56</span>, <span class="dv">56</span>))</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>t_2 <span class="op">=</span> SwinTransformerBlock(dim<span class="op">=</span><span class="dv">96</span>, input_resolution<span class="op">=</span>(<span class="dv">56</span>, <span class="dv">56</span>), shift_size<span class="op">=</span><span class="dv">3</span>)</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>t_1(x).shape, t_2(t_1(x)).shape</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> (torch.Size([<span class="dv">1</span>, <span class="dv">3136</span>, <span class="dv">96</span>]), torch.Size([<span class="dv">1</span>, <span class="dv">3136</span>, <span class="dv">96</span>]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>As can be seen the only difference between the two transformer blocks is that the second one uses shifted <code>WindowAttention</code>, and the <code>shift_size</code> is set to 3 or <code>window_size//2</code>.</p>
+<p>In the <code>forward</code> method of <code>SwinTransformerBlock</code>, if <code>shift_size&gt;0</code>, we perform the cyclic shift. This is performed in PyTorch by using <code>torch.roll</code>. Essentially, this <code>torch.roll</code> will create feature map “B” from feature map “A” as in figure-7.</p>
+</section>
+<section id="window-partition" class="level3" data-number="6.5">
+<h3 data-number="6.5" class="anchored" data-anchor-id="window-partition"><span class="header-section-number">6.5</span> Window Partition</h3>
+<p>It is much easier to partition an input into windows using Microsoft Excel, but how do we do this in PyTorch?</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> window_partition(x, window_size: <span class="bu">int</span>):</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="co">    Args:</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co">        x: (B, H, W, C)</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="co">        window_size (int): window size</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="co">    Returns:</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="co">        windows: (num_windows*B, window_size, window_size, C)</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    B, H, W, C <span class="op">=</span> x.shape</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> x.view(B, H <span class="op">//</span> window_size, window_size, W <span class="op">//</span> window_size, window_size, C)</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>    windows <span class="op">=</span> x.permute(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">3</span>, <span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">5</span>).contiguous().view(<span class="op">-</span><span class="dv">1</span>, window_size, window_size, C)</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> windows</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>We take an input of shape <span class="math inline">\((B, H, W, C)\)</span>, next, we reshape it to <span class="math inline">\((B, H/M, M, W/M, M, C)\)</span> and convert it to shape <span class="math inline">\((B * (H/M * W/M), M, M, C)\)</span> where,</p>
+<ul>
+<li>B - Batch size</li>
+<li>H - Image height</li>
+<li>W - Image width</li>
+<li>C - Number of channels</li>
+<li>M - Window size</li>
+</ul>
+</section>
+</section>
+<section id="conclusion" class="level2" data-number="7">
+<h2 data-number="7" class="anchored" data-anchor-id="conclusion"><span class="header-section-number">7</span> Conclusion</h2>
+<p>And that’s really it when it comes to Swin Transformers! I hope that I’ve been to explain the Swin Transformer architecture in detail and I hope that you’ve enjoed reading the blog post and and explanations using MS Excel.</p>
+<p>As usual, in case I have missed anything or to provide feedback, please feel free to reach out to me at <a href="https://twitter.com/amaarora"><span class="citation" data-cites="amaarora">@amaarora</span></a>.</p>
+<p>Also, feel free to <a href="https://amaarora.github.io/subscribe">subscribe to my blog here</a> to receive regular updates regarding new blog posts. Thanks for reading!</p>
+
+
+</section>
+
+<p>subscribe.html</p></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

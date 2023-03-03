@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-99.9.9">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Aman Arora">
+<meta name="dcterms.date" content="2020-08-30">
+<meta name="description" content="As part of this blog post we will be looking at GeM pooling and also look at the research paper Fine-tuning CNN Image Retrieval with No Human Annotation. We also implement GeM Pooling from scratch in PyTorch.">
+
+<title>GeM Pooling Explained with PyTorch Implementation and Introduction to Image Retrieval</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html" rel="" target="">
+ <span class="menu-text">Aman Arora’s Blog</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../about.html" rel="" target="">
+ <span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/" rel="" target=""><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com" rel="" target=""><i class="bi bi-twitter" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+            <div class="quarto-navbar-tools">
+</div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar"><div class="quarto-margin-header"><div class="margin-header-item">
+<!-- Begin Mailchimp Signup Form -->
+<link href="//cdn-images.mailchimp.com/embedcode/classic-071822.css" rel="stylesheet" type="text/css">
+<style type="text/css">
+    #mc_embed_signup{background:#fff; clear:left; font:14px Helvetica,Arial,sans-serif;  width:600px;}
+    /* Add your own Mailchimp form style overrides in your site stylesheet or in this style block.
+       We recommend moving this block and the preceding CSS link to the HEAD of your HTML file. */
+</style>
+<div id="mc_embed_signup">
+    <form action="https://github.us4.list-manage.com/subscribe/post?u=e847230346a7c78d4745ae796&amp;id=7a63b2b273&amp;f_id=005f58e8f0" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate="">
+        <div id="mc_embed_signup_scroll">
+        <h2>Subscribe to Aman Arora's Blog</h2>
+        <div class="indicates-required"><span class="asterisk">*</span> indicates required</div>
+<div class="mc-field-group">
+    <label for="mce-EMAIL">Email Address  <span class="asterisk">*</span>
+</label>
+    <input type="email" value="" name="EMAIL" class="required email" id="mce-EMAIL" required="">
+    <span id="mce-EMAIL-HELPERTEXT" class="helper_text"></span>
+</div>
+<div class="mc-field-group">
+    <label for="mce-FNAME">First Name </label>
+    <input type="text" value="" name="FNAME" class="" id="mce-FNAME">
+    <span id="mce-FNAME-HELPERTEXT" class="helper_text"></span>
+</div>
+<div class="mc-field-group">
+    <label for="mce-LNAME">Last Name </label>
+    <input type="text" value="" name="LNAME" class="" id="mce-LNAME">
+    <span id="mce-LNAME-HELPERTEXT" class="helper_text"></span>
+</div>
+    <div id="mce-responses" class="clear foot">
+        <div class="response" id="mce-error-response" style="display:none"></div>
+        <div class="response" id="mce-success-response" style="display:none"></div>
+    </div>    <!-- real people should not fill this in and expect good things - do not remove this or risk form bot signups-->
+    <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_e847230346a7c78d4745ae796_7a63b2b273" tabindex="-1" value=""></div>
+        <div class="optionalParent">
+            <div class="clear foot">
+                <input type="submit" value="Subscribe" name="subscribe" id="mc-embedded-subscribe" class="button">
+                <p class="brandingLogo"><a href="http://eepurl.com/il3baM" title="Mailchimp - email marketing made easy and fun"><img src="https://eep.io/mc-cdn-images/template_images/branding_logo_text_dark_dtp.svg"></a></p>
+            </div>
+        </div>
+    </div>
+</form>
+</div>
+<script type="text/javascript" src="//s3.amazonaws.com/downloads.mailchimp.com/js/mc-validate.js"></script><script type="text/javascript">(function($) {window.fnames = new Array(); window.ftypes = new Array();fnames[0]='EMAIL';ftypes[0]='email';fnames[1]='FNAME';ftypes[1]='text';fnames[2]='LNAME';ftypes[2]='text';fnames[3]='ADDRESS';ftypes[3]='address';fnames[4]='PHONE';ftypes[4]='phone';fnames[5]='BIRTHDAY';ftypes[5]='birthday';}(jQuery));var $mcj = jQuery.noConflict(true);</script>
+<!--End mc_embed_signup-->
+</div></div>
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction"><span class="header-section-number">1</span> Introduction</a></li>
+  <li><a href="#image-retrieval-overview" id="toc-image-retrieval-overview" class="nav-link" data-scroll-target="#image-retrieval-overview"><span class="header-section-number">2</span> Image Retrieval Overview</a>
+  <ul class="collapse">
+  <li><a href="#how-does-it-work" id="toc-how-does-it-work" class="nav-link" data-scroll-target="#how-does-it-work"><span class="header-section-number">2.1</span> How does it work?</a></li>
+  </ul></li>
+  <li><a href="#unsupervised-matching-and-non-matching-pairs" id="toc-unsupervised-matching-and-non-matching-pairs" class="nav-link" data-scroll-target="#unsupervised-matching-and-non-matching-pairs"><span class="header-section-number">3</span> Unsupervised matching and non-matching pairs</a></li>
+  <li><a href="#image-retrieval-architecture" id="toc-image-retrieval-architecture" class="nav-link" data-scroll-target="#image-retrieval-architecture"><span class="header-section-number">4</span> Image Retrieval Architecture</a></li>
+  <li><a href="#gem-pooling" id="toc-gem-pooling" class="nav-link" data-scroll-target="#gem-pooling"><span class="header-section-number">5</span> GeM Pooling</a>
+  <ul class="collapse">
+  <li><a href="#pytorch-implementation" id="toc-pytorch-implementation" class="nav-link" data-scroll-target="#pytorch-implementation"><span class="header-section-number">5.1</span> PyTorch Implementation</a></li>
+  </ul></li>
+  <li><a href="#siamese-learning-and-loss-function" id="toc-siamese-learning-and-loss-function" class="nav-link" data-scroll-target="#siamese-learning-and-loss-function"><span class="header-section-number">6</span> Siamese Learning and Loss Function</a></li>
+  <li><a href="#image-representation-and-search" id="toc-image-representation-and-search" class="nav-link" data-scroll-target="#image-representation-and-search"><span class="header-section-number">7</span> Image Representation and Search</a></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion"><span class="header-section-number">8</span> Conclusion</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">9</span> References</a></li>
+  <li><a href="#credits" id="toc-credits" class="nav-link" data-scroll-target="#credits"><span class="header-section-number">10</span> Credits</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">GeM Pooling Explained with PyTorch Implementation and Introduction to Image Retrieval</h1>
+  <div class="quarto-categories">
+    <div class="quarto-category">Computer Vision</div>
+  </div>
+  </div>
+
+<div>
+  <div class="description">
+    <p>As part of this blog post we will be looking at GeM pooling and also look at the research paper <a href="https://arxiv.org/abs/1711.02512">Fine-tuning CNN Image Retrieval with No Human Annotation</a>. We also implement GeM Pooling from scratch in PyTorch.</p>
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Aman Arora </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">August 30, 2020</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+</header>
+
+<section id="introduction" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="introduction"><span class="header-section-number">1</span> Introduction</h2>
+<p>As mentioned in the title, today we will be looking at <code>GeM</code> pooling and also look at the research paper <a href="https://arxiv.org/abs/1711.02512">Fine-tuning CNN Image Retrieval with No Human Annotation</a>. Recently, I started to participate in <a href="https://www.kaggle.com/c/landmark-recognition-2020">Google Landmark Recognition 2020</a> Kaggle competition and as a result I have been <a href="https://github.com/amaarora/researchpapers">reading lots of research papers</a> related to large scale image retrieval and recognition. GeM Pooling featured in almost all of them [1], [2], [3]. Therefore, today we will look at <code>GeM Pooling</code> and understand how it is different from the common Max and Average pooling techniques.</p>
+<p>We will also look at the <a href="https://arxiv.org/abs/1711.02512">Fine-tuning CNN Image Retrieval with No Human Annotation</a> paper briefly and understand about some common ways of doing large scale image retrieval and recognition.</p>
+<p>Finally, we also run our own little experiment to compare the performance of <code>GeM Pooling</code> with Average Pooling on <a href="https://www.robots.ox.ac.uk/~vgg/data/pets/">PETs Dataset</a>. In the experiment, we find that <code>GeM Pooling</code> doesn’t necessarily lead to performance gains on a classification task and a working notebook can be found <a href="https://github.com/amaarora/amaarora.github.io/blob/master/nbs/GeM%20Pooling.ipynb">here</a>.</p>
+<p>In this blog post, we touch upon the basics of image retrieval, and also understand <code>GeM Pooling</code>.</p>
+<p>So, let’s get started.</p>
+</section>
+<section id="image-retrieval-overview" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="image-retrieval-overview"><span class="header-section-number">2</span> Image Retrieval Overview</h2>
+<p>You might want to ask what is Image Retrieval? Why is it relevant and how is this of any importance?</p>
+<p><img src="../images/image_retrieval.JPG" title="fig-1 Image Retrieval Example" class="img-fluid"></p>
+<p>Usually, when we do google image search, or we want to find similar images - this warrants a need to find similar images related to the <code>query</code> image. This task of finding similar images from a large scale unordered database of images is referred to as Image Retrieval. In fact <a href="https://www.kaggle.com/c/landmark-retrieval-2020">Google Landmark Retrieval 2020</a> Kaggle competition is specific to the image retrieval task.</p>
+<section id="how-does-it-work" class="level3" data-number="2.1">
+<h3 data-number="2.1" class="anchored" data-anchor-id="how-does-it-work"><span class="header-section-number">2.1</span> How does it work?</h3>
+<p>The idea is to extract global and local features from the image and perform matching/image similarity based on these extracted vectors. Typically, representing an image as a vector is as simple as extracting the output from a CNN just before the pooling layer. We do this for each image in the database and the query image. Finally, to get image similarity is as simple as performing a dot product between these vector representations and similar images have higher dot product value whereas non similar images have smaller dot-product values. Thus, given a query image, it is possible to find similar images from a large scale unordered database.</p>
+<p>The complexity lies in having suitable/accurate vector representations for each image. To do this, it is possible to train a CNN to do image classification and then extract the image representations from this trained model.</p>
+<p>To have appropriate image representations, a trained model must be able to distinguish similar images of the same class from non-similar images. Such a model could be trained as a Siamese network where it could be fed similar images by finding images with the same label class in the dataset and non-similar images by finding images with a different label.</p>
+<p>For example, let’s say we have a dataset consisting of dogs, cats and horses with 10 images per label. A model could be trained by providing matching or non-matching image pairs. If two dog images are provided to the model, it should say output matching, whereas if an image of a dog and a cat are provided to the model, then it must be able to distinguish between the two and should say non-matching pair. Such a model can be trained as a Siamese network using Contrastive loss. (more about this later in the blogpost)</p>
+<p>But, getting labelled data is costly. Could there be a workaround this?</p>
+</section>
+</section>
+<section id="unsupervised-matching-and-non-matching-pairs" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="unsupervised-matching-and-non-matching-pairs"><span class="header-section-number">3</span> Unsupervised matching and non-matching pairs</h2>
+<p>In the <a href="https://arxiv.org/abs/1711.02512">Fine-tuning CNN Image Retrieval with No Human Annotation</a> research paper, the authors <strong>Radenovic et al</strong> dispense with the need for manually annotated data or any assumptions on the training dataset.</p>
+<p>Basically, there is no longer a need for image labels to find similar images. Previously, we would look at image labels and feed two dog labelled images to the model and train it to say that these two images are a matching pair. And we would also feed the model with a dog and cat labelled image and train it to say that these two images are a non-matching pair.</p>
+<p><strong>Radenovic et al</strong> take away the need for image labels to find similar or non-similar images. They do this by using SfM pipeline [4].</p>
+<p>From the paper, &gt; We achieve this by exploiting the geometry and the camera positions from 3D models reconstructed automatically by a structure-from-motion (SfM) pipeline. The state- of-the-art retrieval-SfM pipeline takes an unordered image collection as input and attempts to build all possible 3D models.</p>
+<p><img src="../images/sfm_pipeline.JPG" title="fig-2 SfM Pipeline" class="img-fluid"></p>
+<p>From the image above, the <code>SfM Pipeline</code> can construct 3D models given an unordered database of images. A typical reconstruction process looks something like below:</p>
+<p><img src="../images/image_reconstruction.JPG" title="fig-3 Reconstruction of the Astronomical Clock in Prague, Czech Republic" class="img-fluid"></p>
+<p>As seen in the image above, it is possible to reconstruct detailed 3D models from unordered photo collections. This is done using local spatial verification and more details can be found in [4].</p>
+<p>Thus, using this technique, one can find similar images and non-similar images without the need for image labels. Now, once we have matching and non-matching pairs, one can train a model using <strong>Contrastive Loss</strong> such that a trained model can separate similar images from non-similar ones, thus providing accurate vector representations for each image.</p>
+</section>
+<section id="image-retrieval-architecture" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="image-retrieval-architecture"><span class="header-section-number">4</span> Image Retrieval Architecture</h2>
+<p>In this section, we will look at the network architecture presented in <a href="https://arxiv.org/abs/1711.02512">Fine-tuning CNN Image Retrieval with No Human Annotation</a> for image retrieval and also look at proposed <code>GeM Pooling</code> layer in detail.</p>
+<p><img src="../images/model_arch.JPG" title="fig-4 Model Architecture with Contrastive Loss at training time" class="img-fluid"></p>
+<p>As mentioned before, it is possible to first get a vector representation of an image by getting the output from a CNN just before the pooling layer. Next, the authors perform the proposed <code>GeM Pooling</code> operation to reduce the dimensionality, perform normalization and finally the final output is the image descriptor.</p>
+<p>It is then possible to train a network to get accurate image descriptors through Siamese Learning and Contrastive Loss by training a network with positive pairs (matching pairs) and negative pairs (non-matching pairs).</p>
+<p>One could wonder what possible advantages could GeM Pooling have over Max/Average Pooling?</p>
+<p><img src="../images/gempool.JPG" title="fig-5 Image Retrieval using GeM Pooling" class="img-fluid"></p>
+<p>As can be seen in the image above, the authors report that by training a network using Siamese Learning and GeM Pooling, the implicit correspondences between images are improved after fine-tuning. Moreover, the CNN fires less on ImageNet classes, e.g.&nbsp;cars and bicycles and is better able to find similar images, thus improving image retrieval process.</p>
+</section>
+<section id="gem-pooling" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="gem-pooling"><span class="header-section-number">5</span> GeM Pooling</h2>
+<p>Having looked at an overview of the Image Retrieval process, let’s now look at the proposed GeM Pooling operation in detail. In this section, we also look a code-level implementation of the <code>GeM Pooling</code> layer in PyTorch.</p>
+<p>Given an input image, the output from a CNN is a 3D tensor of shape <code>K x H x W</code> where, <code>K</code> is the number of channels, <code>H</code> refers to feature map height and <code>W</code> refers to feature map width. If <strong>X<sub>k</sub></strong> represents the <code>H x W</code> spatial feature map activation, then the network consists of <code>K</code> such feature maps.</p>
+<p>For Max Pooling, <img src="../images/maxpool.JPG" title="eq-1 Max Pooling" class="img-fluid"></p>
+<p>In other words, for each feature map <strong>X<sub>k</sub></strong>, we take the maximum value to get a <code>K</code> length long vector representation of the image.</p>
+<p>For Average pooling, <img src="../images/avgpool.JPG" title="eq-2 Average Pooling" class="img-fluid"></p>
+<p>In other words, for each feature map <strong>X<sub>k</sub></strong>, we take the average value to get a <code>K</code> length long vector representation of the image.</p>
+<p>Finally, for <code>GeM Pooling</code>: <img src="../images/gem.JPG" title="eq-3 GeM Pooling" class="img-fluid"></p>
+<p>From the paper, &gt; Pooling methods (eq-1) and (eq-2) are special cases of GeM pool- ing given in (eq-3), i.e., max pooling when p<sub>k</sub>→∞ and average pooling for p<sub>k</sub> = 1. The feature vector finally consists of a single value per feature map, i.e.&nbsp;the generalized-mean activation, and its dimensionality is equal to K. For many popular networks this is equal to 256, 512 or 2048, making it a compact image representation. The pooling parameter pk can be manually set or learned since this operation is differentiable and can be part of the back-propagation.</p>
+<p>Thus, <code>GeM Pooling</code> layer is trainable. One can either fix the hyperparameter p<sub>k</sub> or train it using back propagation as part of the standard model training process.</p>
+<section id="pytorch-implementation" class="level3" data-number="5.1">
+<h3 data-number="5.1" class="anchored" data-anchor-id="pytorch-implementation"><span class="header-section-number">5.1</span> PyTorch Implementation</h3>
+<p>Hopefully, by looking at the code implementation, <code>GeM Pooling</code> process will become clearer to the reader.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> GeM(nn.Module):</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, p<span class="op">=</span><span class="dv">3</span>, eps<span class="op">=</span><span class="fl">1e-6</span>):</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>(GeM,<span class="va">self</span>).<span class="fu">__init__</span>()</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.p <span class="op">=</span> nn.Parameter(torch.ones(<span class="dv">1</span>)<span class="op">*</span>p)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.eps <span class="op">=</span> eps</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x):</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.gem(x, p<span class="op">=</span><span class="va">self</span>.p, eps<span class="op">=</span><span class="va">self</span>.eps)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> gem(<span class="va">self</span>, x, p<span class="op">=</span><span class="dv">3</span>, eps<span class="op">=</span><span class="fl">1e-6</span>):</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> F.avg_pool2d(x.clamp(<span class="bu">min</span><span class="op">=</span>eps).<span class="bu">pow</span>(p), (x.size(<span class="op">-</span><span class="dv">2</span>), x.size(<span class="op">-</span><span class="dv">1</span>))).<span class="bu">pow</span>(<span class="fl">1.</span><span class="op">/</span>p)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__repr__</span>(<span class="va">self</span>):</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.__class__.<span class="va">__name__</span> <span class="op">+</span> <span class="st">'('</span> <span class="op">+</span> <span class="st">'p='</span> <span class="op">+</span> <span class="st">'</span><span class="sc">{:.4f}</span><span class="st">'</span>.<span class="bu">format</span>(<span class="va">self</span>.p.data.tolist()[<span class="dv">0</span>]) <span class="op">+</span> <span class="st">', '</span> <span class="op">+</span> <span class="st">'eps='</span> <span class="op">+</span> <span class="bu">str</span>(<span class="va">self</span>.eps) <span class="op">+</span> <span class="st">')'</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>We initialize a trainable <code>Parameter</code>- <code>p</code>, and replicate <code>eq-3</code> in <code>self.gem</code> function call. As can be seen, this pooling operation is different from Average Pooling and Max Pooling operations.</p>
+</section>
+</section>
+<section id="siamese-learning-and-loss-function" class="level2" data-number="6">
+<h2 data-number="6" class="anchored" data-anchor-id="siamese-learning-and-loss-function"><span class="header-section-number">6</span> Siamese Learning and Loss Function</h2>
+<p>Now that we have looked at <code>GeM Pooling</code>, let’s understand how do we train a network that can perform image retrieval task. The answer lies in Siamese Learning as mentioned before.</p>
+<p>The training input consists of image pairs (i, j) and labels Y<sub>(i, j)</sub> ∈ {0, 1} declaring whether a pair is non-matching (label 0) or matching (label 1). Therefore, it two images of two dog images are fed to the network, the label is 1 corresponding to matching pair and if dog and cat images are fed to the network, then the label is 0 corresponding to non-matching pair.</p>
+<p>Then, we can train the network using Contrastive Loss:</p>
+<p><img src="../images/contrastive_loss.JPG" title="eq-4 Contrastive Loss" class="img-fluid"></p>
+<p>Here f(i) is the L2-normalized GeM vector of image <code>i</code> and <code>τ</code> is a margin parameter defining when non-matching pairs have large enough distance in order to be ignored by the loss. The network is usually trained using a large number of training pairs created automatically using the SfM-pipeline discussed before. The authors found that the contrastive loss generalizes better and converges at higher performance than the triplet loss.</p>
+</section>
+<section id="image-representation-and-search" class="level2" data-number="7">
+<h2 data-number="7" class="anchored" data-anchor-id="image-representation-and-search"><span class="header-section-number">7</span> Image Representation and Search</h2>
+<p>Now that we have looked at the training process using Siamese Learning let’s look at how one can find similar images. Once the training is finished, an image is fed to the net- work shown in fig-4. We get the Descriptor as output at a single scale. Since it is possibe that the object of interest in the query image is either zoomed in or zoomed out, the query image is fed to the network at multiple scales. The resulting descriptors are then finally pooled and re-normalized thus, we get a scale invariance representation of the query image.</p>
+<p>Then, image retrieval is simply performed by exhaustive Euclidean search over database descriptors w.r.t. the query descriptor. This is equivalent to the inner product evaluationof L2 normalized vectors, i.e.&nbsp;vector-to-matrix multiplication, and sorting. Images with highest scores are the most similar and the lowest scores are the least similar.</p>
+<p>Thus, we have successfully performed the task of image retrieval and sorted the images by similarity.</p>
+</section>
+<section id="conclusion" class="level2" data-number="8">
+<h2 data-number="8" class="anchored" data-anchor-id="conclusion"><span class="header-section-number">8</span> Conclusion</h2>
+<p>In this blog post, I hope I have been able to provide the reader with an introduction to image retrieval tasks in Computer Vision and also introduce the GeM Pooling layer. We also looked at how to implement <code>GeM Pooling</code> in PyTorch and performed a simple experiment to compare GeM Pooling with Average Pooling for PETs classification task and found <code>GeM Pooling</code> and <code>Average Pooling</code> to have comparable accuracy. The working notebook can be found <a href="https://github.com/amaarora/amaarora.github.io/blob/master/nbs/GeM%20Pooling.ipynb">here</a>.</p>
+<p>The authors <strong>Radenovic et al</strong> won 6th palce in Google Landmark Image Retrieval 2018 and 9th place in Google Landmark Image Retrieval 2019. Thus, we can safely say that <code>GeM Pooling</code> works particularly for image retrieval based tasks.</p>
+<p>As usual, in case I have missed anything or to provide feedback, please feel free to reach out to me at <a href="https://twitter.com/amaarora"><span class="citation" data-cites="amaarora">@amaarora</span></a>.</p>
+<p>Also, feel free to <a href="https://amaarora.github.io/subscribe">subscribe to my blog here</a> to receive regular updates regarding new blog posts. Thanks for reading!</p>
+</section>
+<section id="references" class="level2" data-number="9">
+<h2 data-number="9" class="anchored" data-anchor-id="references"><span class="header-section-number">9</span> References</h2>
+<ol type="1">
+<li><a href="https://arxiv.org/abs/2001.05027">Unifying Deep Local and Global Features for Image Search</a></li>
+<li><a href="https://www.kaggle.com/c/landmark-retrieval-challenge/discussion/58482">6th Place Solution: VRG Prague</a></li>
+<li><a href="https://www.kaggle.com/c/landmark-retrieval-2019/discussion/94843">9th Place Solution: VRG Prague</a></li>
+<li><a href="https://openaccess.thecvf.com/content_cvpr_2015/papers/Schonberger_From_Single_Image_2015_CVPR_paper.pdf">From Single Image Query to Detailed 3D Reconstruction</a></li>
+</ol>
+</section>
+<section id="credits" class="level2" data-number="10">
+<h2 data-number="10" class="anchored" data-anchor-id="credits"><span class="header-section-number">10</span> Credits</h2>
+<p>The code implementation of <code>GeM Pooling</code> has been copied and replicated from the official implementation in PyTorch <a href="https://github.com/filipradenovic/cnnimageretrieval-pytorch">CNN Image Retrieval</a> toolbox.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
