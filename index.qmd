@@ -15,10 +15,20 @@ You will often see me writing about research papers (mostly in the field of Comp
 
 During my time as Machine Learning Engineer at Weights and Biases, I also wrote the following blog posts:
 
-1. [Explained: Characterizing Signal Propagation to Close the Performance Gap in Unnormalized ResNets](https://wandb.ai/wandb_fc/pytorch-image-models/reports/Explained-Characterizing-Signal-Propagation-to-Close-the-Performance-Gap-in-Unnormalized-ResNets--Vmlldzo2NDIzNTE)
-2. [Revisiting ResNets: Improved Training and Scaling Strategies](https://wandb.ai/wandb_fc/pytorch-image-models/reports/Revisiting-ResNets-Improved-Training-and-Scaling-Strategies--Vmlldzo2NDE3NTM)
-3. [ConViT: Improving Vision Transformers with Soft Convolutional Inductive Biases](https://wandb.ai/wandb_fc/pytorch-image-models/reports/ConViT-Improving-Vision-Transformers-with-Soft-Convolutional-Inductive-Biases--Vmlldzo3MjIxMDk?galleryTag=intermediate)
-4. [Is MLP-Mixer a CNN in Disguise?](https://wandb.ai/wandb_fc/pytorch-image-models/reports/Is-MLP-Mixer-a-CNN-in-Disguise---Vmlldzo4NDE1MTU?galleryTag=intermediate)
-5. [Are fully connected and convolution layers equivalent? If so, how?](https://wandb.ai/wandb_fc/pytorch-image-models/reports/Are-fully-connected-and-convolution-layers-equivalent-If-so-how---Vmlldzo4NDgwNjY)
-6. [A faster way to get working and up-to-date conda environments using "fastchan"](https://wandb.ai/wandb_fc/pytorch-image-models/reports/A-faster-way-to-get-working-and-up-to-date-conda-environments-using-fastchan---Vmlldzo2ODIzNzA)
-7. [Inside Hugging Face's Accelerate!](https://wandb.ai/wandb_fc/pytorch-image-models/reports/Inside-Hugging-Face-s-Accelerate---Vmlldzo2MzgzNzA)
+| Title  | Link  |
+|--------|--------|
+| Explained: Characterizing Signal Propagation to Close the Performance Gap in Unnormalized ResNets  | [[link](https://wandb.ai/wandb_fc/pytorch-image-models/reports/Explained-Characterizing-Signal-Propagation-to-Close-the-Performance-Gap-in-Unnormalized-ResNets--Vmlldzo2NDIzNTE)]   |
+|Revisiting ResNets: Improved Training and Scaling Strategies | [[link](https://wandb.ai/wandb_fc/pytorch-image-models/reports/Revisiting-ResNets-Improved-Training-and-Scaling-Strategies--Vmlldzo2NDE3NTM)]   |
+|ConViT: Improving Vision Transformers with Soft Convolutional Inductive Biases | [[link](https://wandb.ai/wandb_fc/pytorch-image-models/reports/ConViT-Improving-Vision-Transformers-with-Soft-Convolutional-Inductive-Biases--Vmlldzo3MjIxMDk?galleryTag=intermediate)]   |
+|Is MLP-Mixer a CNN in Disguise?| [[link](https://wandb.ai/wandb_fc/pytorch-image-models/reports/Is-MLP-Mixer-a-CNN-in-Disguise---Vmlldzo4NDE1MTU?galleryTag=intermediate)]   |
+|Are fully connected and convolution layers equivalent? If so, how?| [[link](https://wandb.ai/wandb_fc/pytorch-image-models/reports/Are-fully-connected-and-convolution-layers-equivalent-If-so-how---Vmlldzo4NDgwNjY)]   |
+|A faster way to get working and up-to-date conda environments using "fastchan"| [[link](https://wandb.ai/wandb_fc/pytorch-image-models/reports/A-faster-way-to-get-working-and-up-to-date-conda-environments-using-fastchan---Vmlldzo2ODIzNzA)]   |
+|Inside Hugging Face's Accelerate!| [[link](https://wandb.ai/wandb_fc/pytorch-image-models/reports/Inside-Hugging-Face-s-Accelerate---Vmlldzo2MzgzNzA)]   |
+
+: Previous blog posts {tbl-colwidths="[75,25]"}
+
+
+<!-- Add a line break -->
++-------+-------------+
+|       |             |
++-------+-------------+
