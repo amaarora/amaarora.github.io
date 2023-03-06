@@ -6,7 +6,6 @@ _site
 .jekyll-cache
 .jekyll-metadata
 vendor
-_notebooks/.ipynb_checkpoints
+*.ipynb_checkpoints
 nbs/
-*.ipynb
 /.quarto/
