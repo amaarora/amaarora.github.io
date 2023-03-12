@@ -258,6 +258,12 @@ div.csl-indent {
 <section id="sec-intro" class="level2" data-number="1">
 <h2 data-number="1" class="anchored" data-anchor-id="sec-intro"><span class="header-section-number">1</span> Introduction</h2>
 <p>As part of this blog post we will be uncovering the inner workings of CLIP - <a href="https://arxiv.org/abs/2103.00020">Learning Transferable Visual Models From Natural Language Supervision</a> by looking at it’s PyTorch implementation. For a gentle introduction to CLIP, please refer to <a href="https://amaarora.github.io/posts/2023-03-06_Understanding_CLIP.html">part-1</a> of the blog.</p>
+<div id="fig-clip" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="../images/clip.png" class="img-fluid figure-img" width="500"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;1: Summary of CLIP approach</figcaption><p></p>
+</figure>
+</div>
 <div class="callout-note callout callout-style-default callout-captioned">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -431,10 +437,10 @@ Further reading
 <div id="fig-clip" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
 <p><img src="../images/clip.png" class="img-fluid figure-img" width="500"></p>
-<p></p><figcaption class="figure-caption">Figure&nbsp;1: Summary of CLIP approach</figcaption><p></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;2: Summary of CLIP approach</figcaption><p></p>
 </figure>
 </div>
-<p>From <a href="#fig-clip">Figure&nbsp;1</a>, we can see that we have a text encoder and image encoder. These encoders are responsible for taking in the image and the text and and converting them to an embedding space.</p>
+<p>From <a href="#fig-clip">Figure&nbsp;2</a>, we can see that we have a text encoder and image encoder. These encoders are responsible for taking in the image and the text and and converting them to an embedding space.</p>
 <p>As mentioned in <a href="#sec-intro">Section&nbsp;1</a>, we will assume that there is some magic function that can read the <code>.tar</code> files and return tensors of shape <code>[1, 3, 224, 224]</code> for each image, and <code>[1, 77]</code>, for each text.</p>
 <p>These inputs then get encoded to embedding space using image and text encoder respectively.</p>
 <p>The image encoder encodes images to embeddings <span class="math inline">\(I_1, I_2, I_2 ... I_N\)</span>, and the text encoder encodes respective image captions to <span class="math inline">\(T_1, T_2, T_3 ... T_N\)</span>.</p>
@@ -503,7 +509,7 @@ Note
 <p>Makes sense so far?</p>
 <p>As for the outputs, the model returns three outputs - <code>image_features</code>, <code>text_features</code> and <code>logit_scale</code>.</p>
 <p><code>logit_scale</code> has been covered in more detail in <a href="#sec-contrastive-loss">Section&nbsp;8</a> of this blog post. For now, think of it as a learnable parameter during model training.</p>
-<p>As for <code>image_features</code> &amp; <code>text_features</code>, these are the respective embeddings <span class="math inline">\(I_1, I_2, I_2 ... I_N\)</span>, and the text encoder encodes respective image captions to <span class="math inline">\(T_1, T_2, T_3 ... T_N\)</span> with reference to <a href="#fig-clip">Figure&nbsp;1</a>.</p>
+<p>As for <code>image_features</code> &amp; <code>text_features</code>, these are the respective embeddings <span class="math inline">\(I_1, I_2, I_2 ... I_N\)</span>, and the text encoder encodes respective image captions to <span class="math inline">\(T_1, T_2, T_3 ... T_N\)</span> with reference to <a href="#fig-clip">Figure&nbsp;2</a>.</p>
 <div class="callout-tip callout callout-style-default callout-captioned">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -548,7 +554,7 @@ He, Kaiming, Xiangyu Zhang, Shaoqing Ren, and Jian Sun. 2015. <span>“Deep Resi
 <div id="fig-resnet-arch" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
 <p><img src="../images/resnet-arch.png" class="img-fluid figure-img" width="500"></p>
-<p></p><figcaption class="figure-caption">Figure&nbsp;2: Overview of ResNet architecture</figcaption><p></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;3: Overview of ResNet architecture</figcaption><p></p>
 </figure>
 </div>
 <p>In the vanilla ResNet architecture, the stem consists of a 7x7 stride-2 convolution. This is what the stem looks like in the vanilla ResNet architecture.</p>
@@ -560,7 +566,7 @@ He, Kaiming, Xiangyu Zhang, Shaoqing Ren, and Jian Sun. 2015. <span>“Deep Resi
 <div id="fig-resnet-tweak" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
 <p><img src="../images/resnet-tweak.png" class="img-fluid figure-img"></p>
-<p></p><figcaption class="figure-caption">Figure&nbsp;3: Overview of ResNet tweak</figcaption><p></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;4: Overview of ResNet tweak</figcaption><p></p>
 </figure>
 </div>
 <div class="callout-warning callout callout-style-default callout-captioned page-columns page-full">
@@ -638,7 +644,7 @@ He, Tong, Zhi Zhang, Hang Zhang, Zhongyue Zhang, Junyuan Xie, and Mu Li. 2018. <
 <span id="cb19-24"><a href="#cb19-24" aria-hidden="true" tabindex="-1"></a>        out <span class="op">+=</span> identity</span>
 <span id="cb19-25"><a href="#cb19-25" aria-hidden="true" tabindex="-1"></a>        out <span class="op">=</span> <span class="va">self</span>.act3(out)</span>
 <span id="cb19-26"><a href="#cb19-26" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> out</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Now the blurring occurs in <code>downsample</code>. Previously, as can be seen in <a href="#fig-resnet-arch">Figure&nbsp;2</a>, this downsample layer would be a stride-2 <span class="math inline">\(1x1\)</span> convolution.</p>
+<p>Now the blurring occurs in <code>downsample</code>. Previously, as can be seen in <a href="#fig-resnet-arch">Figure&nbsp;3</a>, this downsample layer would be a stride-2 <span class="math inline">\(1x1\)</span> convolution.</p>
 <p>In <code>ModifiedResnet</code>, this downsample consists of:</p>
 <div class="sourceCode" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="va">self</span>.downsample <span class="op">=</span> nn.Sequential(OrderedDict([</span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>        (<span class="st">"-1"</span>, nn.AvgPool2d(stride)),</span>
@@ -787,7 +793,7 @@ Veeling, Bastiaan S., Jasper Linmans, Jim Winkens, Taco Cohen, and Max Welling. 
 <div id="fig-cosine-similarity" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
 <p><img src="../images/cosine_similarity.png" class="img-fluid figure-img"></p>
-<p></p><figcaption class="figure-caption">Figure&nbsp;4: Cosine similarity between text and image features</figcaption><p></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;5: Cosine similarity between text and image features</figcaption><p></p>
 </figure>
 </div>
 <p>Contrastive loss is trying to maximise the cosine similarity on the diagonal and minimise it elsewhere. But, how? In pseudo-code this looked something like:</p>
@@ -796,7 +802,7 @@ Veeling, Bastiaan S., Jasper Linmans, Jim Winkens, Taco Cohen, and Max Welling. 
 <span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>loss_i <span class="op">=</span> cross_entropy_loss(logits, labels, axis<span class="op">=</span><span class="dv">0</span>) </span>
 <span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>loss_t <span class="op">=</span> cross_entropy_loss(logits, labels, axis<span class="op">=</span><span class="dv">1</span>) </span>
 <span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>loss <span class="op">=</span> (loss_i <span class="op">+</span> loss_t)<span class="op">/</span><span class="dv">2</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Once, we have logits, which is the <span class="math inline">\(8 x 8\)</span> matrix as in <a href="#fig-cosine-similarity">Figure&nbsp;4</a> above, we calculate Cross Entropy Loss once for <code>axis=0</code> and once for <code>axis=1</code>, this way, we are trying to match the diagonal to corresponding image and text because the labels are aligned on both the axis.</p>
+<p>Once, we have logits, which is the <span class="math inline">\(8 x 8\)</span> matrix as in <a href="#fig-cosine-similarity">Figure&nbsp;5</a> above, we calculate Cross Entropy Loss once for <code>axis=0</code> and once for <code>axis=1</code>, this way, we are trying to match the diagonal to corresponding image and text because the labels are aligned on both the axis.</p>
 <p>But, how does this look like in code? Let’s see.</p>
 <div class="callout-note callout callout-style-default callout-captioned">
 <div class="callout-header d-flex align-content-center">
@@ -855,7 +861,7 @@ Note
 </div>
 </div>
 <p>So, how does the above implementation match pseudo-code?</p>
-<p>Let’s start with labels. Since the labels are aligned, that is the <span class="math inline">\(0th\)</span> image on <code>axis=0</code> corresponds to <span class="math inline">\(0th\)</span> text on <code>axis=1</code>, therefore, we can just say that <code>labels = torch.arange(num_logits, device=device, dtype=torch.long)</code>. In this case the value of labels comes out to be <code>tensor([ 0,  1,  2,  3,  4,  5,  6,  7], device='cuda:0')</code> based on <a href="#fig-cosine-similarity">Figure&nbsp;4</a>. By minimising Cross Entropy loss for these labels once for <code>axis=0</code> and once for <code>axis=1</code>, we are making sure that cosine-similarity on the diagonal is maximum and lower otherwise.</p>
+<p>Let’s start with labels. Since the labels are aligned, that is the <span class="math inline">\(0th\)</span> image on <code>axis=0</code> corresponds to <span class="math inline">\(0th\)</span> text on <code>axis=1</code>, therefore, we can just say that <code>labels = torch.arange(num_logits, device=device, dtype=torch.long)</code>. In this case the value of labels comes out to be <code>tensor([ 0,  1,  2,  3,  4,  5,  6,  7], device='cuda:0')</code> based on <a href="#fig-cosine-similarity">Figure&nbsp;5</a>. By minimising Cross Entropy loss for these labels once for <code>axis=0</code> and once for <code>axis=1</code>, we are making sure that cosine-similarity on the diagonal is maximum and lower otherwise.</p>
 <p>In code (as opposed to pseudo-code), rather than minimising cross entropy for <code>axis=0</code>, and <code>axis=1</code>, we calculate:</p>
 <div class="sourceCode" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>    logits_per_image <span class="op">=</span> logit_scale <span class="op">*</span> image_features <span class="op">@</span> text_features.T</span>
 <span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>    logits_per_text <span class="op">=</span> logit_scale <span class="op">*</span> text_features <span class="op">@</span> image_features.T    </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
