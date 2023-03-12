@@ -2,6 +2,7 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/2023-03-11_Understanding_CLIP_part_2.html",
       "/posts/2023-03-06_Understanding_CLIP.html",
       "/posts/2022-07-04-swintransformerv1.html",
       "/posts/2021-07-26-annotateddetr.html",
@@ -11,8 +12,8 @@
       "/posts/2021-01-13-efficientdet-pytorch.html",
       "/posts/2021-01-11-efficientdet.html",
       "/posts/2020-09-06-siimacr.html",
-      "/posts/2020-09-13-unet.html",
       "/posts/2020-08-30-gempool.html",
+      "/posts/2020-09-13-unet.html",
       "/posts/2020-08-23-siimisic.html",
       "/posts/2020-08-13-efficientnet.html",
       "/posts/2020-08-09-groupnorm.html",
@@ -22,6 +23,31 @@
       "/posts/2020-07-12-oganized-pytorch.html",
       "/posts/2020-06-29-FocalLoss.html",
       "/posts/2020-02-18-annotatedGPT2.html"
+    ]
+  },
+  {
+    "listing": "/posts/2023-03-11_Understanding_CLIP_part_2.html",
+    "items": [
+      "/posts/2021-03-13-optimizers.html",
+      "/posts/2020-07-12-oganized-pytorch.html",
+      "/posts/2020-08-02-densenets.html",
+      "/posts/2021-01-11-efficientdet.html",
+      "/posts/2020-08-13-efficientnet.html",
+      "/posts/2020-08-30-gempool.html",
+      "/posts/2020-08-09-groupnorm.html",
+      "/posts/2020-07-18-label-smoothing.html",
+      "/posts/2020-08-23-siimisic.html",
+      "/posts/2020-07-24-SeNet.html",
+      "/posts/2022-07-04-swintransformerv1.html",
+      "/posts/2023-03-06_Understanding_CLIP.html",
+      "/posts/2021-07-26-annotateddetr.html",
+      "/posts/2020-02-18-annotatedGPT2.html",
+      "/posts/2021-01-13-efficientdet-pytorch.html",
+      "/posts/2021-05-15-jh-meetup.html",
+      "/posts/2020-09-06-siimacr.html",
+      "/posts/2020-09-13-unet.html",
+      "/posts/2021-01-18-ViT.html",
+      "/posts/2020-06-29-FocalLoss.html"
     ]
   }
 ]
