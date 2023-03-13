@@ -3,6 +3,7 @@ project:
   output-dir: docs
 
 website:
+  google-analytics: "UA-158677010-1"
   navbar:
     left:
     - text: "Aman Arora's Blog"
