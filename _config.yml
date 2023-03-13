@@ -18,9 +18,6 @@ linkedin_username: aroraaman
 # Set this to true to get LaTeX math equation support
 use_math: true
 
-# Add your Google Analytics ID here if you have one and want to use it
-google_analytics: UA-158677010-1
-
 # Everything below here can be ignored, unless you want to change the theme entirely
 theme: minima
 plugins:
