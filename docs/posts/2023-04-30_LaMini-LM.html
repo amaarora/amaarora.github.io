@@ -1088,6 +1088,132 @@ Here is our adapted lm-eval-harness code: <a href="https://t.co/fP2y0IcboQ">http
 <script async="" src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 <p>Based on the above table, let’s re-run for other evaluation datasets too and see if our results match those from the paper.</p>
 <div class="sourceCode" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>python main.py <span class="op">--</span>model hf<span class="op">-</span>causal <span class="op">--</span>model_args pretrained<span class="op">=</span>MBZUAI<span class="op">/</span>LaMini<span class="op">-</span>GPT<span class="op">-</span><span class="fl">1.5</span><span class="er">B</span> <span class="op">--</span>tasks openbookqa,sciq,race,record,sst,mrpc,rte,wsc,winogrande <span class="op">--</span>device cuda:<span class="dv">0</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="tbl-eval-results-v2" class="anchored">
+<table class="table">
+<caption>Table&nbsp;2: Evaluation Results on <code>MRPC</code>, <code>WinoGrande</code>, <code>WSC</code>, <code>RACE</code>, <code>SST</code>, <code>RTE</code>, <code>Record</code>, <code>SciQ</code></caption>
+<thead>
+<tr class="header">
+<th>Task</th>
+<th style="text-align: right;">Version</th>
+<th>Metric</th>
+<th style="text-align: right;">Value</th>
+<th></th>
+<th style="text-align: right;">Stderr</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>mrpc</td>
+<td style="text-align: right;">0</td>
+<td>acc</td>
+<td style="text-align: right;">0.7475</td>
+<td>±</td>
+<td style="text-align: right;">0.0215</td>
+</tr>
+<tr class="even">
+<td></td>
+<td style="text-align: right;"></td>
+<td>f1</td>
+<td style="text-align: right;">0.8352</td>
+<td>±</td>
+<td style="text-align: right;">0.0161</td>
+</tr>
+<tr class="odd">
+<td>winogrande</td>
+<td style="text-align: right;">0</td>
+<td>acc</td>
+<td style="text-align: right;">0.5777</td>
+<td>±</td>
+<td style="text-align: right;">0.0139</td>
+</tr>
+<tr class="even">
+<td>wsc</td>
+<td style="text-align: right;">0</td>
+<td>acc</td>
+<td style="text-align: right;">0.6635</td>
+<td>±</td>
+<td style="text-align: right;">0.0466</td>
+</tr>
+<tr class="odd">
+<td>race</td>
+<td style="text-align: right;">1</td>
+<td>acc</td>
+<td style="text-align: right;">0.3742</td>
+<td>±</td>
+<td style="text-align: right;">0.0150</td>
+</tr>
+<tr class="even">
+<td>sst</td>
+<td style="text-align: right;">0</td>
+<td>acc</td>
+<td style="text-align: right;">0.8933</td>
+<td>±</td>
+<td style="text-align: right;">0.0105</td>
+</tr>
+<tr class="odd">
+<td>rte</td>
+<td style="text-align: right;">0</td>
+<td>acc</td>
+<td style="text-align: right;">0.6354</td>
+<td>±</td>
+<td style="text-align: right;">0.0290</td>
+</tr>
+<tr class="even">
+<td>record</td>
+<td style="text-align: right;">0</td>
+<td>f1</td>
+<td style="text-align: right;">0.8244</td>
+<td>±</td>
+<td style="text-align: right;">0.0038</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td style="text-align: right;"></td>
+<td>em</td>
+<td style="text-align: right;">0.8177</td>
+<td>±</td>
+<td style="text-align: right;">0.0039</td>
+</tr>
+<tr class="even">
+<td>sciq</td>
+<td style="text-align: right;">0</td>
+<td>acc</td>
+<td style="text-align: right;">0.9100</td>
+<td>±</td>
+<td style="text-align: right;">0.0091</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td style="text-align: right;"></td>
+<td>acc_norm</td>
+<td style="text-align: right;">0.8790</td>
+<td>±</td>
+<td style="text-align: right;">0.0103</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>After running more evaluation on these benchmarks shared in <a href="#tbl-eval-results-v2">Table&nbsp;2</a>, looks like the results are different compared to the paper. This maybe due to the same reason as before.</p>
+<div class="callout-tip callout callout-style-default callout-captioned">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-caption-container flex-fill">
+Thank you again authors!
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The authors have responded regarding the difference between their and original LLaMA benchmarking results. It might be due to difference in prompting. We will probably need to run our own benchmarking using 7B LLaMA model &amp; <code>lm-evaluation-harness</code>.</p>
+<blockquote class="twitter-tweet tw-align-center blockquote">
+<p lang="en" dir="ltr">
+<a href="https://twitter.com/abacaj?ref_src=twsrc%5Etfw"><span class="citation" data-cites="abacaj">(</span></a><a href="#ref-abacaj" role="doc-biblioref"><strong>abacaj?</strong></a>) <a href="https://twitter.com/amaarora?ref_src=twsrc%5Etfw"><span class="citation" data-cites="amaarora">(</span></a><a href="#ref-amaarora" role="doc-biblioref"><strong>amaarora?</strong></a>) The LLaMA results use a different method, so a higher number there doesn’t necessarily mean better than ours. Therefore, the tables shouldn’t be compared. The differences may come from the different prompts they used. Here is the description in the LLaMa paper. <a href="https://t.co/B8stCQwyPl">pic.twitter.com/B8stCQwyPl</a>
+</p>
+— Chiyu Zhang (<span class="citation" data-cites="ChiyuZhang0851">(<a href="#ref-ChiyuZhang0851" role="doc-biblioref"><strong>ChiyuZhang0851?</strong></a>)</span>) <a href="https://twitter.com/ChiyuZhang0851/status/1652952982189756416?ref_src=twsrc%5Etfw">May 1, 2023</a>
+</blockquote>
+<script async="" src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+</div>
+</div>
 <section id="sec-human-eval" class="level3" data-number="6.1">
 <h3 data-number="6.1" class="anchored" data-anchor-id="sec-human-eval"><span class="header-section-number">6.1</span> Human Evaluation</h3>
 <p>Lastly, let’s look at the human evaluation bit. From the paper:</p>
