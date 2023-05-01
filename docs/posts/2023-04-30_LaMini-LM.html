@@ -1,0 +1,1405 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.335">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Aman Arora">
+<meta name="dcterms.date" content="2023-05-01">
+<meta name="description" content="As part of this blog post, we regenerate a small sample of the 2.58M shared Instruction Dataset and also perform human evaluation on some of the generated models shared in the research paper.">
+
+<title>Paper Review - ‘LaMini-LM’</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+<script type="text/javascript">
+
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+ga('create', 'UA-158677010-1', 'auto');
+
+ga('send', {
+  hitType: 'pageview',
+  'anonymizeIp': true,
+});
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+<script src="https://unpkg.com/@jupyter-widgets/html-manager@*/dist/embed-amd.js" crossorigin="anonymous"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<meta name="twitter:title" content="Paper Review - ‘LaMini-LM’">
+<meta name="twitter:description" content="As part of this blog post, we regenerate a small sample of the 2.58M shared Instruction Dataset and also perform human evaluation on some of the generated models shared in the research paper.">
+<meta name="twitter:image" content="../images/lamini-lm.png">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html">
+ <span class="menu-text">Aman Arora’s Blog</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/amaarora"><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com/amaarora"><i class="bi bi-twitter" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Paper Review - ‘LaMini-LM’</h1>
+            <p class="subtitle lead">Paper review of “LaMini-LM - A Diverse Herd of Distilled Models from Large-Scale Instructions” and analysis on released 2.58M instruction dataset.</p>
+                  <div>
+        <div class="description">
+          <p>As part of this blog post, we regenerate a small sample of the 2.58M shared Instruction Dataset and also perform human evaluation on some of the generated models shared in the research paper.</p>
+        </div>
+      </div>
+                          <div class="quarto-categories">
+                <div class="quarto-category">Large Language Models</div>
+                <div class="quarto-category">Paper Review</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Aman Arora </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">May 1, 2023</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction"><span class="toc-section-number">1</span>  Introduction</a></li>
+  <li><a href="#sec-data-gen" id="toc-sec-data-gen" class="nav-link" data-scroll-target="#sec-data-gen"><span class="toc-section-number">2</span>  Dataset Generation</a>
+  <ul class="collapse">
+  <li><a href="#introduction-1" id="toc-introduction-1" class="nav-link" data-scroll-target="#introduction-1"><span class="toc-section-number">2.1</span>  Introduction</a></li>
+  <li><a href="#sec-example-guided" id="toc-sec-example-guided" class="nav-link" data-scroll-target="#sec-example-guided"><span class="toc-section-number">2.2</span>  Example Guided</a></li>
+  <li><a href="#sec-topic-guided" id="toc-sec-topic-guided" class="nav-link" data-scroll-target="#sec-topic-guided"><span class="toc-section-number">2.3</span>  Topic Guided</a></li>
+  <li><a href="#response-generation" id="toc-response-generation" class="nav-link" data-scroll-target="#response-generation"><span class="toc-section-number">2.4</span>  Response Generation</a></li>
+  </ul></li>
+  <li><a href="#sec-data-exploration" id="toc-sec-data-exploration" class="nav-link" data-scroll-target="#sec-data-exploration"><span class="toc-section-number">3</span>  Dataset Exploration</a>
+  <ul class="collapse">
+  <li><a href="#statistics" id="toc-statistics" class="nav-link" data-scroll-target="#statistics"><span class="toc-section-number">3.1</span>  Statistics</a></li>
+  <li><a href="#sec-diversity" id="toc-sec-diversity" class="nav-link" data-scroll-target="#sec-diversity"><span class="toc-section-number">3.2</span>  Diversity</a></li>
+  <li><a href="#human-evaluation" id="toc-human-evaluation" class="nav-link" data-scroll-target="#human-evaluation"><span class="toc-section-number">3.3</span>  Human Evaluation</a></li>
+  </ul></li>
+  <li><a href="#sec-dataset-review" id="toc-sec-dataset-review" class="nav-link" data-scroll-target="#sec-dataset-review"><span class="toc-section-number">4</span>  Dataset Review</a></li>
+  <li><a href="#model-training" id="toc-model-training" class="nav-link" data-scroll-target="#model-training"><span class="toc-section-number">5</span>  Model Training</a></li>
+  <li><a href="#sec-model-eval" id="toc-sec-model-eval" class="nav-link" data-scroll-target="#sec-model-eval"><span class="toc-section-number">6</span>  Model Evaluation</a>
+  <ul class="collapse">
+  <li><a href="#sec-human-eval" id="toc-sec-human-eval" class="nav-link" data-scroll-target="#sec-human-eval"><span class="toc-section-number">6.1</span>  Human Evaluation</a></li>
+  </ul></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion"><span class="toc-section-number">7</span>  Conclusion</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<section id="introduction" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="introduction"><span class="header-section-number">1</span> Introduction</h2>
+<p>As part of this blog post, we will be <strong>reviewing</strong> the <a href="https://arxiv.org/abs/2304.14402">LaMini-LM: A Diverse Herd of Distilled Models from Large-Scale Instructions</a> (<span class="citation" data-cites="laminilm">Wu et al. (<a href="#ref-laminilm" role="doc-biblioref">2023</a>)</span>) paper released on Apr 27, 2023.</p>
+<p>The main objectives of this blog post are:</p>
+<ol type="1">
+<li><em>To provide a thorough review of <strong>LaMini-LM</strong> (<span class="citation" data-cites="laminilm">Wu et al. (<a href="#ref-laminilm" role="doc-biblioref">2023</a>)</span>) reseasrch paper.</em></li>
+<li><em>We will try to replicate most figures and share commentary on why some of the results might me misleading. Specifically we replicate <a href="#fig-5">Figure&nbsp;5</a> in <a href="#sec-diversity">Section&nbsp;3.2</a>.</em></li>
+<li><em>Recreate a small sample of the 2.58M shared Instruction Dataset to showcase the complete process - see <a href="#sec-data-gen">Section&nbsp;2</a>.</em></li>
+<li><em>Compare similarity on generated instructions using sentence embeddings generated by using Sentence Transformer from HuggingFace.</em></li>
+<li><em>Share all code in PyTorch that is used as part of this blog post.</em></li>
+<li><em>Compare evaluation results from the paper with our own evaluation on multiple NLP datasets - see <a href="#sec-model-eval">Section&nbsp;6</a>.</em><br>
+</li>
+<li><em>We do our own human evaluation in <a href="#sec-human-eval">Section&nbsp;6.1</a>. Honestly speaking, for the three results, the results for the 1.5B GPT-2 LaMini model, the results were unsatisfactory.</em> 😔</li>
+</ol>
+</section>
+<section id="sec-data-gen" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="sec-data-gen"><span class="header-section-number">2</span> Dataset Generation</h2>
+<section id="introduction-1" class="level3" data-number="2.1">
+<h3 data-number="2.1" class="anchored" data-anchor-id="introduction-1"><span class="header-section-number">2.1</span> Introduction</h3>
+<p>The authors provide a large dataset of 2.58M instructions and responses.</p>
+<p>Two examples in the LaMini-instruction data:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"instruction"</span>: <span class="st">"What is the capital of Australia?</span><span class="ch">\n\n</span><span class="st">Is Canberra the only city chosen to serve as a capital due to a compromise between Sydney and Melbourne?"</span>, </span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"response"</span>: <span class="st">"The capital of Australia is Canberra. Yes, Canberra was chosen as the capital of Australia in 1908 due to a compromise between Sydney and Melbourne, as neither city wanted the other to become the capital."</span>,</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"instruction_source"</span>: <span class="st">"generated_flan"</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"instruction"</span>: <span class="st">"Create a poem that has the word </span><span class="ch">\"</span><span class="st">ocean</span><span class="ch">\"</span><span class="st"> in every other line."</span>, </span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">"response"</span>: <span class="st">"The ocean's depth is a mystery,</span><span class="ch">\n</span><span class="st">Its waves crashing with energy.</span><span class="ch">\n</span><span class="st">Salt air fills the coastal scene,</span><span class="ch">\n</span><span class="st">The ocean's blue hues pure and clean.</span><span class="ch">\n\n</span><span class="st">Seagulls cry out a melancholy song,</span><span class="ch">\n</span><span class="st">The ocean's rhythm steady and strong.</span><span class="ch">\n</span><span class="st">Sunsets paint the water gold,</span><span class="ch">\n</span><span class="st">The ocean's secrets forever untold."</span>,</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">"instruction_source"</span>: <span class="st">"self_instruct_without_topic"</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The dataset is built on top of existing resources and also newer <em>“instructions”+“responses”</em>.</p>
+<p>From the paper:</p>
+<blockquote class="blockquote">
+<p><em>We collate instructions from various prior datasets such as self-instruct (<span class="citation" data-cites="selfinstruct">Wang et al. (<a href="#ref-selfinstruct" role="doc-biblioref">2022</a>)</span>), P3 (<span class="citation" data-cites="p3">Sanh et al. (<a href="#ref-p3" role="doc-biblioref">2022</a>)</span>), FLAN (<span class="citation" data-cites="flan">Longpre et al. (<a href="#ref-flan" role="doc-biblioref">2023</a>)</span>) and Alpaca (<span class="citation" data-cites="alpaca">Taori et al. (<a href="#ref-alpaca" role="doc-biblioref">2023</a>)</span>).</em></p>
+</blockquote>
+<p>The researchers have collated existing resources and also generated a new set “instructions+responses” using <code>gpt-3.5-turbo</code> (ChatGPT) using Self-Instruct approach (<span class="citation" data-cites="selfinstruct">Wang et al. (<a href="#ref-selfinstruct" role="doc-biblioref">2022</a>)</span>). At the time of writing I believe this is the biggest Instruction dataset available.</p>
+<p>Below I provide an overview of the existing datasets that are part of the 2.58M LaMini-LM dataset:</p>
+<ol type="1">
+<li><strong>Self-Instruct:</strong> Instruction, input, and output samples from a language model. (<span class="citation" data-cites="selfinstruct">Wang et al. (<a href="#ref-selfinstruct" role="doc-biblioref">2022</a>)</span>)</li>
+<li><strong>P3:</strong> P3 (Public Pool of Prompts) is a collection of prompted English datasets covering a diverse set of NLP tasks. Hosted at HuggingFace <a href="https://huggingface.co/datasets/bigscience/P3">here</a>.</li>
+<li><strong>FLAN:</strong> Instruction dataset on a wide variety of datasets (473 datasets, 146 task categories, and 1,836 total tasks) using various instruction templates. Refer to the <a href="https://github.com/google-research/FLAN/tree/main/flan/v2">GitHub repo</a> for more details.</li>
+<li><strong>Alpaca:</strong> 52K instruction-following demonstrations generated in the style of self-instruct using <code>text-davinci-003</code>. (<span class="citation" data-cites="alpaca">Taori et al. (<a href="#ref-alpaca" role="doc-biblioref">2023</a>)</span>)</li>
+</ol>
+<p>The authors use two strategies to generate instructions on top of existing ones which they called:</p>
+<ol type="1">
+<li>Example-guided</li>
+<li>Topic-guided</li>
+</ol>
+<p>Let’s look at them in detail in the following sections.</p>
+</section>
+<section id="sec-example-guided" class="level3" data-number="2.2">
+<h3 data-number="2.2" class="anchored" data-anchor-id="sec-example-guided"><span class="header-section-number">2.2</span> Example Guided</h3>
+<p>Example guided generation follows <span class="citation" data-cites="selfinstruct">Wang et al. (<a href="#ref-selfinstruct" role="doc-biblioref">2022</a>)</span> &amp; <span class="citation" data-cites="alpaca">Taori et al. (<a href="#ref-alpaca" role="doc-biblioref">2023</a>)</span>.</p>
+<p>Specifically, the authors include only few random examples, and some limited constraints as shown in the example prompt in <a href="#fig-1">Figure&nbsp;1</a>.</p>
+<p>Newer instructions are generated by providing these examples from existing datasets - Self-Instruct (<span class="math inline">\(X_{SI}\)</span>), P3 (<span class="math inline">\(X_{P3}\)</span>) &amp; FLAN (<span class="math inline">\(X_{FLAN}\)</span>).</p>
+<div class="callout-note callout callout-style-default callout-captioned">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-caption-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The number of in-context examples used for generation of <span class="math inline">\(X_{SI}\)</span> is 3 whereas for <span class="math inline">\(X_{P3}\)</span> &amp; <span class="math inline">\(X_{FLAN}\)</span> is 2. This is because the instructions in <span class="math inline">\(X_{P3}\)</span> &amp; <span class="math inline">\(X_{FLAN}\)</span> are longer in length compared to <span class="math inline">\(X_{SI}\)</span>. This is due to token limits of ChatGPT.</p>
+</div>
+</div>
+<div id="fig-1" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="../images/lamini-example-guided.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;1: An example of instruction generation prompt based on three random examples from self-instruct</figcaption><p></p>
+</figure>
+</div>
+<p>To generate your own instructions using ChatGPT, either paste the above prompt in ChatGPT, or we can use the openai API like so:</p>
+<div class="cell" data-execution_count="2">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> openai</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>openai.api_key <span class="op">=</span> <span class="st">"sk_"</span> <span class="co">#Your API key goes here </span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>N <span class="op">=</span> <span class="dv">20</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>examples <span class="op">=</span> [</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">'What are some things you can do to de-stress?'</span>, </span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">'How can individuals and organizations reduce unconscious bias?'</span>,</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Write a program to compute the sum of integers from k to n.'</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>prompt<span class="op">=</span><span class="ss">f"""</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="ss">&lt;example&gt;</span><span class="sc">{</span>examples[<span class="dv">0</span>]<span class="sc">}</span><span class="ss">&lt;/example&gt;</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="ss">&lt;example&gt;</span><span class="sc">{</span>examples[<span class="dv">1</span>]<span class="sc">}</span><span class="ss">&lt;/example&gt;</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="ss">&lt;example&gt;</span><span class="sc">{</span>examples[<span class="dv">2</span>]<span class="sc">}</span><span class="ss">&lt;/example&gt;</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="ss">Generate </span><span class="sc">{</span>N<span class="sc">}</span><span class="ss"> diverse examples that are similar to the provided examples.</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="ss">You do not need to provide a response to the generated examples.</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="ss">Each example must include an instruction.</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="ss">Each generated instruction can be either an imperative sentence or a question.</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="ss">Each example must start with the label "&lt;example&gt;" and end with the label "&lt;/example&gt;".</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="ss">"""</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>messages <span class="op">=</span> [{<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: prompt}]</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>response <span class="op">=</span> openai.ChatCompletion.create(</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>    model<span class="op">=</span><span class="st">'gpt-3.5-turbo'</span>,</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>    messages<span class="op">=</span>messages,</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>    temperature<span class="op">=</span><span class="dv">0</span>, <span class="co"># not specified in the paper </span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>response.choices[<span class="dv">0</span>].message[<span class="st">"content"</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>In the above code, you can see how we can easily replace the <code>examples</code> list with a function that looks like - <code>get_random_examples(n=3, subset='self-instruct')</code> and based on that get example instructions from the existing datasets. By using different subsets, we can generate different examples.</p>
+<p>The instructions that are generated by using examples from <span class="math inline">\(X_{SI}\)</span>, <span class="math inline">\(X_{P3}\)</span> &amp; <span class="math inline">\(X_{FLAN}\)</span> are referred to as <span class="math inline">\(\hat{X}_{SI}\)</span>, <span class="math inline">\(\hat{X}_{P3}\)</span> &amp; <span class="math inline">\(\hat{X}_{FLAN}\)</span>. So, the below 20 generated instructions would be part of <span class="math inline">\(\hat{X}_{SI}\)</span> because the 3 examples are from <span class="math inline">\(X_{SI}\)</span>.</p>
+<p>Running the above returns an output that looks like:</p>
+<pre><code>&lt;example&gt;What are some healthy breakfast options?&lt;/example&gt;
+&lt;example&gt;How can you improve your public speaking skills?&lt;/example&gt;
+&lt;example&gt;Write a recipe for a vegan lasagna.&lt;/example&gt;
+&lt;example&gt;What are some ways to save money on groceries?&lt;/example&gt;
+&lt;example&gt;How can you improve your time management skills?&lt;/example&gt;
+&lt;example&gt;Write a workout plan for beginners.&lt;/example&gt;
+&lt;example&gt;What are some tips for studying effectively?&lt;/example&gt;
+&lt;example&gt;How can you improve your writing skills?&lt;/example&gt;
+&lt;example&gt;Write a program to find the largest number in an array.&lt;/example&gt;
+&lt;example&gt;What are some ways to improve your memory?&lt;/example&gt;
+&lt;example&gt;How can you improve your interpersonal communication skills?&lt;/example&gt;
+&lt;example&gt;Write a step-by-step guide for making a paper airplane.&lt;/example&gt;
+&lt;example&gt;What are some ways to reduce your carbon footprint?&lt;/example&gt;
+&lt;example&gt;How can you improve your problem-solving skills?&lt;/example&gt;
+&lt;example&gt;Write a program to check if a number is prime.&lt;/example&gt;
+&lt;example&gt;What are some ways to improve your creativity?&lt;/example&gt;
+&lt;example&gt;How can you improve your leadership skills?&lt;/example&gt;
+&lt;example&gt;Write a guide for making homemade soap.&lt;/example&gt;
+&lt;example&gt;What are some healthy breakfast options?&lt;/example&gt;
+&lt;example&gt;What are some ways to improve your emotional intelligence?&lt;/example&gt;</code></pre>
+</section>
+<section id="sec-topic-guided" class="level3" data-number="2.3">
+<h3 data-number="2.3" class="anchored" data-anchor-id="sec-topic-guided"><span class="header-section-number">2.3</span> Topic Guided</h3>
+<p>The process and prompt for topic guided instruction generation is slightly different from example-guided instruction generation.</p>
+<p>The overall process for topic-guided generation looks like:</p>
+<ol type="1">
+<li>Find a list of common categories from Wikipidea (Total 3.5M)</li>
+<li>Filter out topics based on two rules.
+<ol type="1">
+<li>The category must be less than three words.</li>
+<li>The category must comprise more than 10 sub-categories and 50 pages.</li>
+</ol></li>
+<li>Use the prompt in <a href="#fig-2">Figure&nbsp;2</a> and provide random examples from the same dataset and 3 topics obtained after filtering.</li>
+</ol>
+<div class="callout-note callout callout-style-default callout-captioned">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-caption-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>After filtering, the authors obtain a list of 3.5K categories that serve as common topics.</p>
+</div>
+</div>
+<div id="fig-2" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="../images/lamini-topic-guided.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;2: An example of instruction generation prompt based on three random examples from self-instruct and three random topics.</figcaption><p></p>
+</figure>
+</div>
+<div class="cell" data-execution_count="65">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> openai</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>openai.api_key <span class="op">=</span> <span class="st">"sk_"</span> <span class="co">#Your API key goes here </span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>N <span class="op">=</span> <span class="dv">20</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>examples <span class="op">=</span> [</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Try coming up with a creative way to stay motivated during a workout.'</span>, </span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">'In your opinion, what are the qualities of an effective sports coach?'</span>,</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Return the SSN number for the person: "Yann LeCun"'</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>topics <span class="op">=</span> [<span class="st">'Machine Learning'</span>, <span class="st">'Infantry'</span>, <span class="st">'Design bureaus'</span>]</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>prompt<span class="op">=</span><span class="ss">f"""</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="ss">&lt;example&gt;</span><span class="sc">{</span>examples[<span class="dv">0</span>]<span class="sc">}</span><span class="ss">&lt;/example&gt;</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="ss">&lt;example&gt;</span><span class="sc">{</span>examples[<span class="dv">1</span>]<span class="sc">}</span><span class="ss">&lt;/example&gt;</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="ss">&lt;example&gt;</span><span class="sc">{</span>examples[<span class="dv">2</span>]<span class="sc">}</span><span class="ss">&lt;/example&gt;</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="ss">Generate </span><span class="sc">{</span>N<span class="sc">}</span><span class="ss"> diverse examples that are similar to the provided examples with the topics </span><span class="sc">{</span>topics[<span class="dv">0</span>]<span class="sc">}</span><span class="ss">, </span><span class="sc">{</span>topics[<span class="dv">1</span>]<span class="sc">}</span><span class="ss">, </span><span class="sc">{</span>topics[<span class="dv">2</span>]<span class="sc">}</span><span class="ss">".</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="ss">You do not need to provide a response to the generated examples. </span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="ss">Each example must include an instruction. Each generated instruction can be either an imperative sentence or a question. </span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a><span class="ss">Each example must start with the label "&lt;example&gt;" and end with the label "&lt;/example&gt;"."."""</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>messages <span class="op">=</span> [{<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: prompt}]</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>response <span class="op">=</span> openai.ChatCompletion.create(</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>    model<span class="op">=</span><span class="st">'gpt-3.5-turbo'</span>,</span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>    messages<span class="op">=</span>messages,</span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>    temperature<span class="op">=</span><span class="dv">0</span>, <span class="co"># not specified in the paper </span></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(response.choices[<span class="dv">0</span>].message[<span class="st">"content"</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>As before, we can easily replace the <code>examples</code> list with a function that looks like - <code>get_random_examples(n=3, subset='self-instruct')</code> &amp; also replace <code>topics</code> with a function that looks like - <code>get_random_topics(n=3, subset='wiki-categories')</code>.</p>
+<p>Running the above code returns an output that looks like:</p>
+<pre><code>&lt;example&gt;What are some common machine learning algorithms and their applications?&lt;/example&gt;
+&lt;example&gt;Design a new weapon for the infantry that is both effective and lightweight.&lt;/example&gt;
+&lt;example&gt;Retrieve the contact information for a design bureau specializing in sustainable architecture.&lt;/example&gt;
+&lt;example&gt;How can machine learning be used to improve healthcare outcomes?&lt;/example&gt;
+&lt;example&gt;Create a workout plan for an infantry soldier to improve their endurance and strength.&lt;/example&gt;
+&lt;example&gt;What are some key considerations when designing a user interface for a mobile app?&lt;/example&gt;
+&lt;example&gt;Find a machine learning library that is compatible with Python.&lt;/example&gt;
+&lt;example&gt;Develop a training program for infantry soldiers to improve their marksmanship skills.&lt;/example&gt;
+&lt;example&gt;What are some ethical concerns surrounding the use of machine learning in decision-making?&lt;/example&gt;
+&lt;example&gt;Design a new vehicle for the infantry that can navigate difficult terrain.&lt;/example&gt;
+&lt;example&gt;Research and compare different design bureaus to find one that aligns with your project goals.&lt;/example&gt;
+&lt;example&gt;How can machine learning be used to improve customer service in the retail industry?&lt;/example&gt;
+&lt;example&gt;Create a nutrition plan for an infantry soldier to optimize their performance in the field.&lt;/example&gt;
+&lt;example&gt;What are some best practices for designing a logo for a new brand?&lt;/example&gt;
+&lt;example&gt;Implement a machine learning algorithm to predict customer churn for a telecommunications company.&lt;/example&gt;
+&lt;example&gt;Develop a training program for infantry soldiers to improve their communication and teamwork skills.&lt;/example&gt;
+&lt;example&gt;What are some challenges that arise when designing for virtual reality?&lt;/example&gt;
+&lt;example&gt;Find a design bureau that specializes in creating interactive exhibits for museums.&lt;/example&gt;
+&lt;example&gt;How can machine learning be used to improve fraud detection in the financial industry?&lt;/example&gt;
+&lt;example&gt;Design a new piece of equipment for the infantry that can be used in urban environments.&lt;/example&gt;</code></pre>
+<p>Some key things to note just from the small sample above, instructions like</p>
+<ul>
+<li><em>“Design a new piece of equipment for the infantry that can be used in urban environments”</em></li>
+<li><em>“Research and compare different design bureaus to find one that aligns with your project goals”</em></li>
+<li><em>“Retrieve the contact information for a design bureau specializing in sustainable architecture.”</em></li>
+</ul>
+<p>are noisy. <strong>As also mentioned in the paper, ChatGPT has failed to provide enough context for the instructions.</strong></p>
+<ul>
+<li><em>“Design a new piece of equipment for the infantry that can be used in urban environments”</em></li>
+</ul>
+<p>The above instruction IMHO is very generic.</p>
+<ul>
+<li><em>“Research and compare different design bureaus to find one that aligns with your project goals”</em></li>
+</ul>
+<p>The model has failed to define project goals or say anything about the “project”</p>
+<ul>
+<li><em>“Retrieve the contact information for a design bureau specializing in sustainable architecture.”</em></li>
+</ul>
+<p>The model is asking to generate contact information, and it’s the response as we will see in the next section that’s more vague, not just the instruction.</p>
+</section>
+<section id="response-generation" class="level3" data-number="2.4">
+<h3 data-number="2.4" class="anchored" data-anchor-id="response-generation"><span class="header-section-number">2.4</span> Response Generation</h3>
+<p>Let’s collate the above instructions and generate responses for each one to create the resulting pairs. One could simply copy paste the instructions in ChatGPT or use the openAI API as before.</p>
+<p>Let’s take five instructions as examples to generate a <code>.jsonl</code> type <code>dataset</code> as below which can then be used to finetune models using the openAI API.</p>
+<div class="cell" data-execution_count="70">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> openai</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> collections <span class="im">import</span> defaultdict</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>openai.api_key <span class="op">=</span> <span class="st">"sk_"</span> <span class="co">#Your API key goes here </span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>dataset <span class="op">=</span> defaultdict(<span class="bu">dict</span>)</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>instructions <span class="op">=</span> [</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"&lt;example&gt;What are some common machine learning algorithms and their applications?&lt;/example&gt;"</span>,</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">"&lt;example&gt;Design a new weapon for the infantry that is both effective and lightweight.&lt;/example&gt;"</span>,</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">"&lt;example&gt;Retrieve the contact information for a design bureau specializing in sustainable architecture.&lt;/example&gt;"</span>,</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">"&lt;example&gt;How can machine learning be used to improve healthcare outcomes?&lt;/example&gt;"</span>,</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">"&lt;example&gt;Create a workout plan for an infantry soldier to improve their endurance and strength.&lt;/example&gt;"</span>,</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> idx, inst <span class="kw">in</span> <span class="bu">enumerate</span>(instructions):    </span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>    prompt <span class="op">=</span> <span class="ss">f"""Given the following instruction separated by `&lt;example&gt;`, generate a response.</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a><span class="ss">    Response must start with the label "&lt;response&gt;" and end with the label "&lt;/response&gt;".</span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a><span class="ss">    </span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a><span class="ss">    Instruction: </span><span class="sc">{</span>inst<span class="sc">}</span><span class="ss">    </span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a><span class="ss">    """</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>    messages <span class="op">=</span> [{<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: prompt}]</span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>    response <span class="op">=</span> openai.ChatCompletion.create(</span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>        model<span class="op">=</span><span class="st">'gpt-3.5-turbo'</span>,</span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>        messages<span class="op">=</span>messages,</span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>        temperature<span class="op">=</span><span class="dv">0</span>, <span class="co"># not specified in the paper </span></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>    dataset[idx] <span class="op">=</span> {<span class="st">'prompt'</span>: inst, <span class="st">'completion'</span>:response.choices[<span class="dv">0</span>].message[<span class="st">"content"</span>]}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Running above code will give us a dataset that can be used to finetune the base models using OpenAI. This dataset looks something like:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>defaultdict(<span class="bu">dict</span>,</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>            {<span class="dv">0</span>: {<span class="st">'prompt'</span>: <span class="st">'&lt;example&gt;What are some common machine learning algorithms and their applications?&lt;/example&gt;'</span>,</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>              <span class="st">'completion'</span>: <span class="st">'&lt;response&gt;Some common machine learning algorithms and their applications include: </span><span class="ch">\n</span><span class="st">- Linear Regression: used for predicting numerical values</span><span class="ch">\n</span><span class="st">- Logistic Regression: used for classification problems</span><span class="ch">\n</span><span class="st">- Decision Trees: used for both classification and regression problems</span><span class="ch">\n</span><span class="st">- Random Forest: used for classification, regression, and feature selection</span><span class="ch">\n</span><span class="st">- Support Vector Machines: used for classification and regression problems</span><span class="ch">\n</span><span class="st">- K-Nearest Neighbors: used for classification and regression problems</span><span class="ch">\n</span><span class="st">- Neural Networks: used for complex problems such as image recognition and natural language processing&lt;/response&gt;'</span>},</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>             <span class="dv">1</span>: {<span class="st">'prompt'</span>: <span class="st">'&lt;example&gt;Design a new weapon for the infantry that is both effective and lightweight.&lt;/example&gt;'</span>,</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>              <span class="st">'completion'</span>: <span class="st">'&lt;response&gt;A possible solution for a new weapon for the infantry that is both effective and lightweight could be a compact assault rifle that uses advanced materials and technology to reduce weight without sacrificing firepower. The rifle could have a modular design that allows for easy customization and upgrades, and could also incorporate features such as a suppressor and a holographic sight for improved accuracy. Additionally, the rifle could be designed to be easily disassembled and reassembled for maintenance and cleaning in the field.&lt;/response&gt;'</span>},</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>             <span class="dv">2</span>: {<span class="st">'prompt'</span>: <span class="st">'&lt;example&gt;Retrieve the contact information for a design bureau specializing in sustainable architecture.&lt;/example&gt;'</span>,</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>              <span class="st">'completion'</span>: <span class="st">'&lt;response&gt;Here is the contact information for a design bureau specializing in sustainable architecture:&lt;/response&gt;'</span>},</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>             <span class="dv">3</span>: {<span class="st">'prompt'</span>: <span class="st">'&lt;example&gt;How can machine learning be used to improve healthcare outcomes?&lt;/example&gt;'</span>,</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>              <span class="st">'completion'</span>: <span class="st">'&lt;response&gt;Machine learning can be used to improve healthcare outcomes by analyzing large amounts of patient data to identify patterns and predict potential health issues. This can lead to earlier diagnosis and treatment, as well as personalized treatment plans based on individual patient characteristics. Additionally, machine learning can help healthcare providers identify patients who are at risk for readmission or complications, allowing for targeted interventions to improve outcomes and reduce costs.&lt;/response&gt;'</span>},</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>             <span class="dv">4</span>: {<span class="st">'prompt'</span>: <span class="st">'&lt;example&gt;Create a workout plan for an infantry soldier to improve their endurance and strength.&lt;/example&gt;'</span>,</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>              <span class="st">'completion'</span>: <span class="st">'&lt;response&gt;Here is a workout plan for an infantry soldier to improve their endurance and strength:&lt;/response&gt;</span><span class="ch">\n</span><span class="st">- Warm up: 5-10 minutes of light cardio (jogging, jumping jacks, etc.)</span><span class="ch">\n</span><span class="st">- Circuit 1: 3 rounds of the following exercises with minimal rest in between:</span><span class="ch">\n</span><span class="st">  - 20 push-ups</span><span class="ch">\n</span><span class="st">  - 20 squats</span><span class="ch">\n</span><span class="st">  - 20 lunges (10 per leg)</span><span class="ch">\n</span><span class="st">  - 1-minute plank</span><span class="ch">\n</span><span class="st">- Circuit 2: 3 rounds of the following exercises with minimal rest in between:</span><span class="ch">\n</span><span class="st">  - 20 burpees</span><span class="ch">\n</span><span class="st">  - 20 jumping jacks</span><span class="ch">\n</span><span class="st">  - 20 mountain climbers (10 per leg)</span><span class="ch">\n</span><span class="st">  - 1-minute wall sit</span><span class="ch">\n</span><span class="st">- Circuit 3: 3 rounds of the following exercises with minimal rest in between:</span><span class="ch">\n</span><span class="st">  - 20 dumbbell rows (10 per arm)</span><span class="ch">\n</span><span class="st">  - 20 dumbbell curls (10 per arm)</span><span class="ch">\n</span><span class="st">  - 20 dumbbell overhead presses (10 per arm)</span><span class="ch">\n</span><span class="st">  - 1-minute rest</span><span class="ch">\n</span><span class="st">- Cool down: 5-10 minutes of stretching and foam rolling.'</span>}})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>From the smallest of examples, it appears as though:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">'prompt'</span>: <span class="st">'&lt;example&gt;Retrieve the contact information for a design bureau specializing in sustainable architecture.&lt;/example&gt;'</span>,</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">'completion'</span>: <span class="st">'&lt;response&gt;Here is the contact information for a design bureau specializing in sustainable architecture:&lt;/response&gt;'</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>is not of high quality. <strong>This small exercise indicates that there might be more noise in the 2.58M “instruction+response” dataset shared by the authors of LaMini-LM.</strong></p>
+</section>
+</section>
+<section id="sec-data-exploration" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="sec-data-exploration"><span class="header-section-number">3</span> Dataset Exploration</h2>
+<p>In the last section I shared how the dataset generation looks like for <code>LaMini-LM</code>. In this section we will explore the 2.58M instruction dataset. The dataset has been shared publicly and is available on HuggingFace <a href="https://huggingface.co/datasets/MBZUAI/LaMini-instruction/viewer/mbzuai-distil--instruction/train">here</a>.</p>
+<div id="fig-3" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="../images/lamini-hf-dataset.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;3: Dataset Preview on Huggingface.</figcaption><p></p>
+</figure>
+</div>
+<section id="statistics" class="level3" data-number="3.1">
+<h3 data-number="3.1" class="anchored" data-anchor-id="statistics"><span class="header-section-number">3.1</span> Statistics</h3>
+<p>Some statistics about the dataset from the research paper have been shared in <a href="#fig-4">Figure&nbsp;4</a> below.</p>
+<div id="fig-4" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="../images/lamini-dataset-stats.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;4: Data statistics of the generated dataset.</figcaption><p></p>
+</figure>
+</div>
+<p>As can be seen aboce, in total there are 2.58M samples in <code>LaMini-LM</code>. It can be observed that the instructions for <span class="math inline">\(D_{P3}\)</span> &amp; <span class="math inline">\(D_{FLAN}\)</span> are in general longer compared to the rest.</p>
+<div class="callout-note callout callout-style-default callout-captioned">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-caption-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This was also mentioned in <a href="#sec-example-guided">Section&nbsp;2.2</a>, and this is why authors used 2 in-context examples for <span class="math inline">\({X_{P3}}\)</span> and <span class="math inline">\(X_{FLAN}\)</span> compared to 3 in <span class="math inline">\(X_{SI}\)</span>.</p>
+</div>
+</div>
+</section>
+<section id="sec-diversity" class="level3" data-number="3.2">
+<h3 data-number="3.2" class="anchored" data-anchor-id="sec-diversity"><span class="header-section-number">3.2</span> Diversity</h3>
+<p>As part of this section we will be looking at the diversity in the generated instructions. We will also try to recreate <a href="#fig-5">Figure&nbsp;5</a> ourselves using <a href="https://www.sbert.net/">sentence-transformers</a>.</p>
+<p>The authors took a sample of 50K instructions from <span class="math inline">\({\hat{X}_{SI}}\)</span>, <span class="math inline">\({\hat{X}_{A}}\)</span>, <span class="math inline">\({\hat{X}_{P3}}\)</span> &amp; <span class="math inline">\(X_{P3}\)</span> and visualised t-SNE of instruction sentence embeddings that were computed using Sentence Transformer.</p>
+<p>The t-SNE figure has been shared below.</p>
+<div id="fig-5" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="../images/lamini-tsne.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;5: The t-SNE visualizations of 50k sample of instruction sentence embeddings.</figcaption><p></p>
+</figure>
+</div>
+<p>Some comments about the the t-SNE visualisation directly from the paper:</p>
+<ul>
+<li><em>We observe that <span class="math inline">\(\hat{X}_{SI}\)</span> exhibits greater diversity than <span class="math inline">\(\hat{X}_A\)</span> and <span class="math inline">\(\hat{X}_{P3}\)</span> is slightly more diverse than <span class="math inline">\(X_{P3}\)</span>.</em></li>
+</ul>
+<p>But in no way does having a wider spread in <span class="math inline">\(\hat{X}_{SI}\)</span> and <span class="math inline">\(\hat{X}_{P3}\)</span> signify that the instructions are of higher quality. What if the instructions are meaningless?</p>
+<p>For example one of the instructions from the small 20 instructions that were generated in <a href="#sec-topic-guided">Section&nbsp;2.3</a> is:</p>
+<blockquote class="blockquote">
+<p>Retrieve the contact information for a design bureau specializing in sustainable architecture.</p>
+</blockquote>
+<p>And it’s not just the instruction, but rather the response too:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">'prompt'</span>: <span class="st">'&lt;example&gt;Retrieve the contact information for a design bureau specializing in sustainable architecture.&lt;/example&gt;'</span>,</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">'completion'</span>: <span class="st">'&lt;response&gt;Here is the contact information for a design bureau specializing in sustainable architecture:&lt;/response&gt;'</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>I think by training on such examples that might not be of high quality, we are allowing the model to hallucinate.</p>
+<div class="callout-tip callout callout-style-default callout-captioned">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-caption-container flex-fill">
+Hallucination
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>When the model tries to answer questions it has no information about, the model is referred to be “hallucinating”.</p>
+</div>
+</div>
+<div class="cell" data-execution_count="2">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> plotly.express <span class="im">as</span> px</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> umap <span class="im">import</span> UMAP</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> tqdm.notebook <span class="im">import</span> tqdm</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sentence_transformers <span class="im">import</span> SentenceTransformer</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> datasets <span class="im">import</span> load_dataset, load_dataset_builder</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell" data-execution_count="3">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>ds_builder <span class="op">=</span> load_dataset_builder(<span class="st">"MBZUAI/LaMini-instruction"</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>ds_builder.info.features</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="3">
+<pre><code>{'instruction': Value(dtype='string', id=None),
+ 'response': Value(dtype='string', id=None),
+ 'instruction_source': Value(dtype='string', id=None)}</code></pre>
+</div>
+</div>
+<div class="cell" data-execution_count="4">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>dataset <span class="op">=</span> load_dataset(<span class="st">"MBZUAI/LaMini-instruction"</span>)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>dataset</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Found cached dataset parquet (/home/ubuntu/.cache/huggingface/datasets/MBZUAI___parquet/default-3bf051cc03b2354d/0.0.0/2a3b91fbd88a2c90d1dbbb32b460cf621d31bd5b05b934492fdef7d8d6f236ec)</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<script type="application/vnd.jupyter.widget-view+json">
+{"model_id":"8e79355dafb84dc1903a7061c1b433e5","version_major":2,"version_minor":0}
+</script>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="4">
+<pre><code>DatasetDict({
+    train: Dataset({
+        features: ['instruction', 'response', 'instruction_source'],
+        num_rows: 2585615
+    })
+})</code></pre>
+</div>
+</div>
+<p>Total of <strong>2582019</strong> samples in the dataset ➡️ 2.58M. Also, we have a column <code>instruction_source</code> that matches <code>Dataset</code> in <a href="#fig-4">Figure&nbsp;4</a>. First, we filter out the datasets based on source. We are trying to replicate <a href="#fig-5">Figure&nbsp;5</a>.</p>
+<div class="cell" data-execution_count="5">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>X_alpaca <span class="op">=</span> dataset.<span class="bu">filter</span>(<span class="kw">lambda</span> example: example[<span class="st">"instruction_source"</span>]<span class="op">==</span><span class="st">'alpaca'</span>)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>X_p3     <span class="op">=</span> dataset.<span class="bu">filter</span>(<span class="kw">lambda</span> example: example[<span class="st">"instruction_source"</span>]<span class="op">==</span><span class="st">'original_p3'</span>)</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>X_hat_si <span class="op">=</span> dataset.<span class="bu">filter</span>(<span class="kw">lambda</span> example: example[<span class="st">"instruction_source"</span>] <span class="kw">in</span> [<span class="st">'self_instruct_with_topic'</span>, <span class="st">'self_instruct_without_topic'</span>])</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>X_hat_p3 <span class="op">=</span> dataset.<span class="bu">filter</span>(<span class="kw">lambda</span> example: example[<span class="st">"instruction_source"</span>]<span class="op">==</span><span class="st">'generated_p3'</span>)</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>X_alpaca[<span class="st">'train'</span>].num_rows, X_p3[<span class="st">'train'</span>].num_rows, X_hat_si[<span class="st">'train'</span>].num_rows, X_hat_p3[<span class="st">'train'</span>].num_rows</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading cached processed dataset at /home/ubuntu/.cache/huggingface/datasets/MBZUAI___parquet/default-3bf051cc03b2354d/0.0.0/2a3b91fbd88a2c90d1dbbb32b460cf621d31bd5b05b934492fdef7d8d6f236ec/cache-9195cf0efbc66452.arrow
+Loading cached processed dataset at /home/ubuntu/.cache/huggingface/datasets/MBZUAI___parquet/default-3bf051cc03b2354d/0.0.0/2a3b91fbd88a2c90d1dbbb32b460cf621d31bd5b05b934492fdef7d8d6f236ec/cache-4d4436fd5c79b44c.arrow
+Loading cached processed dataset at /home/ubuntu/.cache/huggingface/datasets/MBZUAI___parquet/default-3bf051cc03b2354d/0.0.0/2a3b91fbd88a2c90d1dbbb32b460cf621d31bd5b05b934492fdef7d8d6f236ec/cache-990830c59dd517ae.arrow
+Loading cached processed dataset at /home/ubuntu/.cache/huggingface/datasets/MBZUAI___parquet/default-3bf051cc03b2354d/0.0.0/2a3b91fbd88a2c90d1dbbb32b460cf621d31bd5b05b934492fdef7d8d6f236ec/cache-b3523be466a9a289.arrow</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="5">
+<pre><code>(51985, 464396, 550137, 297312)</code></pre>
+</div>
+</div>
+<p>Next, let’s keep the 50K sample from each source as per the research paper.</p>
+<div class="cell" data-execution_count="6">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>sample_dict <span class="op">=</span> {}</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> X <span class="kw">in</span> tqdm([X_hat_si, X_hat_p3, X_alpaca, X_p3]):</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    np.random.seed(<span class="dv">123</span>)</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>    idxs <span class="op">=</span> np.random.choice(X[<span class="st">'train'</span>].num_rows, <span class="dv">50000</span>)</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>    sample_50k <span class="op">=</span> X[<span class="st">'train'</span>][idxs]</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>    src <span class="op">=</span> np.unique(sample_50k[<span class="st">'instruction_source'</span>])[<span class="dv">0</span>]</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">str</span>(src).startswith(<span class="st">'self_instruct'</span>): src <span class="op">=</span> <span class="st">'generated_self_instruct'</span></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>    sample_dict[src] <span class="op">=</span> sample_50k[<span class="st">'instruction'</span>]</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.DataFrame(sample_dict)</span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>df.head(<span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<script type="application/vnd.jupyter.widget-view+json">
+{"model_id":"bb866cb9ed054917933f964849f7b805","version_major":2,"version_minor":0}
+</script>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="6">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>generated_self_instruct</th>
+      <th>generated_p3</th>
+      <th>alpaca</th>
+      <th>original_p3</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>How does tobacco use affect the cardiovascular...</td>
+      <td>What do you read in your free time?\nRead a be...</td>
+      <td>Classify the types of data structures.</td>
+      <td>I know that the answer to the question "What h...</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>Watch a sitcom and write down three humorous s...</td>
+      <td>Suppose a survey found that the majority of pa...</td>
+      <td>Determine how this example sentence illustrate...</td>
+      <td>The toddler became cranky. \n\nI am hesitating...</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+<p>Now that we have the 50K sample, we could just use <code>sentence-transformer</code> to create the embeddings. I have already done that using a GPU.</p>
+<div class="cell" data-execution_count="7">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert to Sentence embeddings and then apply `UMAP` to get 2D projections</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="kw">not</span> os.path.exists(<span class="st">'../assets/projections_alpaca.npy'</span>):</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    model <span class="op">=</span> SentenceTransformer(<span class="st">'all-MiniLM-L6-v2'</span>)</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> col <span class="kw">in</span> tqdm(df.columns):</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>        sentence_embeddings <span class="op">=</span> model.encode(df[col], batch_size<span class="op">=</span><span class="dv">256</span>, show_progress_bar<span class="op">=</span><span class="va">True</span>, device<span class="op">=</span><span class="st">'cuda'</span>)</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>        umap_2d <span class="op">=</span> UMAP(random_state<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>        umap_2d.fit(sentence_embeddings)</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>        projections <span class="op">=</span> umap_2d.transform(sentence_embeddings)</span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>        np.save(<span class="ss">f'../assets/projections_</span><span class="sc">{</span>col<span class="sc">}</span><span class="ss">.npy'</span>, projections)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Let’s load the UMAP projections and store in a new DataFrame called <code>df_proj</code>.</p>
+<div class="cell" data-execution_count="8">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>df_proj <span class="op">=</span> pd.DataFrame()</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> col <span class="kw">in</span> df.columns:</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    projections <span class="op">=</span> np.load(<span class="ss">f'../assets/projections_</span><span class="sc">{</span>col<span class="sc">}</span><span class="ss">.npy'</span>)</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    _df <span class="op">=</span> pd.DataFrame(projections, columns<span class="op">=</span>[<span class="ss">f'</span><span class="sc">{</span>col<span class="sc">}</span><span class="ss">_0'</span>, <span class="ss">f'</span><span class="sc">{</span>col<span class="sc">}</span><span class="ss">_1'</span>])</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>    _df[col] <span class="op">=</span> df[col]</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>    df_proj <span class="op">=</span> pd.concat([df_proj, _df], axis<span class="op">=</span><span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell" data-execution_count="9">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> sns.scatterplot(data<span class="op">=</span>df_proj, x<span class="op">=</span><span class="st">'generated_self_instruct_0'</span>, y<span class="op">=</span><span class="st">'generated_self_instruct_1'</span>)</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>sns.scatterplot(data<span class="op">=</span>df_proj, x<span class="op">=</span><span class="st">'alpaca_0'</span>, y<span class="op">=</span><span class="st">'alpaca_1'</span>)</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>ax.<span class="bu">set</span>(xlabel<span class="op">=</span><span class="st">'X'</span>, ylabel<span class="op">=</span><span class="st">'Y'</span>)<span class="op">;</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>plt.legend(title<span class="op">=</span><span class="st">'Dataset'</span>, loc<span class="op">=</span><span class="st">'upper left'</span>, labels<span class="op">=</span>[<span class="st">'Self Instruct'</span>, <span class="st">'Alpaca'</span>])<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<p><img src="2023-04-30_LaMini-LM_files/figure-html/cell-12-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<div class="callout-tip callout callout-style-default callout-captioned">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-caption-container flex-fill">
+Thank you authors!
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Previously, the dataset shared on Huggingface did not contain <code>instruction_source</code> column, but the authors were really kind enough to add it.</p>
+<blockquote class="twitter-tweet tw-align-center blockquote">
+<p lang="en" dir="ltr">
+Hi! Thanks for the feedback. <br>You are correct, we'll update the HF repo data with a new column shortly.
+</p>
+— Alham Fikri Aji (<span class="citation" data-cites="AlhamFikri">(<a href="#ref-AlhamFikri" role="doc-biblioref"><strong>AlhamFikri?</strong></a>)</span>) <a href="https://twitter.com/AlhamFikri/status/1652497888490954754?ref_src=twsrc%5Etfw">April 30, 2023</a>
+</blockquote>
+<script async="" src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+</div>
+</div>
+</section>
+<section id="human-evaluation" class="level3" data-number="3.3">
+<h3 data-number="3.3" class="anchored" data-anchor-id="human-evaluation"><span class="header-section-number">3.3</span> Human Evaluation</h3>
+<p>From the paper:</p>
+<p><em>We follow the human evaluation protocol given by Wang et al.&nbsp;(2022a), which categorizes the quality of the generated text into four levels:</em></p>
+<ul>
+<li><em>Rate-A: The generated text is of high quality;</em></li>
+<li><em>Rate-B: The generated text is acceptable but has minor errors;</em></li>
+<li><em>Rate-C: The generated text has significant errors in content.</em></li>
+<li><em>Rate-D: The generated text is completely unacceptable.</em></li>
+</ul>
+<p><em>We randomly sample 20 examples from each subset of <span class="math inline">\(D_{ALL}\)</span> and one of the co-authors scores the generated text.</em></p>
+<p><em>In general, both the generated instructions and the generated responses are of high quality as shown in <a href="#fig-6">Figure&nbsp;6</a>.</em></p>
+<div id="fig-6" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="../images/lamini-human-evaluation.png" class="img-fluid figure-img" style="width:60.0%"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;6: Human evaluation results for the generated instruction dataset.</figcaption><p></p>
+</figure>
+</div>
+<p>As part of this blog post, let’s look at <code>self_instruct_with_topic</code> and perform human evaluation on 20 samples ourselves.</p>
+<div class="cell" data-scrolled="true" data-execution_count="11">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>dataset_si_with_topic <span class="op">=</span> dataset.<span class="bu">filter</span>(<span class="kw">lambda</span> example: example[<span class="st">"instruction_source"</span>] <span class="op">==</span> <span class="st">'self_instruct_with_topic'</span>)</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>dataset_si_with_topic <span class="op">=</span> dataset_si_with_topic.shuffle(seed<span class="op">=</span><span class="dv">42</span>)</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>sample_20 <span class="op">=</span> dataset_si_with_topic[<span class="st">'train'</span>][<span class="bu">range</span>(<span class="dv">20</span>)]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading cached processed dataset at /home/ubuntu/.cache/huggingface/datasets/MBZUAI___parquet/default-3bf051cc03b2354d/0.0.0/2a3b91fbd88a2c90d1dbbb32b460cf621d31bd5b05b934492fdef7d8d6f236ec/cache-d9007dd1dde13ff9.arrow
+Loading cached shuffled indices for dataset at /home/ubuntu/.cache/huggingface/datasets/MBZUAI___parquet/default-3bf051cc03b2354d/0.0.0/2a3b91fbd88a2c90d1dbbb32b460cf621d31bd5b05b934492fdef7d8d6f236ec/cache-d54e2b73deab01dc.arrow</code></pre>
+</div>
+</div>
+<p>Now let’s score the 20 samples for <code>self_instruct_with_topic</code>, below, I used a simple IpyWidget that I created using ChatGPT. :)</p>
+<div class="cell" data-execution_count="14">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> ipywidgets <span class="im">as</span> widgets</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> IPython.display <span class="im">import</span> display</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Create widgets to display the current example</span></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>instruction_widget <span class="op">=</span> widgets.HTML(layout<span class="op">=</span>widgets.Layout(width<span class="op">=</span><span class="st">'50%'</span>))</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>response_widget <span class="op">=</span> widgets.HTML(layout<span class="op">=</span>widgets.Layout(width<span class="op">=</span><span class="st">'25%'</span>))</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>score_widget <span class="op">=</span> widgets.Dropdown(options<span class="op">=</span>[(<span class="st">''</span>, <span class="dv">0</span>), (<span class="st">'1'</span>, <span class="dv">1</span>), (<span class="st">'2'</span>, <span class="dv">2</span>), (<span class="st">'3'</span>, <span class="dv">3</span>), (<span class="st">'4'</span>, <span class="dv">4</span>)], layout<span class="op">=</span>widgets.Layout(width<span class="op">=</span><span class="st">'25%'</span>))</span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a container for the example</span></span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>example_container <span class="op">=</span> widgets.HBox([instruction_widget, response_widget, score_widget])</span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Create buttons for navigation</span></span>
+<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a>previous_button <span class="op">=</span> widgets.Button(description<span class="op">=</span><span class="st">'Previous'</span>)</span>
+<span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a>next_button <span class="op">=</span> widgets.Button(description<span class="op">=</span><span class="st">'Next'</span>)</span>
+<span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a>submit_button <span class="op">=</span> widgets.Button(description<span class="op">=</span><span class="st">'Submit'</span>)</span>
+<span id="cb25-16"><a href="#cb25-16" aria-hidden="true" tabindex="-1"></a>clear_button <span class="op">=</span> widgets.Button(description<span class="op">=</span><span class="st">'Clear'</span>)</span>
+<span id="cb25-17"><a href="#cb25-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-18"><a href="#cb25-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Keep track of the current example index</span></span>
+<span id="cb25-19"><a href="#cb25-19" aria-hidden="true" tabindex="-1"></a>current_index <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb25-20"><a href="#cb25-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-21"><a href="#cb25-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Initialize a list to store the scores</span></span>
+<span id="cb25-22"><a href="#cb25-22" aria-hidden="true" tabindex="-1"></a>scores <span class="op">=</span> [<span class="dv">0</span>] <span class="op">*</span> <span class="bu">len</span>(sample_20[<span class="st">'instruction'</span>])</span>
+<span id="cb25-23"><a href="#cb25-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-24"><a href="#cb25-24" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> update_example(index):</span>
+<span id="cb25-25"><a href="#cb25-25" aria-hidden="true" tabindex="-1"></a>    instruction_widget.value <span class="op">=</span> sample_20[<span class="st">'instruction'</span>][index]</span>
+<span id="cb25-26"><a href="#cb25-26" aria-hidden="true" tabindex="-1"></a>    response_widget.value <span class="op">=</span> sample_20[<span class="st">'response'</span>][index]</span>
+<span id="cb25-27"><a href="#cb25-27" aria-hidden="true" tabindex="-1"></a>    score_widget.value <span class="op">=</span> scores[index]</span>
+<span id="cb25-28"><a href="#cb25-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-29"><a href="#cb25-29" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> on_previous(button):</span>
+<span id="cb25-30"><a href="#cb25-30" aria-hidden="true" tabindex="-1"></a>    <span class="kw">global</span> current_index</span>
+<span id="cb25-31"><a href="#cb25-31" aria-hidden="true" tabindex="-1"></a>    scores[current_index] <span class="op">=</span> score_widget.value</span>
+<span id="cb25-32"><a href="#cb25-32" aria-hidden="true" tabindex="-1"></a>    current_index <span class="op">=</span> <span class="bu">max</span>(<span class="dv">0</span>, current_index <span class="op">-</span> <span class="dv">1</span>)</span>
+<span id="cb25-33"><a href="#cb25-33" aria-hidden="true" tabindex="-1"></a>    update_example(current_index)</span>
+<span id="cb25-34"><a href="#cb25-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-35"><a href="#cb25-35" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> on_next(button):</span>
+<span id="cb25-36"><a href="#cb25-36" aria-hidden="true" tabindex="-1"></a>    <span class="kw">global</span> current_index</span>
+<span id="cb25-37"><a href="#cb25-37" aria-hidden="true" tabindex="-1"></a>    scores[current_index] <span class="op">=</span> score_widget.value</span>
+<span id="cb25-38"><a href="#cb25-38" aria-hidden="true" tabindex="-1"></a>    current_index <span class="op">=</span> <span class="bu">min</span>(<span class="bu">len</span>(sample_20[<span class="st">'instruction'</span>]) <span class="op">-</span> <span class="dv">1</span>, current_index <span class="op">+</span> <span class="dv">1</span>)</span>
+<span id="cb25-39"><a href="#cb25-39" aria-hidden="true" tabindex="-1"></a>    update_example(current_index)</span>
+<span id="cb25-40"><a href="#cb25-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-41"><a href="#cb25-41" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> on_submit(button):</span>
+<span id="cb25-42"><a href="#cb25-42" aria-hidden="true" tabindex="-1"></a>    scores[current_index] <span class="op">=</span> score_widget.value</span>
+<span id="cb25-43"><a href="#cb25-43" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">'Scores:'</span>, scores)</span>
+<span id="cb25-44"><a href="#cb25-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-45"><a href="#cb25-45" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> on_clear(button):</span>
+<span id="cb25-46"><a href="#cb25-46" aria-hidden="true" tabindex="-1"></a>    scores[current_index] <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb25-47"><a href="#cb25-47" aria-hidden="true" tabindex="-1"></a>    score_widget.value <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb25-48"><a href="#cb25-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-49"><a href="#cb25-49" aria-hidden="true" tabindex="-1"></a><span class="co"># Set button callbacks</span></span>
+<span id="cb25-50"><a href="#cb25-50" aria-hidden="true" tabindex="-1"></a>previous_button.on_click(on_previous)</span>
+<span id="cb25-51"><a href="#cb25-51" aria-hidden="true" tabindex="-1"></a>next_button.on_click(on_next)</span>
+<span id="cb25-52"><a href="#cb25-52" aria-hidden="true" tabindex="-1"></a>submit_button.on_click(on_submit)</span>
+<span id="cb25-53"><a href="#cb25-53" aria-hidden="true" tabindex="-1"></a>clear_button.on_click(on_clear)</span>
+<span id="cb25-54"><a href="#cb25-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-55"><a href="#cb25-55" aria-hidden="true" tabindex="-1"></a><span class="co"># Display the example container and navigation buttons</span></span>
+<span id="cb25-56"><a href="#cb25-56" aria-hidden="true" tabindex="-1"></a>display(example_container)</span>
+<span id="cb25-57"><a href="#cb25-57" aria-hidden="true" tabindex="-1"></a>display(widgets.HBox([previous_button, next_button]))</span>
+<span id="cb25-58"><a href="#cb25-58" aria-hidden="true" tabindex="-1"></a>display(widgets.HBox([submit_button, clear_button]))</span>
+<span id="cb25-59"><a href="#cb25-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-60"><a href="#cb25-60" aria-hidden="true" tabindex="-1"></a><span class="co"># Initialize the first example</span></span>
+<span id="cb25-61"><a href="#cb25-61" aria-hidden="true" tabindex="-1"></a>update_example(current_index)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<script type="application/vnd.jupyter.widget-view+json">
+{"model_id":"6226ae928af048f3bd5edc32e7221012","version_major":2,"version_minor":0}
+</script>
+</div>
+<div class="cell-output cell-output-display">
+<script type="application/vnd.jupyter.widget-view+json">
+{"model_id":"2d336554154d450989e12692b36fb63f","version_major":2,"version_minor":0}
+</script>
+</div>
+<div class="cell-output cell-output-display">
+<script type="application/vnd.jupyter.widget-view+json">
+{"model_id":"b211ee724c504372846eaadc2d42c6fa","version_major":2,"version_minor":0}
+</script>
+</div>
+</div>
+<div id="fig-7" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="../images/lamini-widget.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;7: IpyWidget for scoring instructions &amp; responses</figcaption><p></p>
+</figure>
+</div>
+<p>You can see how hard it is to score even 20 samples each. Scoring is an intensive task especially when it is about topics that the labeler has no idea about. Above, the instruction is <em>“What are some behavioral patterns exhibited by Zygaenoidea moths?”</em>.</p>
+<p>As a labeler, I have no idea what <em>“Zygaenoidea moths”</em> are, let alone know their characterstics. I had to search for <em>“Zygaenoidea moths”</em> on google, and that linked me to scholarly articles.</p>
+<p>Through this simple exercise, I hope I have showcased how difficult it can be to rate responses generated by the LLM.</p>
+</section>
+</section>
+<section id="sec-dataset-review" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="sec-dataset-review"><span class="header-section-number">4</span> Dataset Review</h2>
+<p>As part of <a href="#sec-data-gen">Section&nbsp;2</a> and <a href="#sec-data-exploration">Section&nbsp;3</a>, by calling the OpenaiAPI ourselves, we saw that there might be noise in the dataset.</p>
+<p><code>gpt-3.5-turbo</code> fails to provide context in some of the instructions that we saw before like:</p>
+<ul>
+<li><em>“Research and compare different design bureaus to find one that aligns with your project goals”</em></li>
+<li><em>“Retrieve the contact information for a design bureau specializing in sustainable architecture.”</em></li>
+</ul>
+<p>This means that there is possibility there is noise in the dataset. It is harder to look at text and figure out noise and clean datasets, IMHO, this is an open research question and I will try to work on this in my next blog post.</p>
+<p>Also, from the simple exercise, we saw how hard it can be to label Instruction and Response. There is no direct way, if the labeler doesn’t have knowledge about the topic, then the task becomes even more intensive.</p>
+</section>
+<section id="model-training" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="model-training"><span class="header-section-number">5</span> Model Training</h2>
+<p>From the paper:</p>
+<p><em>We present <strong>LaMini-LM</strong>, a family of language models instruction-tuned on our 2.58M instructions dataset <span class="math inline">\(D_{ALL}\)</span>. We train two types of models, encoder-decoder and decoder-only, for architectural comparison. The size for both categories of models ranges from 61M to 1.5B to facilitate size comparison. The underlying models for initialization are from five sources, including T5 (Raffel et al., 2020), Flan-T5 (<span class="citation" data-cites="flant5">Chung et al. (<a href="#ref-flant5" role="doc-biblioref">2022</a>)</span>), Cereberas-GPT (<span class="citation" data-cites="cerebrasgpt">Dey et al. (<a href="#ref-cerebrasgpt" role="doc-biblioref">2023</a>)</span>), GPT-2 (Radford et al., 2019), and GPT-Neo (<span class="citation" data-cites="pile">Gao et al. (<a href="#ref-pile" role="doc-biblioref">2020</a>)</span>).</em></p>
+<div id="fig-8" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="../images/lamini-eval.png" class="img-fluid figure-img" style="width:60.0%"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;8: LaMini-LM collection.</figcaption><p></p>
+</figure>
+</div>
+<p>Also, from the paper:</p>
+<p><em>We finetune all models over 5 epochs and a batch size of 1024. For our encoder-decoder models, we use a learning rate of 5 × 10−4 following Chung et al.&nbsp;(2022). For our decoder-only models, we follow the same configuration as Alpaca (Taori et al., 2023) including the learning rate of 2 × 10−5. We use HuggingFace’s transformers for training. Moreover, we use the same prompt wrapper as Alpaca (Taori et al., 2023), hence we also wrap our instruction similarly during inference. We perform all of our experiments on 8×V100 (32G) and 8×A100 (40G) GPUs.</em></p>
+<p>As part of this blog post, we will not be re-training the models, but you can see it is supervised finetuning on the Instruction Dataset using <code>Transformers</code> library.</p>
+</section>
+<section id="sec-model-eval" class="level2" data-number="6">
+<h2 data-number="6" class="anchored" data-anchor-id="sec-model-eval"><span class="header-section-number">6</span> Model Evaluation</h2>
+<p>The authors have evaluated the performance of their trained models on several NLP tasks using model evaluation harness. (<span class="citation" data-cites="eval-harness">Gao et al. (<a href="#ref-eval-harness" role="doc-biblioref">2021</a>)</span>)</p>
+<p>As part of this blog post we will also be evluating the models using this framework.</p>
+<p>Results of model evaluation provided by the authors are shared in the table below. I have also shared the results from LLAMA.</p>
+<div id="fig-9" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="../images/lamini-eval-table.png" class="img-fluid figure-img" style="width:80.0%"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;9: LaMini-LM collection.</figcaption><p></p>
+</figure>
+</div>
+<p>As shared by <a href="https://twitter.com/abacaj">anton</a>, and as shown above, the results from <code>LaMini-LM</code>, don’t match <code>LLAMA</code>.</p>
+<blockquote class="twitter-tweet tw-align-center blockquote">
+<p lang="en" dir="ltr">
+What's even more interesting is the discrepancy of the numbers on LLaMA 7B vs their paper reported numbers… <a href="https://t.co/12TBbuArLb">pic.twitter.com/12TBbuArLb</a>
+</p>
+— anton (<span class="citation" data-cites="abacaj">(<a href="#ref-abacaj" role="doc-biblioref"><strong>abacaj?</strong></a>)</span>) <a href="https://twitter.com/abacaj/status/1652066990033362944?ref_src=twsrc%5Etfw">April 28, 2023</a>
+</blockquote>
+<script async="" src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+<p>The results shared in the original LLAMA paper are better compared to those shared in the LaMini-LM research paper. The most surprising is OpenBookQA, where in the LLAMA paper the reported accuracy is 57.2% compared to 42.4% in LaMini-LM.</p>
+<p>To further analyse, let’s run evaluation on BoolQ, the results are reported in LLAMA, but not present in LaMini-LM.</p>
+<p>To do this, let’s first install the library:</p>
+<div class="sourceCode" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>git clone https:<span class="op">//</span>github.com<span class="op">/</span>EleutherAI<span class="op">/</span>lm<span class="op">-</span>evaluation<span class="op">-</span>harness</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>cd lm<span class="op">-</span>evaluation<span class="op">-</span>harness</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>pip install <span class="op">-</span>e .</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Next, we could just simply run</p>
+<div class="sourceCode" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>python main.py <span class="op">--</span>model hf<span class="op">-</span>causal <span class="op">--</span>model_args pretrained<span class="op">=</span>MBZUAI<span class="op">/</span>LaMini<span class="op">-</span>GPT<span class="op">-</span><span class="fl">1.5</span><span class="er">B</span> <span class="op">--</span>tasks openbookqa,boolq,piqa <span class="op">--</span>device cuda:<span class="dv">0</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>to evaluate the 1.5 GPT-2 on OpenBookQA (<span class="citation" data-cites="openbookqa">Mihaylov et al. (<a href="#ref-openbookqa" role="doc-biblioref">2018</a>)</span>), BoolQ (<span class="citation" data-cites="boolq">Clark et al. (<a href="#ref-boolq" role="doc-biblioref">2019</a>)</span>), PIQA (<span class="citation" data-cites="piqa">Bisk et al. (<a href="#ref-piqa" role="doc-biblioref">2019</a>)</span>).</p>
+<div id="tbl-eval-results" class="anchored">
+<table class="table">
+<caption>Table&nbsp;1: Evaluation Results on <code>BoolQ</code>, <code>PIQA</code>, <code>OpenBookQA</code></caption>
+<thead>
+<tr class="header">
+<th>Task</th>
+<th style="text-align: right;">Version</th>
+<th>Metric</th>
+<th style="text-align: right;">Value</th>
+<th></th>
+<th style="text-align: right;">Stderr</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>boolq</td>
+<td style="text-align: right;">1</td>
+<td>acc</td>
+<td style="text-align: right;">0.7725</td>
+<td>±</td>
+<td style="text-align: right;">0.0073</td>
+</tr>
+<tr class="even">
+<td>piqa</td>
+<td style="text-align: right;">0</td>
+<td>acc</td>
+<td style="text-align: right;">0.7127</td>
+<td>±</td>
+<td style="text-align: right;">0.0106</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td style="text-align: right;"></td>
+<td>acc_norm</td>
+<td style="text-align: right;">0.7214</td>
+<td>±</td>
+<td style="text-align: right;">0.0105</td>
+</tr>
+<tr class="even">
+<td>openbookqa</td>
+<td style="text-align: right;">0</td>
+<td>acc</td>
+<td style="text-align: right;">0.2680</td>
+<td>±</td>
+<td style="text-align: right;">0.0198</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td style="text-align: right;"></td>
+<td>acc_norm</td>
+<td style="text-align: right;">0.3440</td>
+<td>±</td>
+<td style="text-align: right;">0.0213</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Interesting results to say the least, on <code>BoolQ</code>, it appears as though the results for <code>LaMini-GPT</code> are better than <code>LLAMA</code>. LLAMA’s 7B model is at 76.5% accuracy whereas <code>LaMini-GPT</code> is at 77.25% accuracy.</p>
+<p>Also, our results on OpenBookQA don’t match those provided in the paper. The accuracy we get is only 26.8% compared to the reported 39.8% in the paper.</p>
+<blockquote class="blockquote">
+<p>At this point, as a reader, I am not sure if I trust the results from the LaMini-LM paper. I’ve just followed the instructions and results on OpenBookQA are different?</p>
+</blockquote>
+<p>I have asked the authors to check if there is something that they have done differently compared to my understanding.</p>
+<blockquote class="twitter-tweet tw-align-center blockquote">
+<p lang="en" dir="ltr">
+Another one please, I re-ran Language Model Evaluation Harness for OpenBookQA. (left)<br><br>And results don't match those provided in paper for GPT-2-LaMini-1.5B. <br><br>PIQA matches the paper. Provided eval table-4 from paper (right).<br><br>I get 26.8% acc compared to 39.8% reported in the… <a href="https://t.co/ErQYXuVOfQ">pic.twitter.com/ErQYXuVOfQ</a>
+</p>
+— Aman Arora (<span class="citation" data-cites="amaarora">(<a href="#ref-amaarora" role="doc-biblioref"><strong>amaarora?</strong></a>)</span>) <a href="https://twitter.com/amaarora/status/1652892060436033541?ref_src=twsrc%5Etfw">May 1, 2023</a>
+</blockquote>
+<script async="" src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+<p>Based on the above table, let’s re-run for other evaluation datasets too and see if our results match those from the paper.</p>
+<div class="sourceCode" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>python main.py <span class="op">--</span>model hf<span class="op">-</span>causal <span class="op">--</span>model_args pretrained<span class="op">=</span>MBZUAI<span class="op">/</span>LaMini<span class="op">-</span>GPT<span class="op">-</span><span class="fl">1.5</span><span class="er">B</span> <span class="op">--</span>tasks openbookqa,sciq,race,record,sst,mrpc,rte,wsc,winogrande <span class="op">--</span>device cuda:<span class="dv">0</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="sec-human-eval" class="level3" data-number="6.1">
+<h3 data-number="6.1" class="anchored" data-anchor-id="sec-human-eval"><span class="header-section-number">6.1</span> Human Evaluation</h3>
+<p>Lastly, let’s look at the human evaluation bit. From the paper:</p>
+<p><em>To complete the evaluation, we additionally evaluate the practicality of both our LaMini-LM and our baseline models by utilizing the user-oriented instructions from Wang et al.&nbsp;(2022a), which consists of 252 instructions covering 71 commonly used apps use-cases.</em></p>
+<div class="callout-important callout callout-style-default callout-captioned">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-caption-container flex-fill">
+Important
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The training set consists of 0.27M instructions+responses that have been generated using “example-guided” approach from Self-Instruction, and 0.28M instructions+responses that have been generated using “topic-guided” approach from Self-Instruction. Doesn’t that mean that the evaluation set is very similar to the training set here?</p>
+</div>
+</div>
+<p>Also, would have been nice to know what these 252 Instructions look like. The authors have kindly provided the human evaluation results table which I share below in <a href="#fig-10">Figure&nbsp;10</a>, but not the evaluation instructions.</p>
+<div id="fig-10" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="../images/lamini-human-eval.png" class="img-fluid figure-img" style="width:80.0%"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;10: LaMini-LM collection.</figcaption><p></p>
+</figure>
+</div>
+<div class="cell" data-execution_count="3">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co"># pip install -q transformers</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> transformers <span class="im">import</span> pipeline</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>checkpoint <span class="op">=</span> <span class="st">"MBZUAI/LaMini-GPT-1.5B"</span> </span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> pipeline(<span class="st">'text-generation'</span>, model <span class="op">=</span> checkpoint, device<span class="op">=</span><span class="st">'cuda:0'</span>)</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>instruction <span class="op">=</span> <span class="st">'Two large and 1 small pumps can fill a swimming pool in 4 hours. One large and 3 small pumps can also fill the same swimming pool in 4 hours. How many hours will it take 4 large and 4 small pumps to fill the swimming pool?'</span></span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>input_prompt <span class="op">=</span> <span class="ss">f"Below is an instruction that describes a task. Write a response that appropriately completes the request.</span><span class="ch">\n\n</span><span class="ss">### Instruction:</span><span class="ch">\n</span><span class="sc">{</span>instruction<span class="sc">}</span><span class="ch">\n\n</span><span class="ss">### Response:"</span></span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>generated_text <span class="op">=</span> model(input_prompt, max_length<span class="op">=</span><span class="dv">512</span>, do_sample<span class="op">=</span><span class="va">True</span>)[<span class="dv">0</span>][<span class="st">'generated_text'</span>]</span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Response"</span>, generated_text)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Setting `pad_token_id` to `eos_token_id`:50256 for open-end generation.</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Response Below is an instruction that describes a task. Write a response that appropriately completes the request.
+
+### Instruction:
+Two large and 1 small pumps can fill a swimming pool in 4 hours. One large and 3 small pumps can also fill the same swimming pool in 4 hours. How many hours will it take 4 large and 4 small pumps to fill the swimming pool?
+
+### Response:It will take 4 large and 4 small pumps (6 pumps total) 4 hours to fill the swimming pool.</code></pre>
+</div>
+</div>
+<blockquote class="blockquote">
+<p>By the way, ChatGPT nails it and returns the right answer “1 hour &amp; 36 minutes” but it would be unfair to compare a 1.5B model with ChatGPT.</p>
+</blockquote>
+<div class="cell" data-execution_count="6">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>instruction <span class="op">=</span> <span class="st">'Today is 30 Apr, 2023. I want to participate in a marathon on July 30, 2023. Please create a training program for me. I can run 5kms easily as of now.'</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>input_prompt <span class="op">=</span> <span class="ss">f"Below is an instruction that describes a task. Write a response that appropriately completes the request.</span><span class="ch">\n\n</span><span class="ss">### Instruction:</span><span class="ch">\n</span><span class="sc">{</span>instruction<span class="sc">}</span><span class="ch">\n\n</span><span class="ss">### Response:"</span></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>generated_text <span class="op">=</span> model(input_prompt, max_length<span class="op">=</span><span class="dv">512</span>, do_sample<span class="op">=</span><span class="va">True</span>)[<span class="dv">0</span>][<span class="st">'generated_text'</span>]</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Response"</span>, generated_text)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Setting `pad_token_id` to `eos_token_id`:50256 for open-end generation.</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Response Below is an instruction that describes a task. Write a response that appropriately completes the request.
+
+### Instruction:
+Today is 30 Apr, 2023. I want to participate in a marathon on July 30, 2023. Please create a training program for me. I can run 5kms easily as of now.
+
+### Response:Understood. Training program created for participant. Training will be divided into four phases: 
+1. Endurance training
+2. Strength and flexibility training 
+3. Low-impact exercise (stretching, yoga, etc.) 
+4. Functional training (running drills, pace training, etc.)</code></pre>
+</div>
+</div>
+<p>This is not a statisfactory and I would rate it <code>Rate-C</code>, “The response is relevant and responds to the instruction, but it has significant errors in the content.”</p>
+<div class="cell" data-execution_count="8">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>instruction <span class="op">=</span> <span class="st">'Write a product description for a sustainable, eco-friendly backpack made from recycled materials.'</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>input_prompt <span class="op">=</span> <span class="ss">f"Below is an instruction that describes a task. Write a response that appropriately completes the request.</span><span class="ch">\n\n</span><span class="ss">### Instruction:</span><span class="ch">\n</span><span class="sc">{</span>instruction<span class="sc">}</span><span class="ch">\n\n</span><span class="ss">### Response:"</span></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>generated_text <span class="op">=</span> model(input_prompt, max_length<span class="op">=</span><span class="dv">512</span>, do_sample<span class="op">=</span><span class="va">True</span>)[<span class="dv">0</span>][<span class="st">'generated_text'</span>]</span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Response"</span>, generated_text)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Setting `pad_token_id` to `eos_token_id`:50256 for open-end generation.</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Response Below is an instruction that describes a task. Write a response that appropriately completes the request.
+
+### Instruction:
+Write a product description for a sustainable, eco-friendly backpack made from recycled materials.
+
+### Response:Sustainable, eco-friendly backpack made from recycled materials.</code></pre>
+</div>
+</div>
+<p>The result above looks unsatisfactory too.</p>
+</section>
+</section>
+<section id="conclusion" class="level2" data-number="7">
+<h2 data-number="7" class="anchored" data-anchor-id="conclusion"><span class="header-section-number">7</span> Conclusion</h2>
+<p>To summarise,</p>
+<ol type="1">
+<li>We recreated a small sample of the dataset using example-guided and topic-guided approach as mentioned in the paper.</li>
+<li>We used OpenaiAPI to also generate responses for the paper.</li>
+<li>We replicated <a href="#fig-5">Figure&nbsp;5</a> which showcases that diversity in Self-Instruct guided <span class="math inline">\(\hat{X}_{SI}\)</span> is actually more compared to Alpaca <span class="math inline">\(\hat{X}_A\)</span></li>
+<li>The authors were very kind enought to update the HF dataset and add a new column called <code>instruction_source</code> to match <a href="#fig-4">Figure&nbsp;4</a>.</li>
+<li>We used <code>ChatGPT</code> to create a simple IpyWidget to rate the scores. Through this simple exercise we realised how hard it can be to score text based responses.</li>
+<li>We ran our own model evaluation on <code>BoolQ</code>, <code>PIQA</code>, <code>OpenBookQA</code>, <code>SciQ</code>, <code>RACE</code>, <code>Record</code>, <code>SST</code> and more reasoning based datasets. We found that our results don’t match the ones provided in the paper in <a href="#fig-9">Figure&nbsp;9</a>.</li>
+<li>We also saw that the results provided for LLAMA don’t match those from the original paper.</li>
+</ol>
+
+
+
+</section>
+
+<link href="//cdn-images.mailchimp.com/embedcode/classic-071822.css" rel="stylesheet" type="text/css"><div id="mc_embed_signup">
+    <form action="https://github.us4.list-manage.com/subscribe/post?u=e847230346a7c78d4745ae796&amp;id=7a63b2b273&amp;f_id=005f58e8f0" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate="">
+        <div id="mc_embed_signup_scroll">
+        <h2 class="anchored">Subscribe to Aman Arora's blog:</h2>
+        <div class="indicates-required"><span class="asterisk">*</span> indicates required</div>
+<div class="mc-field-group">
+    <label for="mce-EMAIL">Email Address  <span class="asterisk">*</span>
+</label>
+    <input type="email" value="" name="EMAIL" class="required email" id="mce-EMAIL" required="">
+    <span id="mce-EMAIL-HELPERTEXT" class="helper_text"></span>
+</div>
+<div hidden="true"><input type="hidden" name="tags" value="7232948"></div>
+    <div id="mce-responses" class="clear foot">
+        <div class="response" id="mce-error-response" style="display:none"></div>
+        <div class="response" id="mce-success-response" style="display:none"></div>
+    </div>    <!-- real people should not fill this in and expect good things - do not remove this or risk form bot signups-->
+    <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_e847230346a7c78d4745ae796_7a63b2b273" tabindex="-1" value=""></div>
+        <div class="optionalParent">
+            <div class="clear foot">
+                <input type="submit" value="Subscribe" name="subscribe" id="mc-embedded-subscribe" class="button">
+                <p class="brandingLogo"><a href="http://eepurl.com/il3baM" title="Mailchimp - email marketing made easy and fun"><img src="https://eep.io/mc-cdn-images/template_images/branding_logo_text_dark_dtp.svg"></a></p>
+            </div>
+        </div>
+    </div>
+</form>
+</div><script type="text/javascript">(function($) {window.fnames = new Array(); window.ftypes = new Array();fnames[0]='EMAIL';ftypes[0]='email';fnames[1]='FNAME';ftypes[1]='text';fnames[2]='LNAME';ftypes[2]='text';fnames[3]='ADDRESS';ftypes[3]='address';fnames[4]='PHONE';ftypes[4]='phone';fnames[5]='BIRTHDAY';ftypes[5]='birthday';}(jQuery));var $mcj = jQuery.noConflict(true);</script><div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" role="doc-bibliography">
+<div id="ref-piqa" class="csl-entry" role="doc-biblioentry">
+Bisk, Yonatan, Rowan Zellers, Ronan Le Bras, Jianfeng Gao, and Yejin Choi. 2019. <span>“PIQA: Reasoning about Physical Commonsense in Natural Language.”</span> <a href="https://arxiv.org/abs/1911.11641">https://arxiv.org/abs/1911.11641</a>.
+</div>
+<div id="ref-flant5" class="csl-entry" role="doc-biblioentry">
+Chung, Hyung Won, Le Hou, Shayne Longpre, Barret Zoph, Yi Tay, William Fedus, Yunxuan Li, et al. 2022. <span>“Scaling Instruction-Finetuned Language Models.”</span> <a href="https://arxiv.org/abs/2210.11416">https://arxiv.org/abs/2210.11416</a>.
+</div>
+<div id="ref-boolq" class="csl-entry" role="doc-biblioentry">
+Clark, Christopher, Kenton Lee, Ming-Wei Chang, Tom Kwiatkowski, Michael Collins, and Kristina Toutanova. 2019. <span>“BoolQ: Exploring the Surprising Difficulty of Natural Yes/No Questions.”</span> <a href="https://arxiv.org/abs/1905.10044">https://arxiv.org/abs/1905.10044</a>.
+</div>
+<div id="ref-cerebrasgpt" class="csl-entry" role="doc-biblioentry">
+Dey, Nolan, Gurpreet Gosal, Zhiming, Chen, Hemant Khachane, William Marshall, Ribhu Pathria, Marvin Tom, and Joel Hestness. 2023. <span>“Cerebras-GPT: Open Compute-Optimal Language Models Trained on the Cerebras Wafer-Scale Cluster.”</span> <a href="https://arxiv.org/abs/2304.03208">https://arxiv.org/abs/2304.03208</a>.
+</div>
+<div id="ref-pile" class="csl-entry" role="doc-biblioentry">
+Gao, Leo, Stella Biderman, Sid Black, Laurence Golding, Travis Hoppe, Charles Foster, Jason Phang, et al. 2020. <span>“The Pile: An 800GB Dataset of Diverse Text for Language Modeling.”</span> <a href="https://arxiv.org/abs/2101.00027">https://arxiv.org/abs/2101.00027</a>.
+</div>
+<div id="ref-eval-harness" class="csl-entry" role="doc-biblioentry">
+Gao, Leo, Jonathan Tow, Stella Biderman, Sid Black, Anthony DiPofi, Charles Foster, Laurence Golding, et al. 2021. <em>A Framework for Few-Shot Language Model Evaluation</em> (version v0.0.1). Zenodo. <a href="https://doi.org/10.5281/zenodo.5371628">https://doi.org/10.5281/zenodo.5371628</a>.
+</div>
+<div id="ref-flan" class="csl-entry" role="doc-biblioentry">
+Longpre, Shayne, Le Hou, Tu Vu, Albert Webson, Hyung Won Chung, Yi Tay, Denny Zhou, et al. 2023. <span>“The Flan Collection: Designing Data and Methods for Effective Instruction Tuning.”</span> <a href="https://arxiv.org/abs/2301.13688">https://arxiv.org/abs/2301.13688</a>.
+</div>
+<div id="ref-openbookqa" class="csl-entry" role="doc-biblioentry">
+Mihaylov, Todor, Peter Clark, Tushar Khot, and Ashish Sabharwal. 2018. <span>“Can a Suit of Armor Conduct Electricity? A New Dataset for Open Book Question Answering.”</span> <a href="https://arxiv.org/abs/1809.02789">https://arxiv.org/abs/1809.02789</a>.
+</div>
+<div id="ref-p3" class="csl-entry" role="doc-biblioentry">
+Sanh, Victor, Albert Webson, Colin Raffel, Stephen H. Bach, Lintang Sutawika, Zaid Alyafeai, Antoine Chaffin, et al. 2022. <span>“Multitask Prompted Training Enables Zero-Shot Task Generalization.”</span> <a href="https://arxiv.org/abs/2110.08207">https://arxiv.org/abs/2110.08207</a>.
+</div>
+<div id="ref-alpaca" class="csl-entry" role="doc-biblioentry">
+Taori, Rohan, Ishaan Gulrajani, Tianyi Zhang, Yann Dubois, Xuechen Li, Carlos Guestrin, Percy Liang, and Tatsunori B. Hashimoto. 2023. <span>“Stanford Alpaca: An Instruction-Following LLaMA Model.”</span> <em>GitHub Repository</em>. <a href="https://github.com/tatsu-lab/stanford_alpaca" class="uri">https://github.com/tatsu-lab/stanford_alpaca</a>; GitHub.
+</div>
+<div id="ref-selfinstruct" class="csl-entry" role="doc-biblioentry">
+Wang, Yizhong, Yeganeh Kordi, Swaroop Mishra, Alisa Liu, Noah A. Smith, Daniel Khashabi, and Hannaneh Hajishirzi. 2022. <span>“Self-Instruct: Aligning Language Model with Self Generated Instructions.”</span> <a href="https://arxiv.org/abs/2212.10560">https://arxiv.org/abs/2212.10560</a>.
+</div>
+<div id="ref-laminilm" class="csl-entry" role="doc-biblioentry">
+Wu, Minghao, Abdul Waheed, Chiyu Zhang, Muhammad Abdul-Mageed, and Alham Fikri Aji. 2023. <span>“LaMini-LM: A Diverse Herd of Distilled Models from Large-Scale Instructions.”</span> <a href="https://arxiv.org/abs/2304.14402">https://arxiv.org/abs/2304.14402</a>.
+</div>
+</div></section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
