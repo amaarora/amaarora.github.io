@@ -1747,7 +1747,7 @@
     "href": "posts/2023-05-02-Ahead_of_times-Issue_1.html#parameter-efficient-llm-finetuning-with-low-rank-adaptation-lora",
     "title": "Ahead of Times - Issue 1 (Apr 24 - Apr 30)",
     "section": "2.6 Parameter-Efficient LLM Finetuning With Low-Rank Adaptation (LoRA)",
-    "text": "2.6 Parameter-Efficient LLM Finetuning With Low-Rank Adaptation (LoRA)\nAs mentioned in Section 1, I will also be sharing helpful tutorials as part of the newsletter.\nOne such amazing tutorial released last week by Sebastian Raschka showcases how to finetuning Large Language Models using a technique called LoRA ((lora?)).\n\n\n\nOverview of LoRA\n\n\n\nWhat I particularly liked about this blog post were the illustrative images matching pseudo PyTorch code. This is an opportunity for someone to build on top of this tutorial and showcase LoRA with complete working PyTorch code from scratch. :)\n\nYou can find the tutorial shared by Sebastian Raschka here."
+    "text": "2.6 Parameter-Efficient LLM Finetuning With Low-Rank Adaptation (LoRA)\nAs mentioned in Section 1, I will also be sharing helpful tutorials as part of the newsletter.\nOne such amazing tutorial released last week by Sebastian Raschka showcases how to finetuning Large Language Models using a technique called LoRA (Hu et al. (2021)).\n\n\n\nOverview of LoRA\n\n\n\nWhat I particularly liked about this blog post were the illustrative images matching pseudo PyTorch code. This is an opportunity for someone to build on top of this tutorial and showcase LoRA with complete working PyTorch code from scratch. :)\n\nYou can find the tutorial shared by Sebastian Raschka here."
   },
   {
     "objectID": "posts/2023-05-02-Ahead_of_times-Issue_1.html#a-recap-of-replit-developer-day",
