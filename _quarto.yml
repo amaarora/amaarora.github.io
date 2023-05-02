@@ -8,12 +8,15 @@ website:
   navbar:
     left:
     - text: "Aman Arora's Blog"
-      href: index.qmd    
+      href: index.qmd   
+    - about.qmd
     right:
       - icon: github
         href: https://github.com/amaarora
       - icon: twitter
         href: https://twitter.com/amaarora
+      - icon: linkedin
+        href: https://www.linkedin.com/in/aroraaman/
   twitter-card: true
   # (additional metadata excluded for brevity)
   body-footer: subscribe.html

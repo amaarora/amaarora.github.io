@@ -1,7 +1,7 @@
 ---
-title: "About"
+title: "Aman Arora"
 about:
-  template: jolla
+  template: marquee
   links:
     - icon: twitter
       text: Twitter
@@ -14,8 +14,16 @@ about:
       href: https://github.com/amaarora
 ---
 
-I work as **Data Science Lead** at [REA Group](https://www.rea-group.com/), where we work with Property data, text and images. A part of my job is to experiment with the latest research and as part of this blog post, I document my learnings as I go.
+Aman Arora is the Data Science Lead at [PropTrack](https://www.proptrack.com.au/). Outside of work, Aman enjoys playing badminton and going for runs along the beach.
 
-I am interested in making deep learning more accessible to everybody and as part of that, a lot of my time is also spent in contributing to open source projects such as [TIMM](https://github.com/rwightman/pytorch-image-models/) and [fastai](https://github.com/fastai/).
+Being largely self-taught, Aman dedicates much of his time to staying current with the latest research. He has a strong passion for sharing his knowledge and insights, which he documents on this blog.
 
-I am also self-taught - thanks to the wonderful [fast.ai](https://course.fast.ai/) course.
+## Experience
+1. **Data Science Lead,** REA Group, May 2022 – Present 
+2. **Machine Learning Engineer,** Weights and Biases, Mar 2021 – May 2022
+3. **Applied AI Scientist,** Harrison AI, Nov 2020 – Mar 2021
+4. **Data Scientist,** CoreLogic Australia, Mar 2019 – Nov 2020 
+
+## Education
+1. **Master of Technology - MTech,** Information Technology, Charles Sturt University
+2. **Bachelor of Technology - BTech,** Electrical, Electronics and Communications Engineering, Maharaja Surajmal Institute of Technology

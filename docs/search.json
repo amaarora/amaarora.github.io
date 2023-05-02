@@ -1262,9 +1262,9 @@
   {
     "objectID": "about.html",
     "href": "about.html",
-    "title": "About",
+    "title": "Aman Arora",
     "section": "",
-    "text": "I work as Data Science Lead at REA Group, where we work with Property data, text and images. A part of my job is to experiment with the latest research and as part of this blog post, I document my learnings as I go.\nI am interested in making deep learning more accessible to everybody and as part of that, a lot of my time is also spent in contributing to open source projects such as TIMM and fastai.\nI am also self-taught - thanks to the wonderful fast.ai course.\n\n\n\n    \n        \n        Subscribe to Aman Arora's blog:\n        * indicates required\n\n    Email Address  *"
+    "text": "Aman Arora is the Data Science Lead at PropTrack. Outside of work, Aman enjoys playing badminton and going for runs along the beach.\nBeing largely self-taught, Aman dedicates much of his time to staying current with the latest research. He has a strong passion for sharing his knowledge and insights, which he documents on this blog."
   },
   {
     "objectID": "subscribe.html",
@@ -1804,5 +1804,19 @@
     "title": "Ahead of Times - Issue 2 (May 01 - May 07)",
     "section": "1.2 ‘The Godfather of A.I.’ Leaves Google and Warns of Danger Ahead",
     "text": "1.2 ‘The Godfather of A.I.’ Leaves Google and Warns of Danger Ahead\nGeoffrey Hinton, one of the pioneers in the field of artificial intelligence, quit Google. From the article published in NYT:\nDr. Hinton said he has quit his job at Google, where he has worked for more than a decade and became one of the most respected voices in the field, so he can freely speak out about the risks of A.I.\nSome concerns shared by Geoffrey Hinton in the NYT article:\n\n“He is also worried that A.I. technologies will in time upend the job market.”\n\n\n“The idea that this stuff could actually get smarter than people is not so far off”\n\nAlso, I would refer the reader to Deep learning pioneer Geoffrey Hinton has quit Google for more reading on the same.\nDr. Hinton also later clarified on Twitter:\n\n\nIn the NYT today, Cade Metz implies that I left Google so that I could criticize Google. Actually, I left so that I could talk about the dangers of AI without considering how this impacts Google. Google has acted very responsibly.\n\n— Geoffrey Hinton ((geoffreyhinton?)) May 1, 2023"
+  },
+  {
+    "objectID": "about.html#education",
+    "href": "about.html#education",
+    "title": "Aman Arora",
+    "section": "Education",
+    "text": "Education\n\nMaster of Technology - MTech, Information Technology, Charles Sturt University\nBachelor of Technology - BTech, Electrical, Electronics and Communications Engineering, Maharaja Surajmal Institute of Technology"
+  },
+  {
+    "objectID": "about.html#experience",
+    "href": "about.html#experience",
+    "title": "Aman Arora",
+    "section": "Experience",
+    "text": "Experience\n\nData Science Lead, REA Group, May 2022 – Present\nMachine Learning Engineer, Weights and Biases, Mar 2021 – May 2022\nApplied AI Scientist, Harrison AI, Nov 2020 – Mar 2021\nData Scientist, CoreLogic Australia, Mar 2019 – Nov 2020"
   }
 ]
