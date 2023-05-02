@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.335">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Aman Arora">
+<meta name="dcterms.date" content="2023-05-02">
+<meta name="description" content="As part of this newsletter, I share with you key updates, projects, GitHub repos, research trends, research papers in the field of Computer Vision, Large Language Models and Stable Diffusion.">
+
+<title>Ahead of Times - Issue 1 (Apr 24 - Apr 30)</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script src="../site_libs/quarto-contrib/videojs/video.min.js"></script>
+<link href="../site_libs/quarto-contrib/videojs/video-js.css" rel="stylesheet">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+<script type="text/javascript">
+
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+ga('create', 'UA-158677010-1', 'auto');
+
+ga('send', {
+  hitType: 'pageview',
+  'anonymizeIp': true,
+});
+</script>
+
+
+<meta name="twitter:title" content="Ahead of Times - Issue 1 (Apr 24 - Apr 30)">
+<meta name="twitter:description" content="As part of this newsletter, I share with you key updates, projects, GitHub repos, research trends, research papers in the field of Computer Vision, Large Language Models and Stable Diffusion.">
+<meta name="twitter:image" content="../images/">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html">
+ <span class="menu-text">Aman Arora’s Blog</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/amaarora"><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com/amaarora"><i class="bi bi-twitter" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Ahead of Times - Issue 1 (Apr 24 - Apr 30)</h1>
+            <p class="subtitle lead">First issue of the weekly newsletter to help you stay ahead of the times with latest news &amp; updates in the field of AI.</p>
+                  <div>
+        <div class="description">
+          <p>As part of this newsletter, I share with you key updates, projects, GitHub repos, research trends, research papers in the field of Computer Vision, Large Language Models and Stable Diffusion.</p>
+        </div>
+      </div>
+                          <div class="quarto-categories">
+                <div class="quarto-category">Newsletter</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Aman Arora </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">May 2, 2023</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#sec-intro" id="toc-sec-intro" class="nav-link active" data-scroll-target="#sec-intro"><span class="toc-section-number">1</span>  Introduction</a>
+  <ul class="collapse">
+  <li><a href="#what-does-the-image-signify" id="toc-what-does-the-image-signify" class="nav-link" data-scroll-target="#what-does-the-image-signify"><span class="toc-section-number">1.1</span>  What does the image signify?</a></li>
+  <li><a href="#public-commitments" id="toc-public-commitments" class="nav-link" data-scroll-target="#public-commitments"><span class="toc-section-number">1.2</span>  Public commitments</a></li>
+  </ul></li>
+  <li><a href="#april-24-2023---april-30-2023-key-updates" id="toc-april-24-2023---april-30-2023-key-updates" class="nav-link" data-scroll-target="#april-24-2023---april-30-2023-key-updates"><span class="toc-section-number">2</span>  April 24, 2023 - April 30, 2023: Key Updates</a>
+  <ul class="collapse">
+  <li><a href="#stability-ai-releases-deepfloyd-if" id="toc-stability-ai-releases-deepfloyd-if" class="nav-link" data-scroll-target="#stability-ai-releases-deepfloyd-if"><span class="toc-section-number">2.1</span>  Stability AI releases DeepFloyd IF</a></li>
+  <li><a href="#redpajama-training-progress-at-440-billion-tokens" id="toc-redpajama-training-progress-at-440-billion-tokens" class="nav-link" data-scroll-target="#redpajama-training-progress-at-440-billion-tokens"><span class="toc-section-number">2.2</span>  RedPajama training progress at 440 billion tokens</a></li>
+  <li><a href="#segment-anything-in-medical-images" id="toc-segment-anything-in-medical-images" class="nav-link" data-scroll-target="#segment-anything-in-medical-images"><span class="toc-section-number">2.3</span>  Segment Anything in Medical Images</a></li>
+  <li><a href="#a-cookbook-of-self-supervised-learning" id="toc-a-cookbook-of-self-supervised-learning" class="nav-link" data-scroll-target="#a-cookbook-of-self-supervised-learning"><span class="toc-section-number">2.4</span>  A Cookbook of Self-Supervised Learning</a></li>
+  <li><a href="#new-ways-to-manage-your-data-in-chatgpt" id="toc-new-ways-to-manage-your-data-in-chatgpt" class="nav-link" data-scroll-target="#new-ways-to-manage-your-data-in-chatgpt"><span class="toc-section-number">2.5</span>  New ways to manage your data in ChatGPT</a></li>
+  <li><a href="#parameter-efficient-llm-finetuning-with-low-rank-adaptation-lora" id="toc-parameter-efficient-llm-finetuning-with-low-rank-adaptation-lora" class="nav-link" data-scroll-target="#parameter-efficient-llm-finetuning-with-low-rank-adaptation-lora"><span class="toc-section-number">2.6</span>  Parameter-Efficient LLM Finetuning With Low-Rank Adaptation (LoRA)</a></li>
+  <li><a href="#replits-from-scratch-trained-code-complete-model" id="toc-replits-from-scratch-trained-code-complete-model" class="nav-link" data-scroll-target="#replits-from-scratch-trained-code-complete-model"><span class="toc-section-number">2.7</span>  Replit’s From-Scratch Trained Code Complete model</a></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion"><span class="toc-section-number">2.8</span>  Conclusion</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../images/newsletter-theme.png" class="img-fluid figure-img"></p>
+<p></p><figcaption class="figure-caption">Ahead of Times - Issue 1</figcaption><p></p>
+</figure>
+</div>
+<section id="sec-intro" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Introduction</h1>
+<p>If I am allowed to be a little dramatic, let me present to you the start of a new newsletter called <strong>“Ahead of Times”</strong>.</p>
+<p>As the title suggests, the idea is to stay ahead of the curve. I personally strive my best to keep up to date with the latest research and advancements in the field of AI. As part of this newsletter I wish to take you along on that journey with me. Are you in?</p>
+<section id="what-does-the-image-signify" class="level2" data-number="1.1">
+<h2 data-number="1.1" class="anchored" data-anchor-id="what-does-the-image-signify"><span class="header-section-number">1.1</span> What does the image signify?</h2>
+<p>Since the inception of Neural Nets in 2012 by the godfather of AI - <a href="https://en.wikipedia.org/wiki/Geoffrey_Hinton">Geoffrey Hinton</a>, a lot has changed in terms of our capabilities as a human race to process unstructured data - specifically images and text.</p>
+<p>This is even more apparent and visible with the release of chatbots such as <a href="https://openai.com/blog/chatgpt">ChatGPT</a> with colleagues and employees from different fields (not particularly with a software engineering) utilising the tool in their day to day work.</p>
+<p>In some ways we could say <em>“The world of AI is on fire and changing very rapidly”.</em></p>
+<p><strong>“Ahead of Times”</strong> is meant to serve as a newsletter in this “times of change” to provide you with the latest news and updates by cutting through the noise &amp; help you steer away from TikTok inspired influencers who write for publicity.</p>
+</section>
+<section id="public-commitments" class="level2" data-number="1.2">
+<h2 data-number="1.2" class="anchored" data-anchor-id="public-commitments"><span class="header-section-number">1.2</span> Public commitments</h2>
+<p>As the author of <strong>“Ahead of Times”</strong>, I publicly commit to:</p>
+<ol type="1">
+<li>Providing a fair assessment of the latest technologies by trying them out myself.</li>
+<li>Being regular in providing you up to date information.</li>
+<li>Provide code examples and snippets where necessary.</li>
+<li>A “hands on” practical approach rather than going deep into mathematics/theory.</li>
+<li>Communicate clearly if there are times when I am not able to release the newsletter.</li>
+<li>Open to feedback.</li>
+<li>Promise to not spread misinformation, not be inspired by the “click bait” ideology.</li>
+<li>Continue writing the newsletter even if I am the only reader, trust me, it helps when you note things down in writing.</li>
+</ol>
+<p>With the introductions and some public commitments out of the way, let’s get started with some key updates between <strong>“April 24, 2023 - April 30, 2023”</strong>.</p>
+</section>
+</section>
+<section id="april-24-2023---april-30-2023-key-updates" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> April 24, 2023 - April 30, 2023: Key Updates</h1>
+<section id="stability-ai-releases-deepfloyd-if" class="level2" data-number="2.1">
+<h2 data-number="2.1" class="anchored" data-anchor-id="stability-ai-releases-deepfloyd-if"><span class="header-section-number">2.1</span> Stability AI releases DeepFloyd IF</h2>
+<blockquote class="blockquote">
+<p>The theme image for this newsletter was also generated using this model. You can try it our yourself on <a href="https://huggingface.co/spaces/DeepFloyd/IF">here</a>.</p>
+</blockquote>
+<p>On April 28, 2012, Stability AI announced the research release of DeepFloyd IF, a powerful text-to-image cascaded pixel diffusion model.</p>
+<p>Read more about the release on their <a href="https://stability.ai/blog/deepfloyd-if-text-to-image-model">official blog here</a>.</p>
+</section>
+<section id="redpajama-training-progress-at-440-billion-tokens" class="level2" data-number="2.2">
+<h2 data-number="2.2" class="anchored" data-anchor-id="redpajama-training-progress-at-440-billion-tokens"><span class="header-section-number">2.2</span> RedPajama training progress at 440 billion tokens</h2>
+<p>What is RedPajama? Why is this relevant or important?</p>
+<p>From the <a href="https://www.together.xyz/blog/redpajama">RedPajama announcement post</a>,</p>
+<p><em>Foundation models such as GPT-4 have driven rapid improvement in AI. However, the most powerful models are closed commercial models or only partially open. RedPajama is a project to create a set of leading, fully open-source models. </em></p>
+<p>Remember “LLaMA” (<span class="citation" data-cites="llama">Touvron et al. (<a href="#ref-llama" role="doc-biblioref">2023</a>)</span>)? Large language models of varying sizes between 7B to 65B released by Meta trained on trillions of tokens on publicly available datasets?</p>
+<p>Well, as great as it may be, <em>The original LLaMA code is GPL licensed which means any project using it must also be released under GPL.</em> What does this mean? <em>This “taints” any other code and prevents meaningful academic and commercial use.</em> You also have to <a href="https://docs.google.com/forms/d/e/1FAIpQLSfqNECQnMkycAp2jP4Z9TFX0cGR4uf7b_fBxjY_OjhJILlKGA/viewform">apply for access to LLaMA weights</a> making them inaccessible. I have personally been waiting a few weeks and never heard back from Meta.</p>
+<p>So why is this <strong>RedPajama</strong> project important? Quoting directly from their <a href="https://www.together.xyz/blog/redpajama-training-progress">blog</a>,</p>
+<p><em>Our goal is to train the LLaMA suite of models and make them available under a permissive open-source license so they can be used as a foundation for research and commercial applications.</em></p>
+<p>Great, right?!</p>
+<p>The RedPajama dataset is available on HuggingFace and can be downloaded from <a href="https://huggingface.co/datasets/togethercomputer/RedPajama-Data-1T">here</a>. All pre-processing and quality filters are open soourced <a href="https://github.com/togethercomputer/RedPajama-Data">here</a>!</p>
+<p>As part of the announcement on April 24, 2023, <strong>Together</strong> announced:</p>
+<p><em>At 440 billion tokens, we now have a model checkpoint that is better than Pythia-7B (0.416 HELM vs.&nbsp;0.400 HELM) and StableLM-7B (0.283 HELM).</em></p>
+<p>Basically, in simpler terms, they conducted a training run with exactly the same model architecture and tokenizer as Pythia-7B (<span class="citation" data-cites="pythia">Biderman et al. (<a href="#ref-pythia" role="doc-biblioref">2023</a>)</span>), a well-regarded and fully open model from EleutherAI trained on <a href="https://pile.eleuther.ai/">the Pile</a> (originally released by EleutherAI in 2020).</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../images/RedPajama-7B-partial-HELM.png" class="img-fluid figure-img" style="width:60.0%"></p>
+<p></p><figcaption class="figure-caption">A mid training checkpoint of the 7B RedPajama base model, using Pythia architecture, achieves higher quality result on HELM scores than Pythia-7B.</figcaption><p></p>
+</figure>
+</div>
+</section>
+<section id="segment-anything-in-medical-images" class="level2" data-number="2.3">
+<h2 data-number="2.3" class="anchored" data-anchor-id="segment-anything-in-medical-images"><span class="header-section-number">2.3</span> Segment Anything in Medical Images</h2>
+<p>Remember Segment Anything Model from Meta?</p>
+<div class="quarto-video"><video id="video_shortcode_videojs_video1" class="video-js vjs-default-skin vjs-fluid" controls="" preload="auto" data-setup="{}" title=""><source src="../assets/SAM.mov"></video></div>
+<p><a href="https://ai.facebook.com/blog/segment-anything-foundation-model-image-segmentation/">Blog</a> | <a href="https://ai.facebook.com/research/publications/segment-anything/">Paper</a> | <a href="https://github.com/facebookresearch/segment-anything">Code</a></p>
+<p>Try out the Demo for SAM <a href="https://segment-anything.com/demo">here</a>. In the video that we see above, the model does a great job at segmenting people and vehicles in the image I provided to it. It did miss however some tiny details, but, hey, that’s okay for a zero shot model performing segmentation!</p>
+<p>From the <a href="https://arxiv.org/abs/2304.12306">Segment Anything in Medical Images</a>, also called <strong>MedSAM</strong> (<span class="citation" data-cites="medsam">Ma and Wang (<a href="#ref-medsam" role="doc-biblioref">2023</a>)</span>),</p>
+<p><em>MedSAM, is the first attempt at extending the success of SAM to medical images, with the goal of creating a universal tool for the segmentation of various medical targets.</em></p>
+<p>You can try out the models in the offical GitHub Repository <a href="https://github.com/bowang-lab/MedSAM">here</a>.</p>
+<blockquote class="blockquote">
+<p>I have personally not tried MedSAM, but if you do, feel free to share your results with me at <a href="https://twitter.com/amaarora"><span class="citation" data-cites="amaarora">(</span></a><a href="#ref-amaarora" role="doc-biblioref"><strong>amaarora?</strong></a>).</p>
+</blockquote>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../images/MedSAM.png" class="img-fluid figure-img" style="width:60.0%"></p>
+<p></p><figcaption class="figure-caption">MedSAM significantly improves the segmentation performance across various modalities and segmentation tasks.</figcaption><p></p>
+</figure>
+</div>
+</section>
+<section id="a-cookbook-of-self-supervised-learning" class="level2" data-number="2.4">
+<h2 data-number="2.4" class="anchored" data-anchor-id="a-cookbook-of-self-supervised-learning"><span class="header-section-number">2.4</span> A Cookbook of Self-Supervised Learning</h2>
+<p>From <a href="https://ai.facebook.com/blog/self-supervised-learning-the-dark-matter-of-intelligence/">“Self-supervised learning: The dark matter of intelligence”</a>:</p>
+<p><em>Supervised learning is a bottleneck for building more intelligent generalist models that can do multiple tasks and acquire new skills without massive amounts of labeled data. Practically speaking, it’s impossible to label everything in the world.</em></p>
+<p><em>Self-supervised learning enables AI systems to learn from orders of magnitude more data, which is important to recognize and understand patterns of more subtle, less common representations of the world.</em></p>
+<p>Last week, Yann LeCun <a href="https://twitter.com/ylecun/status/1650798206283051009">shared</a> “A Cookbook of Self-Supervised Learning” on Twitter.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../images/SSL-cookbook.png" class="img-fluid figure-img" style="width:60.0%"></p>
+<p></p><figcaption class="figure-caption">Contents of “A Cookbook of Self-Supervised Learning”.</figcaption><p></p>
+</figure>
+</div>
+<p><strong>Why a Cookbook for Self-Supervised Learning?</strong></p>
+<p><em>While many components of SSL are familiar to researchers, successfully training a SSL method involves a dizzying set of choices from the pretext tasks to training hyperparameters. SSL research has a high barrier to entry due to (i) its computational cost, (ii) the absence of fully transparent papers detailing the intricate implementations required to fully enable SSL’s potential, and (iii) the absence of a unified vocabulary and theoretical view of SSL.</em></p>
+<blockquote class="blockquote">
+<p>The above cookbook provides a comprehensive analysis of SSL, hyperparameter tuning, metric learning methods such as SIMCLR (<span class="citation" data-cites="simclr">Chen et al. (<a href="#ref-simclr" role="doc-biblioref">2020</a>)</span>), evaluation and also deployment!</p>
+</blockquote>
+</section>
+<section id="new-ways-to-manage-your-data-in-chatgpt" class="level2" data-number="2.5">
+<h2 data-number="2.5" class="anchored" data-anchor-id="new-ways-to-manage-your-data-in-chatgpt"><span class="header-section-number">2.5</span> New ways to manage your data in ChatGPT</h2>
+<p>ChatGPT users can now turn off chat history, allowing you to choose which conversations can be used to train our models.</p>
+<p><a href="https://openai.com/blog/new-ways-to-manage-your-data-in-chatgpt">Announced on April 25, 2023</a>, OpenAI has introduced the ability to turn off Chat History in ChatGPT.</p>
+<p>This is particularly useful for sharing code snippets related to private and confidential code sources.</p>
+</section>
+<section id="parameter-efficient-llm-finetuning-with-low-rank-adaptation-lora" class="level2" data-number="2.6">
+<h2 data-number="2.6" class="anchored" data-anchor-id="parameter-efficient-llm-finetuning-with-low-rank-adaptation-lora"><span class="header-section-number">2.6</span> Parameter-Efficient LLM Finetuning With Low-Rank Adaptation (LoRA)</h2>
+<p>As mentioned in <a href="#sec-intro">Section&nbsp;1</a>, I will also be sharing helpful tutorials as part of the newsletter.</p>
+<p>One such amazing tutorial released last week by <a href="https://sebastianraschka.com/">Sebastian Raschka</a> showcases how to finetuning Large Language Models using a technique called LoRA (<span class="citation" data-cites="lora">(<a href="#ref-lora" role="doc-biblioref"><strong>lora?</strong></a>)</span>).</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../images/lora-img.png" class="img-fluid figure-img" style="width:50.0%"></p>
+<p></p><figcaption class="figure-caption">Overview of LoRA</figcaption><p></p>
+</figure>
+</div>
+<blockquote class="blockquote">
+<p>What I particularly liked about this blog post were the illustrative images matching pseudo PyTorch code. This is an opportunity for someone to build on top of this tutorial and showcase LoRA with complete working PyTorch code from scratch. :)</p>
+</blockquote>
+<p>You can find the tutorial shared by Sebastian Raschka <a href="https://lightning.ai/pages/community/tutorial/lora-llm/">here</a>.</p>
+</section>
+<section id="replits-from-scratch-trained-code-complete-model" class="level2" data-number="2.7">
+<h2 data-number="2.7" class="anchored" data-anchor-id="replits-from-scratch-trained-code-complete-model"><span class="header-section-number">2.7</span> Replit’s From-Scratch Trained Code Complete model</h2>
+<p>Before we begin, what is Replit? And why is this relevant?</p>
+<p>Replit is the newest AI unicorn, and they <a href="https://techcrunch.com/2023/04/27/replit-funding-100m-generative-ai/">announced on April 28, 2023</a> that they’ve raised nearly <code>$100M</code> and are valued at <code>$1.16B</code>!</p>
+<p>Also, at <a href="https://www.youtube.com/watch?v=7TCqGslll-4">Developer Day</a>, Replit announced:</p>
+<ol type="1">
+<li>Production-grade Deployments straight from IDE</li>
+<li>A more powerful Workspace</li>
+<li>Secure Workspace Extensions</li>
+<li><strong>Replit’s From-Scratch Trained Code Complete model</strong></li>
+</ol>
+<blockquote class="blockquote">
+<p>The one I am most interested in, is the open source replacement for <a href="https://openai.com/blog/openai-codex">Codex</a>, which Replit has termed “CodeGen”!</p>
+</blockquote>
+<p>Some folks have shared their reviews on CodeGen:</p>
+<blockquote class="twitter-tweet tw-align-center blockquote">
+<p lang="en" dir="ltr">
+Despite the recent hype around Replit's new model, it isn't actually the best open-source code model out there<br><br>In fact, it's not even the best 3-billion parameter code model<br><br>That title belongs to Microsoft's MIM-2.7B… <br><br>And it was trained on 2x fewer tokens! <a href="https://t.co/PiE8NpG5Lc">pic.twitter.com/PiE8NpG5Lc</a>
+</p>
+— Aman Sanger (<span class="citation" data-cites="amanrsanger">(<a href="#ref-amanrsanger" role="doc-biblioref"><strong>amanrsanger?</strong></a>)</span>) <a href="https://twitter.com/amanrsanger/status/1651241868993130498?ref_src=twsrc%5Etfw">April 26, 2023</a>
+</blockquote>
+<script async="" src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+<p>For further reading:</p>
+<p><em>There is also this really cool <a href="https://every.to/chain-of-thought/ai-and-the-future-of-programming">interview with Replit co-founder Amjad Masad by Dan Shipper</a>.</em></p>
+</section>
+<section id="conclusion" class="level2" data-number="2.8">
+<h2 data-number="2.8" class="anchored" data-anchor-id="conclusion"><span class="header-section-number">2.8</span> Conclusion</h2>
+<p>This brings us to the end of our very first issue of the Newsletter!</p>
+<p>If you found it helpful, consider subscribing to the blog. You can also buy me a coffee <a href="https://www.buymeacoffee.com/amaarora">here</a>.</p>
+<p>Thank you for your time! See you next week on Monday at 9am AEST!</p>
+
+
+
+</section>
+</section>
+
+<link href="//cdn-images.mailchimp.com/embedcode/classic-071822.css" rel="stylesheet" type="text/css"><div id="mc_embed_signup">
+    <form action="https://github.us4.list-manage.com/subscribe/post?u=e847230346a7c78d4745ae796&amp;id=7a63b2b273&amp;f_id=005f58e8f0" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate="">
+        <div id="mc_embed_signup_scroll">
+        <h2 class="anchored">Subscribe to Aman Arora's blog:</h2>
+        <div class="indicates-required"><span class="asterisk">*</span> indicates required</div>
+<div class="mc-field-group">
+    <label for="mce-EMAIL">Email Address  <span class="asterisk">*</span>
+</label>
+    <input type="email" value="" name="EMAIL" class="required email" id="mce-EMAIL" required="">
+    <span id="mce-EMAIL-HELPERTEXT" class="helper_text"></span>
+</div>
+<div hidden="true"><input type="hidden" name="tags" value="7232948"></div>
+    <div id="mce-responses" class="clear foot">
+        <div class="response" id="mce-error-response" style="display:none"></div>
+        <div class="response" id="mce-success-response" style="display:none"></div>
+    </div>    <!-- real people should not fill this in and expect good things - do not remove this or risk form bot signups-->
+    <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_e847230346a7c78d4745ae796_7a63b2b273" tabindex="-1" value=""></div>
+        <div class="optionalParent">
+            <div class="clear foot">
+                <input type="submit" value="Subscribe" name="subscribe" id="mc-embedded-subscribe" class="button">
+                <p class="brandingLogo"><a href="http://eepurl.com/il3baM" title="Mailchimp - email marketing made easy and fun"><img src="https://eep.io/mc-cdn-images/template_images/branding_logo_text_dark_dtp.svg"></a></p>
+            </div>
+        </div>
+    </div>
+</form>
+</div><script type="text/javascript">(function($) {window.fnames = new Array(); window.ftypes = new Array();fnames[0]='EMAIL';ftypes[0]='email';fnames[1]='FNAME';ftypes[1]='text';fnames[2]='LNAME';ftypes[2]='text';fnames[3]='ADDRESS';ftypes[3]='address';fnames[4]='PHONE';ftypes[4]='phone';fnames[5]='BIRTHDAY';ftypes[5]='birthday';}(jQuery));var $mcj = jQuery.noConflict(true);</script><div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" role="doc-bibliography">
+<div id="ref-pythia" class="csl-entry" role="doc-biblioentry">
+Biderman, Stella, Hailey Schoelkopf, Quentin Anthony, Herbie Bradley, Kyle O’Brien, Eric Hallahan, Mohammad Aflah Khan, et al. 2023. <span>“Pythia: A Suite for Analyzing Large Language Models Across Training and Scaling.”</span> <a href="https://arxiv.org/abs/2304.01373">https://arxiv.org/abs/2304.01373</a>.
+</div>
+<div id="ref-simclr" class="csl-entry" role="doc-biblioentry">
+Chen, Ting, Simon Kornblith, Mohammad Norouzi, and Geoffrey Hinton. 2020. <span>“A Simple Framework for Contrastive Learning of Visual Representations.”</span> <a href="https://arxiv.org/abs/2002.05709">https://arxiv.org/abs/2002.05709</a>.
+</div>
+<div id="ref-medsam" class="csl-entry" role="doc-biblioentry">
+Ma, Jun, and Bo Wang. 2023. <span>“Segment Anything in Medical Images.”</span> <a href="https://arxiv.org/abs/2304.12306">https://arxiv.org/abs/2304.12306</a>.
+</div>
+<div id="ref-llama" class="csl-entry" role="doc-biblioentry">
+Touvron, Hugo, Thibaut Lavril, Gautier Izacard, Xavier Martinet, Marie-Anne Lachaux, Timothée Lacroix, Baptiste Rozière, et al. 2023. <span>“LLaMA: Open and Efficient Foundation Language Models.”</span> <a href="https://arxiv.org/abs/2302.13971">https://arxiv.org/abs/2302.13971</a>.
+</div>
+</div></section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+<script>videojs(video_shortcode_videojs_video1);</script>
+
+
+
+</body></html>
