@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.2.335">
+<meta name="generator" content="quarto-1.3.433">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -19,7 +19,7 @@ div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
 ul.task-list{list-style: none;}
 ul.task-list li input[type="checkbox"] {
   width: 0.8em;
-  margin: 0 0.8em 0.2em -1.6em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
 </style>
@@ -32,6 +32,7 @@ ul.task-list li input[type="checkbox"] {
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
+<link href=".././images/logo.png" rel="icon" type="image/png">
 <script src="../site_libs/quarto-html/quarto.js"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
@@ -57,11 +58,30 @@ ul.task-list li input[type="checkbox"] {
     "search-more-matches-text": "more matches in this document",
     "search-clear-button-title": "Clear",
     "search-detached-cancel-button-title": "Cancel",
-    "search-submit-button-title": "Submit"
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
   }
 }</script>
 
+<script type="text/javascript">
 
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+ga('create', 'UA-158677010-1', 'auto');
+
+ga('send', {
+  hitType: 'pageview',
+  'anonymizeIp': true,
+});
+</script>
+
+
+<meta name="twitter:title" content="The sad state of AI and tech startups in Australia today and what can we do about it">
+<meta name="twitter:description" content="">
+<meta name="twitter:image" content="../images/qld_ai_hub.jpeg">
+<meta name="twitter:card" content="summary_large_image">
 </head>
 
 <body class="nav-fixed">
@@ -70,29 +90,40 @@ ul.task-list li input[type="checkbox"] {
   <header id="quarto-header" class="headroom fixed-top">
     <nav class="navbar navbar-expand-lg navbar-dark ">
       <div class="navbar-container container-fluid">
+            <div id="quarto-search" class="" title="Search"></div>
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
   <span class="navbar-toggler-icon"></span>
 </button>
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
-    <a class="nav-link" href="../index.html">
+    <a class="nav-link" href="../index.html" rel="" target="">
  <span class="menu-text">Aman Arora’s Blog</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../about.html" rel="" target="">
+ <span class="menu-text">Aman Arora</span></a>
   </li>  
 </ul>
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item compact">
-    <a class="nav-link" href="https://github.com/amaarora"><i class="bi bi-github" role="img">
+    <a class="nav-link" href="https://github.com/amaarora" rel="" target=""><i class="bi bi-github" role="img">
 </i> 
  <span class="menu-text"></span></a>
   </li>  
   <li class="nav-item compact">
-    <a class="nav-link" href="https://twitter.com/amaarora"><i class="bi bi-twitter" role="img">
+    <a class="nav-link" href="https://twitter.com/amaarora" rel="" target=""><i class="bi bi-twitter" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://www.linkedin.com/in/aroraaman/" rel="" target=""><i class="bi bi-linkedin" role="img">
 </i> 
  <span class="menu-text"></span></a>
   </li>  
 </ul>
-              <div id="quarto-search" class="" title="Search"></div>
+            <div class="quarto-navbar-tools">
+</div>
           </div> <!-- /navcollapse -->
       </div> <!-- /container-fluid -->
     </nav>
@@ -138,17 +169,17 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#australia-invested-a-meager-0.29-of-the-total-global-investment-in-ai-in-2020" id="toc-australia-invested-a-meager-0.29-of-the-total-global-investment-in-ai-in-2020" class="nav-link active" data-scroll-target="#australia-invested-a-meager-0.29-of-the-total-global-investment-in-ai-in-2020"><span class="toc-section-number">1</span>  Australia invested a meager 0.29% of the total global investment in AI in 2020</a></li>
-  <li><a href="#dont-listen-to-old-people" id="toc-dont-listen-to-old-people" class="nav-link" data-scroll-target="#dont-listen-to-old-people"><span class="toc-section-number">2</span>  Don’t listen to old people</a></li>
-  <li><a href="#in-australia-dont-try-to-be-an-australian-company" id="toc-in-australia-dont-try-to-be-an-australian-company" class="nav-link" data-scroll-target="#in-australia-dont-try-to-be-an-australian-company"><span class="toc-section-number">3</span>  In Australia, don’t try to be an Australian company</a></li>
-  <li><a href="#to-be-a-tech-founder-requires-this-weird-combination-of-great-humility-and-arrogance" id="toc-to-be-a-tech-founder-requires-this-weird-combination-of-great-humility-and-arrogance" class="nav-link" data-scroll-target="#to-be-a-tech-founder-requires-this-weird-combination-of-great-humility-and-arrogance"><span class="toc-section-number">4</span>  To be a tech founder requires this weird combination of great humility and arrogance</a></li>
-  <li><a href="#moving-to-san-francisco-was-interesting" id="toc-moving-to-san-francisco-was-interesting" class="nav-link" data-scroll-target="#moving-to-san-francisco-was-interesting"><span class="toc-section-number">5</span>  Moving to San Francisco was interesting</a></li>
-  <li><a href="#around-2012-i-started-noticing-deep-learning-starting-to-win-things" id="toc-around-2012-i-started-noticing-deep-learning-starting-to-win-things" class="nav-link" data-scroll-target="#around-2012-i-started-noticing-deep-learning-starting-to-win-things"><span class="toc-section-number">6</span>  Around 2012, I started noticing deep learning starting to win things</a></li>
-  <li><a href="#no-one-was-doing-deep-learning-in-medicine" id="toc-no-one-was-doing-deep-learning-in-medicine" class="nav-link" data-scroll-target="#no-one-was-doing-deep-learning-in-medicine"><span class="toc-section-number">7</span>  No one was doing deep learning in medicine</a></li>
-  <li><a href="#to-do-deep-learning-you-dont-need-a-p.h.d" id="toc-to-do-deep-learning-you-dont-need-a-p.h.d" class="nav-link" data-scroll-target="#to-do-deep-learning-you-dont-need-a-p.h.d"><span class="toc-section-number">8</span>  To do deep learning, you “don’t” need a P.h.D</a></li>
-  <li><a href="#suprised-at-how-little-had-changed-in-australia" id="toc-suprised-at-how-little-had-changed-in-australia" class="nav-link" data-scroll-target="#suprised-at-how-little-had-changed-in-australia"><span class="toc-section-number">9</span>  Suprised at how little had changed in Australia</a></li>
-  <li><a href="#australia-ranks-right-at-the-top-in-use-of-tech" id="toc-australia-ranks-right-at-the-top-in-use-of-tech" class="nav-link" data-scroll-target="#australia-ranks-right-at-the-top-in-use-of-tech"><span class="toc-section-number">10</span>  Australia ranks right at the top in “use of tech”</a></li>
-  <li><a href="#the-end" id="toc-the-end" class="nav-link" data-scroll-target="#the-end"><span class="toc-section-number">11</span>  The end</a></li>
+  <li><a href="#australia-invested-a-meager-0.29-of-the-total-global-investment-in-ai-in-2020" id="toc-australia-invested-a-meager-0.29-of-the-total-global-investment-in-ai-in-2020" class="nav-link active" data-scroll-target="#australia-invested-a-meager-0.29-of-the-total-global-investment-in-ai-in-2020"><span class="header-section-number">1</span> Australia invested a meager 0.29% of the total global investment in AI in 2020</a></li>
+  <li><a href="#dont-listen-to-old-people" id="toc-dont-listen-to-old-people" class="nav-link" data-scroll-target="#dont-listen-to-old-people"><span class="header-section-number">2</span> Don’t listen to old people</a></li>
+  <li><a href="#in-australia-dont-try-to-be-an-australian-company" id="toc-in-australia-dont-try-to-be-an-australian-company" class="nav-link" data-scroll-target="#in-australia-dont-try-to-be-an-australian-company"><span class="header-section-number">3</span> In Australia, don’t try to be an Australian company</a></li>
+  <li><a href="#to-be-a-tech-founder-requires-this-weird-combination-of-great-humility-and-arrogance" id="toc-to-be-a-tech-founder-requires-this-weird-combination-of-great-humility-and-arrogance" class="nav-link" data-scroll-target="#to-be-a-tech-founder-requires-this-weird-combination-of-great-humility-and-arrogance"><span class="header-section-number">4</span> To be a tech founder requires this weird combination of great humility and arrogance</a></li>
+  <li><a href="#moving-to-san-francisco-was-interesting" id="toc-moving-to-san-francisco-was-interesting" class="nav-link" data-scroll-target="#moving-to-san-francisco-was-interesting"><span class="header-section-number">5</span> Moving to San Francisco was interesting</a></li>
+  <li><a href="#around-2012-i-started-noticing-deep-learning-starting-to-win-things" id="toc-around-2012-i-started-noticing-deep-learning-starting-to-win-things" class="nav-link" data-scroll-target="#around-2012-i-started-noticing-deep-learning-starting-to-win-things"><span class="header-section-number">6</span> Around 2012, I started noticing deep learning starting to win things</a></li>
+  <li><a href="#no-one-was-doing-deep-learning-in-medicine" id="toc-no-one-was-doing-deep-learning-in-medicine" class="nav-link" data-scroll-target="#no-one-was-doing-deep-learning-in-medicine"><span class="header-section-number">7</span> No one was doing deep learning in medicine</a></li>
+  <li><a href="#to-do-deep-learning-you-dont-need-a-p.h.d" id="toc-to-do-deep-learning-you-dont-need-a-p.h.d" class="nav-link" data-scroll-target="#to-do-deep-learning-you-dont-need-a-p.h.d"><span class="header-section-number">8</span> To do deep learning, you “don’t” need a P.h.D</a></li>
+  <li><a href="#suprised-at-how-little-had-changed-in-australia" id="toc-suprised-at-how-little-had-changed-in-australia" class="nav-link" data-scroll-target="#suprised-at-how-little-had-changed-in-australia"><span class="header-section-number">9</span> Suprised at how little had changed in Australia</a></li>
+  <li><a href="#australia-ranks-right-at-the-top-in-use-of-tech" id="toc-australia-ranks-right-at-the-top-in-use-of-tech" class="nav-link" data-scroll-target="#australia-ranks-right-at-the-top-in-use-of-tech"><span class="header-section-number">10</span> Australia ranks right at the top in “use of tech”</a></li>
+  <li><a href="#the-end" id="toc-the-end" class="nav-link" data-scroll-target="#the-end"><span class="header-section-number">11</span> The end</a></li>
   </ul>
 </nav>
     </div>
@@ -363,9 +394,23 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     icon: icon
   };
   anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
   const clipboard = new window.ClipboardJS('.code-copy-button', {
-    target: function(trigger) {
-      return trigger.previousElementSibling;
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
     }
   });
   clipboard.on('success', function(e) {
@@ -430,6 +475,92 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       return note.innerHTML;
     });
   }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
   const findCites = (el) => {
     const parentEl = el.parentElement;
     if (parentEl) {

@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.433">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Aman Arora">
+<meta name="dcterms.date" content="2023-07-25">
+<meta name="description" content="Analyzing LangChain’s source code reveals impressive modularity but also surprising complexity in executing simple text generation. The deep call stack makes tracing execution flow challenging.">
+
+<title>Deciphering LangChain: A Deep Dive into Code Complexity</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href=".././images/logo.png" rel="icon" type="image/png">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+<script type="text/javascript">
+
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+ga('create', 'UA-158677010-1', 'auto');
+
+ga('send', {
+  hitType: 'pageview',
+  'anonymizeIp': true,
+});
+</script>
+
+
+<meta name="twitter:title" content="Deciphering LangChain: A Deep Dive into Code Complexity">
+<meta name="twitter:description" content="Analyzing LangChain’s source code reveals impressive modularity but also surprising complexity in executing simple text generation. The deep call stack makes tracing execution flow challenging.">
+<meta name="twitter:image" content="../images/langchain.png">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html" rel="" target="">
+ <span class="menu-text">Aman Arora’s Blog</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../about.html" rel="" target="">
+ <span class="menu-text">Aman Arora</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/amaarora" rel="" target=""><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com/amaarora" rel="" target=""><i class="bi bi-twitter" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://www.linkedin.com/in/aroraaman/" rel="" target=""><i class="bi bi-linkedin" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+            <div class="quarto-navbar-tools">
+</div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Deciphering LangChain: A Deep Dive into Code Complexity</h1>
+                  <div>
+        <div class="description">
+          Analyzing LangChain’s source code reveals impressive modularity but also surprising complexity in executing simple text generation. The deep call stack makes tracing execution flow challenging.
+        </div>
+      </div>
+                </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Aman Arora </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">July 25, 2023</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction"><span class="header-section-number">1</span> Introduction</a></li>
+  <li><a href="#code-deep-dive" id="toc-code-deep-dive" class="nav-link" data-scroll-target="#code-deep-dive"><span class="header-section-number">2</span> Code: Deep-dive</a></li>
+  <li><a href="#openai-llm" id="toc-openai-llm" class="nav-link" data-scroll-target="#openai-llm"><span class="header-section-number">3</span> OpenAI LLM</a></li>
+  <li><a href="#complexity-and-readability-in-langchain" id="toc-complexity-and-readability-in-langchain" class="nav-link" data-scroll-target="#complexity-and-readability-in-langchain"><span class="header-section-number">4</span> Complexity and Readability in LangChain</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<section id="introduction" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="introduction"><span class="header-section-number">1</span> Introduction</h2>
+<p>With large language models taking the world by storm ever since the release of ChatGPT, one framework that has been ubiquitous has been <a href="https://github.com/langchain-ai/langchain">LangChain</a>. Recently, I was myself working on building an economic chatbot using the framework and wanted to look into the source code of what goes inside this complex framework. As part of this blog post, we start small. We pick the simplest use-case of <code>LLMChain</code> and look at the source code to understand what goes inside the framework.</p>
+<p>Let’s say that we want to hear a joke about any product. We can use the <code>LLMChain</code> for this.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># https://python.langchain.com/docs/modules/chains/foundational/llm_chain#get-started</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> langchain <span class="im">import</span> LLMChain, OpenAI, PromptTemplate</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>prompt_template <span class="op">=</span> <span class="st">"Tell me a joke that includes </span><span class="sc">{product}</span><span class="st">?"</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>llm <span class="op">=</span> OpenAI(temperature<span class="op">=</span><span class="dv">0</span>, openai_api_key<span class="op">=&lt;</span>openai_api_key<span class="op">&gt;</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>llm_chain <span class="op">=</span> LLMChain(</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    llm<span class="op">=</span>llm,</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    prompt<span class="op">=</span>PromptTemplate.from_template(prompt_template),</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    return_final_only<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(llm_chain(<span class="st">"colorful socks"</span>)[<span class="st">'text'</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The above code is internally calls the OpenAI chat completion API to tell a joke about “colorful socks”. Here is the output from the model.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="an">Q:</span><span class="co"> What did the sock say to the other sock when it was feeling blue?</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="an">A:</span><span class="co"> "Cheer up, it could be worse, at least we're not white socks!"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>And with that joke, let’s start looking into the source code of <a href="https://github.com/langchain-ai/langchain">LangChain</a> and understand everything that there is to know about <code>LLMChain</code>.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>All code below has been copied from from <strong>LangChain</strong>. At the time of writing, this was the GIT commit-id <code>24c165420827305e813f4b6d501f93d18f6d46a4</code>. <code>LangChain</code>’s code might change in the future.</p>
+</div>
+</div>
+</section>
+<section id="code-deep-dive" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="code-deep-dive"><span class="header-section-number">2</span> Code: Deep-dive</h2>
+<p>Calling any class in Python requires the <code>__call__</code> method to be implemented. <code>LLMChain</code> in itself is a subclass of <code>Chain</code> which has the <code>__call__</code> method implemented that looks like below:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># https://github.com/langchain-ai/langchain/blob/24c165420827305e813f4b6d501f93d18f6d46a4/langchain/chains/base.py#L185-L250</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="fu">__call__</span>(</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>,</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>        inputs: Union[Dict[<span class="bu">str</span>, Any], Any],</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>        return_only_outputs: <span class="bu">bool</span> <span class="op">=</span> <span class="va">False</span>,</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>        callbacks: Callbacks <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>        <span class="op">*</span>,</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>        tags: Optional[List[<span class="bu">str</span>]] <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>        metadata: Optional[Dict[<span class="bu">str</span>, Any]] <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>        include_run_info: <span class="bu">bool</span> <span class="op">=</span> <span class="va">False</span>,</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    ) <span class="op">-&gt;</span> Dict[<span class="bu">str</span>, Any]:</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>        inputs <span class="op">=</span> <span class="va">self</span>.prep_inputs(inputs)</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>        callback_manager <span class="op">=</span> CallbackManager.configure(</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>            callbacks,</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.callbacks,</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.verbose,</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>            tags,</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.tags,</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>            metadata,</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.metadata,</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>        new_arg_supported <span class="op">=</span> inspect.signature(<span class="va">self</span>._call).parameters.get(<span class="st">"run_manager"</span>)</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>        run_manager <span class="op">=</span> callback_manager.on_chain_start(</span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>            dumpd(<span class="va">self</span>),</span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>            inputs,</span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>        <span class="cf">try</span>:</span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>            outputs <span class="op">=</span> (</span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>                <span class="va">self</span>._call(inputs, run_manager<span class="op">=</span>run_manager)</span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> new_arg_supported</span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>                <span class="cf">else</span> <span class="va">self</span>._call(inputs)</span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>            )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Looking at the above code we can see that it calls <code>self.prep_inputs(inputs)</code> and then calls <code>self._call</code> method. We wil ignore the <code>self.prep_inputs</code> part for now, as otherwise, this blog post will become too long. The <code>self._call</code> method inside the <code>Chain</code> class is an abstract method. Therefore, it must be implemented in <code>LLMChain</code>.</p>
+<p>Let’s look at the definition of it in <code>LLMChain</code>.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># https://github.com/langchain-ai/langchain/blob/24c165420827305e813f4b6d501f93d18f6d46a4/langchain/chains/llm.py#L87-L93</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _call(</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>,</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>        inputs: Dict[<span class="bu">str</span>, Any],</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>        run_manager: Optional[CallbackManagerForChainRun] <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    ) <span class="op">-&gt;</span> Dict[<span class="bu">str</span>, <span class="bu">str</span>]:</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>        response <span class="op">=</span> <span class="va">self</span>.generate([inputs], run_manager<span class="op">=</span>run_manager)</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.create_outputs(response)[<span class="dv">0</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Okay, great! Now, we see that the <code>_call</code> method calling <code>self.generate</code> passing in the <code>[inputs]</code>. Remember, the inputs were prepared in <code>self.prep_inputs(inputs)</code> step inside <code>__call__</code> of <code>Chain</code>.</p>
+<p>Below I have shared the source code of <code>generate</code> method from <code>LLMChain</code>.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># https://github.com/langchain-ai/langchain/blob/24c165420827305e813f4b6d501f93d18f6d46a4/langchain/chains/llm.py#L95-L107</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> generate(</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>,</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>        input_list: List[Dict[<span class="bu">str</span>, Any]],</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>        run_manager: Optional[CallbackManagerForChainRun] <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    ) <span class="op">-&gt;</span> LLMResult:</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Generate LLM result from inputs."""</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>        prompts, stop <span class="op">=</span> <span class="va">self</span>.prep_prompts(input_list, run_manager<span class="op">=</span>run_manager)</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.llm.generate_prompt(</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>            prompts,</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>            stop,</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>            callbacks<span class="op">=</span>run_manager.get_child() <span class="cf">if</span> run_manager <span class="cf">else</span> <span class="va">None</span>,</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>            <span class="op">**</span><span class="va">self</span>.llm_kwargs,</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>        )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>So, it’s calling <code>self.llm.generate_prompt</code>. Great! At this point, I am starting to wonder, what’s the point of <code>LLMChain</code> at all? Also, let’s skip the <code>self.prep_prompts</code> part. Otherwise the blog post will be too long. Rather than looking at the source code of <code>self.prep_prompts</code>, let’s just look at the output of it.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> input_list</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>[{<span class="st">'product'</span>: <span class="st">'colorful socks'</span>}]</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> prompts, stop</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>([StringPromptValue(text<span class="op">=</span><span class="st">'Tell me a joke that includes colorful socks?'</span>)], <span class="va">None</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>So now all that has happened is that the above code has added product value to out input prompt. Why is this not an f-string I wonder?</p>
+<p>Before we go any further, because, now we are starting to look at <code>self.llm</code>’s source code and not so much on <code>Chain</code>s let’s just look at the reponse from <code>response = self.generate([inputs], run_manager=run_manager)</code>. Below is what the response looks like:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> response</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>LLMResult(generations<span class="op">=</span>[[Generation(text<span class="op">=</span><span class="st">'</span><span class="ch">\n\n</span><span class="st">Q: What did the sock say to the other sock when it was feeling blue?</span><span class="ch">\n</span><span class="st">A: "Cheer up, it could be worse, at least we</span><span class="ch">\'</span><span class="st">re not white socks!"'</span>, generation_info<span class="op">=</span>{<span class="st">'finish_reason'</span>: <span class="st">'stop'</span>, <span class="st">'logprobs'</span>: <span class="va">None</span>})]], llm_output<span class="op">=</span>{<span class="st">'token_usage'</span>: {<span class="st">'prompt_tokens'</span>: <span class="dv">9</span>, <span class="st">'total_tokens'</span>: <span class="dv">49</span>, <span class="st">'completion_tokens'</span>: <span class="dv">40</span>}, <span class="st">'model_name'</span>: <span class="st">'text-davinci-003'</span>}, run<span class="op">=</span>[RunInfo(run_id<span class="op">=</span>UUID(<span class="st">'5afa5d25-802a-49eb-b147-0f708d207a33'</span>))])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Now we are ready to look into <code>self.llm.generate_prompt</code>, how did this method create the <code>response</code> that we see above?</p>
+</section>
+<section id="openai-llm" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="openai-llm"><span class="header-section-number">3</span> OpenAI LLM</h2>
+<p>So far we were looking at the <code>LLMChain</code> source code. But, internally that in-itself is calling <code>self.llm.generate_prompt</code>. If you remember from the top of the blog post, <code>self.llm</code> was an instance of <code>OpenAI</code> class.</p>
+<p>The <code>OpenAI</code> class is a subclass of <code>BaseOpenAI</code> and that in itself is a subclass of <code>BaseLLM</code> and the <code>generate_prompt</code> method that was called from inside the <code>generate</code> method of <code>ChainLLM</code> is implemented in <code>BaseLLM</code>. A bit complicated, isn’t it?</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="co"># https://github.com/langchain-ai/langchain/blob/24c165420827305e813f4b6d501f93d18f6d46a4/langchain/llms/base.py#L178-L186</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> generate_prompt(</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>,</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>        prompts: List[PromptValue],</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>        stop: Optional[List[<span class="bu">str</span>]] <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>        callbacks: Callbacks <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>        <span class="op">**</span>kwargs: Any,</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    ) <span class="op">-&gt;</span> LLMResult:</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>        prompt_strings <span class="op">=</span> [p.to_string() <span class="cf">for</span> p <span class="kw">in</span> prompts]</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.generate(prompt_strings, stop<span class="op">=</span>stop, callbacks<span class="op">=</span>callbacks, <span class="op">**</span>kwargs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>So, now we can see that the <code>generate_prompt</code> method calls <code>self.generate</code> again. Remember, the last time we called <code>self.generate</code> it was for the <code>LLMChain</code>, but this time, it is for the OpenAI LLM. The <code>p.to_string()</code> part? That’s just converting our prompt to string. This is the output of <code>prompt_strings</code> looks like below:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> prompt_strings</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>[<span class="st">'Tell me a joke that includes colorful socks?'</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>🤔 So far so good? Yes and No.&nbsp;<strong>I am a bit baffled at the amount of complexity in the code.</strong> I still don’t know why we had a <code>Chain</code> and a <code>LLMChain</code>. I guess we are looking at just one use-case of <code>LLMChain</code> which is generation, <code>LLMChain</code>s might also be supporting other use cases where this complexity might be needed.</p>
+</div>
+</div>
+<p>Time to look at the <code>generate</code> method. It is again implemented in <code>BaseLLM</code>.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># https://github.com/langchain-ai/langchain/blob/24c165420827305e813f4b6d501f93d18f6d46a4/langchain/llms/base.py#L233-L302</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> generate(</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>,</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>        prompts: List[<span class="bu">str</span>],</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>        stop: Optional[List[<span class="bu">str</span>]] <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>        callbacks: Callbacks <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>        <span class="op">*</span>,</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>        tags: Optional[List[<span class="bu">str</span>]] <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>        metadata: Optional[Dict[<span class="bu">str</span>, Any]] <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>        <span class="op">**</span>kwargs: Any,</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    ) <span class="op">-&gt;</span> LLMResult:</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Run the LLM on the given prompt and input."""</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="kw">not</span> <span class="bu">isinstance</span>(prompts, <span class="bu">list</span>):</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>            <span class="cf">raise</span> <span class="pp">ValueError</span>(</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>                <span class="st">"Argument 'prompts' is expected to be of type List[str], received"</span></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>                <span class="ss">f" argument of type </span><span class="sc">{</span><span class="bu">type</span>(prompts)<span class="sc">}</span><span class="ss">."</span></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>        params <span class="op">=</span> <span class="va">self</span>.<span class="bu">dict</span>()</span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>        params[<span class="st">"stop"</span>] <span class="op">=</span> stop</span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>        options <span class="op">=</span> {<span class="st">"stop"</span>: stop}</span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>        (</span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>            existing_prompts,</span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>            llm_string,</span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>            missing_prompt_idxs,</span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>            missing_prompts,</span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>        ) <span class="op">=</span> get_prompts(params, prompts)</span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>        disregard_cache <span class="op">=</span> <span class="va">self</span>.cache <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span> <span class="kw">and</span> <span class="kw">not</span> <span class="va">self</span>.cache</span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>        callback_manager <span class="op">=</span> CallbackManager.configure(</span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>            callbacks,</span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.callbacks,</span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.verbose,</span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a>            tags,</span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.tags,</span>
+<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a>            metadata,</span>
+<span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.metadata,</span>
+<span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb10-37"><a href="#cb10-37" aria-hidden="true" tabindex="-1"></a>        new_arg_supported <span class="op">=</span> inspect.signature(<span class="va">self</span>._generate).parameters.get(</span>
+<span id="cb10-38"><a href="#cb10-38" aria-hidden="true" tabindex="-1"></a>            <span class="st">"run_manager"</span></span>
+<span id="cb10-39"><a href="#cb10-39" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb10-40"><a href="#cb10-40" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> langchain.llm_cache <span class="kw">is</span> <span class="va">None</span> <span class="kw">or</span> disregard_cache:</span>
+<span id="cb10-41"><a href="#cb10-41" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="va">self</span>.cache <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span> <span class="kw">and</span> <span class="va">self</span>.cache:</span>
+<span id="cb10-42"><a href="#cb10-42" aria-hidden="true" tabindex="-1"></a>                <span class="cf">raise</span> <span class="pp">ValueError</span>(</span>
+<span id="cb10-43"><a href="#cb10-43" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"Asked to cache, but no cache found at `langchain.cache`."</span></span>
+<span id="cb10-44"><a href="#cb10-44" aria-hidden="true" tabindex="-1"></a>                )</span>
+<span id="cb10-45"><a href="#cb10-45" aria-hidden="true" tabindex="-1"></a>            run_managers <span class="op">=</span> callback_manager.on_llm_start(</span>
+<span id="cb10-46"><a href="#cb10-46" aria-hidden="true" tabindex="-1"></a>                dumpd(<span class="va">self</span>), prompts, invocation_params<span class="op">=</span>params, options<span class="op">=</span>options</span>
+<span id="cb10-47"><a href="#cb10-47" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb10-48"><a href="#cb10-48" aria-hidden="true" tabindex="-1"></a>            output <span class="op">=</span> <span class="va">self</span>._generate_helper(</span>
+<span id="cb10-49"><a href="#cb10-49" aria-hidden="true" tabindex="-1"></a>                prompts, stop, run_managers, <span class="bu">bool</span>(new_arg_supported), <span class="op">**</span>kwargs</span>
+<span id="cb10-50"><a href="#cb10-50" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb10-51"><a href="#cb10-51" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> output</span>
+<span id="cb10-52"><a href="#cb10-52" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="bu">len</span>(missing_prompts) <span class="op">&gt;</span> <span class="dv">0</span>:</span>
+<span id="cb10-53"><a href="#cb10-53" aria-hidden="true" tabindex="-1"></a>            run_managers <span class="op">=</span> callback_manager.on_llm_start(</span>
+<span id="cb10-54"><a href="#cb10-54" aria-hidden="true" tabindex="-1"></a>                dumpd(<span class="va">self</span>), missing_prompts, invocation_params<span class="op">=</span>params, options<span class="op">=</span>options</span>
+<span id="cb10-55"><a href="#cb10-55" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb10-56"><a href="#cb10-56" aria-hidden="true" tabindex="-1"></a>            new_results <span class="op">=</span> <span class="va">self</span>._generate_helper(</span>
+<span id="cb10-57"><a href="#cb10-57" aria-hidden="true" tabindex="-1"></a>                missing_prompts, stop, run_managers, <span class="bu">bool</span>(new_arg_supported), <span class="op">**</span>kwargs</span>
+<span id="cb10-58"><a href="#cb10-58" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb10-59"><a href="#cb10-59" aria-hidden="true" tabindex="-1"></a>            llm_output <span class="op">=</span> update_cache(</span>
+<span id="cb10-60"><a href="#cb10-60" aria-hidden="true" tabindex="-1"></a>                existing_prompts, llm_string, missing_prompt_idxs, new_results, prompts</span>
+<span id="cb10-61"><a href="#cb10-61" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb10-62"><a href="#cb10-62" aria-hidden="true" tabindex="-1"></a>            run_info <span class="op">=</span> (</span>
+<span id="cb10-63"><a href="#cb10-63" aria-hidden="true" tabindex="-1"></a>                [RunInfo(run_id<span class="op">=</span>run_manager.run_id) <span class="cf">for</span> run_manager <span class="kw">in</span> run_managers]</span>
+<span id="cb10-64"><a href="#cb10-64" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> run_managers</span>
+<span id="cb10-65"><a href="#cb10-65" aria-hidden="true" tabindex="-1"></a>                <span class="cf">else</span> <span class="va">None</span></span>
+<span id="cb10-66"><a href="#cb10-66" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb10-67"><a href="#cb10-67" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="cb10-68"><a href="#cb10-68" aria-hidden="true" tabindex="-1"></a>            llm_output <span class="op">=</span> {}</span>
+<span id="cb10-69"><a href="#cb10-69" aria-hidden="true" tabindex="-1"></a>            run_info <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb10-70"><a href="#cb10-70" aria-hidden="true" tabindex="-1"></a>        generations <span class="op">=</span> [existing_prompts[i] <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(prompts))]</span>
+<span id="cb10-71"><a href="#cb10-71" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> LLMResult(generations<span class="op">=</span>generations, llm_output<span class="op">=</span>llm_output, run<span class="op">=</span>run_info)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Okay, well, let’s look at the outputs step-by-step. This again is a majorly over-complicated piece of code. But, for what? Why do we need such complication?</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> params</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>{<span class="st">'model_name'</span>: <span class="st">'text-davinci-003'</span>, <span class="st">'temperature'</span>: <span class="fl">0.0</span>, <span class="st">'max_tokens'</span>: <span class="dv">256</span>, <span class="st">'top_p'</span>: <span class="dv">1</span>, <span class="st">'frequency_penalty'</span>: <span class="dv">0</span>, <span class="st">'presence_penalty'</span>: <span class="dv">0</span>, <span class="st">'n'</span>: <span class="dv">1</span>, <span class="st">'request_timeout'</span>: <span class="va">None</span>, <span class="st">'logit_bias'</span>: {}, <span class="st">'_type'</span>: <span class="st">'openai'</span>, <span class="st">'stop'</span>: <span class="va">None</span>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Honestly, looking at the above source code, I am still a bit confused at which point do we even call the model and call the create API. I can’t count how many layers down we are in code, and we still haven’t called the <code>openai.Completion.create</code> method when generating an output from the prompt should be as simple as:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> openai</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>response <span class="op">=</span> openai.Completion.create(</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  model<span class="op">=</span><span class="st">"text-davinci-003"</span>,</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  prompt<span class="op">=</span><span class="st">"Write a tagline for an ice cream shop."</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>I believe the part where the generations actually happen is inside the following piece of code.</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>output <span class="op">=</span> <span class="va">self</span>._generate_helper(</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>                prompts, stop, run_managers, <span class="bu">bool</span>(new_arg_supported), <span class="op">**</span>kwargs</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Values of `output` (This is the same as `response` from before)</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> output</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>LLMResult(generations<span class="op">=</span>[[Generation(text<span class="op">=</span><span class="st">'</span><span class="ch">\n\n</span><span class="st">Q: What did the sock say to the other sock when it was feeling blue?</span><span class="ch">\n</span><span class="st">A: "Cheer up, it could be worse, at least we</span><span class="ch">\'</span><span class="st">re not white socks!"'</span>, generation_info<span class="op">=</span>{<span class="st">'finish_reason'</span>: <span class="st">'stop'</span>, <span class="st">'logprobs'</span>: <span class="va">None</span>})]], llm_output<span class="op">=</span>{<span class="st">'token_usage'</span>: {<span class="st">'prompt_tokens'</span>: <span class="dv">9</span>, <span class="st">'total_tokens'</span>: <span class="dv">49</span>, <span class="st">'completion_tokens'</span>: <span class="dv">40</span>}, <span class="st">'model_name'</span>: <span class="st">'text-davinci-003'</span>}, run<span class="op">=</span>[RunInfo(run_id<span class="op">=</span>UUID(<span class="st">'b32869ec-43a3-4780-805e-be482f1fe05b'</span>))])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>So, now we need to look at another method <code>self._generate_helper</code> and who knows what other methods that method will call. Let’s dig down more into the source code a bit further and look at <code>self._generate_helper</code>.</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># https://github.com/langchain-ai/langchain/blob/24c165420827305e813f4b6d501f93d18f6d46a4/langchain/llms/base.py#L200-L231</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _generate_helper(</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>,</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>        prompts: List[<span class="bu">str</span>],</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>        stop: Optional[List[<span class="bu">str</span>]],</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>        run_managers: List[CallbackManagerForLLMRun],</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>        new_arg_supported: <span class="bu">bool</span>,</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>        <span class="op">**</span>kwargs: Any,</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>    ) <span class="op">-&gt;</span> LLMResult:</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>        <span class="cf">try</span>:</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>            output <span class="op">=</span> (</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>                <span class="va">self</span>._generate(</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>                    prompts,</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>                    stop<span class="op">=</span>stop,</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>                    <span class="co"># </span><span class="al">TODO</span><span class="co">: support multiple run managers</span></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>                    run_manager<span class="op">=</span>run_managers[<span class="dv">0</span>] <span class="cf">if</span> run_managers <span class="cf">else</span> <span class="va">None</span>,</span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>                    <span class="op">**</span>kwargs,</span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>                )</span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> new_arg_supported</span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>                <span class="cf">else</span> <span class="va">self</span>._generate(prompts, stop<span class="op">=</span>stop)</span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>        <span class="cf">except</span> (<span class="pp">KeyboardInterrupt</span>, <span class="pp">Exception</span>) <span class="im">as</span> e:</span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> run_manager <span class="kw">in</span> run_managers:</span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a>                run_manager.on_llm_error(e)</span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>            <span class="cf">raise</span> e</span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a>        flattened_outputs <span class="op">=</span> output.flatten()</span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> manager, flattened_output <span class="kw">in</span> <span class="bu">zip</span>(run_managers, flattened_outputs):</span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a>            manager.on_llm_end(flattened_output)</span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> run_managers:</span>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a>            output.run <span class="op">=</span> [</span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a>                RunInfo(run_id<span class="op">=</span>run_manager.run_id) <span class="cf">for</span> run_manager <span class="kw">in</span> run_managers</span>
+<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a>            ]</span>
+<span id="cb14-33"><a href="#cb14-33" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> output</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Unbelievable! The <code>self._generate_helper</code> is further calling <code>self._generate</code> method which is an abstract method in <code>BaseLLM</code> but implemented in <code>BaseOpenAI</code>!</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>😡 Are you still with me yet? We got to finish this. But, yes I am a bit frustrated. This whole part seems so complex and is so hard to follow and explain. Let’s recap what has happened so far. We wanted to look at what goes inside <code>LangChain</code> to create outputs from a prompt. What we have discovered is extremely puzzling. And I am being euphemistic here.</p>
+<p>We started with <code>LLMChain</code> and called it using <code>__call__</code> method that was implemented in <code>Chain</code> which called<code>_call</code> method of <code>LLMChain</code> that in-turn called <code>self.generate</code> which further called <code>self.llm.generate_prompt</code>.</p>
+<p><code>self.llm</code> is an instance of <code>OpenAI</code> class which is subclass of <code>BaseOpenAI</code> which is subclass of <code>BaseLLM</code> and <code>generate_prompt</code> method is implemented there. We are not done yet.</p>
+<p>The <code>generate_prompt</code> implemented in <code>BaseLLM</code> calls <code>self.generate</code> which in turn calls <code>self._generate_helper</code> that in turn calls <code>self._generate</code> of <code>BaseOpenAI</code>!</p>
+<p>Isn’t that a lot of code? And we still haven’t called the OpenAI API yet.</p>
+</div>
+</div>
+<p>Okay, I am normally breathing again. Let’s continue. We are still not done yet and haven’t generated our results. Let’s continue and look at the <code>self._generate</code> method which is implemented in <code>BaseOpenAI</code>.</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># https://github.com/langchain-ai/langchain/blob/24c165420827305e813f4b6d501f93d18f6d46a4/langchain/llms/openai.py#L272-L325</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _generate(</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>,</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>        prompts: List[<span class="bu">str</span>],</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>        stop: Optional[List[<span class="bu">str</span>]] <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>        run_manager: Optional[CallbackManagerForLLMRun] <span class="op">=</span> <span class="va">None</span>,</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>        <span class="op">**</span>kwargs: Any,</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>    ) <span class="op">-&gt;</span> LLMResult:</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>        params <span class="op">=</span> <span class="va">self</span>._invocation_params</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>        params <span class="op">=</span> {<span class="op">**</span>params, <span class="op">**</span>kwargs}</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>        sub_prompts <span class="op">=</span> <span class="va">self</span>.get_sub_prompts(params, prompts, stop)</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>        choices <span class="op">=</span> []</span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>        token_usage: Dict[<span class="bu">str</span>, <span class="bu">int</span>] <span class="op">=</span> {}</span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Get the token usage from the response.</span></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Includes prompt, completion, and total tokens used.</span></span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>        _keys <span class="op">=</span> {<span class="st">"completion_tokens"</span>, <span class="st">"prompt_tokens"</span>, <span class="st">"total_tokens"</span>}</span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> _prompts <span class="kw">in</span> sub_prompts:</span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="va">self</span>.streaming:</span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> <span class="bu">len</span>(_prompts) <span class="op">&gt;</span> <span class="dv">1</span>:</span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">raise</span> <span class="pp">ValueError</span>(<span class="st">"Cannot stream results with multiple prompts."</span>)</span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>                params[<span class="st">"stream"</span>] <span class="op">=</span> <span class="va">True</span></span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>                response <span class="op">=</span> _streaming_response_template()</span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>                <span class="cf">for</span> stream_resp <span class="kw">in</span> completion_with_retry(</span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a>                    <span class="va">self</span>, prompt<span class="op">=</span>_prompts, <span class="op">**</span>params</span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a>                ):</span>
+<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">if</span> run_manager:</span>
+<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a>                        run_manager.on_llm_new_token(</span>
+<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a>                            stream_resp[<span class="st">"choices"</span>][<span class="dv">0</span>][<span class="st">"text"</span>],</span>
+<span id="cb15-29"><a href="#cb15-29" aria-hidden="true" tabindex="-1"></a>                            verbose<span class="op">=</span><span class="va">self</span>.verbose,</span>
+<span id="cb15-30"><a href="#cb15-30" aria-hidden="true" tabindex="-1"></a>                            logprobs<span class="op">=</span>stream_resp[<span class="st">"choices"</span>][<span class="dv">0</span>][<span class="st">"logprobs"</span>],</span>
+<span id="cb15-31"><a href="#cb15-31" aria-hidden="true" tabindex="-1"></a>                        )</span>
+<span id="cb15-32"><a href="#cb15-32" aria-hidden="true" tabindex="-1"></a>                    _update_response(response, stream_resp)</span>
+<span id="cb15-33"><a href="#cb15-33" aria-hidden="true" tabindex="-1"></a>                choices.extend(response[<span class="st">"choices"</span>])</span>
+<span id="cb15-34"><a href="#cb15-34" aria-hidden="true" tabindex="-1"></a>            <span class="cf">else</span>:</span>
+<span id="cb15-35"><a href="#cb15-35" aria-hidden="true" tabindex="-1"></a>                response <span class="op">=</span> completion_with_retry(<span class="va">self</span>, prompt<span class="op">=</span>_prompts, <span class="op">**</span>params)</span>
+<span id="cb15-36"><a href="#cb15-36" aria-hidden="true" tabindex="-1"></a>                choices.extend(response[<span class="st">"choices"</span>])</span>
+<span id="cb15-37"><a href="#cb15-37" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="kw">not</span> <span class="va">self</span>.streaming:</span>
+<span id="cb15-38"><a href="#cb15-38" aria-hidden="true" tabindex="-1"></a>                <span class="co"># Can't update token usage if streaming</span></span>
+<span id="cb15-39"><a href="#cb15-39" aria-hidden="true" tabindex="-1"></a>                update_token_usage(_keys, response, token_usage)</span>
+<span id="cb15-40"><a href="#cb15-40" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.create_llm_result(choices, prompts, token_usage)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Do we get to the part where we have results yet? Yes! The <code>completion_with_retry</code> function looks like it! Let’s look at the inputs to this function. It looks like the <code>_generate</code> also supports streaming.</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> _prompts</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>[<span class="st">'Tell me a joke that includes colorful socks?'</span>]</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> params</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>{<span class="st">'model'</span>: <span class="st">'text-davinci-003'</span>, <span class="st">'api_key'</span>: <span class="st">'&lt;openai_api_key&gt;'</span>, <span class="st">'api_base'</span>: <span class="st">''</span>, <span class="st">'organization'</span>: <span class="st">''</span>, <span class="st">'temperature'</span>: <span class="fl">0.0</span>, <span class="st">'max_tokens'</span>: <span class="dv">256</span>, <span class="st">'top_p'</span>: <span class="dv">1</span>, <span class="st">'frequency_penalty'</span>: <span class="dv">0</span>, <span class="st">'presence_penalty'</span>: <span class="dv">0</span>, <span class="st">'n'</span>: <span class="dv">1</span>, <span class="st">'request_timeout'</span>: <span class="va">None</span>, <span class="st">'logit_bias'</span>: {}}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>We are now ready to call the <code>completion_with_retry</code> passing in above as inputs. The <code>_prompts</code> is just the Prompt Template converted to a string. And the <code>params</code> are defined as defaults in <code>BaseOpenAI</code>.</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> completion_with_retry(llm: Union[BaseOpenAI, OpenAIChat], <span class="op">**</span>kwargs: Any) <span class="op">-&gt;</span> Any:</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Use tenacity to retry the completion call."""</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    retry_decorator <span class="op">=</span> _create_retry_decorator(llm)</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">@retry_decorator</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> _completion_with_retry(<span class="op">**</span>kwargs: Any) <span class="op">-&gt;</span> Any:</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> llm.client.create(<span class="op">**</span>kwargs)</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> _completion_with_retry(<span class="op">**</span>kwargs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Now, <code>self</code> get’s passed as an argument to the function and finally we call <code>llm.client.create(kwargs)</code>.</p>
+<p>Below is what the <code>kwargs</code> look like. Remember, they are just <code>_prompts</code> &amp; <code>params</code> mergfed together into a single dictionary.</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> kwargs</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>{<span class="st">'prompt'</span>: [<span class="st">'Tell me a joke that includes colorful socks?'</span>], <span class="st">'model'</span>: <span class="st">'text-davinci-003'</span>, <span class="st">'api_key'</span>: <span class="st">'&lt;api_key&gt;'</span>, <span class="st">'api_base'</span>: <span class="st">''</span>, <span class="st">'organization'</span>: <span class="st">''</span>, <span class="st">'temperature'</span>: <span class="fl">0.0</span>, <span class="st">'max_tokens'</span>: <span class="dv">256</span>, <span class="st">'top_p'</span>: <span class="dv">1</span>, <span class="st">'frequency_penalty'</span>: <span class="dv">0</span>, <span class="st">'presence_penalty'</span>: <span class="dv">0</span>, <span class="st">'n'</span>: <span class="dv">1</span>, <span class="st">'request_timeout'</span>: <span class="va">None</span>, <span class="st">'logit_bias'</span>: {}}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="complexity-and-readability-in-langchain" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="complexity-and-readability-in-langchain"><span class="header-section-number">4</span> Complexity and Readability in LangChain</h2>
+<p>Going through the LangChain code, I find myself filled with a mix of admiration and confusion. It’s clear that the creators of LangChain put a lot of thought into building a flexible architecture. The design, which involves multiple layers of abstraction and many separate components, suggests that the tool is built to handle a wide range of use cases beyond the one we’ve examined today. However, in this particular scenario, we’ve seen how complexity can make code harder to follow and understand.</p>
+<p>Let’s start with the positives. The modular design of LangChain allows for easy extension and modification.</p>
+<p>On the other hand, the complexity of the code made it difficult to trace the flow of execution. We found ourselves diving deeper and deeper into the call stack, and it took a considerable amount of time just to locate the point where the OpenAI API is actually called.</p>
+<p>Another point of confusion was the usage of the <strong><code>self.dict()</code></strong> method. It seems that this method is intended to create a dictionary representation of an object’s attributes, but it’s not immediately clear why this is necessary. In some cases, it seemed that a simpler approach, such as using f-strings for prompt generation, could have achieved the same result with less code.</p>
+<p>In conclusion, examining the LangChain code has provided valuable insights into the design decisions that go into creating a complex tool like this. While the abstraction and modularity are commendable, the complexity of the code can potentially make it harder for anyone to understand.</p>
+<p>What are your thoughts?</p>
+
+
+</section>
+
+<link href="//cdn-images.mailchimp.com/embedcode/classic-071822.css" rel="stylesheet" type="text/css"><div id="mc_embed_signup">
+    <form action="https://github.us4.list-manage.com/subscribe/post?u=e847230346a7c78d4745ae796&amp;id=7a63b2b273&amp;f_id=005f58e8f0" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate="">
+        <div id="mc_embed_signup_scroll">
+        <h2 class="anchored">Subscribe to Aman Arora's blog:</h2>
+        <div class="indicates-required"><span class="asterisk">*</span> indicates required</div>
+<div class="mc-field-group">
+    <label for="mce-EMAIL">Email Address  <span class="asterisk">*</span>
+</label>
+    <input type="email" value="" name="EMAIL" class="required email" id="mce-EMAIL" required="">
+    <span id="mce-EMAIL-HELPERTEXT" class="helper_text"></span>
+</div>
+<div hidden="true"><input type="hidden" name="tags" value="7232948"></div>
+    <div id="mce-responses" class="clear foot">
+        <div class="response" id="mce-error-response" style="display:none"></div>
+        <div class="response" id="mce-success-response" style="display:none"></div>
+    </div>    <!-- real people should not fill this in and expect good things - do not remove this or risk form bot signups-->
+    <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_e847230346a7c78d4745ae796_7a63b2b273" tabindex="-1" value=""></div>
+        <div class="optionalParent">
+            <div class="clear foot">
+                <input type="submit" value="Subscribe" name="subscribe" id="mc-embedded-subscribe" class="button">
+                <p class="brandingLogo"><a href="http://eepurl.com/il3baM" title="Mailchimp - email marketing made easy and fun"><img src="https://eep.io/mc-cdn-images/template_images/branding_logo_text_dark_dtp.svg"></a></p>
+            </div>
+        </div>
+    </div>
+</form>
+</div><script type="text/javascript">(function($) {window.fnames = new Array(); window.ftypes = new Array();fnames[0]='EMAIL';ftypes[0]='email';fnames[1]='FNAME';ftypes[1]='text';fnames[2]='LNAME';ftypes[2]='text';fnames[3]='ADDRESS';ftypes[3]='address';fnames[4]='PHONE';ftypes[4]='phone';fnames[5]='BIRTHDAY';ftypes[5]='birthday';}(jQuery));var $mcj = jQuery.noConflict(true);</script></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

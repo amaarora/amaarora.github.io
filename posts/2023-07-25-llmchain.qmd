@@ -1,0 +1,419 @@
+---
+title: "Deciphering LangChain: A Deep Dive into Code Complexity"
+description: Analyzing LangChain's source code reveals impressive modularity but also surprising complexity in executing simple text generation. The deep call stack makes tracing execution flow challenging.
+author: Aman Arora
+date: "07/25/2023"
+toc: true
+number-sections: true
+title-block-banner: true
+bibliography: ../references.bib
+reference-location: margin
+code-fold: true
+image: ../images/langchain.png
+---
+## Introduction
+With large language models taking the world by storm ever since the release of ChatGPT, one framework that has been ubiquitous has been [LangChain](https://github.com/langchain-ai/langchain). 
+Recently, I was myself working on building an economic chatbot using the framework and wanted to look into the source code of what goes inside this complex framework. As part of this blog post, we start small. We pick the simplest use-case of `LLMChain` and look at the source code to understand what goes inside the framework.
+
+Let's say that we want to hear a joke about any product. We can use the `LLMChain` for this.
+
+```python
+# https://python.langchain.com/docs/modules/chains/foundational/llm_chain#get-started
+from langchain import LLMChain, OpenAI, PromptTemplate
+prompt_template = "Tell me a joke that includes {product}?"
+llm = OpenAI(temperature=0, openai_api_key=<openai_api_key>)
+llm_chain = LLMChain(
+    llm=llm,
+    prompt=PromptTemplate.from_template(prompt_template),
+    return_final_only=True,
+)
+print(llm_chain("colorful socks")['text'])
+```
+The above code is internally calls the OpenAI chat completion API to tell a joke about “colorful socks”. Here is the output from the model. 
+
+```markdown
+Q: What did the sock say to the other sock when it was feeling blue?
+A: "Cheer up, it could be worse, at least we're not white socks!"
+```
+
+And with that joke, let’s start looking into the source code of [LangChain](https://github.com/langchain-ai/langchain) and understand everything that there is to know about `LLMChain`. 
+
+::: {.callout-note}
+All code below has been copied from from **LangChain**. At the time of writing, this was the GIT commit-id `24c165420827305e813f4b6d501f93d18f6d46a4`. `LangChain`'s code might change in the future. 
+:::
+
+## Code: Deep-dive
+Calling any class in Python requires the `__call__` method to be implemented. `LLMChain` in itself is a subclass of `Chain` which has the `__call__` method implemented that looks like below:
+
+```python
+# https://github.com/langchain-ai/langchain/blob/24c165420827305e813f4b6d501f93d18f6d46a4/langchain/chains/base.py#L185-L250
+def __call__(
+        self,
+        inputs: Union[Dict[str, Any], Any],
+        return_only_outputs: bool = False,
+        callbacks: Callbacks = None,
+        *,
+        tags: Optional[List[str]] = None,
+        metadata: Optional[Dict[str, Any]] = None,
+        include_run_info: bool = False,
+    ) -> Dict[str, Any]:
+        inputs = self.prep_inputs(inputs)
+        callback_manager = CallbackManager.configure(
+            callbacks,
+            self.callbacks,
+            self.verbose,
+            tags,
+            self.tags,
+            metadata,
+            self.metadata,
+        )
+        new_arg_supported = inspect.signature(self._call).parameters.get("run_manager")
+        run_manager = callback_manager.on_chain_start(
+            dumpd(self),
+            inputs,
+        )
+        try:
+            outputs = (
+                self._call(inputs, run_manager=run_manager)
+                if new_arg_supported
+                else self._call(inputs)
+            )
+```
+
+Looking at the above code we can see that it calls `self.prep_inputs(inputs)` and then calls `self._call` method. We wil ignore the `self.prep_inputs` part for now, as otherwise, this blog post will become too long. The `self._call` method inside the `Chain` class is an abstract method. Therefore, it must be implemented in `LLMChain`. 
+
+Let’s look at the definition of it in `LLMChain`. 
+
+```python
+# https://github.com/langchain-ai/langchain/blob/24c165420827305e813f4b6d501f93d18f6d46a4/langchain/chains/llm.py#L87-L93
+def _call(
+        self,
+        inputs: Dict[str, Any],
+        run_manager: Optional[CallbackManagerForChainRun] = None,
+    ) -> Dict[str, str]:
+        response = self.generate([inputs], run_manager=run_manager)
+        return self.create_outputs(response)[0]
+```
+
+Okay, great! Now, we see that the `_call` method calling `self.generate` passing in the `[inputs]`. Remember, the inputs were prepared in `self.prep_inputs(inputs)` step inside `__call__` of `Chain`. 
+
+Below I have shared the source code of `generate` method from `LLMChain`. 
+
+```python
+# https://github.com/langchain-ai/langchain/blob/24c165420827305e813f4b6d501f93d18f6d46a4/langchain/chains/llm.py#L95-L107
+def generate(
+        self,
+        input_list: List[Dict[str, Any]],
+        run_manager: Optional[CallbackManagerForChainRun] = None,
+    ) -> LLMResult:
+        """Generate LLM result from inputs."""
+        prompts, stop = self.prep_prompts(input_list, run_manager=run_manager)
+        return self.llm.generate_prompt(
+            prompts,
+            stop,
+            callbacks=run_manager.get_child() if run_manager else None,
+            **self.llm_kwargs,
+        )
+```
+
+So, it’s calling `self.llm.generate_prompt`. Great! At this point, I am starting to wonder, what’s the point of `LLMChain` at all? Also, let’s skip the `self.prep_prompts` part. Otherwise the blog post will be too long. Rather than looking at the source code of `self.prep_prompts`, let’s just look at the output of it. 
+
+```python
+>> input_list
+[{'product': 'colorful socks'}]
+
+>> prompts, stop
+([StringPromptValue(text='Tell me a joke that includes colorful socks?')], None)
+```
+
+So now all that has happened is that the above code has added product value to out input prompt. Why is this not an f-string I wonder?  
+
+Before we go any further, because, now we are starting to look at `self.llm`'s source code and not so much on `Chain`s let’s just look at the reponse from `response = self.generate([inputs], run_manager=run_manager)`. Below is what the response looks like: 
+
+```python
+>> response
+LLMResult(generations=[[Generation(text='\n\nQ: What did the sock say to the other sock when it was feeling blue?\nA: "Cheer up, it could be worse, at least we\'re not white socks!"', generation_info={'finish_reason': 'stop', 'logprobs': None})]], llm_output={'token_usage': {'prompt_tokens': 9, 'total_tokens': 49, 'completion_tokens': 40}, 'model_name': 'text-davinci-003'}, run=[RunInfo(run_id=UUID('5afa5d25-802a-49eb-b147-0f708d207a33'))])
+```
+
+Now we are ready to look into `self.llm.generate_prompt`, how did this method create the `response` that we see above?
+
+## OpenAI LLM
+So far we were looking at the `LLMChain` source code. But, internally that in-itself is calling `self.llm.generate_prompt`. If you remember from the top of the blog post, `self.llm` was an instance of `OpenAI` class. 
+
+
+The `OpenAI` class is a subclass of `BaseOpenAI` and that in itself is a subclass of `BaseLLM` and the `generate_prompt` method that was called from inside the `generate` method of `ChainLLM` is implemented in `BaseLLM`. A bit complicated, isn’t it?
+
+```python
+# 
+# https://github.com/langchain-ai/langchain/blob/24c165420827305e813f4b6d501f93d18f6d46a4/langchain/llms/base.py#L178-L186
+def generate_prompt(
+        self,
+        prompts: List[PromptValue],
+        stop: Optional[List[str]] = None,
+        callbacks: Callbacks = None,
+        **kwargs: Any,
+    ) -> LLMResult:
+        prompt_strings = [p.to_string() for p in prompts]
+        return self.generate(prompt_strings, stop=stop, callbacks=callbacks, **kwargs)
+```
+
+So, now we can see that the `generate_prompt` method calls `self.generate` again. Remember, the last time we called `self.generate` it was for the `LLMChain`, but this time, it is for the OpenAI LLM. The `p.to_string()` part? That’s just converting our prompt to string. This is the output of `prompt_strings` looks like below: 
+
+```python
+>> prompt_strings
+['Tell me a joke that includes colorful socks?']
+```
+
+::: {.callout-note}
+🤔 So far so good? Yes and No. **I am a bit baffled at the amount of complexity in the code.** I still don’t know why we had a `Chain` and a `LLMChain`. I guess we are looking at just one use-case of `LLMChain` which is generation, `LLMChain`s might also be supporting other use cases where this complexity might be needed.
+:::
+
+Time to look at the `generate` method. It is again implemented in `BaseLLM`. 
+
+```python
+# https://github.com/langchain-ai/langchain/blob/24c165420827305e813f4b6d501f93d18f6d46a4/langchain/llms/base.py#L233-L302
+def generate(
+        self,
+        prompts: List[str],
+        stop: Optional[List[str]] = None,
+        callbacks: Callbacks = None,
+        *,
+        tags: Optional[List[str]] = None,
+        metadata: Optional[Dict[str, Any]] = None,
+        **kwargs: Any,
+    ) -> LLMResult:
+        """Run the LLM on the given prompt and input."""
+        if not isinstance(prompts, list):
+            raise ValueError(
+                "Argument 'prompts' is expected to be of type List[str], received"
+                f" argument of type {type(prompts)}."
+            )
+        params = self.dict()
+        params["stop"] = stop
+        options = {"stop": stop}
+        (
+            existing_prompts,
+            llm_string,
+            missing_prompt_idxs,
+            missing_prompts,
+        ) = get_prompts(params, prompts)
+        disregard_cache = self.cache is not None and not self.cache
+        callback_manager = CallbackManager.configure(
+            callbacks,
+            self.callbacks,
+            self.verbose,
+            tags,
+            self.tags,
+            metadata,
+            self.metadata,
+        )
+        new_arg_supported = inspect.signature(self._generate).parameters.get(
+            "run_manager"
+        )
+        if langchain.llm_cache is None or disregard_cache:
+            if self.cache is not None and self.cache:
+                raise ValueError(
+                    "Asked to cache, but no cache found at `langchain.cache`."
+                )
+            run_managers = callback_manager.on_llm_start(
+                dumpd(self), prompts, invocation_params=params, options=options
+            )
+            output = self._generate_helper(
+                prompts, stop, run_managers, bool(new_arg_supported), **kwargs
+            )
+            return output
+        if len(missing_prompts) > 0:
+            run_managers = callback_manager.on_llm_start(
+                dumpd(self), missing_prompts, invocation_params=params, options=options
+            )
+            new_results = self._generate_helper(
+                missing_prompts, stop, run_managers, bool(new_arg_supported), **kwargs
+            )
+            llm_output = update_cache(
+                existing_prompts, llm_string, missing_prompt_idxs, new_results, prompts
+            )
+            run_info = (
+                [RunInfo(run_id=run_manager.run_id) for run_manager in run_managers]
+                if run_managers
+                else None
+            )
+        else:
+            llm_output = {}
+            run_info = None
+        generations = [existing_prompts[i] for i in range(len(prompts))]
+        return LLMResult(generations=generations, llm_output=llm_output, run=run_info)
+```
+
+Okay, well, let’s look at the outputs step-by-step. This again is a majorly over-complicated piece of code. But, for what? Why do we need such complication?
+
+```python
+>> params
+{'model_name': 'text-davinci-003', 'temperature': 0.0, 'max_tokens': 256, 'top_p': 1, 'frequency_penalty': 0, 'presence_penalty': 0, 'n': 1, 'request_timeout': None, 'logit_bias': {}, '_type': 'openai', 'stop': None}
+```
+
+Honestly, looking at the above source code, I am still a bit confused at which point do we even call the model and call the create API. I can’t count how many layers down we are in code, and we still haven’t called the `openai.Completion.create` method when generating an output from the prompt should be as simple as:
+
+```python
+import openai
+
+response = openai.Completion.create(
+  model="text-davinci-003",
+  prompt="Write a tagline for an ice cream shop."
+)
+```
+
+I believe the part where the generations actually happen is inside the following piece of code. 
+
+```python
+output = self._generate_helper(
+                prompts, stop, run_managers, bool(new_arg_supported), **kwargs
+            )
+
+# Values of `output` (This is the same as `response` from before)
+>> output
+LLMResult(generations=[[Generation(text='\n\nQ: What did the sock say to the other sock when it was feeling blue?\nA: "Cheer up, it could be worse, at least we\'re not white socks!"', generation_info={'finish_reason': 'stop', 'logprobs': None})]], llm_output={'token_usage': {'prompt_tokens': 9, 'total_tokens': 49, 'completion_tokens': 40}, 'model_name': 'text-davinci-003'}, run=[RunInfo(run_id=UUID('b32869ec-43a3-4780-805e-be482f1fe05b'))])
+```
+
+So, now we need to look at another method `self._generate_helper` and who knows what other methods that method will call. Let’s dig down more into the source code a bit further and look at `self._generate_helper`. 
+
+```python
+# https://github.com/langchain-ai/langchain/blob/24c165420827305e813f4b6d501f93d18f6d46a4/langchain/llms/base.py#L200-L231
+def _generate_helper(
+        self,
+        prompts: List[str],
+        stop: Optional[List[str]],
+        run_managers: List[CallbackManagerForLLMRun],
+        new_arg_supported: bool,
+        **kwargs: Any,
+    ) -> LLMResult:
+        try:
+            output = (
+                self._generate(
+                    prompts,
+                    stop=stop,
+                    # TODO: support multiple run managers
+                    run_manager=run_managers[0] if run_managers else None,
+                    **kwargs,
+                )
+                if new_arg_supported
+                else self._generate(prompts, stop=stop)
+            )
+        except (KeyboardInterrupt, Exception) as e:
+            for run_manager in run_managers:
+                run_manager.on_llm_error(e)
+            raise e
+        flattened_outputs = output.flatten()
+        for manager, flattened_output in zip(run_managers, flattened_outputs):
+            manager.on_llm_end(flattened_output)
+        if run_managers:
+            output.run = [
+                RunInfo(run_id=run_manager.run_id) for run_manager in run_managers
+            ]
+        return output
+```
+
+Unbelievable! The `self._generate_helper` is further calling `self._generate` method which is an abstract method in `BaseLLM` but implemented in `BaseOpenAI`! 
+
+::: {.callout-note}
+😡 Are you still with me yet? We got to finish this. But, yes I am a bit frustrated. This whole part seems so complex and is so hard to follow and explain. Let’s recap what has happened so far. We wanted to look at what goes inside `LangChain` to create outputs from a prompt. What we have discovered is extremely puzzling. And I am being euphemistic here. 
+
+We started with `LLMChain` and called it using `__call__` method that was implemented in `Chain` which called`_call` method of `LLMChain` that in-turn called `self.generate` which further called `self.llm.generate_prompt`. 
+
+`self.llm` is an instance of `OpenAI` class which is subclass of `BaseOpenAI` which is subclass of `BaseLLM` and `generate_prompt` method is implemented there. We are not done yet.
+
+The `generate_prompt` implemented in `BaseLLM` calls `self.generate` which in turn calls `self._generate_helper` that in turn calls `self._generate` of `BaseOpenAI`!
+
+Isn't that a lot of code? And we still haven’t called the OpenAI API yet.
+:::
+
+Okay, I am normally breathing again. Let’s continue. We are still not done yet and haven’t generated our results. Let’s continue and look at the `self._generate` method which is implemented in `BaseOpenAI`. 
+
+```python
+# https://github.com/langchain-ai/langchain/blob/24c165420827305e813f4b6d501f93d18f6d46a4/langchain/llms/openai.py#L272-L325
+def _generate(
+        self,
+        prompts: List[str],
+        stop: Optional[List[str]] = None,
+        run_manager: Optional[CallbackManagerForLLMRun] = None,
+        **kwargs: Any,
+    ) -> LLMResult:
+        params = self._invocation_params
+        params = {**params, **kwargs}
+        sub_prompts = self.get_sub_prompts(params, prompts, stop)
+        choices = []
+        token_usage: Dict[str, int] = {}
+        # Get the token usage from the response.
+        # Includes prompt, completion, and total tokens used.
+        _keys = {"completion_tokens", "prompt_tokens", "total_tokens"}
+        for _prompts in sub_prompts:
+            if self.streaming:
+                if len(_prompts) > 1:
+                    raise ValueError("Cannot stream results with multiple prompts.")
+                params["stream"] = True
+                response = _streaming_response_template()
+                for stream_resp in completion_with_retry(
+                    self, prompt=_prompts, **params
+                ):
+                    if run_manager:
+                        run_manager.on_llm_new_token(
+                            stream_resp["choices"][0]["text"],
+                            verbose=self.verbose,
+                            logprobs=stream_resp["choices"][0]["logprobs"],
+                        )
+                    _update_response(response, stream_resp)
+                choices.extend(response["choices"])
+            else:
+                response = completion_with_retry(self, prompt=_prompts, **params)
+                choices.extend(response["choices"])
+            if not self.streaming:
+                # Can't update token usage if streaming
+                update_token_usage(_keys, response, token_usage)
+        return self.create_llm_result(choices, prompts, token_usage)
+```
+
+Do we get to the part where we have results yet? Yes! The `completion_with_retry` function looks like it! Let’s look at the inputs to this function. It looks like the `_generate` also supports streaming. 
+
+```python
+>> _prompts
+['Tell me a joke that includes colorful socks?']
+
+>> params
+{'model': 'text-davinci-003', 'api_key': '<openai_api_key>', 'api_base': '', 'organization': '', 'temperature': 0.0, 'max_tokens': 256, 'top_p': 1, 'frequency_penalty': 0, 'presence_penalty': 0, 'n': 1, 'request_timeout': None, 'logit_bias': {}}
+```
+
+We are now ready to call the `completion_with_retry` passing in above as inputs. The `_prompts` is just the Prompt Template converted to a string. And the `params` are defined as defaults in `BaseOpenAI`. 
+
+```python
+def completion_with_retry(llm: Union[BaseOpenAI, OpenAIChat], **kwargs: Any) -> Any:
+    """Use tenacity to retry the completion call."""
+    retry_decorator = _create_retry_decorator(llm)
+
+    @retry_decorator
+    def _completion_with_retry(**kwargs: Any) -> Any:
+        return llm.client.create(**kwargs)
+
+    return _completion_with_retry(**kwargs)
+```
+
+Now, `self` get’s passed as an argument to the function and finally we call `llm.client.create(kwargs)`. 
+
+Below is what the `kwargs` look like. Remember, they are just `_prompts` & `params` mergfed together into a single dictionary.
+
+```python
+>> kwargs
+{'prompt': ['Tell me a joke that includes colorful socks?'], 'model': 'text-davinci-003', 'api_key': '<api_key>', 'api_base': '', 'organization': '', 'temperature': 0.0, 'max_tokens': 256, 'top_p': 1, 'frequency_penalty': 0, 'presence_penalty': 0, 'n': 1, 'request_timeout': None, 'logit_bias': {}}
+```
+
+## Complexity and Readability in LangChain
+
+Going through the LangChain code, I find myself filled with a mix of admiration and confusion. It's clear that the creators of LangChain put a lot of thought into building a flexible architecture. The design, which involves multiple layers of abstraction and many separate components, suggests that the tool is built to handle a wide range of use cases beyond the one we've examined today. However, in this particular scenario, we've seen how complexity can make code harder to follow and understand.
+
+Let's start with the positives. The modular design of LangChain allows for easy extension and modification.
+
+On the other hand, the complexity of the code made it difficult to trace the flow of execution. We found ourselves diving deeper and deeper into the call stack, and it took a considerable amount of time just to locate the point where the OpenAI API is actually called. 
+
+Another point of confusion was the usage of the **`self.dict()`** method. It seems that this method is intended to create a dictionary representation of an object's attributes, but it's not immediately clear why this is necessary. In some cases, it seemed that a simpler approach, such as using f-strings for prompt generation, could have achieved the same result with less code.
+
+In conclusion, examining the LangChain code has provided valuable insights into the design decisions that go into creating a complex tool like this. While the abstraction and modularity are commendable, the complexity of the code can potentially make it harder for anyone to understand.
+
+What are your thoughts? 

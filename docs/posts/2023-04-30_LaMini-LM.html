@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.2.335">
+<meta name="generator" content="quarto-1.3.433">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -20,9 +20,10 @@ div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
 ul.task-list{list-style: none;}
 ul.task-list li input[type="checkbox"] {
   width: 0.8em;
-  margin: 0 0.8em 0.2em -1.6em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
 pre > code.sourceCode { white-space: pre; position: relative; }
 pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
@@ -49,48 +50,19 @@ pre.numberSource code > span > a:first-child::before
     -khtml-user-select: none; -moz-user-select: none;
     -ms-user-select: none; user-select: none;
     padding: 0 4px; width: 4em;
-    color: #aaaaaa;
   }
-pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
 div.sourceCode
   {   }
 @media screen {
 pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-code span.al { color: #ff0000; font-weight: bold; } /* Alert */
-code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
-code span.at { color: #7d9029; } /* Attribute */
-code span.bn { color: #40a070; } /* BaseN */
-code span.bu { color: #008000; } /* BuiltIn */
-code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
-code span.ch { color: #4070a0; } /* Char */
-code span.cn { color: #880000; } /* Constant */
-code span.co { color: #60a0b0; font-style: italic; } /* Comment */
-code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
-code span.do { color: #ba2121; font-style: italic; } /* Documentation */
-code span.dt { color: #902000; } /* DataType */
-code span.dv { color: #40a070; } /* DecVal */
-code span.er { color: #ff0000; font-weight: bold; } /* Error */
-code span.ex { } /* Extension */
-code span.fl { color: #40a070; } /* Float */
-code span.fu { color: #06287e; } /* Function */
-code span.im { color: #008000; font-weight: bold; } /* Import */
-code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
-code span.kw { color: #007020; font-weight: bold; } /* Keyword */
-code span.op { color: #666666; } /* Operator */
-code span.ot { color: #007020; } /* Other */
-code span.pp { color: #bc7a00; } /* Preprocessor */
-code span.sc { color: #4070a0; } /* SpecialChar */
-code span.ss { color: #bb6688; } /* SpecialString */
-code span.st { color: #4070a0; } /* String */
-code span.va { color: #19177c; } /* Variable */
-code span.vs { color: #4070a0; } /* VerbatimString */
-code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+/* CSS for citations */
 div.csl-bib-body { }
 div.csl-entry {
   clear: both;
 }
-.hanging div.csl-entry {
+.hanging-indent div.csl-entry {
   margin-left:2em;
   text-indent:-2em;
 }
@@ -104,8 +76,7 @@ div.csl-right-inline {
 }
 div.csl-indent {
   margin-left: 2em;
-}
-</style>
+}</style>
 
 
 <script src="../site_libs/quarto-nav/quarto-nav.js"></script>
@@ -115,6 +86,7 @@ div.csl-indent {
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
+<link href=".././images/logo.png" rel="icon" type="image/png">
 <script src="../site_libs/quarto-html/quarto.js"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
@@ -140,7 +112,8 @@ div.csl-indent {
     "search-more-matches-text": "more matches in this document",
     "search-clear-button-title": "Clear",
     "search-detached-cancel-button-title": "Cancel",
-    "search-submit-button-title": "Submit"
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
   }
 }</script>
 
@@ -162,6 +135,7 @@ ga('send', {
 <script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 <script src="https://unpkg.com/@jupyter-widgets/html-manager@*/dist/embed-amd.js" crossorigin="anonymous"></script>
 
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
 <meta name="twitter:title" content="Paper Review - ‘LaMini-LM’">
@@ -176,29 +150,40 @@ ga('send', {
   <header id="quarto-header" class="headroom fixed-top">
     <nav class="navbar navbar-expand-lg navbar-dark ">
       <div class="navbar-container container-fluid">
+            <div id="quarto-search" class="" title="Search"></div>
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
   <span class="navbar-toggler-icon"></span>
 </button>
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
-    <a class="nav-link" href="../index.html">
+    <a class="nav-link" href="../index.html" rel="" target="">
  <span class="menu-text">Aman Arora’s Blog</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../about.html" rel="" target="">
+ <span class="menu-text">Aman Arora</span></a>
   </li>  
 </ul>
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item compact">
-    <a class="nav-link" href="https://github.com/amaarora"><i class="bi bi-github" role="img">
+    <a class="nav-link" href="https://github.com/amaarora" rel="" target=""><i class="bi bi-github" role="img">
 </i> 
  <span class="menu-text"></span></a>
   </li>  
   <li class="nav-item compact">
-    <a class="nav-link" href="https://twitter.com/amaarora"><i class="bi bi-twitter" role="img">
+    <a class="nav-link" href="https://twitter.com/amaarora" rel="" target=""><i class="bi bi-twitter" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://www.linkedin.com/in/aroraaman/" rel="" target=""><i class="bi bi-linkedin" role="img">
 </i> 
  <span class="menu-text"></span></a>
   </li>  
 </ul>
-              <div id="quarto-search" class="" title="Search"></div>
+            <div class="quarto-navbar-tools">
+</div>
           </div> <!-- /navcollapse -->
       </div> <!-- /container-fluid -->
     </nav>
@@ -250,27 +235,27 @@ ga('send', {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction"><span class="toc-section-number">1</span>  Introduction</a></li>
-  <li><a href="#sec-data-gen" id="toc-sec-data-gen" class="nav-link" data-scroll-target="#sec-data-gen"><span class="toc-section-number">2</span>  Dataset Generation</a>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction"><span class="header-section-number">1</span> Introduction</a></li>
+  <li><a href="#sec-data-gen" id="toc-sec-data-gen" class="nav-link" data-scroll-target="#sec-data-gen"><span class="header-section-number">2</span> Dataset Generation</a>
   <ul class="collapse">
-  <li><a href="#introduction-1" id="toc-introduction-1" class="nav-link" data-scroll-target="#introduction-1"><span class="toc-section-number">2.1</span>  Introduction</a></li>
-  <li><a href="#sec-example-guided" id="toc-sec-example-guided" class="nav-link" data-scroll-target="#sec-example-guided"><span class="toc-section-number">2.2</span>  Example Guided</a></li>
-  <li><a href="#sec-topic-guided" id="toc-sec-topic-guided" class="nav-link" data-scroll-target="#sec-topic-guided"><span class="toc-section-number">2.3</span>  Topic Guided</a></li>
-  <li><a href="#response-generation" id="toc-response-generation" class="nav-link" data-scroll-target="#response-generation"><span class="toc-section-number">2.4</span>  Response Generation</a></li>
+  <li><a href="#introduction-1" id="toc-introduction-1" class="nav-link" data-scroll-target="#introduction-1"><span class="header-section-number">2.1</span> Introduction</a></li>
+  <li><a href="#sec-example-guided" id="toc-sec-example-guided" class="nav-link" data-scroll-target="#sec-example-guided"><span class="header-section-number">2.2</span> Example Guided</a></li>
+  <li><a href="#sec-topic-guided" id="toc-sec-topic-guided" class="nav-link" data-scroll-target="#sec-topic-guided"><span class="header-section-number">2.3</span> Topic Guided</a></li>
+  <li><a href="#response-generation" id="toc-response-generation" class="nav-link" data-scroll-target="#response-generation"><span class="header-section-number">2.4</span> Response Generation</a></li>
   </ul></li>
-  <li><a href="#sec-data-exploration" id="toc-sec-data-exploration" class="nav-link" data-scroll-target="#sec-data-exploration"><span class="toc-section-number">3</span>  Dataset Exploration</a>
+  <li><a href="#sec-data-exploration" id="toc-sec-data-exploration" class="nav-link" data-scroll-target="#sec-data-exploration"><span class="header-section-number">3</span> Dataset Exploration</a>
   <ul class="collapse">
-  <li><a href="#statistics" id="toc-statistics" class="nav-link" data-scroll-target="#statistics"><span class="toc-section-number">3.1</span>  Statistics</a></li>
-  <li><a href="#sec-diversity" id="toc-sec-diversity" class="nav-link" data-scroll-target="#sec-diversity"><span class="toc-section-number">3.2</span>  Diversity</a></li>
-  <li><a href="#human-evaluation" id="toc-human-evaluation" class="nav-link" data-scroll-target="#human-evaluation"><span class="toc-section-number">3.3</span>  Human Evaluation</a></li>
+  <li><a href="#statistics" id="toc-statistics" class="nav-link" data-scroll-target="#statistics"><span class="header-section-number">3.1</span> Statistics</a></li>
+  <li><a href="#sec-diversity" id="toc-sec-diversity" class="nav-link" data-scroll-target="#sec-diversity"><span class="header-section-number">3.2</span> Diversity</a></li>
+  <li><a href="#human-evaluation" id="toc-human-evaluation" class="nav-link" data-scroll-target="#human-evaluation"><span class="header-section-number">3.3</span> Human Evaluation</a></li>
   </ul></li>
-  <li><a href="#sec-dataset-review" id="toc-sec-dataset-review" class="nav-link" data-scroll-target="#sec-dataset-review"><span class="toc-section-number">4</span>  Dataset Review</a></li>
-  <li><a href="#model-training" id="toc-model-training" class="nav-link" data-scroll-target="#model-training"><span class="toc-section-number">5</span>  Model Training</a></li>
-  <li><a href="#sec-model-eval" id="toc-sec-model-eval" class="nav-link" data-scroll-target="#sec-model-eval"><span class="toc-section-number">6</span>  Model Evaluation</a>
+  <li><a href="#sec-dataset-review" id="toc-sec-dataset-review" class="nav-link" data-scroll-target="#sec-dataset-review"><span class="header-section-number">4</span> Dataset Review</a></li>
+  <li><a href="#model-training" id="toc-model-training" class="nav-link" data-scroll-target="#model-training"><span class="header-section-number">5</span> Model Training</a></li>
+  <li><a href="#sec-model-eval" id="toc-sec-model-eval" class="nav-link" data-scroll-target="#sec-model-eval"><span class="header-section-number">6</span> Model Evaluation</a>
   <ul class="collapse">
-  <li><a href="#sec-human-eval" id="toc-sec-human-eval" class="nav-link" data-scroll-target="#sec-human-eval"><span class="toc-section-number">6.1</span>  Human Evaluation</a></li>
+  <li><a href="#sec-human-eval" id="toc-sec-human-eval" class="nav-link" data-scroll-target="#sec-human-eval"><span class="header-section-number">6.1</span> Human Evaluation</a></li>
   </ul></li>
-  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion"><span class="toc-section-number">7</span>  Conclusion</a></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion"><span class="header-section-number">7</span> Conclusion</a></li>
   </ul>
 </nav>
     </div>
@@ -285,7 +270,7 @@ ga('send', {
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="../images/lamini-intro-2.png" class="img-fluid figure-img"></p>
-<p></p><figcaption class="figure-caption">Overview of LaMini-LM</figcaption><p></p>
+<figcaption class="figure-caption">Overview of LaMini-LM</figcaption>
 </figure>
 </div>
 <p>As part of this blog post, we will be <strong>reviewing</strong> the <a href="https://arxiv.org/abs/2304.14402">LaMini-LM: A Diverse Herd of Distilled Models from Large-Scale Instructions</a> (<span class="citation" data-cites="laminilm">Wu et al. (<a href="#ref-laminilm" role="doc-biblioref">2023</a>)</span>) paper released on Apr 27, 2023.</p>
@@ -343,12 +328,12 @@ ga('send', {
 <p>Example guided generation follows <span class="citation" data-cites="selfinstruct">Wang et al. (<a href="#ref-selfinstruct" role="doc-biblioref">2022</a>)</span> &amp; <span class="citation" data-cites="alpaca">Taori et al. (<a href="#ref-alpaca" role="doc-biblioref">2023</a>)</span>.</p>
 <p>Specifically, the authors include only few random examples, and some limited constraints as shown in the example prompt in <a href="#fig-1">Figure&nbsp;1</a>.</p>
 <p>Newer instructions are generated by providing these examples from existing datasets - Self-Instruct (<span class="math inline">\(X_{SI}\)</span>), P3 (<span class="math inline">\(X_{P3}\)</span>) &amp; FLAN (<span class="math inline">\(X_{FLAN}\)</span>).</p>
-<div class="callout-note callout callout-style-default callout-captioned">
+<div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
-<div class="callout-caption-container flex-fill">
+<div class="callout-title-container flex-fill">
 Note
 </div>
 </div>
@@ -359,7 +344,7 @@ Note
 <div id="fig-1" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
 <p><img src="../images/lamini-example-guided.png" class="img-fluid figure-img"></p>
-<p></p><figcaption class="figure-caption">Figure&nbsp;1: An example of instruction generation prompt based on three random examples from self-instruct</figcaption><p></p>
+<figcaption class="figure-caption">Figure&nbsp;1: An example of instruction generation prompt based on three random examples from self-instruct</figcaption>
 </figure>
 </div>
 <p>To generate your own instructions using ChatGPT, either paste the above prompt in ChatGPT, or we can use the openai API like so:</p>
@@ -434,12 +419,12 @@ Note
 </ol></li>
 <li>Use the prompt in <a href="#fig-2">Figure&nbsp;2</a> and provide random examples from the same dataset and 3 topics obtained after filtering.</li>
 </ol>
-<div class="callout-note callout callout-style-default callout-captioned">
+<div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
-<div class="callout-caption-container flex-fill">
+<div class="callout-title-container flex-fill">
 Note
 </div>
 </div>
@@ -450,7 +435,7 @@ Note
 <div id="fig-2" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
 <p><img src="../images/lamini-topic-guided.png" class="img-fluid figure-img"></p>
-<p></p><figcaption class="figure-caption">Figure&nbsp;2: An example of instruction generation prompt based on three random examples from self-instruct and three random topics.</figcaption><p></p>
+<figcaption class="figure-caption">Figure&nbsp;2: An example of instruction generation prompt based on three random examples from self-instruct and three random topics.</figcaption>
 </figure>
 </div>
 <div class="cell" data-execution_count="65">
@@ -591,7 +576,7 @@ Note
 <div id="fig-3" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
 <p><img src="../images/lamini-hf-dataset.png" class="img-fluid figure-img"></p>
-<p></p><figcaption class="figure-caption">Figure&nbsp;3: Dataset Preview on Huggingface.</figcaption><p></p>
+<figcaption class="figure-caption">Figure&nbsp;3: Dataset Preview on Huggingface.</figcaption>
 </figure>
 </div>
 <section id="statistics" class="level3" data-number="3.1">
@@ -600,16 +585,16 @@ Note
 <div id="fig-4" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
 <p><img src="../images/lamini-dataset-stats.png" class="img-fluid figure-img"></p>
-<p></p><figcaption class="figure-caption">Figure&nbsp;4: Data statistics of the generated dataset.</figcaption><p></p>
+<figcaption class="figure-caption">Figure&nbsp;4: Data statistics of the generated dataset.</figcaption>
 </figure>
 </div>
 <p>As can be seen aboce, in total there are 2.58M samples in <code>LaMini-LM</code>. It can be observed that the instructions for <span class="math inline">\(D_{P3}\)</span> &amp; <span class="math inline">\(D_{FLAN}\)</span> are in general longer compared to the rest.</p>
-<div class="callout-note callout callout-style-default callout-captioned">
+<div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
-<div class="callout-caption-container flex-fill">
+<div class="callout-title-container flex-fill">
 Note
 </div>
 </div>
@@ -626,7 +611,7 @@ Note
 <div id="fig-5" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
 <p><img src="../images/lamini-tsne.png" class="img-fluid figure-img"></p>
-<p></p><figcaption class="figure-caption">Figure&nbsp;5: The t-SNE visualizations of 50k sample of instruction sentence embeddings.</figcaption><p></p>
+<figcaption class="figure-caption">Figure&nbsp;5: The t-SNE visualizations of 50k sample of instruction sentence embeddings.</figcaption>
 </figure>
 </div>
 <p>Some comments about the the t-SNE visualisation directly from the paper:</p>
@@ -644,12 +629,12 @@ Note
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">'completion'</span>: <span class="st">'&lt;response&gt;Here is the contact information for a design bureau specializing in sustainable architecture:&lt;/response&gt;'</span></span>
 <span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>I think by training on such examples that might not be of high quality, we are allowing the model to hallucinate.</p>
-<div class="callout-tip callout callout-style-default callout-captioned">
+<div class="callout callout-style-default callout-tip callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
-<div class="callout-caption-container flex-fill">
+<div class="callout-title-container flex-fill">
 Hallucination
 </div>
 </div>
@@ -695,7 +680,7 @@ Hallucination
 </div>
 <div class="cell-output cell-output-display">
 <script type="application/vnd.jupyter.widget-view+json">
-{"model_id":"8e79355dafb84dc1903a7061c1b433e5","version_major":2,"version_minor":0}
+{"model_id":"8e79355dafb84dc1903a7061c1b433e5","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
 </script>
 </div>
 <div class="cell-output cell-output-display" data-execution_count="4">
@@ -744,40 +729,41 @@ Loading cached processed dataset at /home/ubuntu/.cache/huggingface/datasets/MBZ
 </details>
 <div class="cell-output cell-output-display">
 <script type="application/vnd.jupyter.widget-view+json">
-{"model_id":"bb866cb9ed054917933f964849f7b805","version_major":2,"version_minor":0}
+{"model_id":"bb866cb9ed054917933f964849f7b805","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
 </script>
 </div>
 <div class="cell-output cell-output-display" data-execution_count="6">
-
 <div>
 
-<table class="dataframe table table-sm table-striped">
-  <thead>
-    <tr>
-      <th></th>
-      <th>generated_self_instruct</th>
-      <th>generated_p3</th>
-      <th>alpaca</th>
-      <th>original_p3</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>How does tobacco use affect the cardiovascular...</td>
-      <td>What do you read in your free time?\nRead a be...</td>
-      <td>Classify the types of data structures.</td>
-      <td>I know that the answer to the question "What h...</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>Watch a sitcom and write down three humorous s...</td>
-      <td>Suppose a survey found that the majority of pa...</td>
-      <td>Determine how this example sentence illustrate...</td>
-      <td>The toddler became cranky. \n\nI am hesitating...</td>
-    </tr>
-  </tbody>
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">generated_self_instruct</th>
+<th data-quarto-table-cell-role="th">generated_p3</th>
+<th data-quarto-table-cell-role="th">alpaca</th>
+<th data-quarto-table-cell-role="th">original_p3</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>How does tobacco use affect the cardiovascular...</td>
+<td>What do you read in your free time?\nRead a be...</td>
+<td>Classify the types of data structures.</td>
+<td>I know that the answer to the question "What h...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>Watch a sitcom and write down three humorous s...</td>
+<td>Suppose a survey found that the majority of pa...</td>
+<td>Determine how this example sentence illustrate...</td>
+<td>The toddler became cranky. \n\nI am hesitating...</td>
+</tr>
+</tbody>
 </table>
+
 </div>
 </div>
 </div>
@@ -820,12 +806,12 @@ Loading cached processed dataset at /home/ubuntu/.cache/huggingface/datasets/MBZ
 <p><img src="2023-04-30_LaMini-LM_files/figure-html/cell-12-output-1.png" class="img-fluid"></p>
 </div>
 </div>
-<div class="callout-tip callout callout-style-default callout-captioned">
+<div class="callout callout-style-default callout-tip callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
-<div class="callout-caption-container flex-fill">
+<div class="callout-title-container flex-fill">
 Thank you authors!
 </div>
 </div>
@@ -856,7 +842,7 @@ Hi! Thanks for the feedback. <br>You are correct, we'll update the HF repo data 
 <div id="fig-6" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
 <p><img src="../images/lamini-human-evaluation.png" class="img-fluid figure-img" style="width:60.0%"></p>
-<p></p><figcaption class="figure-caption">Figure&nbsp;6: Human evaluation results for the generated instruction dataset.</figcaption><p></p>
+<figcaption class="figure-caption">Figure&nbsp;6: Human evaluation results for the generated instruction dataset.</figcaption>
 </figure>
 </div>
 <p>As part of this blog post, let’s look at <code>self_instruct_with_topic</code> and perform human evaluation on 20 samples ourselves.</p>
@@ -940,24 +926,24 @@ Loading cached shuffled indices for dataset at /home/ubuntu/.cache/huggingface/d
 </details>
 <div class="cell-output cell-output-display">
 <script type="application/vnd.jupyter.widget-view+json">
-{"model_id":"6226ae928af048f3bd5edc32e7221012","version_major":2,"version_minor":0}
+{"model_id":"6226ae928af048f3bd5edc32e7221012","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
 </script>
 </div>
 <div class="cell-output cell-output-display">
 <script type="application/vnd.jupyter.widget-view+json">
-{"model_id":"2d336554154d450989e12692b36fb63f","version_major":2,"version_minor":0}
+{"model_id":"2d336554154d450989e12692b36fb63f","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
 </script>
 </div>
 <div class="cell-output cell-output-display">
 <script type="application/vnd.jupyter.widget-view+json">
-{"model_id":"b211ee724c504372846eaadc2d42c6fa","version_major":2,"version_minor":0}
+{"model_id":"b211ee724c504372846eaadc2d42c6fa","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
 </script>
 </div>
 </div>
 <div id="fig-7" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
 <p><img src="../images/lamini-widget.png" class="img-fluid figure-img"></p>
-<p></p><figcaption class="figure-caption">Figure&nbsp;7: IpyWidget for scoring instructions &amp; responses</figcaption><p></p>
+<figcaption class="figure-caption">Figure&nbsp;7: IpyWidget for scoring instructions &amp; responses</figcaption>
 </figure>
 </div>
 <p>You can see how hard it is to score even 20 samples each. Scoring is an intensive task especially when it is about topics that the labeler has no idea about. Above, the instruction is <em>“What are some behavioral patterns exhibited by Zygaenoidea moths?”</em>.</p>
@@ -983,7 +969,7 @@ Loading cached shuffled indices for dataset at /home/ubuntu/.cache/huggingface/d
 <div id="fig-8" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
 <p><img src="../images/lamini-eval.png" class="img-fluid figure-img" style="width:60.0%"></p>
-<p></p><figcaption class="figure-caption">Figure&nbsp;8: LaMini-LM collection.</figcaption><p></p>
+<figcaption class="figure-caption">Figure&nbsp;8: LaMini-LM collection.</figcaption>
 </figure>
 </div>
 <p>Also, from the paper:</p>
@@ -998,7 +984,7 @@ Loading cached shuffled indices for dataset at /home/ubuntu/.cache/huggingface/d
 <div id="fig-9" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
 <p><img src="../images/lamini-eval-table.png" class="img-fluid figure-img" style="width:80.0%"></p>
-<p></p><figcaption class="figure-caption">Figure&nbsp;9: LaMini-LM collection.</figcaption><p></p>
+<figcaption class="figure-caption">Figure&nbsp;9: LaMini-LM collection.</figcaption>
 </figure>
 </div>
 <p>As shared by <a href="https://twitter.com/abacaj">anton</a>, and as shown above, the results from <code>LaMini-LM</code>, don’t match <code>LLAMA</code>.</p>
@@ -1193,12 +1179,12 @@ Here is our adapted lm-eval-harness code: <a href="https://t.co/fP2y0IcboQ">http
 </table>
 </div>
 <p>After running more evaluation on these benchmarks shared in <a href="#tbl-eval-results-v2">Table&nbsp;2</a>, looks like the results are different compared to the paper. This maybe due to the same reason as before.</p>
-<div class="callout-tip callout callout-style-default callout-captioned">
+<div class="callout callout-style-default callout-tip callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
-<div class="callout-caption-container flex-fill">
+<div class="callout-title-container flex-fill">
 Thank you again authors!
 </div>
 </div>
@@ -1217,12 +1203,12 @@ Thank you again authors!
 <h3 data-number="6.1" class="anchored" data-anchor-id="sec-human-eval"><span class="header-section-number">6.1</span> Human Evaluation</h3>
 <p>Lastly, let’s look at the human evaluation bit. From the paper:</p>
 <p><em>To complete the evaluation, we additionally evaluate the practicality of both our LaMini-LM and our baseline models by utilizing the user-oriented instructions from Wang et al.&nbsp;(2022a), which consists of 252 instructions covering 71 commonly used apps use-cases.</em></p>
-<div class="callout-important callout callout-style-default callout-captioned">
+<div class="callout callout-style-default callout-important callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
-<div class="callout-caption-container flex-fill">
+<div class="callout-title-container flex-fill">
 Important
 </div>
 </div>
@@ -1234,7 +1220,7 @@ Important
 <div id="fig-10" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
 <p><img src="../images/lamini-human-eval.png" class="img-fluid figure-img" style="width:80.0%"></p>
-<p></p><figcaption class="figure-caption">Figure&nbsp;10: LaMini-LM collection.</figcaption><p></p>
+<figcaption class="figure-caption">Figure&nbsp;10: LaMini-LM collection.</figcaption>
 </figure>
 </div>
 <div class="cell" data-execution_count="3">
@@ -1355,41 +1341,41 @@ Write a product description for a sustainable, eco-friendly backpack made from r
         </div>
     </div>
 </form>
-</div><script type="text/javascript">(function($) {window.fnames = new Array(); window.ftypes = new Array();fnames[0]='EMAIL';ftypes[0]='email';fnames[1]='FNAME';ftypes[1]='text';fnames[2]='LNAME';ftypes[2]='text';fnames[3]='ADDRESS';ftypes[3]='address';fnames[4]='PHONE';ftypes[4]='phone';fnames[5]='BIRTHDAY';ftypes[5]='birthday';}(jQuery));var $mcj = jQuery.noConflict(true);</script><div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" role="doc-bibliography">
-<div id="ref-piqa" class="csl-entry" role="doc-biblioentry">
+</div><script type="text/javascript">(function($) {window.fnames = new Array(); window.ftypes = new Array();fnames[0]='EMAIL';ftypes[0]='email';fnames[1]='FNAME';ftypes[1]='text';fnames[2]='LNAME';ftypes[2]='text';fnames[3]='ADDRESS';ftypes[3]='address';fnames[4]='PHONE';ftypes[4]='phone';fnames[5]='BIRTHDAY';ftypes[5]='birthday';}(jQuery));var $mcj = jQuery.noConflict(true);</script><div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" role="list">
+<div id="ref-piqa" class="csl-entry" role="listitem">
 Bisk, Yonatan, Rowan Zellers, Ronan Le Bras, Jianfeng Gao, and Yejin Choi. 2019. <span>“PIQA: Reasoning about Physical Commonsense in Natural Language.”</span> <a href="https://arxiv.org/abs/1911.11641">https://arxiv.org/abs/1911.11641</a>.
 </div>
-<div id="ref-flant5" class="csl-entry" role="doc-biblioentry">
+<div id="ref-flant5" class="csl-entry" role="listitem">
 Chung, Hyung Won, Le Hou, Shayne Longpre, Barret Zoph, Yi Tay, William Fedus, Yunxuan Li, et al. 2022. <span>“Scaling Instruction-Finetuned Language Models.”</span> <a href="https://arxiv.org/abs/2210.11416">https://arxiv.org/abs/2210.11416</a>.
 </div>
-<div id="ref-boolq" class="csl-entry" role="doc-biblioentry">
+<div id="ref-boolq" class="csl-entry" role="listitem">
 Clark, Christopher, Kenton Lee, Ming-Wei Chang, Tom Kwiatkowski, Michael Collins, and Kristina Toutanova. 2019. <span>“BoolQ: Exploring the Surprising Difficulty of Natural Yes/No Questions.”</span> <a href="https://arxiv.org/abs/1905.10044">https://arxiv.org/abs/1905.10044</a>.
 </div>
-<div id="ref-cerebrasgpt" class="csl-entry" role="doc-biblioentry">
+<div id="ref-cerebrasgpt" class="csl-entry" role="listitem">
 Dey, Nolan, Gurpreet Gosal, Zhiming, Chen, Hemant Khachane, William Marshall, Ribhu Pathria, Marvin Tom, and Joel Hestness. 2023. <span>“Cerebras-GPT: Open Compute-Optimal Language Models Trained on the Cerebras Wafer-Scale Cluster.”</span> <a href="https://arxiv.org/abs/2304.03208">https://arxiv.org/abs/2304.03208</a>.
 </div>
-<div id="ref-pile" class="csl-entry" role="doc-biblioentry">
+<div id="ref-pile" class="csl-entry" role="listitem">
 Gao, Leo, Stella Biderman, Sid Black, Laurence Golding, Travis Hoppe, Charles Foster, Jason Phang, et al. 2020. <span>“The Pile: An 800GB Dataset of Diverse Text for Language Modeling.”</span> <a href="https://arxiv.org/abs/2101.00027">https://arxiv.org/abs/2101.00027</a>.
 </div>
-<div id="ref-eval-harness" class="csl-entry" role="doc-biblioentry">
-Gao, Leo, Jonathan Tow, Stella Biderman, Sid Black, Anthony DiPofi, Charles Foster, Laurence Golding, et al. 2021. <em>A Framework for Few-Shot Language Model Evaluation</em> (version v0.0.1). Zenodo. <a href="https://doi.org/10.5281/zenodo.5371628">https://doi.org/10.5281/zenodo.5371628</a>.
+<div id="ref-eval-harness" class="csl-entry" role="listitem">
+Gao, Leo, Jonathan Tow, Stella Biderman, Sid Black, Anthony DiPofi, Charles Foster, Laurence Golding, et al. 2021. <span>“A Framework for Few-Shot Language Model Evaluation.”</span> Zenodo. <a href="https://doi.org/10.5281/zenodo.5371628">https://doi.org/10.5281/zenodo.5371628</a>.
 </div>
-<div id="ref-flan" class="csl-entry" role="doc-biblioentry">
+<div id="ref-flan" class="csl-entry" role="listitem">
 Longpre, Shayne, Le Hou, Tu Vu, Albert Webson, Hyung Won Chung, Yi Tay, Denny Zhou, et al. 2023. <span>“The Flan Collection: Designing Data and Methods for Effective Instruction Tuning.”</span> <a href="https://arxiv.org/abs/2301.13688">https://arxiv.org/abs/2301.13688</a>.
 </div>
-<div id="ref-openbookqa" class="csl-entry" role="doc-biblioentry">
+<div id="ref-openbookqa" class="csl-entry" role="listitem">
 Mihaylov, Todor, Peter Clark, Tushar Khot, and Ashish Sabharwal. 2018. <span>“Can a Suit of Armor Conduct Electricity? A New Dataset for Open Book Question Answering.”</span> <a href="https://arxiv.org/abs/1809.02789">https://arxiv.org/abs/1809.02789</a>.
 </div>
-<div id="ref-p3" class="csl-entry" role="doc-biblioentry">
+<div id="ref-p3" class="csl-entry" role="listitem">
 Sanh, Victor, Albert Webson, Colin Raffel, Stephen H. Bach, Lintang Sutawika, Zaid Alyafeai, Antoine Chaffin, et al. 2022. <span>“Multitask Prompted Training Enables Zero-Shot Task Generalization.”</span> <a href="https://arxiv.org/abs/2110.08207">https://arxiv.org/abs/2110.08207</a>.
 </div>
-<div id="ref-alpaca" class="csl-entry" role="doc-biblioentry">
+<div id="ref-alpaca" class="csl-entry" role="listitem">
 Taori, Rohan, Ishaan Gulrajani, Tianyi Zhang, Yann Dubois, Xuechen Li, Carlos Guestrin, Percy Liang, and Tatsunori B. Hashimoto. 2023. <span>“Stanford Alpaca: An Instruction-Following LLaMA Model.”</span> <em>GitHub Repository</em>. <a href="https://github.com/tatsu-lab/stanford_alpaca" class="uri">https://github.com/tatsu-lab/stanford_alpaca</a>; GitHub.
 </div>
-<div id="ref-selfinstruct" class="csl-entry" role="doc-biblioentry">
+<div id="ref-selfinstruct" class="csl-entry" role="listitem">
 Wang, Yizhong, Yeganeh Kordi, Swaroop Mishra, Alisa Liu, Noah A. Smith, Daniel Khashabi, and Hannaneh Hajishirzi. 2022. <span>“Self-Instruct: Aligning Language Model with Self Generated Instructions.”</span> <a href="https://arxiv.org/abs/2212.10560">https://arxiv.org/abs/2212.10560</a>.
 </div>
-<div id="ref-laminilm" class="csl-entry" role="doc-biblioentry">
+<div id="ref-laminilm" class="csl-entry" role="listitem">
 Wu, Minghao, Abdul Waheed, Chiyu Zhang, Muhammad Abdul-Mageed, and Alham Fikri Aji. 2023. <span>“LaMini-LM: A Diverse Herd of Distilled Models from Large-Scale Instructions.”</span> <a href="https://arxiv.org/abs/2304.14402">https://arxiv.org/abs/2304.14402</a>.
 </div>
 </div></section></div></main> <!-- /main -->
@@ -1420,9 +1406,23 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     icon: icon
   };
   anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
   const clipboard = new window.ClipboardJS('.code-copy-button', {
-    target: function(trigger) {
-      return trigger.previousElementSibling;
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
     }
   });
   clipboard.on('success', function(e) {
@@ -1487,6 +1487,92 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       return note.innerHTML;
     });
   }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
   const findCites = (el) => {
     const parentEl = el.parentElement;
     if (parentEl) {
