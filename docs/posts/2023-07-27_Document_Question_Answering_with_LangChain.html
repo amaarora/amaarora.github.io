@@ -575,48 +575,42 @@ On <code>LLMChain</code>s
 <section id="document-chain" class="level4" data-number="2.4.2">
 <h4 data-number="2.4.2" class="anchored" data-anchor-id="document-chain"><span class="header-section-number">2.4.2</span> Document chain</h4>
 <p>The stuff documents chain is available as <code>combine_docs_chain</code> attribute from the conversational retrieval chain.</p>
-<div class="cell" data-execution_count="8">
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>qa.combine_docs_chain</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="8">
-<pre><code>StuffDocumentsChain(memory=None, callbacks=None, callback_manager=None, verbose=False, tags=None, metadata=None, input_key='input_documents', output_key='output_text', llm_chain=LLMChain(memory=None, callbacks=None, callback_manager=None, verbose=False, tags=None, metadata=None, prompt=ChatPromptTemplate(input_variables=['context', 'question'], output_parser=None, partial_variables={}, messages=[SystemMessagePromptTemplate(prompt=PromptTemplate(input_variables=['context'], output_parser=None, partial_variables={}, template="Use the following pieces of context to answer the users question. \nIf you don't know the answer, just say that you don't know, don't try to make up an answer.\n----------------\n{context}", template_format='f-string', validate_template=True), additional_kwargs={}), HumanMessagePromptTemplate(prompt=PromptTemplate(input_variables=['question'], output_parser=None, partial_variables={}, template='{question}', template_format='f-string', validate_template=True), additional_kwargs={})]), llm=ChatOpenAI(cache=None, verbose=False, callbacks=None, callback_manager=None, tags=None, metadata=None, client=&lt;class 'openai.api_resources.chat_completion.ChatCompletion'&gt;, model_name='gpt-3.5-turbo', temperature=0.2, model_kwargs={}, openai_api_key='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', openai_api_base='', openai_organization='', openai_proxy='', request_timeout=None, max_retries=6, streaming=False, n=1, max_tokens=None, tiktoken_model_name=None), output_key='text', output_parser=NoOpOutputParser(), return_final_only=True, llm_kwargs={}), document_prompt=PromptTemplate(input_variables=['page_content'], output_parser=None, partial_variables={}, template='{page_content}', template_format='f-string', validate_template=True), document_variable_name='context', document_separator='\n\n')</code></pre>
-</div>
-</div>
-<p>As can be seen above, the <code>StuffDocumentsChain</code> itself has a <code>LLMChain</code> of it’s own with the prompt</p>
-<div class="sourceCode" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>system_template <span class="op">=</span> <span class="st">"""Use the following pieces of context to answer the users question. </span></span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="st">If you don't know the answer, just say that you don't know, don't try to make up an answer.</span></span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="st">----------------</span></span>
-<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a><span class="sc">{context}</span><span class="st">"""</span></span>
-<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>messages <span class="op">=</span> [</span>
-<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>    SystemMessagePromptTemplate.from_template(system_template),</span>
-<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>    HumanMessagePromptTemplate.from_template(<span class="st">"</span><span class="sc">{question}</span><span class="st">"</span>),</span>
-<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>]</span>
-<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>CHAT_PROMPT <span class="op">=</span> ChatPromptTemplate.from_messages(messages)</span>
-<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>PROMPT_SELECTOR <span class="op">=</span> ConditionalPromptSelector(</span>
-<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>    default_prompt<span class="op">=</span>PROMPT, conditionals<span class="op">=</span>[(is_chat_model, CHAT_PROMPT)]</span>
-<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The <code>StuffDocumentsChain</code> itself has a <code>LLMChain</code> of it’s own with the prompt</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>system_template <span class="op">=</span> <span class="st">"""Use the following pieces of context to answer the users question. </span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="st">If you don't know the answer, just say that you don't know, don't try to make up an answer.</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="st">----------------</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="sc">{context}</span><span class="st">"""</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>messages <span class="op">=</span> [</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>    SystemMessagePromptTemplate.from_template(system_template),</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>    HumanMessagePromptTemplate.from_template(<span class="st">"</span><span class="sc">{question}</span><span class="st">"</span>),</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>CHAT_PROMPT <span class="op">=</span> ChatPromptTemplate.from_messages(messages)</span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>PROMPT_SELECTOR <span class="op">=</span> ConditionalPromptSelector(</span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>    default_prompt<span class="op">=</span>PROMPT, conditionals<span class="op">=</span>[(is_chat_model, CHAT_PROMPT)]</span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>So, we to our prompt, we pass in the context and a follow up question. It specifically says “just say that you don’t know, don’t try to make up an answer.” This is good to limit hallucination.</p>
 <p>When we call the <code>StuffDocumentsChain</code>, it does two things - first it calls <code>combine_docs</code>. This method first combines the given input chunks by using separator <code>\n\n</code> to generate context.</p>
-<div class="sourceCode" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> _get_inputs(<span class="va">self</span>, docs: List[Document], <span class="op">**</span>kwargs: Any) <span class="op">-&gt;</span> <span class="bu">dict</span>:</span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Format each document according to the prompt</span></span>
-<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>        doc_strings <span class="op">=</span> [format_document(doc, <span class="va">self</span>.document_prompt) <span class="cf">for</span> doc <span class="kw">in</span> docs]</span>
-<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Join the documents together to put them in the prompt.</span></span>
-<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>        inputs <span class="op">=</span> {</span>
-<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>            k: v</span>
-<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> k, v <span class="kw">in</span> kwargs.items()</span>
-<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> k <span class="kw">in</span> <span class="va">self</span>.llm_chain.prompt.input_variables</span>
-<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>        }</span>
-<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>        inputs[<span class="va">self</span>.document_variable_name] <span class="op">=</span> <span class="va">self</span>.document_separator.join(doc_strings)</span>
-<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> inputs</span>
-<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> combine_docs(</span>
-<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>, docs: List[Document], callbacks: Callbacks <span class="op">=</span> <span class="va">None</span>, <span class="op">**</span>kwargs: Any</span>
-<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a>    ) <span class="op">-&gt;</span> Tuple[<span class="bu">str</span>, <span class="bu">dict</span>]:</span>
-<span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a>        inputs <span class="op">=</span> <span class="va">self</span>._get_inputs(docs, <span class="op">**</span>kwargs)</span>
-<span id="cb24-18"><a href="#cb24-18" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Call predict on the LLM.</span></span>
-<span id="cb24-19"><a href="#cb24-19" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.llm_chain.predict(callbacks<span class="op">=</span>callbacks, <span class="op">**</span>inputs), {}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> _get_inputs(<span class="va">self</span>, docs: List[Document], <span class="op">**</span>kwargs: Any) <span class="op">-&gt;</span> <span class="bu">dict</span>:</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Format each document according to the prompt</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>        doc_strings <span class="op">=</span> [format_document(doc, <span class="va">self</span>.document_prompt) <span class="cf">for</span> doc <span class="kw">in</span> docs]</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Join the documents together to put them in the prompt.</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>        inputs <span class="op">=</span> {</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>            k: v</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> k, v <span class="kw">in</span> kwargs.items()</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> k <span class="kw">in</span> <span class="va">self</span>.llm_chain.prompt.input_variables</span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>        inputs[<span class="va">self</span>.document_variable_name] <span class="op">=</span> <span class="va">self</span>.document_separator.join(doc_strings)</span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> inputs</span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> combine_docs(</span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>, docs: List[Document], callbacks: Callbacks <span class="op">=</span> <span class="va">None</span>, <span class="op">**</span>kwargs: Any</span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a>    ) <span class="op">-&gt;</span> Tuple[<span class="bu">str</span>, <span class="bu">dict</span>]:</span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>        inputs <span class="op">=</span> <span class="va">self</span>._get_inputs(docs, <span class="op">**</span>kwargs)</span>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Call predict on the LLM.</span></span>
+<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.llm_chain.predict(callbacks<span class="op">=</span>callbacks, <span class="op">**</span>inputs), {}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Given our question, remember, we first find the closest chunks to the question. These chunks are then joined together using <code>\n\n</code> separator.</p>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
@@ -639,30 +633,30 @@ Note
 <section id="conclusion" class="level2" data-number="3">
 <h2 data-number="3" class="anchored" data-anchor-id="conclusion"><span class="header-section-number">3</span> Conclusion</h2>
 <p>In <a href="https://python.langchain.com/docs/get_started/introduction.html">langchain</a>, once we have a vector database, below lines of code are enough to create a chatbot, that can answer user questions based on some “context”.</p>
-<div class="sourceCode" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> langchain.vectorstores.chroma <span class="im">import</span> Chroma</span>
-<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> langchain.embeddings.openai <span class="im">import</span> OpenAIEmbeddings</span>
-<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> langchain.chat_models <span class="im">import</span> ChatOpenAI</span>
-<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> langchain.chains <span class="im">import</span> ConversationalRetrievalChain</span>
-<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> langchain.memory <span class="im">import</span> ConversationBufferMemory</span>
-<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>persist_directory <span class="op">=</span> <span class="st">"./db/"</span></span>
-<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>openai_api_key <span class="op">=</span> os.environ[<span class="st">'OPENAI_API_KEY'</span>]</span>
-<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>embeddings <span class="op">=</span> OpenAIEmbeddings(openai_api_key<span class="op">=</span>openai_api_key)</span>
-<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>db <span class="op">=</span> Chroma(persist_directory<span class="op">=</span>persist_directory, embedding_function<span class="op">=</span>embeddings)</span>
-<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a>memory <span class="op">=</span> ConversationBufferMemory(</span>
-<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a>    memory_key<span class="op">=</span><span class="st">"chat_history"</span>, output_key<span class="op">=</span><span class="st">'answer'</span>, return_messages<span class="op">=</span><span class="va">False</span>)</span>
-<span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a><span class="co"># create QA chain using `langchain`, database is used as vector store retriever to find "context" (using similarity search)</span></span>
-<span id="cb25-16"><a href="#cb25-16" aria-hidden="true" tabindex="-1"></a>qa <span class="op">=</span> ConversationalRetrievalChain.from_llm(</span>
-<span id="cb25-17"><a href="#cb25-17" aria-hidden="true" tabindex="-1"></a>    llm<span class="op">=</span>ChatOpenAI(temperature<span class="op">=</span><span class="fl">0.2</span>, model_name<span class="op">=</span><span class="st">'gpt-3.5-turbo'</span>),</span>
-<span id="cb25-18"><a href="#cb25-18" aria-hidden="true" tabindex="-1"></a>    chain_type<span class="op">=</span><span class="st">"stuff"</span>,</span>
-<span id="cb25-19"><a href="#cb25-19" aria-hidden="true" tabindex="-1"></a>    retriever<span class="op">=</span>db.as_retriever(),</span>
-<span id="cb25-20"><a href="#cb25-20" aria-hidden="true" tabindex="-1"></a>    get_chat_history<span class="op">=</span><span class="kw">lambda</span> o:o,</span>
-<span id="cb25-21"><a href="#cb25-21" aria-hidden="true" tabindex="-1"></a>    memory<span class="op">=</span>memory,</span>
-<span id="cb25-22"><a href="#cb25-22" aria-hidden="true" tabindex="-1"></a>    return_generated_question<span class="op">=</span><span class="va">True</span>,</span>
-<span id="cb25-23"><a href="#cb25-23" aria-hidden="true" tabindex="-1"></a>    verbose<span class="op">=</span><span class="va">False</span>,</span>
-<span id="cb25-24"><a href="#cb25-24" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> langchain.vectorstores.chroma <span class="im">import</span> Chroma</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> langchain.embeddings.openai <span class="im">import</span> OpenAIEmbeddings</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> langchain.chat_models <span class="im">import</span> ChatOpenAI</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> langchain.chains <span class="im">import</span> ConversationalRetrievalChain</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> langchain.memory <span class="im">import</span> ConversationBufferMemory</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>persist_directory <span class="op">=</span> <span class="st">"./db/"</span></span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>openai_api_key <span class="op">=</span> os.environ[<span class="st">'OPENAI_API_KEY'</span>]</span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>embeddings <span class="op">=</span> OpenAIEmbeddings(openai_api_key<span class="op">=</span>openai_api_key)</span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>db <span class="op">=</span> Chroma(persist_directory<span class="op">=</span>persist_directory, embedding_function<span class="op">=</span>embeddings)</span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>memory <span class="op">=</span> ConversationBufferMemory(</span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>    memory_key<span class="op">=</span><span class="st">"chat_history"</span>, output_key<span class="op">=</span><span class="st">'answer'</span>, return_messages<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a><span class="co"># create QA chain using `langchain`, database is used as vector store retriever to find "context" (using similarity search)</span></span>
+<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a>qa <span class="op">=</span> ConversationalRetrievalChain.from_llm(</span>
+<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a>    llm<span class="op">=</span>ChatOpenAI(temperature<span class="op">=</span><span class="fl">0.2</span>, model_name<span class="op">=</span><span class="st">'gpt-3.5-turbo'</span>),</span>
+<span id="cb23-18"><a href="#cb23-18" aria-hidden="true" tabindex="-1"></a>    chain_type<span class="op">=</span><span class="st">"stuff"</span>,</span>
+<span id="cb23-19"><a href="#cb23-19" aria-hidden="true" tabindex="-1"></a>    retriever<span class="op">=</span>db.as_retriever(),</span>
+<span id="cb23-20"><a href="#cb23-20" aria-hidden="true" tabindex="-1"></a>    get_chat_history<span class="op">=</span><span class="kw">lambda</span> o:o,</span>
+<span id="cb23-21"><a href="#cb23-21" aria-hidden="true" tabindex="-1"></a>    memory<span class="op">=</span>memory,</span>
+<span id="cb23-22"><a href="#cb23-22" aria-hidden="true" tabindex="-1"></a>    return_generated_question<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb23-23"><a href="#cb23-23" aria-hidden="true" tabindex="-1"></a>    verbose<span class="op">=</span><span class="va">False</span>,</span>
+<span id="cb23-24"><a href="#cb23-24" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>We saw all the steps in detail as part of this blog post. We also saw that the <code>ConversationalRetrievalChain</code> consists of two chains:</p>
 <ol type="1">
 <li>Question generator chain (to generate a new standalone question based on chat history)</li>
