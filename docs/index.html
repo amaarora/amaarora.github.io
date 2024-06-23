@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.3.433">
+<meta name="generator" content="quarto-99.9.9">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -48,7 +48,13 @@ ul.task-list li input[type="checkbox"] {
   "collapse-after": 3,
   "panel-placement": "end",
   "type": "overlay",
-  "limit": 20,
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
   "language": {
     "search-no-results-text": "No results",
     "search-matching-documents-text": "matching documents",
@@ -57,6 +63,7 @@ ul.task-list li input[type="checkbox"] {
     "search-more-match-text": "more match in this document",
     "search-more-matches-text": "more matches in this document",
     "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
     "search-detached-cancel-button-title": "Cancel",
     "search-submit-button-title": "Submit",
     "search-label": "Search"
@@ -107,52 +114,79 @@ ga('send', {
 });
 </script>
 
-  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 </head>
 
 <body class="nav-fixed">
 
 <div id="quarto-search-results"></div>
-  <header id="quarto-header" class="headroom fixed-top">
-    <nav class="navbar navbar-expand-lg navbar-dark ">
+  <header id="quarto-header" class="headroom fixed-top quarto-banner">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
             <div id="quarto-search" class="" title="Search"></div>
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
   <span class="navbar-toggler-icon"></span>
 </button>
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
-    <a class="nav-link active" href="./index.html" rel="" target="" aria-current="page">
- <span class="menu-text">Aman Arora’s Blog</span></a>
+    <a class="nav-link active" href="./index.html" aria-current="page"> 
+<span class="menu-text">Aman Arora’s Blog</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./about.html" rel="" target="">
- <span class="menu-text">Aman Arora</span></a>
+    <a class="nav-link" href="./about.html"> 
+<span class="menu-text">Aman Arora</span></a>
   </li>  
 </ul>
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item compact">
-    <a class="nav-link" href="https://github.com/amaarora" rel="" target=""><i class="bi bi-github" role="img">
+    <a class="nav-link" href="https://github.com/amaarora"> <i class="bi bi-github" role="img">
 </i> 
- <span class="menu-text"></span></a>
+<span class="menu-text"></span></a>
   </li>  
   <li class="nav-item compact">
-    <a class="nav-link" href="https://twitter.com/amaarora" rel="" target=""><i class="bi bi-twitter" role="img">
+    <a class="nav-link" href="https://twitter.com/amaarora"> <i class="bi bi-twitter" role="img">
 </i> 
- <span class="menu-text"></span></a>
+<span class="menu-text"></span></a>
   </li>  
   <li class="nav-item compact">
-    <a class="nav-link" href="https://www.linkedin.com/in/aroraaman/" rel="" target=""><i class="bi bi-linkedin" role="img">
+    <a class="nav-link" href="https://www.linkedin.com/in/aroraaman/"> <i class="bi bi-linkedin" role="img">
 </i> 
- <span class="menu-text"></span></a>
+<span class="menu-text"></span></a>
   </li>  
 </ul>
+          </div> <!-- /navcollapse -->
             <div class="quarto-navbar-tools">
 </div>
-          </div> <!-- /navcollapse -->
       </div> <!-- /container-fluid -->
     </nav>
 </header>
@@ -162,9 +196,10 @@ ga('send', {
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
         
-    <h5 class="quarto-listing-category-title">Categories</h5><div class="quarto-listing-category category-default"><div class="category" data-category="">All <span class="quarto-category-count">(26)</span></div><div class="category" data-category="AI">AI <span class="quarto-category-count">(1)</span></div><div class="category" data-category="Clip">Clip <span class="quarto-category-count">(1)</span></div><div class="category" data-category="Computer Vision">Computer Vision <span class="quarto-category-count">(17)</span></div><div class="category" data-category="Image Segmentation">Image Segmentation <span class="quarto-category-count">(2)</span></div><div class="category" data-category="Jeremy Howard">Jeremy Howard <span class="quarto-category-count">(1)</span></div><div class="category" data-category="Kaggle">Kaggle <span class="quarto-category-count">(2)</span></div><div class="category" data-category="Large Language Models">Large Language Models <span class="quarto-category-count">(1)</span></div><div class="category" data-category="Loss Function">Loss Function <span class="quarto-category-count">(1)</span></div><div class="category" data-category="Model Architecture">Model Architecture <span class="quarto-category-count">(7)</span></div><div class="category" data-category="Model Architecure">Model Architecure <span class="quarto-category-count">(2)</span></div><div class="category" data-category="Multimodal">Multimodal <span class="quarto-category-count">(2)</span></div><div class="category" data-category="NLP">NLP <span class="quarto-category-count">(1)</span></div><div class="category" data-category="Newsletter">Newsletter <span class="quarto-category-count">(2)</span></div><div class="category" data-category="Object Detection">Object Detection <span class="quarto-category-count">(3)</span></div><div class="category" data-category="Paper Review">Paper Review <span class="quarto-category-count">(1)</span></div><div class="category" data-category="Programming">Programming <span class="quarto-category-count">(2)</span></div><div class="category" data-category="Transformers">Transformers <span class="quarto-category-count">(6)</span></div></div></div>
+    <h5 class="quarto-listing-category-title">Categories</h5><div class="quarto-listing-category category-default"><div class="category" data-category="">All <span class="quarto-category-count">(27)</span></div><div class="category" data-category="AI">AI <span class="quarto-category-count">(1)</span></div><div class="category" data-category="Clip">Clip <span class="quarto-category-count">(1)</span></div><div class="category" data-category="Computer Vision">Computer Vision <span class="quarto-category-count">(17)</span></div><div class="category" data-category="Image Segmentation">Image Segmentation <span class="quarto-category-count">(2)</span></div><div class="category" data-category="Jeremy Howard">Jeremy Howard <span class="quarto-category-count">(1)</span></div><div class="category" data-category="Kaggle">Kaggle <span class="quarto-category-count">(2)</span></div><div class="category" data-category="LLM">LLM <span class="quarto-category-count">(1)</span></div><div class="category" data-category="Large Language Models">Large Language Models <span class="quarto-category-count">(1)</span></div><div class="category" data-category="Loss Function">Loss Function <span class="quarto-category-count">(1)</span></div><div class="category" data-category="Model Architecture">Model Architecture <span class="quarto-category-count">(7)</span></div><div class="category" data-category="Model Architecure">Model Architecure <span class="quarto-category-count">(2)</span></div><div class="category" data-category="Multimodal">Multimodal <span class="quarto-category-count">(2)</span></div><div class="category" data-category="NLP">NLP <span class="quarto-category-count">(1)</span></div><div class="category" data-category="Newsletter">Newsletter <span class="quarto-category-count">(2)</span></div><div class="category" data-category="Object Detection">Object Detection <span class="quarto-category-count">(3)</span></div><div class="category" data-category="Paper Review">Paper Review <span class="quarto-category-count">(1)</span></div><div class="category" data-category="Programming">Programming <span class="quarto-category-count">(2)</span></div><div class="category" data-category="Transformers">Transformers <span class="quarto-category-count">(6)</span></div></div></div>
 <!-- main -->
 <main class="content quarto-banner-title-block column-page-left" id="quarto-document-content">
+
 
 
 
@@ -195,25 +230,58 @@ ga('send', {
   </div>
 </div>
 <div class="list quarto-listing-default">
-<div class="quarto-post image-right" data-index="0" data-listing-date-sort="1690502400000" data-listing-file-modified-sort="1690491606031" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="16">
+<div class="quarto-post image-right" data-index="0" data-categories="LLM" data-listing-date-sort="1719014400000" data-listing-file-modified-sort="1719114700915" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="7" data-listing-word-count-sort="1268">
 <div class="thumbnail">
-<p><a href="./posts/2023-07-27_Document_Question_Answering_with_LangChain.html"> <img src="./images/langchain.png" class="thumbnail-image"> </a></p>
+<p><a href="./posts/2024-06-22 Support bot.html" class="no-external"></a></p><a href="./posts/2024-06-22 Support bot.html" class="no-external">
+<p><img loading="lazy" src="./images/claudette-title.png" class="thumbnail-image"></p>
+</a><p><a href="./posts/2024-06-22 Support bot.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/2023-07-27_Document_Question_Answering_with_LangChain.html">
 <h3 class="no-anchor listing-title">
-Demystifying Document Question-Answering Chatbot - A Comprehensive Step-by-Step Tutorial with LangChain
+<a href="./posts/2024-06-22 Support bot.html" class="no-external">Support bot with Claude 3.5 Sonnet using Claudette and Slack-SDK</a>
 </h3>
 <div class="listing-subtitle">
-
+<a href="./posts/2024-06-22 Support bot.html" class="no-external">Creating a support bot that support API calls using Claudette</a>
+</div>
+<div class="listing-categories">
+<div class="listing-category" onclick="window.quartoListingCategory('LLM'); return false;">
+LLM
+</div>
 </div>
 <div class="listing-description">
-<p>Embark on an enlightening journey through the world of document-based question-answering chatbots using langchain! With a keen focus on detailed explanations and code walk-throughs, you’ll gain a deep understanding of each component - from creating a vector database to response generation.</p>
+<a href="./posts/2024-06-22 Support bot.html" class="no-external">As part of this blog post we will build a support bot that can answer support queries from a slack channel using Claudette (a thin python wrapper on top of Anthropic CLI) </a>
+</div>
+</div>
+<div class="metadata">
+<a href="./posts/2024-06-22 Support bot.html" class="no-external">
+<div class="listing-date">
+Jun 22, 2024
+</div>
+<div class="listing-author">
+Aman Arora
 </div>
 </a>
 </div>
+</div>
+<div class="quarto-post image-right" data-index="1" data-listing-date-sort="1690502400000" data-listing-file-modified-sort="1719114795932" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="16" data-listing-word-count-sort="3073">
+<div class="thumbnail">
+<p><a href="./posts/2023-07-27_Document_Question_Answering_with_LangChain.html" class="no-external"></a></p><a href="./posts/2023-07-27_Document_Question_Answering_with_LangChain.html" class="no-external">
+<p><img loading="lazy" src="./images/langchain.png" class="thumbnail-image"></p>
+</a><p><a href="./posts/2023-07-27_Document_Question_Answering_with_LangChain.html" class="no-external"></a></p>
+</div>
+<div class="body">
+<h3 class="no-anchor listing-title">
+<a href="./posts/2023-07-27_Document_Question_Answering_with_LangChain.html" class="no-external">Demystifying Document Question-Answering Chatbot - A Comprehensive Step-by-Step Tutorial with LangChain</a>
+</h3>
+<div class="listing-subtitle">
+<a href="./posts/2023-07-27_Document_Question_Answering_with_LangChain.html" class="no-external"></a>
+</div>
+<div class="listing-description">
+<a href="./posts/2023-07-27_Document_Question_Answering_with_LangChain.html" class="no-external">Embark on an enlightening journey through the world of document-based question-answering chatbots using langchain! With a keen focus on detailed explanations and code walk-throughs, you’ll gain a deep understanding of each component - from creating a vector database to response generation.</a>
+</div>
+</div>
 <div class="metadata">
-<a href="./posts/2023-07-27_Document_Question_Answering_with_LangChain.html">
+<a href="./posts/2023-07-27_Document_Question_Answering_with_LangChain.html" class="no-external">
 <div class="listing-date">
 Jul 28, 2023
 </div>
@@ -223,25 +291,25 @@ Aman Arora
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="1" data-listing-date-sort="1690243200000" data-listing-file-modified-sort="1690244816931" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="22">
+<div class="quarto-post image-right" data-index="2" data-listing-date-sort="1690243200000" data-listing-file-modified-sort="1719114795932" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="22" data-listing-word-count-sort="4269">
 <div class="thumbnail">
-<p><a href="./posts/2023-07-25-llmchain.html"> <img src="./images/langchain.png" class="thumbnail-image"> </a></p>
+<p><a href="./posts/2023-07-25-llmchain.html" class="no-external"></a></p><a href="./posts/2023-07-25-llmchain.html" class="no-external">
+<p><img loading="lazy" src="./images/langchain.png" class="thumbnail-image"></p>
+</a><p><a href="./posts/2023-07-25-llmchain.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/2023-07-25-llmchain.html">
 <h3 class="no-anchor listing-title">
-Deciphering LangChain: A Deep Dive into Code Complexity
+<a href="./posts/2023-07-25-llmchain.html" class="no-external">Deciphering LangChain: A Deep Dive into Code Complexity</a>
 </h3>
 <div class="listing-subtitle">
-
+<a href="./posts/2023-07-25-llmchain.html" class="no-external"></a>
 </div>
 <div class="listing-description">
-<p>Analyzing LangChain’s source code reveals impressive modularity but also surprising complexity in executing simple text generation. The deep call stack makes tracing execution flow challenging.</p>
+<a href="./posts/2023-07-25-llmchain.html" class="no-external">Analyzing LangChain’s source code reveals impressive modularity but also surprising complexity in executing simple text generation. The deep call stack makes tracing execution flow challenging.</a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/2023-07-25-llmchain.html">
+<a href="./posts/2023-07-25-llmchain.html" class="no-external">
 <div class="listing-date">
 Jul 25, 2023
 </div>
@@ -251,32 +319,30 @@ Aman Arora
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="2" data-categories="Newsletter" data-listing-date-sort="1683504000000" data-listing-file-modified-sort="1690258770042" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="6">
+<div class="quarto-post image-right" data-index="3" data-categories="Newsletter" data-listing-date-sort="1683504000000" data-listing-file-modified-sort="1688187490337" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="6" data-listing-word-count-sort="1143">
 <div class="thumbnail">
-<p><a href="./posts/2023-05-09-Ahead_of_times-Issue_2.html"> <img src="./images/newsletter-theme.png" class="thumbnail-image"> </a></p>
+<p><a href="./posts/2023-05-09-Ahead_of_times-Issue_2.html" class="no-external"></a></p><a href="./posts/2023-05-09-Ahead_of_times-Issue_2.html" class="no-external">
+<p><img loading="lazy" src="./images/newsletter-theme.png" class="thumbnail-image"></p>
+</a><p><a href="./posts/2023-05-09-Ahead_of_times-Issue_2.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/2023-05-09-Ahead_of_times-Issue_2.html">
 <h3 class="no-anchor listing-title">
-Ahead of Times - Issue 2 (May 01 - May 07)
+<a href="./posts/2023-05-09-Ahead_of_times-Issue_2.html" class="no-external">Ahead of Times - Issue 2 (May 01 - May 07)</a>
 </h3>
 <div class="listing-subtitle">
-Second issue of the weekly newsletter to help you stay ahead of the times with latest news &amp; updates in the field of AI.
+<a href="./posts/2023-05-09-Ahead_of_times-Issue_2.html" class="no-external">Second issue of the weekly newsletter to help you stay ahead of the times with latest news &amp; updates in the field of AI.</a>
 </div>
-</a>
 <div class="listing-categories">
 <div class="listing-category" onclick="window.quartoListingCategory('Newsletter'); return false;">
 Newsletter
 </div>
 </div>
-<a href="./posts/2023-05-09-Ahead_of_times-Issue_2.html">
 <div class="listing-description">
-<p>As part of this newsletter, I share with you key updates, projects, GitHub repos, research trends, research papers in the field of Computer Vision, Large Language Models and Stable Diffusion.</p>
+<a href="./posts/2023-05-09-Ahead_of_times-Issue_2.html" class="no-external">As part of this newsletter, I share with you key updates, projects, GitHub repos, research trends, research papers in the field of Computer Vision, Large Language Models and Stable Diffusion. </a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/2023-05-09-Ahead_of_times-Issue_2.html">
+<a href="./posts/2023-05-09-Ahead_of_times-Issue_2.html" class="no-external">
 <div class="listing-date">
 May 8, 2023
 </div>
@@ -286,32 +352,30 @@ Aman Arora
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="3" data-categories="Newsletter" data-listing-date-sort="1682985600000" data-listing-file-modified-sort="1688187490337" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="8">
+<div class="quarto-post image-right" data-index="4" data-categories="Newsletter" data-listing-date-sort="1682985600000" data-listing-file-modified-sort="1688187490337" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="8" data-listing-word-count-sort="1425">
 <div class="thumbnail">
-<p><a href="./posts/2023-05-02-Ahead_of_times-Issue_1.html"> <img src="./images/newsletter-theme.png" class="thumbnail-image"> </a></p>
+<p><a href="./posts/2023-05-02-Ahead_of_times-Issue_1.html" class="no-external"></a></p><a href="./posts/2023-05-02-Ahead_of_times-Issue_1.html" class="no-external">
+<p><img loading="lazy" src="./images/newsletter-theme.png" class="thumbnail-image"></p>
+</a><p><a href="./posts/2023-05-02-Ahead_of_times-Issue_1.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/2023-05-02-Ahead_of_times-Issue_1.html">
 <h3 class="no-anchor listing-title">
-Ahead of Times - Issue 1 (Apr 24 - Apr 30)
+<a href="./posts/2023-05-02-Ahead_of_times-Issue_1.html" class="no-external">Ahead of Times - Issue 1 (Apr 24 - Apr 30)</a>
 </h3>
 <div class="listing-subtitle">
-First issue of the weekly newsletter to help you stay ahead of the times with latest news &amp; updates in the field of AI.
+<a href="./posts/2023-05-02-Ahead_of_times-Issue_1.html" class="no-external">First issue of the weekly newsletter to help you stay ahead of the times with latest news &amp; updates in the field of AI.</a>
 </div>
-</a>
 <div class="listing-categories">
 <div class="listing-category" onclick="window.quartoListingCategory('Newsletter'); return false;">
 Newsletter
 </div>
 </div>
-<a href="./posts/2023-05-02-Ahead_of_times-Issue_1.html">
 <div class="listing-description">
-<p>As part of this newsletter, I share with you key updates, projects, GitHub repos, research trends, research papers in the field of Computer Vision, Large Language Models and Stable Diffusion.</p>
+<a href="./posts/2023-05-02-Ahead_of_times-Issue_1.html" class="no-external">As part of this newsletter, I share with you key updates, projects, GitHub repos, research trends, research papers in the field of Computer Vision, Large Language Models and Stable Diffusion. </a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/2023-05-02-Ahead_of_times-Issue_1.html">
+<a href="./posts/2023-05-02-Ahead_of_times-Issue_1.html" class="no-external">
 <div class="listing-date">
 May 2, 2023
 </div>
@@ -321,19 +385,19 @@ Aman Arora
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="4" data-categories="Large Language Models,Paper Review" data-listing-date-sort="1682899200000" data-listing-file-modified-sort="1688187490337" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="23">
+<div class="quarto-post image-right" data-index="5" data-categories="Large Language Models,Paper Review" data-listing-date-sort="1682899200000" data-listing-file-modified-sort="1688187490337" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="23" data-listing-word-count-sort="4458">
 <div class="thumbnail">
-<p><a href="./posts/2023-04-30_LaMini-LM.html"> <img src="./images/lamini-intro-2.png" class="thumbnail-image"> </a></p>
+<p><a href="./posts/2023-04-30_LaMini-LM.html" class="no-external"></a></p><a href="./posts/2023-04-30_LaMini-LM.html" class="no-external">
+<p><img loading="lazy" src="./images/lamini-intro-2.png" class="thumbnail-image"></p>
+</a><p><a href="./posts/2023-04-30_LaMini-LM.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/2023-04-30_LaMini-LM.html">
 <h3 class="no-anchor listing-title">
-Paper Review - ‘LaMini-LM’
+<a href="./posts/2023-04-30_LaMini-LM.html" class="no-external">Paper Review - ‘LaMini-LM’</a>
 </h3>
 <div class="listing-subtitle">
-Paper review of “LaMini-LM - A Diverse Herd of Distilled Models from Large-Scale Instructions” and analysis on released 2.58M instruction dataset.
+<a href="./posts/2023-04-30_LaMini-LM.html" class="no-external">Paper review of “LaMini-LM - A Diverse Herd of Distilled Models from Large-Scale Instructions” and analysis on released 2.58M instruction dataset.</a>
 </div>
-</a>
 <div class="listing-categories">
 <div class="listing-category" onclick="window.quartoListingCategory('Large Language Models'); return false;">
 Large Language Models
@@ -342,14 +406,12 @@ Large Language Models
 Paper Review
 </div>
 </div>
-<a href="./posts/2023-04-30_LaMini-LM.html">
 <div class="listing-description">
-<p>As part of this blog post, we regenerate a small sample of the 2.58M shared Instruction Dataset and also perform human evaluation on some of the generated models shared in the research paper.</p>
+<a href="./posts/2023-04-30_LaMini-LM.html" class="no-external">As part of this blog post, we regenerate a small sample of the 2.58M shared Instruction Dataset and also perform human evaluation on some of the generated models shared in the research paper. </a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/2023-04-30_LaMini-LM.html">
+<a href="./posts/2023-04-30_LaMini-LM.html" class="no-external">
 <div class="listing-date">
 May 1, 2023
 </div>
@@ -359,19 +421,19 @@ Aman Arora
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="5" data-categories="Multimodal,Transformers,Clip" data-listing-date-sort="1678492800000" data-listing-file-modified-sort="1688187490337" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="18">
+<div class="quarto-post image-right" data-index="6" data-categories="Multimodal,Transformers,Clip" data-listing-date-sort="1678492800000" data-listing-file-modified-sort="1688187490337" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="18" data-listing-word-count-sort="3600">
 <div class="thumbnail">
-<p><a href="./posts/2023-03-11_Understanding_CLIP_part_2.html"> <img src="./images/clip.png" class="thumbnail-image"> </a></p>
+<p><a href="./posts/2023-03-11_Understanding_CLIP_part_2.html" class="no-external"></a></p><a href="./posts/2023-03-11_Understanding_CLIP_part_2.html" class="no-external">
+<p><img loading="lazy" src="./images/clip.png" class="thumbnail-image"></p>
+</a><p><a href="./posts/2023-03-11_Understanding_CLIP_part_2.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/2023-03-11_Understanding_CLIP_part_2.html">
 <h3 class="no-anchor listing-title">
-The Annotated CLIP (Part-2)
+<a href="./posts/2023-03-11_Understanding_CLIP_part_2.html" class="no-external">The Annotated CLIP (Part-2)</a>
 </h3>
 <div class="listing-subtitle">
-Learning Transferable Visual Models From Natural Language Supervision
+<a href="./posts/2023-03-11_Understanding_CLIP_part_2.html" class="no-external">Learning Transferable Visual Models From Natural Language Supervision</a>
 </div>
-</a>
 <div class="listing-categories">
 <div class="listing-category" onclick="window.quartoListingCategory('Multimodal'); return false;">
 Multimodal
@@ -383,14 +445,12 @@ Transformers
 Clip
 </div>
 </div>
-<a href="./posts/2023-03-11_Understanding_CLIP_part_2.html">
 <div class="listing-description">
-<p>This post is part-2 of the two series blog posts on CLIP (for part-1, please refer to my previous blog post). In this blog, we present the PyTorch code behind CLIP for model building and training. This blog post is in itself a working Jupyter Notebook.</p>
+<a href="./posts/2023-03-11_Understanding_CLIP_part_2.html" class="no-external">This post is part-2 of the two series blog posts on CLIP (for part-1, please refer to my previous blog post). In this blog, we present the PyTorch code behind CLIP for model building and training. This blog post is in itself a working Jupyter Notebook. </a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/2023-03-11_Understanding_CLIP_part_2.html">
+<a href="./posts/2023-03-11_Understanding_CLIP_part_2.html" class="no-external">
 <div class="listing-date">
 Mar 11, 2023
 </div>
@@ -400,19 +460,19 @@ Aman Arora
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="6" data-categories="Multimodal,Transformers" data-listing-date-sort="1677801600000" data-listing-file-modified-sort="1688187490337" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="9">
+<div class="quarto-post image-right" data-index="7" data-categories="Multimodal,Transformers" data-listing-date-sort="1677801600000" data-listing-file-modified-sort="1719016506675" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="9" data-listing-word-count-sort="1627">
 <div class="thumbnail">
-<p><a href="./posts/2023-03-06_Understanding_CLIP.html"> <img src="./images/clip.png" class="thumbnail-image"> </a></p>
+<p><a href="./posts/2023-03-06_Understanding_CLIP.html" class="no-external"></a></p><a href="./posts/2023-03-06_Understanding_CLIP.html" class="no-external">
+<p><img loading="lazy" src="./images/clip.png" class="thumbnail-image"></p>
+</a><p><a href="./posts/2023-03-06_Understanding_CLIP.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/2023-03-06_Understanding_CLIP.html">
 <h3 class="no-anchor listing-title">
-The Annotated CLIP (Part-1)
+<a href="./posts/2023-03-06_Understanding_CLIP.html" class="no-external">The Annotated CLIP (Part-1)</a>
 </h3>
 <div class="listing-subtitle">
-Learning Transferable Visual Models From Natural Language Supervision
+<a href="./posts/2023-03-06_Understanding_CLIP.html" class="no-external">Learning Transferable Visual Models From Natural Language Supervision</a>
 </div>
-</a>
 <div class="listing-categories">
 <div class="listing-category" onclick="window.quartoListingCategory('Multimodal'); return false;">
 Multimodal
@@ -421,14 +481,12 @@ Multimodal
 Transformers
 </div>
 </div>
-<a href="./posts/2023-03-06_Understanding_CLIP.html">
 <div class="listing-description">
-<p>This post is part-1 of the two series blog posts on CLIP. In this blog, we present an Introduction to CLIP in an easy to digest manner. We also compare CLIP to other research papers and look at the background and inspiration behind CLIP.</p>
+<a href="./posts/2023-03-06_Understanding_CLIP.html" class="no-external">This post is part-1 of the two series blog posts on CLIP. In this blog, we present an Introduction to CLIP in an easy to digest manner. We also compare CLIP to other research papers and look at the background and inspiration behind CLIP. </a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/2023-03-06_Understanding_CLIP.html">
+<a href="./posts/2023-03-06_Understanding_CLIP.html" class="no-external">
 <div class="listing-date">
 Mar 3, 2023
 </div>
@@ -438,19 +496,19 @@ Aman Arora
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="7" data-categories="Computer Vision,Model Architecure,Transformers" data-listing-date-sort="1656892800000" data-listing-file-modified-sort="1688187490337" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="25">
+<div class="quarto-post image-right" data-index="8" data-categories="Computer Vision,Model Architecure,Transformers" data-listing-date-sort="1656892800000" data-listing-file-modified-sort="1688187490337" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="25" data-listing-word-count-sort="4880">
 <div class="thumbnail">
-<p><a href="./posts/2022-07-04-swintransformerv1.html"> <p class="card-img-top"><img src="images/swin-transformer.png" title="Figure-1: Swin Transformer Architecture" class="thumbnail-image card-img"/></p> </a></p>
+<p><a href="./posts/2022-07-04-swintransformerv1.html" class="no-external"></a></p><a href="./posts/2022-07-04-swintransformerv1.html" class="no-external">
+<p class="card-img-top"><img src="images/swin-transformer.png" title="Figure-1: Swin Transformer Architecture" class="thumbnail-image card-img"/></p>
+</a><p><a href="./posts/2022-07-04-swintransformerv1.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/2022-07-04-swintransformerv1.html">
 <h3 class="no-anchor listing-title">
-Swin Transformer
+<a href="./posts/2022-07-04-swintransformerv1.html" class="no-external">Swin Transformer</a>
 </h3>
 <div class="listing-subtitle">
-Hierarchical Vision Transformer using Shifted Windows
+<a href="./posts/2022-07-04-swintransformerv1.html" class="no-external">Hierarchical Vision Transformer using Shifted Windows</a>
 </div>
-</a>
 <div class="listing-categories">
 <div class="listing-category" onclick="window.quartoListingCategory('Computer Vision'); return false;">
 Computer Vision
@@ -462,14 +520,12 @@ Model Architecure
 Transformers
 </div>
 </div>
-<a href="./posts/2022-07-04-swintransformerv1.html">
 <div class="listing-description">
-<p>Swin Transformer Model Architecture explained with PyTorch implementation line-by-line.</p>
+<a href="./posts/2022-07-04-swintransformerv1.html" class="no-external">Swin Transformer Model Architecture explained with PyTorch implementation line-by-line. </a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/2022-07-04-swintransformerv1.html">
+<a href="./posts/2022-07-04-swintransformerv1.html" class="no-external">
 <div class="listing-date">
 Jul 4, 2022
 </div>
@@ -479,19 +535,19 @@ Aman Arora
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="8" data-categories="Computer Vision,Model Architecure,Object Detection,Transformers" data-listing-date-sort="1627257600000" data-listing-file-modified-sort="1688187490337" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="43">
+<div class="quarto-post image-right" data-index="9" data-categories="Computer Vision,Model Architecure,Object Detection,Transformers" data-listing-date-sort="1627257600000" data-listing-file-modified-sort="1688187490337" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="43" data-listing-word-count-sort="8444">
 <div class="thumbnail">
-<p><a href="./posts/2021-07-26-annotateddetr.html"> <p class="card-img-top"><img src="images/DETR_overall.png" title="Figure-1: DETR directly predicts (in parallel) the final set of detections by combining a common CNN with a transformer architecture. During training, bipartite matching uniquely assigns predictions with ground truth boxes. Prediction with no match should yield a “no object” (∅) class prediction." class="thumbnail-image card-img"/></p> </a></p>
+<p><a href="./posts/2021-07-26-annotateddetr.html" class="no-external"></a></p><a href="./posts/2021-07-26-annotateddetr.html" class="no-external">
+<p class="card-img-top"><img src="images/DETR_overall.png" title="Figure-1: DETR directly predicts (in parallel) the final set of detections by combining a common CNN with a transformer architecture. During training, bipartite matching uniquely assigns predictions with ground truth boxes. Prediction with no match should yield a “no object” (∅) class prediction." class="thumbnail-image card-img"/></p>
+</a><p><a href="./posts/2021-07-26-annotateddetr.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/2021-07-26-annotateddetr.html">
 <h3 class="no-anchor listing-title">
-The Annotated DETR
+<a href="./posts/2021-07-26-annotateddetr.html" class="no-external">The Annotated DETR</a>
 </h3>
 <div class="listing-subtitle">
-End-to-End Object Detection with Transformers
+<a href="./posts/2021-07-26-annotateddetr.html" class="no-external">End-to-End Object Detection with Transformers</a>
 </div>
-</a>
 <div class="listing-categories">
 <div class="listing-category" onclick="window.quartoListingCategory('Computer Vision'); return false;">
 Computer Vision
@@ -506,14 +562,12 @@ Object Detection
 Transformers
 </div>
 </div>
-<a href="./posts/2021-07-26-annotateddetr.html">
 <div class="listing-description">
-<p>DETR Model Architecture explained with PyTorch implementation line-by-line.</p>
+<a href="./posts/2021-07-26-annotateddetr.html" class="no-external">DETR Model Architecture explained with PyTorch implementation line-by-line. </a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/2021-07-26-annotateddetr.html">
+<a href="./posts/2021-07-26-annotateddetr.html" class="no-external">
 <div class="listing-date">
 Jul 26, 2021
 </div>
@@ -523,19 +577,19 @@ Aman Arora
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="9" data-categories="AI,Jeremy Howard" data-listing-date-sort="1621036800000" data-listing-file-modified-sort="1688187490337" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="19">
+<div class="quarto-post image-right" data-index="10" data-categories="AI,Jeremy Howard" data-listing-date-sort="1621036800000" data-listing-file-modified-sort="1688187490337" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="19" data-listing-word-count-sort="3641">
 <div class="thumbnail">
-<p><a href="./posts/2021-05-15-jh-meetup.html"> <p class="card-img-top"><img src="images/qld_ai_hub.jpeg" title="Jeremy Howard speaking at a meetup in Queensland" class="thumbnail-image card-img"/></p> </a></p>
+<p><a href="./posts/2021-05-15-jh-meetup.html" class="no-external"></a></p><a href="./posts/2021-05-15-jh-meetup.html" class="no-external">
+<p class="card-img-top"><img src="images/qld_ai_hub.jpeg" title="Jeremy Howard speaking at a meetup in Queensland" class="thumbnail-image card-img"/></p>
+</a><p><a href="./posts/2021-05-15-jh-meetup.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/2021-05-15-jh-meetup.html">
 <h3 class="no-anchor listing-title">
-The sad state of AI and tech startups in Australia today and what can we do about it
+<a href="./posts/2021-05-15-jh-meetup.html" class="no-external">The sad state of AI and tech startups in Australia today and what can we do about it</a>
 </h3>
 <div class="listing-subtitle">
-
+<a href="./posts/2021-05-15-jh-meetup.html" class="no-external"></a>
 </div>
-</a>
 <div class="listing-categories">
 <div class="listing-category" onclick="window.quartoListingCategory('AI'); return false;">
 AI
@@ -544,14 +598,12 @@ AI
 Jeremy Howard
 </div>
 </div>
-<a href="./posts/2021-05-15-jh-meetup.html">
 <div class="listing-description">
-“Did you know that Australia’s…<strong></strong>
+<a href="./posts/2021-05-15-jh-meetup.html" class="no-external">“Did you know that Australia’s investment in AI was only 0.29% of the total investment in AI in 2020? This must explain the sad state of things here in Australia when it…<strong></strong></a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/2021-05-15-jh-meetup.html">
+<a href="./posts/2021-05-15-jh-meetup.html" class="no-external">
 <div class="listing-date">
 May 15, 2021
 </div>
@@ -561,32 +613,30 @@ Aman Arora
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="10" data-categories="Computer Vision" data-listing-date-sort="1615593600000" data-listing-file-modified-sort="1688187490337" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="23">
+<div class="quarto-post image-right" data-index="11" data-categories="Computer Vision" data-listing-date-sort="1615593600000" data-listing-file-modified-sort="1688187490337" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="23" data-listing-word-count-sort="4559">
 <div class="thumbnail">
-<p><a href="./posts/2021-03-13-optimizers.html"> <p class="card-img-top"><img src="images/optimizers.png" title="fig-1 Adam and Friends" class="thumbnail-image card-img"/></p> </a></p>
+<p><a href="./posts/2021-03-13-optimizers.html" class="no-external"></a></p><a href="./posts/2021-03-13-optimizers.html" class="no-external">
+<p class="card-img-top"><img src="images/optimizers.png" title="fig-1 Adam and Friends" class="thumbnail-image card-img"/></p>
+</a><p><a href="./posts/2021-03-13-optimizers.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/2021-03-13-optimizers.html">
 <h3 class="no-anchor listing-title">
-Adam and friends
+<a href="./posts/2021-03-13-optimizers.html" class="no-external">Adam and friends</a>
 </h3>
 <div class="listing-subtitle">
-Adam, SGD, RMSProp from scratch in PyTorch.
+<a href="./posts/2021-03-13-optimizers.html" class="no-external">Adam, SGD, RMSProp from scratch in PyTorch.</a>
 </div>
-</a>
 <div class="listing-categories">
 <div class="listing-category" onclick="window.quartoListingCategory('Computer Vision'); return false;">
 Computer Vision
 </div>
 </div>
-<a href="./posts/2021-03-13-optimizers.html">
 <div class="listing-description">
-<p>Basic optimizers from scratch in PyTorch with working notebook.</p>
+<a href="./posts/2021-03-13-optimizers.html" class="no-external">Basic optimizers from scratch in PyTorch with working notebook. </a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/2021-03-13-optimizers.html">
+<a href="./posts/2021-03-13-optimizers.html" class="no-external">
 <div class="listing-date">
 Mar 13, 2021
 </div>
@@ -596,19 +646,19 @@ Aman Arora
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="11" data-categories="Computer Vision,Model Architecture,Transformers" data-listing-date-sort="1610928000000" data-listing-file-modified-sort="1688187490337" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="20">
+<div class="quarto-post image-right" data-index="12" data-categories="Computer Vision,Model Architecture,Transformers" data-listing-date-sort="1610928000000" data-listing-file-modified-sort="1688187490337" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="20" data-listing-word-count-sort="3906">
 <div class="thumbnail">
-<p><a href="./posts/2021-01-18-ViT.html"> <p class="card-img-top"><img src="images/ViT.png" title="fig-1 The Model Overview" class="thumbnail-image card-img"/></p> </a></p>
+<p><a href="./posts/2021-01-18-ViT.html" class="no-external"></a></p><a href="./posts/2021-01-18-ViT.html" class="no-external">
+<p class="card-img-top"><img src="images/ViT.png" title="fig-1 The Model Overview" class="thumbnail-image card-img"/></p>
+</a><p><a href="./posts/2021-01-18-ViT.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/2021-01-18-ViT.html">
 <h3 class="no-anchor listing-title">
-Vision Transformer
+<a href="./posts/2021-01-18-ViT.html" class="no-external">Vision Transformer</a>
 </h3>
 <div class="listing-subtitle">
-An Image is Worth 16x16 Words - Transformers for Image Recognition at Scale
+<a href="./posts/2021-01-18-ViT.html" class="no-external">An Image is Worth 16x16 Words - Transformers for Image Recognition at Scale</a>
 </div>
-</a>
 <div class="listing-categories">
 <div class="listing-category" onclick="window.quartoListingCategory('Computer Vision'); return false;">
 Computer Vision
@@ -620,14 +670,12 @@ Model Architecture
 Transformers
 </div>
 </div>
-<a href="./posts/2021-01-18-ViT.html">
 <div class="listing-description">
-<p>In this blog post, we will be looking at the Vision Transformer architectures in detail, and also re-implement in PyTorch from scratch.</p>
+<a href="./posts/2021-01-18-ViT.html" class="no-external">In this blog post, we will be looking at the Vision Transformer architectures in detail, and also re-implement in PyTorch from scratch. </a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/2021-01-18-ViT.html">
+<a href="./posts/2021-01-18-ViT.html" class="no-external">
 <div class="listing-date">
 Jan 18, 2021
 </div>
@@ -637,19 +685,19 @@ Aman Arora
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="12" data-categories="Computer Vision,Model Architecture,Object Detection" data-listing-date-sort="1610496000000" data-listing-file-modified-sort="1688187490337" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="37">
+<div class="quarto-post image-right" data-index="13" data-categories="Computer Vision,Model Architecture,Object Detection" data-listing-date-sort="1610496000000" data-listing-file-modified-sort="1688187490337" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="37" data-listing-word-count-sort="7337">
 <div class="thumbnail">
-<p><a href="./posts/2021-01-13-efficientdet-pytorch.html"> <p class="card-img-top"><img src="images/EfficientDet.png" title="fig-1 EfficientDet Architecture" class="thumbnail-image card-img"/></p> </a></p>
+<p><a href="./posts/2021-01-13-efficientdet-pytorch.html" class="no-external"></a></p><a href="./posts/2021-01-13-efficientdet-pytorch.html" class="no-external">
+<p class="card-img-top"><img src="images/EfficientDet.png" title="fig-1 EfficientDet Architecture" class="thumbnail-image card-img"/></p>
+</a><p><a href="./posts/2021-01-13-efficientdet-pytorch.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/2021-01-13-efficientdet-pytorch.html">
 <h3 class="no-anchor listing-title">
-The EfficientDet Architecture in PyTorch
+<a href="./posts/2021-01-13-efficientdet-pytorch.html" class="no-external">The EfficientDet Architecture in PyTorch</a>
 </h3>
 <div class="listing-subtitle">
-
+<a href="./posts/2021-01-13-efficientdet-pytorch.html" class="no-external"></a>
 </div>
-</a>
 <div class="listing-categories">
 <div class="listing-category" onclick="window.quartoListingCategory('Computer Vision'); return false;">
 Computer Vision
@@ -661,14 +709,12 @@ Model Architecture
 Object Detection
 </div>
 </div>
-<a href="./posts/2021-01-13-efficientdet-pytorch.html">
 <div class="listing-description">
-<p>In this blog post, we will look at how to implement the EfficientDet architecture in PyTorch from scratch.</p>
+<a href="./posts/2021-01-13-efficientdet-pytorch.html" class="no-external">In this blog post, we will look at how to implement the EfficientDet architecture in PyTorch from scratch. </a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/2021-01-13-efficientdet-pytorch.html">
+<a href="./posts/2021-01-13-efficientdet-pytorch.html" class="no-external">
 <div class="listing-date">
 Jan 13, 2021
 </div>
@@ -678,19 +724,19 @@ Aman Arora
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="13" data-categories="Computer Vision,Model Architecture,Object Detection" data-listing-date-sort="1610323200000" data-listing-file-modified-sort="1688187490337" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="15">
+<div class="quarto-post image-right" data-index="14" data-categories="Computer Vision,Model Architecture,Object Detection" data-listing-date-sort="1610323200000" data-listing-file-modified-sort="1688187490337" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="15" data-listing-word-count-sort="2995">
 <div class="thumbnail">
-<p><a href="./posts/2021-01-11-efficientdet.html"> <p class="card-img-top"><img src="images/feature_network_design.png" title="fig-5 Feature Network Design for cross-scale feature fusion after the introduction of FPN" class="thumbnail-image card-img"/></p> </a></p>
+<p><a href="./posts/2021-01-11-efficientdet.html" class="no-external"></a></p><a href="./posts/2021-01-11-efficientdet.html" class="no-external">
+<p class="card-img-top"><img src="images/feature_network_design.png" title="fig-5 Feature Network Design for cross-scale feature fusion after the introduction of FPN" class="thumbnail-image card-img"/></p>
+</a><p><a href="./posts/2021-01-11-efficientdet.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/2021-01-11-efficientdet.html">
 <h3 class="no-anchor listing-title">
-EfficientDet - Scalable and Efficient Object Detection
+<a href="./posts/2021-01-11-efficientdet.html" class="no-external">EfficientDet - Scalable and Efficient Object Detection</a>
 </h3>
 <div class="listing-subtitle">
-
+<a href="./posts/2021-01-11-efficientdet.html" class="no-external"></a>
 </div>
-</a>
 <div class="listing-categories">
 <div class="listing-category" onclick="window.quartoListingCategory('Computer Vision'); return false;">
 Computer Vision
@@ -702,14 +748,12 @@ Model Architecture
 Object Detection
 </div>
 </div>
-<a href="./posts/2021-01-11-efficientdet.html">
 <div class="listing-description">
-<p>As part of this blog post I will explain how EfficientDets work step-by-step.</p>
+<a href="./posts/2021-01-11-efficientdet.html" class="no-external">As part of this blog post I will explain how EfficientDets work step-by-step. </a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/2021-01-11-efficientdet.html">
+<a href="./posts/2021-01-11-efficientdet.html" class="no-external">
 <div class="listing-date">
 Jan 11, 2021
 </div>
@@ -719,19 +763,19 @@ Aman Arora
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="14" data-categories="Computer Vision,Kaggle,Image Segmentation" data-listing-date-sort="1599350400000" data-listing-file-modified-sort="1688187490333" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="18">
+<div class="quarto-post image-right" data-index="15" data-categories="Computer Vision,Kaggle,Image Segmentation" data-listing-date-sort="1599350400000" data-listing-file-modified-sort="1688187490333" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="18" data-listing-word-count-sort="3549">
 <div class="thumbnail">
-<p><a href="./posts/2020-09-06-siimacr.html"> <p class="card-img-top"><img src="images/img_segmentation_example.png" title="fig-1 Eye Segmentation Model" class="thumbnail-image card-img"/></p> </a></p>
+<p><a href="./posts/2020-09-06-siimacr.html" class="no-external"></a></p><a href="./posts/2020-09-06-siimacr.html" class="no-external">
+<p class="card-img-top"><img src="images/img_segmentation_example.png" title="fig-1 Eye Segmentation Model" class="thumbnail-image card-img"/></p>
+</a><p><a href="./posts/2020-09-06-siimacr.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/2020-09-06-siimacr.html">
 <h3 class="no-anchor listing-title">
-Top 100 solution - SIIM-ACR Pneumothorax Segmentation
+<a href="./posts/2020-09-06-siimacr.html" class="no-external">Top 100 solution - SIIM-ACR Pneumothorax Segmentation</a>
 </h3>
 <div class="listing-subtitle">
-
+<a href="./posts/2020-09-06-siimacr.html" class="no-external"></a>
 </div>
-</a>
 <div class="listing-categories">
 <div class="listing-category" onclick="window.quartoListingCategory('Computer Vision'); return false;">
 Computer Vision
@@ -743,14 +787,12 @@ Kaggle
 Image Segmentation
 </div>
 </div>
-<a href="./posts/2020-09-06-siimacr.html">
 <div class="listing-description">
-<p>In this blog post, we will looking at Image Segmentation based problem in Pytorch with SIIM-ACR Pneumothorax Segmentation competition serving as a useful example and create a solution that will get us to the top-100 leaderboard position on Kaggle.</p>
+<a href="./posts/2020-09-06-siimacr.html" class="no-external">In this blog post, we will looking at Image Segmentation based problem in Pytorch with SIIM-ACR Pneumothorax Segmentation competition serving as a useful example and create a solution that will get us to the top-100 leaderboard position on Kaggle. </a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/2020-09-06-siimacr.html">
+<a href="./posts/2020-09-06-siimacr.html" class="no-external">
 <div class="listing-date">
 Sep 6, 2020
 </div>
@@ -760,32 +802,30 @@ Aman Arora
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="15" data-categories="Computer Vision" data-listing-date-sort="1598745600000" data-listing-file-modified-sort="1688187490333" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="11">
+<div class="quarto-post image-right" data-index="16" data-categories="Computer Vision" data-listing-date-sort="1598745600000" data-listing-file-modified-sort="1688187490333" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="11" data-listing-word-count-sort="2094">
 <div class="thumbnail">
-<p><a href="./posts/2020-08-30-gempool.html"> <p class="card-img-top"><img src="images/image_retrieval.JPG" title="fig-1 Image Retrieval Example" class="thumbnail-image card-img"/></p> </a></p>
+<p><a href="./posts/2020-08-30-gempool.html" class="no-external"></a></p><a href="./posts/2020-08-30-gempool.html" class="no-external">
+<p class="card-img-top"><img src="images/image_retrieval.JPG" title="fig-1 Image Retrieval Example" class="thumbnail-image card-img"/></p>
+</a><p><a href="./posts/2020-08-30-gempool.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/2020-08-30-gempool.html">
 <h3 class="no-anchor listing-title">
-GeM Pooling Explained with PyTorch Implementation and Introduction to Image Retrieval
+<a href="./posts/2020-08-30-gempool.html" class="no-external">GeM Pooling Explained with PyTorch Implementation and Introduction to Image Retrieval</a>
 </h3>
 <div class="listing-subtitle">
-
+<a href="./posts/2020-08-30-gempool.html" class="no-external"></a>
 </div>
-</a>
 <div class="listing-categories">
 <div class="listing-category" onclick="window.quartoListingCategory('Computer Vision'); return false;">
 Computer Vision
 </div>
 </div>
-<a href="./posts/2020-08-30-gempool.html">
 <div class="listing-description">
-<p>As part of this blog post we will be looking at GeM pooling and also look at the research paper <span>Fine-tuning CNN Image Retrieval with No Human Annotation</span>. We also implement GeM Pooling from scratch in PyTorch.</p>
+<a href="./posts/2020-08-30-gempool.html" class="no-external">As part of this blog post we will be looking at GeM pooling and also look at the research paper <span>Fine-tuning CNN Image Retrieval with No Human Annotation</span>. We also implement GeM Pooling from scratch in PyTorch. </a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/2020-08-30-gempool.html">
+<a href="./posts/2020-08-30-gempool.html" class="no-external">
 <div class="listing-date">
 Aug 30, 2020
 </div>
@@ -795,19 +835,19 @@ Aman Arora
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="16" data-categories="Computer Vision,Model Architecture,Image Segmentation" data-listing-date-sort="1598745600000" data-listing-file-modified-sort="1688187490333" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="15">
+<div class="quarto-post image-right" data-index="17" data-categories="Computer Vision,Model Architecture,Image Segmentation" data-listing-date-sort="1598745600000" data-listing-file-modified-sort="1688187490333" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="15" data-listing-word-count-sort="2839">
 <div class="thumbnail">
-<p><a href="./posts/2020-09-13-unet.html"> <p class="card-img-top"><img src="images/unet.png" title="fig-1 The U-Net Architecture" class="thumbnail-image card-img"/></p> </a></p>
+<p><a href="./posts/2020-09-13-unet.html" class="no-external"></a></p><a href="./posts/2020-09-13-unet.html" class="no-external">
+<p class="card-img-top"><img src="images/unet.png" title="fig-1 The U-Net Architecture" class="thumbnail-image card-img"/></p>
+</a><p><a href="./posts/2020-09-13-unet.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/2020-09-13-unet.html">
 <h3 class="no-anchor listing-title">
-U-Net A PyTorch Implementation in 60 lines of Code
+<a href="./posts/2020-09-13-unet.html" class="no-external">U-Net A PyTorch Implementation in 60 lines of Code</a>
 </h3>
 <div class="listing-subtitle">
-U-Net Convolutional Networks for Biomedical Image Segmentation
+<a href="./posts/2020-09-13-unet.html" class="no-external">U-Net Convolutional Networks for Biomedical Image Segmentation</a>
 </div>
-</a>
 <div class="listing-categories">
 <div class="listing-category" onclick="window.quartoListingCategory('Computer Vision'); return false;">
 Computer Vision
@@ -819,14 +859,12 @@ Model Architecture
 Image Segmentation
 </div>
 </div>
-<a href="./posts/2020-09-13-unet.html">
 <div class="listing-description">
-<p>As part of this blog post we will implement the U-Net architecture in PyTorch in 60 lines of code.</p>
+<a href="./posts/2020-09-13-unet.html" class="no-external">As part of this blog post we will implement the U-Net architecture in PyTorch in 60 lines of code. </a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/2020-09-13-unet.html">
+<a href="./posts/2020-09-13-unet.html" class="no-external">
 <div class="listing-date">
 Aug 30, 2020
 </div>
@@ -836,19 +874,19 @@ Aman Arora
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="17" data-categories="Computer Vision,Kaggle" data-listing-date-sort="1598140800000" data-listing-file-modified-sort="1688187490333" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="9">
+<div class="quarto-post image-right" data-index="18" data-categories="Computer Vision,Kaggle" data-listing-date-sort="1598140800000" data-listing-file-modified-sort="1688187490333" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="9" data-listing-word-count-sort="1682">
 <div class="thumbnail">
-<p><a href="./posts/2020-08-23-siimisic.html"> <p class="card-img-top"><img src="images/ideas.png" title="fig-1 List of ideas" class="thumbnail-image card-img"/></p> </a></p>
+<p><a href="./posts/2020-08-23-siimisic.html" class="no-external"></a></p><a href="./posts/2020-08-23-siimisic.html" class="no-external">
+<p class="card-img-top"><img src="images/ideas.png" title="fig-1 List of ideas" class="thumbnail-image card-img"/></p>
+</a><p><a href="./posts/2020-08-23-siimisic.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/2020-08-23-siimisic.html">
 <h3 class="no-anchor listing-title">
-SIIM-ISIC Melanoma Classification - my journey to a top 5% solution and first silver medal on Kaggle
+<a href="./posts/2020-08-23-siimisic.html" class="no-external">SIIM-ISIC Melanoma Classification - my journey to a top 5% solution and first silver medal on Kaggle</a>
 </h3>
 <div class="listing-subtitle">
-Winning solution for SIIM-ISIC Melanoma Classification
+<a href="./posts/2020-08-23-siimisic.html" class="no-external">Winning solution for SIIM-ISIC Melanoma Classification</a>
 </div>
-</a>
 <div class="listing-categories">
 <div class="listing-category" onclick="window.quartoListingCategory('Computer Vision'); return false;">
 Computer Vision
@@ -857,14 +895,12 @@ Computer Vision
 Kaggle
 </div>
 </div>
-<a href="./posts/2020-08-23-siimisic.html">
 <div class="listing-description">
-<p>As part of this blog post I share my winning solution for SIIM-ISIC Melanoma Classification Kaggle Competition.</p>
+<a href="./posts/2020-08-23-siimisic.html" class="no-external">As part of this blog post I share my winning solution for SIIM-ISIC Melanoma Classification Kaggle Competition. </a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/2020-08-23-siimisic.html">
+<a href="./posts/2020-08-23-siimisic.html" class="no-external">
 <div class="listing-date">
 Aug 23, 2020
 </div>
@@ -874,19 +910,19 @@ Aman Arora
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="18" data-categories="Computer Vision,Model Architecture" data-listing-date-sort="1597276800000" data-listing-file-modified-sort="1688187490333" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="15">
+<div class="quarto-post image-right" data-index="19" data-categories="Computer Vision,Model Architecture" data-listing-date-sort="1597276800000" data-listing-file-modified-sort="1688187490333" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="15" data-listing-word-count-sort="2824">
 <div class="thumbnail">
-<p><a href="./posts/2020-08-13-efficientnet.html"> <p class="card-img-top"><img src="images/effnet_moment.png" title="fig-1 Model Size vs Imagenet Accuracy" class="thumbnail-image card-img"/></p> </a></p>
+<p><a href="./posts/2020-08-13-efficientnet.html" class="no-external"></a></p><a href="./posts/2020-08-13-efficientnet.html" class="no-external">
+<p class="card-img-top"><img src="images/effnet_moment.png" title="fig-1 Model Size vs Imagenet Accuracy" class="thumbnail-image card-img"/></p>
+</a><p><a href="./posts/2020-08-13-efficientnet.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/2020-08-13-efficientnet.html">
 <h3 class="no-anchor listing-title">
-EfficientNet
+<a href="./posts/2020-08-13-efficientnet.html" class="no-external">EfficientNet</a>
 </h3>
 <div class="listing-subtitle">
-Rethinking Model Scaling for Convolutional Neural Networks
+<a href="./posts/2020-08-13-efficientnet.html" class="no-external">Rethinking Model Scaling for Convolutional Neural Networks</a>
 </div>
-</a>
 <div class="listing-categories">
 <div class="listing-category" onclick="window.quartoListingCategory('Computer Vision'); return false;">
 Computer Vision
@@ -895,14 +931,12 @@ Computer Vision
 Model Architecture
 </div>
 </div>
-<a href="./posts/2020-08-13-efficientnet.html">
 <div class="listing-description">
-<p>Look at the current SOTA, with top-1 accuracy of 88.5% on ImageNet.</p>
+<a href="./posts/2020-08-13-efficientnet.html" class="no-external">Look at the current SOTA, with top-1 accuracy of 88.5% on ImageNet. </a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/2020-08-13-efficientnet.html">
+<a href="./posts/2020-08-13-efficientnet.html" class="no-external">
 <div class="listing-date">
 Aug 13, 2020
 </div>
@@ -912,32 +946,30 @@ Aman Arora
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="19" data-categories="Computer Vision" data-listing-date-sort="1596931200000" data-listing-file-modified-sort="1688187490333" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="13">
+<div class="quarto-post image-right" data-index="20" data-categories="Computer Vision" data-listing-date-sort="1596931200000" data-listing-file-modified-sort="1688187490333" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="13" data-listing-word-count-sort="2450">
 <div class="thumbnail">
-<p><a href="./posts/2020-08-09-groupnorm.html"> <p class="card-img-top"><img src="images/BN_batch_size.png" title="fig-1 Imagenet classification error vs batch sizes" class="thumbnail-image card-img"/></p> </a></p>
+<p><a href="./posts/2020-08-09-groupnorm.html" class="no-external"></a></p><a href="./posts/2020-08-09-groupnorm.html" class="no-external">
+<p class="card-img-top"><img src="images/BN_batch_size.png" title="fig-1 Imagenet classification error vs batch sizes" class="thumbnail-image card-img"/></p>
+</a><p><a href="./posts/2020-08-09-groupnorm.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/2020-08-09-groupnorm.html">
 <h3 class="no-anchor listing-title">
-Group Normalization
+<a href="./posts/2020-08-09-groupnorm.html" class="no-external">Group Normalization</a>
 </h3>
 <div class="listing-subtitle">
-
+<a href="./posts/2020-08-09-groupnorm.html" class="no-external"></a>
 </div>
-</a>
 <div class="listing-categories">
 <div class="listing-category" onclick="window.quartoListingCategory('Computer Vision'); return false;">
 Computer Vision
 </div>
 </div>
-<a href="./posts/2020-08-09-groupnorm.html">
 <div class="listing-description">
-<p>In this blog post, we will look at <span>Group Normalization</span> research paper and also implement Group Normalization in PyTorch from scratch.</p>
+<a href="./posts/2020-08-09-groupnorm.html" class="no-external">In this blog post, we will look at <span>Group Normalization</span> research paper and also implement Group Normalization in PyTorch from scratch. </a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/2020-08-09-groupnorm.html">
+<a href="./posts/2020-08-09-groupnorm.html" class="no-external">
 <div class="listing-date">
 Aug 9, 2020
 </div>
@@ -947,19 +979,19 @@ Aman Arora
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="20" data-categories="Programming,Computer Vision,Model Architecture" data-listing-date-sort="1596326400000" data-listing-file-modified-sort="1688187490333" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="20">
+<div class="quarto-post image-right" data-index="21" data-categories="Programming,Computer Vision,Model Architecture" data-listing-date-sort="1596326400000" data-listing-file-modified-sort="1688187490333" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="20" data-listing-word-count-sort="3829">
 <div class="thumbnail">
-<p><a href="./posts/2020-08-02-densenets.html"> <p class="card-img-top"><img src="images/CNN.png" title="fig-1 Convolutional Neural Network; src: https://cezannec.github.io/Convolutional_Neural_Networks/" class="thumbnail-image card-img"/></p> </a></p>
+<p><a href="./posts/2020-08-02-densenets.html" class="no-external"></a></p><a href="./posts/2020-08-02-densenets.html" class="no-external">
+<p class="card-img-top"><img src="images/CNN.png" title="fig-1 Convolutional Neural Network; src: https://cezannec.github.io/Convolutional_Neural_Networks/" class="thumbnail-image card-img"/></p>
+</a><p><a href="./posts/2020-08-02-densenets.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/2020-08-02-densenets.html">
 <h3 class="no-anchor listing-title">
-DenseNet Architecture Explained with PyTorch Implementation from TorchVision
+<a href="./posts/2020-08-02-densenets.html" class="no-external">DenseNet Architecture Explained with PyTorch Implementation from TorchVision</a>
 </h3>
 <div class="listing-subtitle">
-Densely Connected Convolutional Networks
+<a href="./posts/2020-08-02-densenets.html" class="no-external">Densely Connected Convolutional Networks</a>
 </div>
-</a>
 <div class="listing-categories">
 <div class="listing-category" onclick="window.quartoListingCategory('Programming'); return false;">
 Programming
@@ -971,14 +1003,12 @@ Computer Vision
 Model Architecture
 </div>
 </div>
-<a href="./posts/2020-08-02-densenets.html">
 <div class="listing-description">
-<p>In this blog post, we introduce dense blocks, transition layers and look at the TorchVision implementation of DenseNet step-by-step.</p>
+<a href="./posts/2020-08-02-densenets.html" class="no-external">In this blog post, we introduce dense blocks, transition layers and look at the TorchVision implementation of DenseNet step-by-step. </a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/2020-08-02-densenets.html">
+<a href="./posts/2020-08-02-densenets.html" class="no-external">
 <div class="listing-date">
 Aug 2, 2020
 </div>
@@ -988,19 +1018,19 @@ Aman Arora
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="21" data-categories="Computer Vision,Model Architecture" data-listing-date-sort="1595548800000" data-listing-file-modified-sort="1688187490333" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="19">
+<div class="quarto-post image-right" data-index="22" data-categories="Computer Vision,Model Architecture" data-listing-date-sort="1595548800000" data-listing-file-modified-sort="1688187490333" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="19" data-listing-word-count-sort="3792">
 <div class="thumbnail">
-<p><a href="./posts/2020-07-24-SeNet.html"> <p class="card-img-top"><img src="images/cnn.gif" title="fig-1: Convolution operation on RGB image; src: https://towardsdatascience.com/intuitively-understanding-convolutions-for-deep-learning-1f6f42faee1" class="thumbnail-image card-img"/></p> </a></p>
+<p><a href="./posts/2020-07-24-SeNet.html" class="no-external"></a></p><a href="./posts/2020-07-24-SeNet.html" class="no-external">
+<p class="card-img-top"><img src="images/cnn.gif" title="fig-1: Convolution operation on RGB image; src: https://towardsdatascience.com/intuitively-understanding-convolutions-for-deep-learning-1f6f42faee1" class="thumbnail-image card-img"/></p>
+</a><p><a href="./posts/2020-07-24-SeNet.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/2020-07-24-SeNet.html">
 <h3 class="no-anchor listing-title">
-Squeeze and Excitation Networks Explained with PyTorch Implementation
+<a href="./posts/2020-07-24-SeNet.html" class="no-external">Squeeze and Excitation Networks Explained with PyTorch Implementation</a>
 </h3>
 <div class="listing-subtitle">
-Squeeze-and-Excitation Networks
+<a href="./posts/2020-07-24-SeNet.html" class="no-external">Squeeze-and-Excitation Networks</a>
 </div>
-</a>
 <div class="listing-categories">
 <div class="listing-category" onclick="window.quartoListingCategory('Computer Vision'); return false;">
 Computer Vision
@@ -1009,14 +1039,12 @@ Computer Vision
 Model Architecture
 </div>
 </div>
-<a href="./posts/2020-07-24-SeNet.html">
 <div class="listing-description">
-<p>In this blogpost, we re-implement the Squeeze-and-Excitation networks in PyTorch step-by-step with very minor updates to ResNet implementation in torchvision.</p>
+<a href="./posts/2020-07-24-SeNet.html" class="no-external">In this blogpost, we re-implement the Squeeze-and-Excitation networks in PyTorch step-by-step with very minor updates to ResNet implementation in torchvision. </a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/2020-07-24-SeNet.html">
+<a href="./posts/2020-07-24-SeNet.html" class="no-external">
 <div class="listing-date">
 Jul 24, 2020
 </div>
@@ -1026,32 +1054,30 @@ Aman Arora
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="22" data-categories="Computer Vision" data-listing-date-sort="1595030400000" data-listing-file-modified-sort="1688187490333" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="15">
+<div class="quarto-post image-right" data-index="23" data-categories="Computer Vision" data-listing-date-sort="1595030400000" data-listing-file-modified-sort="1688187490333" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="15" data-listing-word-count-sort="2801">
 <div class="thumbnail">
-<p><a href="./posts/2020-07-18-label-smoothing.html"> <p class="card-img-top"><img src="images/cross_entropy.png" title="cross entropy loss" class="thumbnail-image card-img"/></p> </a></p>
+<p><a href="./posts/2020-07-18-label-smoothing.html" class="no-external"></a></p><a href="./posts/2020-07-18-label-smoothing.html" class="no-external">
+<p class="card-img-top"><img src="images/cross_entropy.png" title="cross entropy loss" class="thumbnail-image card-img"/></p>
+</a><p><a href="./posts/2020-07-18-label-smoothing.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/2020-07-18-label-smoothing.html">
 <h3 class="no-anchor listing-title">
-Label Smoothing Explained using Microsoft Excel
+<a href="./posts/2020-07-18-label-smoothing.html" class="no-external">Label Smoothing Explained using Microsoft Excel</a>
 </h3>
 <div class="listing-subtitle">
-Better language models and their implications
+<a href="./posts/2020-07-18-label-smoothing.html" class="no-external">Better language models and their implications</a>
 </div>
-</a>
 <div class="listing-categories">
 <div class="listing-category" onclick="window.quartoListingCategory('Computer Vision'); return false;">
 Computer Vision
 </div>
 </div>
-<a href="./posts/2020-07-18-label-smoothing.html">
 <div class="listing-description">
-<p>In this blogpost, we re-implement Label Smoothing in Microsoft Excel step by step.</p>
+<a href="./posts/2020-07-18-label-smoothing.html" class="no-external">In this blogpost, we re-implement Label Smoothing in Microsoft Excel step by step. </a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/2020-07-18-label-smoothing.html">
+<a href="./posts/2020-07-18-label-smoothing.html" class="no-external">
 <div class="listing-date">
 Jul 18, 2020
 </div>
@@ -1061,19 +1087,19 @@ Aman Arora
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="23" data-categories="Programming,Computer Vision" data-listing-date-sort="1594512000000" data-listing-file-modified-sort="1688187490333" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="14">
+<div class="quarto-post image-right" data-index="24" data-categories="Programming,Computer Vision" data-listing-date-sort="1594512000000" data-listing-file-modified-sort="1688187490333" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="14" data-listing-word-count-sort="2735">
 <div class="thumbnail">
-<p><a href="./posts/2020-07-12-oganized-pytorch.html"> <p class="card-img-top"><img src="images/ISIC.png" title="src: https://www.isic-archive.com/#!/topWithHeader/onlyHeaderTop/gallery" class="thumbnail-image card-img"/></p> </a></p>
+<p><a href="./posts/2020-07-12-oganized-pytorch.html" class="no-external"></a></p><a href="./posts/2020-07-12-oganized-pytorch.html" class="no-external">
+<p class="card-img-top"><img src="images/ISIC.png" title="src: https://www.isic-archive.com/#!/topWithHeader/onlyHeaderTop/gallery" class="thumbnail-image card-img"/></p>
+</a><p><a href="./posts/2020-07-12-oganized-pytorch.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/2020-07-12-oganized-pytorch.html">
 <h3 class="no-anchor listing-title">
-An introduction to PyTorch Lightning with comparisons to PyTorch
+<a href="./posts/2020-07-12-oganized-pytorch.html" class="no-external">An introduction to PyTorch Lightning with comparisons to PyTorch</a>
 </h3>
 <div class="listing-subtitle">
-Better language models and their implications
+<a href="./posts/2020-07-12-oganized-pytorch.html" class="no-external">Better language models and their implications</a>
 </div>
-</a>
 <div class="listing-categories">
 <div class="listing-category" onclick="window.quartoListingCategory('Programming'); return false;">
 Programming
@@ -1082,14 +1108,12 @@ Programming
 Computer Vision
 </div>
 </div>
-<a href="./posts/2020-07-12-oganized-pytorch.html">
 <div class="listing-description">
-<p>In this blogpost, we will be going through an introduction to Pytorch Lightning and implement all the cool tricks like - Gradient Accumulation, 16-bit precision training, and also add TPU/multi-gpu support - all in a few lines of code. We will use Pytorch Lightning to work on SIIM-ISIC Melanoma Classification challenge on Kaggle.</p>
+<a href="./posts/2020-07-12-oganized-pytorch.html" class="no-external">In this blogpost, we will be going through an introduction to Pytorch Lightning and implement all the cool tricks like - Gradient Accumulation, 16-bit precision training, and also add TPU/multi-gpu support - all in a few lines of code. We will use Pytorch Lightning to work on SIIM-ISIC Melanoma Classification challenge on Kaggle. </a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/2020-07-12-oganized-pytorch.html">
+<a href="./posts/2020-07-12-oganized-pytorch.html" class="no-external">
 <div class="listing-date">
 Jul 12, 2020
 </div>
@@ -1099,19 +1123,19 @@ Aman Arora
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="24" data-categories="Computer Vision,Loss Function" data-listing-date-sort="1593388800000" data-listing-file-modified-sort="1688187490333" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="8">
+<div class="quarto-post image-right" data-index="25" data-categories="Computer Vision,Loss Function" data-listing-date-sort="1593388800000" data-listing-file-modified-sort="1688187490333" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="8" data-listing-word-count-sort="1425">
 <div class="thumbnail">
-<p><a href="./posts/2020-06-29-FocalLoss.html"> <p class="card-img-top"><img src="images/IntroFL.PNG" title="fig-1: Why do we need Focal Loss" class="thumbnail-image card-img"/></p> </a></p>
+<p><a href="./posts/2020-06-29-FocalLoss.html" class="no-external"></a></p><a href="./posts/2020-06-29-FocalLoss.html" class="no-external">
+<p class="card-img-top"><img data-src="images/IntroFL.PNG" title="fig-1: Why do we need Focal Loss" class="thumbnail-image card-img"/></p>
+</a><p><a href="./posts/2020-06-29-FocalLoss.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/2020-06-29-FocalLoss.html">
 <h3 class="no-anchor listing-title">
-What is Focal Loss and when should you use it?
+<a href="./posts/2020-06-29-FocalLoss.html" class="no-external">What is Focal Loss and when should you use it?</a>
 </h3>
 <div class="listing-subtitle">
-Better language models and their implications
+<a href="./posts/2020-06-29-FocalLoss.html" class="no-external">Better language models and their implications</a>
 </div>
-</a>
 <div class="listing-categories">
 <div class="listing-category" onclick="window.quartoListingCategory('Computer Vision'); return false;">
 Computer Vision
@@ -1120,14 +1144,12 @@ Computer Vision
 Loss Function
 </div>
 </div>
-<a href="./posts/2020-06-29-FocalLoss.html">
 <div class="listing-description">
-<p>In this blogpost, we will understand what Focal Loss and when is it used. We will also take a dive into its math and implement step-by-step in PyTorch.</p>
+<a href="./posts/2020-06-29-FocalLoss.html" class="no-external">In this blogpost, we will understand what Focal Loss and when is it used. We will also take a dive into its math and implement step-by-step in PyTorch. </a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/2020-06-29-FocalLoss.html">
+<a href="./posts/2020-06-29-FocalLoss.html" class="no-external">
 <div class="listing-date">
 Jun 29, 2020
 </div>
@@ -1137,19 +1159,19 @@ Aman Arora
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="25" data-categories="NLP,Transformers" data-listing-date-sort="1581984000000" data-listing-file-modified-sort="1688187490333" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="27">
+<div class="quarto-post image-right" data-index="26" data-categories="NLP,Transformers" data-listing-date-sort="1581984000000" data-listing-file-modified-sort="1688187490333" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="27" data-listing-word-count-sort="5220">
 <div class="thumbnail">
-<p><a href="./posts/2020-02-18-annotatedGPT2.html"> <p class="card-img-top"><img data-src="images/gpt-architecture.PNG" title="GPT Architecture" class="thumbnail-image card-img"/></p> </a></p>
+<p><a href="./posts/2020-02-18-annotatedGPT2.html" class="no-external"></a></p><a href="./posts/2020-02-18-annotatedGPT2.html" class="no-external">
+<p class="card-img-top"><img data-src="images/gpt-architecture.PNG" title="GPT Architecture" class="thumbnail-image card-img"/></p>
+</a><p><a href="./posts/2020-02-18-annotatedGPT2.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/2020-02-18-annotatedGPT2.html">
 <h3 class="no-anchor listing-title">
-The Annotated GPT-2
+<a href="./posts/2020-02-18-annotatedGPT2.html" class="no-external">The Annotated GPT-2</a>
 </h3>
 <div class="listing-subtitle">
-Better language models and their implications
+<a href="./posts/2020-02-18-annotatedGPT2.html" class="no-external">Better language models and their implications</a>
 </div>
-</a>
 <div class="listing-categories">
 <div class="listing-category" onclick="window.quartoListingCategory('NLP'); return false;">
 NLP
@@ -1158,14 +1180,12 @@ NLP
 Transformers
 </div>
 </div>
-<a href="./posts/2020-02-18-annotatedGPT2.html">
 <div class="listing-description">
-<p>This post presents an annotated version of the paper in the form of a line-by-line implementation in PyTorch. This document itself is a working notebook, and should be a completely usable implementation.</p>
+<a href="./posts/2020-02-18-annotatedGPT2.html" class="no-external">This post presents an annotated version of the paper in the form of a line-by-line implementation in PyTorch. This document itself is a working notebook, and should be a completely usable implementation. </a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/2020-02-18-annotatedGPT2.html">
+<a href="./posts/2020-02-18-annotatedGPT2.html" class="no-external">
 <div class="listing-date">
 Feb 18, 2020
 </div>
@@ -1243,18 +1263,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }
     return false;
   }
-  const clipboard = new window.ClipboardJS('.code-copy-button', {
-    text: function(trigger) {
-      const codeEl = trigger.previousElementSibling.cloneNode(true);
-      for (const childEl of codeEl.children) {
-        if (isCodeAnnotation(childEl)) {
-          childEl.remove();
-        }
-      }
-      return codeEl.innerText;
-    }
-  });
-  clipboard.on('success', function(e) {
+  const onCopySuccess = function(e) {
     // button target
     const button = e.trigger;
     // don't keep focus
@@ -1286,11 +1295,50 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }, 1000);
     // clear code selection
     e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
   });
-  function tippyHover(el, contentFn) {
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
     const config = {
       allowHTML: true,
-      content: contentFn,
       maxWidth: 500,
       delay: 100,
       arrow: false,
@@ -1300,8 +1348,17 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       interactive: true,
       interactiveBorder: 10,
       theme: 'quarto',
-      placement: 'bottom-start'
+      placement: 'bottom-start',
     };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
     window.tippy(el, config); 
   }
   const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
@@ -1313,7 +1370,130 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       try { href = new URL(href).hash; } catch {}
       const id = href.replace(/^#\/?/, "");
       const note = window.document.getElementById(id);
-      return note.innerHTML;
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
     });
   }
       let selectedAnnoteEl;
@@ -1357,6 +1537,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
             }
             div.style.top = top - 2 + "px";
             div.style.height = height + 4 + "px";
+            div.style.left = 0;
             let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
             if (gutterDiv === null) {
               gutterDiv = window.document.createElement("div");
@@ -1382,6 +1563,32 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
         });
         selectedAnnoteEl = undefined;
       };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
       // Attach click handler to the DT
       const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
       for (const annoteDlNode of annoteDls) {
@@ -1442,6 +1649,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 });
 </script>
 </div> <!-- /content -->
+
 
 
 
