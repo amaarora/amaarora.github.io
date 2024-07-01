@@ -8,7 +8,7 @@
 
 <meta name="author" content="Aman Arora">
 <meta name="dcterms.date" content="2024-07-01">
-<meta name="description" content="As part of this blog post we are going to build an image retriever app that can take in three inputs - caption, brightness and number of items per image and retrieve most similar image based on their values.">
+<meta name="description" content="As part of this blog post we are going to build an image retriever app that can take in three inputs - caption, brightness and number of items per image to retrieve the most similar image from a database based on their values.">
 
 <title>Image retrieval app using Apple’s 4M-21 any-to-any vision model</title>
 <style>
@@ -80,7 +80,7 @@ div.csl-indent {
 }</style>
 
 
-<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="../site_libs/quarto-nav/quarto-nav.js"></script>
 <script src="../site_libs/quarto-nav/headroom.min.js"></script>
 <script src="../site_libs/clipboard/clipboard.min.js"></script>
 <script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
@@ -140,10 +140,13 @@ ga('send', {
   'anonymizeIp': true,
 });
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
 
 <meta name="twitter:title" content="Image retrieval app using Apple’s 4M-21 any-to-any vision model">
-<meta name="twitter:description" content="As part of this blog post we are going to build an image retriever app that can take in three inputs - caption, brightness and number of items per image and retrieve most similar image based on their values.">
+<meta name="twitter:description" content="As part of this blog post we are going to build an image retriever app that can take in three inputs - caption, brightness and number of items per image to retrieve the most similar image from a database based on their values.">
 <meta name="twitter:image" content="../images/4m-21.png">
 <meta name="twitter:card" content="summary_large_image">
 </head>
@@ -200,7 +203,7 @@ ga('send', {
             <p class="subtitle lead">4M-21 An Any-to-Any Vision Model for Tens of Tasks and Modalities</p>
                   <div>
         <div class="description">
-          <p>As part of this blog post we are going to build an image retriever app that can take in three inputs - caption, brightness and number of items per image and retrieve most similar image based on their values.</p>
+          <p>As part of this blog post we are going to build an image retriever app that can take in three inputs - caption, brightness and number of items per image to retrieve the most similar image from a database based on their values.</p>
         </div>
       </div>
                           <div class="quarto-categories">
@@ -249,12 +252,16 @@ ga('send', {
   <li><a href="#sec-code" id="toc-sec-code" class="nav-link" data-scroll-target="#sec-code"><span class="header-section-number">2.3</span> Python code for image retrieval</a>
   <ul class="collapse">
   <li><a href="#building-the-database" id="toc-building-the-database" class="nav-link" data-scroll-target="#building-the-database"><span class="header-section-number">2.3.1</span> Building the database</a></li>
-  <li><a href="#inference-with-4m-21model-epfl-vilab4m-21_l-to-get-most-similar-image" id="toc-inference-with-4m-21model-epfl-vilab4m-21_l-to-get-most-similar-image" class="nav-link" data-scroll-target="#inference-with-4m-21model-epfl-vilab4m-21_l-to-get-most-similar-image"><span class="header-section-number">2.3.2</span> Inference with 4M-21model <code>EPFL-VILAB/4M-21_L</code> to get most similar image</a></li>
+  <li><a href="#sec-inference" id="toc-sec-inference" class="nav-link" data-scroll-target="#sec-inference"><span class="header-section-number">2.3.2</span> Inference with 4M-21model <code>EPFL-VILAB/4M-21_L</code> to get most similar image</a></li>
   <li><a href="#gradio-app-with-required-filters" id="toc-gradio-app-with-required-filters" class="nav-link" data-scroll-target="#gradio-app-with-required-filters"><span class="header-section-number">2.3.3</span> Gradio app with required filters</a></li>
   <li><a href="#deploy-app-to-huggingface-hub" id="toc-deploy-app-to-huggingface-hub" class="nav-link" data-scroll-target="#deploy-app-to-huggingface-hub"><span class="header-section-number">2.3.4</span> Deploy app to HuggingFace hub</a></li>
   </ul></li>
-  <li><a href="#sec-appendixa" id="toc-sec-appendixa" class="nav-link" data-scroll-target="#sec-appendixa"><span class="header-section-number">2.4</span> Appendix A</a></li>
-  <li><a href="#credits" id="toc-credits" class="nav-link" data-scroll-target="#credits"><span class="header-section-number">2.5</span> Credits</a></li>
+  <li><a href="#sec-appendixa" id="toc-sec-appendixa" class="nav-link" data-scroll-target="#sec-appendixa"><span class="header-section-number">2.4</span> Appendix A</a>
+  <ul class="collapse">
+  <li><a href="#adding-color-palette-as-inputs" id="toc-adding-color-palette-as-inputs" class="nav-link" data-scroll-target="#adding-color-palette-as-inputs"><span class="header-section-number">2.4.1</span> Adding color palette as inputs</a></li>
+  <li><a href="#adding-more-metadata-as-input" id="toc-adding-more-metadata-as-input" class="nav-link" data-scroll-target="#adding-more-metadata-as-input"><span class="header-section-number">2.4.2</span> Adding more metadata as input</a></li>
+  </ul></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion"><span class="header-section-number">2.5</span> Conclusion</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -278,23 +285,36 @@ Figure&nbsp;1: Image retrieval using 4M-21 any-to-any vision model
 </figcaption>
 </figure>
 </div>
-<p>Before, we get started, let’s take a moment to understand what’s going on in the video:</p>
+<p>Before, we get started, let’s take a moment to understand what’s going on in the demo video above:</p>
 <ol type="1">
 <li>This a demo of an image retrieval app that is capable of retrieving most similar images from any given database. It is built on top of gradio.</li>
 <li>As part of this demo, we are able to retrieve images based on the following filters:
 <ol type="a">
 <li><em>Caption</em> (description of the image)</li>
-<li><em>Brightness</em> (brightness in the image, lower represents darker image)</li>
-<li><em>Number of items</em> (lower represents lower number of items in the image)</li>
+<li><em>Brightness</em> (brightness in the image, lower represents a darker image)</li>
+<li><em>Number of items</em> (lower represents fewer number of items in the image)</li>
 </ol></li>
-<li>Starting with a lower number of brightness and items per image for dining room, we were able to retrieve an almost empty &amp; dark image of a dining room.</li>
+<li>Starting with a 5/255 brightness &amp; a 5/50 items per image for dining room, we were able to retrieve an almost empty &amp; dark image of a dining room.</li>
 <li>Increasing the number of items to 50 retrieves a dark image of a dining room but with chairs and a dining table.</li>
 <li>As you’ll later see, we can also add a lot more filters such as an input image, image segmentation mask, image boundary, number of humans and more but we have limited ourselves to three for the purpose of this demo.</li>
 </ol>
 <p>With this understanding of the demo app, let’s get started and build one ourselves! If you’d like to skip over all the details, python code for this app has been shared in <a href="#sec-code" class="quarto-xref">Section&nbsp;2.3</a>.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Thank you <strong>jarvislabs.ai</strong> for the compute, this blog post would not have been possible without the credits.</p>
+</div>
+</div>
 <section id="prerequisites" class="level2" data-number="1.1">
 <h2 data-number="1.1" class="anchored" data-anchor-id="prerequisites"><span class="header-section-number">1.1</span> Prerequisites</h2>
-<p>As part of this blog post, we are going to assume that the reader has a basic understanding of embeddings, Vision Language Models and image retreival using top-K similarity search.</p>
+<p>As part of this blog post, we are going to assume that the reader has a basic understanding of embeddings, Vision Language Models and image retreival using cosine similarity search.</p>
 <p>Some good resources to get the readers going are shared below:</p>
 <ol type="1">
 <li><a href="https://huggingface.co/blog/image-similarity">Image Similarity with Hugging Face Datasets and Transformers</a> by Sayak Paul</li>
@@ -307,7 +327,7 @@ Figure&nbsp;1: Image retrieval using 4M-21 any-to-any vision model
 <h1 data-number="2"><span class="header-section-number">2</span> 4M-21: An Any-to-Any Vision Model for Tens of Tasks and Modalities</h1>
 <section id="introduction" class="level2 page-columns page-full" data-number="2.1">
 <h2 data-number="2.1" class="anchored" data-anchor-id="introduction"><span class="header-section-number">2.1</span> Introduction</h2>
-<p>As part of this blog post we will be utilising Apple’s <strong>4M-21: An Any-to-Any Vision Model for Tens of Tasks and Modalities</strong> <span class="citation" data-cites="4m-21">Bachmann et al. (<a href="#ref-4m-21" role="doc-biblioref">2024</a>)</span> paper to build a realtime search engine that is capable of using caption, brightness &amp; number of items per image as filters to query a database.</p>
+<p>As part of this blog post we will be utilising Apple’s <strong>4M-21: An Any-to-Any Vision Model for Tens of Tasks and Modalities</strong> <span class="citation" data-cites="4m-21">Bachmann et al. (<a href="#ref-4m-21" role="doc-biblioref">2024</a>)</span> paper to build a real-time search engine that is capable of using caption, brightness &amp; number of items per image as filters to query an image database of a total of 15 images. Though this technique can easily be expanded to a million or more images. If you have a big database of images, take a look at <a href="https://engineering.fb.com/2017/03/29/data-infrastructure/faiss-a-library-for-efficient-similarity-search/">faiss</a> for similarity search.</p>
 <div class="no-row-height column-margin column-container"></div><p>We will build an app using Gradio and also deploy it to Huggingface Hub for anyone to use.</p>
 <p>The 4M-21 paper is the second in the 4M series (Massively Multimodal Masked Modeling) by Apple, the first paper was also an any-to-any vision model capable of working with 7 modalities - <a href="https://arxiv.org/abs/2312.06647">4M: Massively Multimodal Masked Modeling</a> <span class="citation" data-cites="4m">Mizrahi et al. (<a href="#ref-4m" role="doc-biblioref">2023</a>)</span>.</p>
 <div class="no-row-height column-margin column-container"></div><div id="fig-1" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
@@ -320,7 +340,18 @@ Figure&nbsp;2: 4M-21 any-to-any vision model
 </figcaption>
 </figure>
 </div>
-<p>As shown in the image above, the model can work with with multiple modalities. It can take all modalities shared above as inputs of output any or all of the modalities using single or subset of modalities as input! Unbelievable right? Not anymore!</p>
+<p>As shown in the image above, the model can work with with multiple modalities. It can take all modalities as inputs and output any or all of the modalities using single or subset of modalities! Unbelievable right? Not anymore!</p>
+<p>See the conditional generation example below as shared in the paper:</p>
+<div id="fig-9" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-9-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/4m-21-one-to-all.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="500">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-9-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: One to all generation
+</figcaption>
+</figure>
+</div>
 <p>As part of this blog post we will focus more on retrieval rather than generation. But, the basic concepts remain the same.</p>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
@@ -335,6 +366,7 @@ Note
 <p>The authors have open sourced all code here - <a href="https://github.com/apple/ml-4m">https://github.com/apple/ml-4m</a>.</p>
 </div>
 </div>
+<p>As part of this blog post we will focus more on retrieval rather than generation. But, the basic concepts remain the same. With that being said, let’s get started with image retrieval.</p>
 </section>
 <section id="image-retrieval-using-4m-21" class="level2 page-columns page-full" data-number="2.2">
 <h2 data-number="2.2" class="anchored" data-anchor-id="image-retrieval-using-4m-21"><span class="header-section-number">2.2</span> Image retrieval using 4M-21</h2>
@@ -344,11 +376,12 @@ Note
 <img src="../images/4m-21-retreival.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="500">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;3: Different modes of multimodal retrieval
+Figure&nbsp;4: Different modes of multimodal retrieval
 </figcaption>
 </figure>
 </div>
-<p>As can be seen above, the authors showcased that the model is capable of using any or subet of 21 modalities as input to retrieve similar images from a database.</p>
+<p>As can be seen above, the authors showcased that the model is capable of using any or subet of 21 modalities as input to retrieve similar images from a database. The query consist of one or more modalities from <a href="#fig-1" class="quarto-xref">Figure&nbsp;2</a>. As part of this blog post, we will be focusing on the “caption + metadata -&gt; RGB” retrieval example.</p>
+<p>In <a href="#fig-2" class="quarto-xref">Figure&nbsp;4</a>, given the inputs “a fancy mansion” and “brightness 200/255”, the model was able to return very bright images of a mansion. Doing the same for “brightness 30/255” returns darker images of mansions. We will be replicating this functionality as part of this blog post.</p>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -359,11 +392,11 @@ Note
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p><a href="#fig-2" class="quarto-xref">Figure&nbsp;3</a> above is what prompted the idea for this blog post. What if we can utilise some or all of the modalities to query our own custom databases?</p>
+<p><a href="#fig-2" class="quarto-xref">Figure&nbsp;4</a> above is what prompted the idea for this blog post. What if we can utilise some or all of the modalities to query our own custom databases?</p>
 <p>Thank you dear authors for answering all my <a href="https://github.com/apple/ml-4m/issues/2#issuecomment-2192932207">questions</a>.</p>
 </div>
 </div>
-<p>We could have also added any of the input modalities from <a href="#fig-2" class="quarto-xref">Figure&nbsp;3</a> to our demo but we will leave this to the reader as an exercise to build on top of the code shared in this blog post. We have kept the input modalities limited to two as part of this blog post:</p>
+<p>We could have also added any of the input modalities from <a href="#fig-2" class="quarto-xref">Figure&nbsp;4</a> to our demo but we will leave this to the reader as an exercise to build on top of the code shared in this blog post. We have kept the input modalities limited to two as part of this blog post:</p>
 <ol type="1">
 <li>Image description (caption)</li>
 <li>Metadata (such as brightness, number of items per image)</li>
@@ -374,6 +407,34 @@ Note
 <li>Colour palette (using color palette to find similar images matching the colour schema)</li>
 </ol>
 <p>Please refer to <a href="#sec-appendixa" class="quarto-xref">Section&nbsp;2.4</a> for our findings on our custom database. Using color palette was not giving satisying results. We tried both <code>EPFL-VILAB/4M-21_XL</code> and <code>EPFL-VILAB/4M-21_L</code> models for the same.</p>
+<div class="callout callout-style-default callout-caution callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Expand to learn more about how to use color-palette and more metadata as inputs to the model
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-4" class="callout-4-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>In <a href="#sec-appendixa" class="quarto-xref">Section&nbsp;2.4</a> we will share with the reader how to extend the app to add color palette as an input the model on top of what has been shared in the demo.</p>
+<p>We also showcase to the reader how to extend the app to use other metadata such as:</p>
+<ol type="1">
+<li>Crowdedness score: number of humans</li>
+<li>SAM clutter score: number of SAM instances</li>
+<li>COCO clutter score: number of COCO [55] instances</li>
+<li>COCO instance diversity: number of unique COCO instance classes</li>
+<li>Walkability score: % of pixels belonging to walkable COCO semantic classes such as ‘road’</li>
+<li>Semantic diversity: number of unique COCO semantic classes</li>
+<li>Caption length: length of the caption in characters, words, and sentences</li>
+<li>Geometric complexity: angular variance of surface normals</li>
+<li>Occlusion score: % of occlusion edges over a fixed threshold</li>
+</ol>
+</div>
+</div>
+</div>
 <p>Having said that, let’s dig deep into the paper and understand how this model is able to distill information from multiple modalities.</p>
 <p>As part of the training, each modality from <a href="#fig-1" class="quarto-xref">Figure&nbsp;2</a> was encoded using modality specific tokenizers. From the paper:</p>
 <p><em>We employ suitable tokenization schemes for different modalities based on their format and performance. For image-like modalities and feature maps, we use spatial VQ-VAEs with optional diffusion decoders for detail rich modalities like RGB. For non-spatial modalities like global tokens or parameterized poses, we compress them to a fixed number of discrete tokens using Memcodes with MLP encoders and decoders. All sequence modalities are encoded as text using WordPiece.</em></p>
@@ -383,7 +444,7 @@ Note
 <img src="../images/4m-21-tokenizer.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="500">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;4: Tokenization overview
+Figure&nbsp;5: Tokenization overview
 </figcaption>
 </figure>
 </div>
@@ -394,7 +455,7 @@ Figure&nbsp;4: Tokenization overview
 <img src="../images/4m-21-overview.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="500">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-4-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;5: Method overview
+Figure&nbsp;6: Method overview
 </figcaption>
 </figure>
 </div>
@@ -407,16 +468,16 @@ Mizrahi, David, Roman Bachmann, Oğuzhan Fatih Kar, Teresa Yeo, Mingfei Gao, Afs
 <li>A random subset of tokens are selected as input</li>
 <li>A random subset of tokens are selected as output</li>
 </ol>
-<p>By doing so, the model learns to take in all or a subset of input modalities and predicts all or a subset of output modalities thus it is termed an “any-to-any vision model”.</p>
+<p>By doing so, the model learns to take in all or a subset of input modalities and predicts all or a subset of output modalities thus it is termed an <strong>“any-to-any vision model”</strong>.</p>
 <p>Now that we have a basic understanding of how the model works, let’ start building the retrieval app in Python.</p>
 </section>
 <section id="sec-code" class="level2 page-columns page-full" data-number="2.3">
 <h2 data-number="2.3" class="anchored" data-anchor-id="sec-code"><span class="header-section-number">2.3</span> Python code for image retrieval</h2>
-<p>We will follow the <a href="https://github.com/apple/ml-4m/blob/main/notebooks/generation_4M-21.ipynb">demo notebook</a> shared by the authors and build the retrieval sytem ourselves using a custom database (in this case a sample of 10 images).</p>
+<p>We will closely follow the <a href="https://github.com/apple/ml-4m/blob/main/notebooks/generation_4M-21.ipynb">demo notebook</a> shared by the authors and build the retrieval sytem on top of it using a custom database (in this case a sample of 15 images).</p>
 <p>As also mentioned in the paper,</p>
 <p><em>Our model can also perform multimodal retrievals by predicting global embeddings of DINOv2 and ImageBind from any (subset) of the input modalities. Once the global embeddings are obtained, the retrieval is done by finding the retrieval set samples with the smallest cosine distance to the query.</em></p>
-<p>We can utilize either Imagebind or Dino-V2 to encode images as embeddings, as part of this demo we utilise Dino-V2.</p>
-<p><strong>ImageBind: One Embedding Space To Bind Them All</strong> by <span class="citation" data-cites="imagebind">Girdhar et al. (<a href="#ref-imagebind" role="doc-biblioref">2023</a>)</span> and <strong>DINOv2: Learning Robust Visual Features without Supervision</strong> by <span class="citation" data-cites="dinov2">Oquab et al. (<a href="#ref-dinov2" role="doc-biblioref">2024</a>)</span> are both multimodal vision models released previously by Meta. They are both capable of representing images to an embedding space.</p>
+<p>We can utilize either Imagebind or Dino-V2 to encode images as embeddings, as part of this demo we utilise DINOv2 global embeddings for retrieval.</p>
+<p><strong>ImageBind: One Embedding Space To Bind Them All</strong> <span class="citation" data-cites="imagebind">Girdhar et al. (<a href="#ref-imagebind" role="doc-biblioref">2023</a>)</span> and <strong>DINOv2: Learning Robust Visual Features without Supervision</strong> <span class="citation" data-cites="dinov2">Oquab et al. (<a href="#ref-dinov2" role="doc-biblioref">2024</a>)</span> are both multi-modal vision models released previously by Meta. They are both capable of representing images to an embedding space. We donot dig deeper into these models as part of this blog post.</p>
 <div class="no-row-height column-margin column-container"><div id="ref-imagebind" class="csl-entry" role="listitem">
 Girdhar, Rohit, Alaaeldin El-Nouby, Zhuang Liu, Mannat Singh, Kalyan Vasudev Alwala, Armand Joulin, and Ishan Misra. 2023. <span>“ImageBind: One Embedding Space to Bind Them All.”</span> <a href="https://arxiv.org/abs/2305.05665">https://arxiv.org/abs/2305.05665</a>.
 </div><div id="ref-dinov2" class="csl-entry" role="listitem">
@@ -424,11 +485,26 @@ Oquab, Maxime, Timothée Darcet, Théo Moutakanni, Huy Vo, Marc Szafraniec, Vasi
 </div></div><section id="building-the-database" class="level3 page-columns page-full" data-number="2.3.1">
 <h3 data-number="2.3.1" class="anchored" data-anchor-id="building-the-database"><span class="header-section-number">2.3.1</span> Building the database</h3>
 <p>Since we wanted to showcase image description, brightness and number of items, our database consists of 15 images downloaded manually using <a href="https://images.google.com.au/">google image search</a>. The complete database can be found - <a href="https://huggingface.co/datasets/aroraaman/4m-21-demo">here</a>.</p>
+<div class="callout callout-style-default callout-caution callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-5-contents" aria-controls="callout-5" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Expand to learn more about creating your own database
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-5" class="callout-5-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
 <p>Creating your own Huggingface dataset using an image folder is as simple as:</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> datasets <span class="im">import</span> load_dataset</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>dataset <span class="op">=</span> load_dataset(<span class="st">"imagefolder"</span>, data_dir<span class="op">=</span><span class="st">"path/to/data"</span>)</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>dataset.push_to_hub()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>You can read more about it <a href="https://huggingface.co/docs/datasets/en/image_dataset">here</a>.</p>
+</div>
+</div>
+</div>
 <div id="6e05c9b4" class="cell" data-execution_count="17">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> datasets <span class="im">import</span> load_dataset</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>dataset <span class="op">=</span> load_dataset(<span class="st">"aroraaman/4m-21-demo"</span>)</span>
@@ -437,7 +513,7 @@ Oquab, Maxime, Timothée Darcet, Théo Moutakanni, Huy Vo, Marc Szafraniec, Vasi
 <pre><code>15</code></pre>
 </div>
 </div>
-<p>The dataset consists of a mix of dark and bright images of dining room and swimming pool. Some images contain lot of items and are cluttered while others look more “empty”.</p>
+<p>The dataset consists of a mix of dark and bright images of dining room and swimming pool. Some images contain lot of items and are cluttered while others look more “empty”. Images are of type .png, .jpg, .webp we &amp; .jpeg.</p>
 <div id="be90f4b3" class="cell" data-execution_count="24">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>dataset[<span class="st">'train'</span>][<span class="st">'image'</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="24">
@@ -458,7 +534,7 @@ Oquab, Maxime, Timothée Darcet, Théo Moutakanni, Huy Vo, Marc Szafraniec, Vasi
  &lt;PIL.JpegImagePlugin.JpegImageFile image mode=RGB size=2399x3229&gt;]</code></pre>
 </div>
 </div>
-<p>Now that we have a list of images that we want to use as our database, let’s use DINO-V2 to convert them to embeddings.</p>
+<p>Now that we have a list of images that we want to use as our database, let’s use DINOv2 to convert them to embeddings.</p>
 <div id="ccc4cdce" class="cell" data-execution_count="25">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torch.utils.data <span class="im">import</span> Dataset, DataLoader</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn <span class="im">as</span> nn</span>
@@ -469,10 +545,8 @@ Oquab, Maxime, Timothée Darcet, Théo Moutakanni, Huy Vo, Marc Szafraniec, Vasi
 <span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
 <span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> tqdm.notebook <span class="im">import</span> tqdm</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>Now, let’s load the Dino-V2 model as our feature extractor. Speicifically we will be using the ViT-B14 version as mentioned in the <span class="citation" data-cites="4m-21">Bachmann et al. (<a href="#ref-4m-21" role="doc-biblioref">2024</a>)</span> paper.</p>
-<div class="no-row-height column-margin column-container"><div id="ref-4m-21" class="csl-entry" role="listitem">
-Bachmann, Roman, Oğuzhan Fatih Kar, David Mizrahi, Ali Garjani, Mingfei Gao, David Griffiths, Jiaming Hu, Afshin Dehghan, and Amir Zamir. 2024. <span>“4M-21: An Any-to-Any Vision Model for Tens of Tasks and Modalities.”</span> <a href="https://arxiv.org/abs/2406.09406">https://arxiv.org/abs/2406.09406</a>.
-</div></div><div id="02c5b25b" class="cell" data-execution_count="27">
+<p>Now, let’s load the DINOv2 model as our feature extractor. Speicifically we will be using the ViT-B14 version as mentioned in the <span class="citation" data-cites="4m-21">Bachmann et al. (<a href="#ref-4m-21" role="doc-biblioref">2024</a>)</span> paper.</p>
+<div class="no-row-height column-margin column-container"></div><div id="02c5b25b" class="cell" data-execution_count="27">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>device <span class="op">=</span> <span class="st">"cuda"</span> <span class="cf">if</span> torch.cuda.is_available() <span class="cf">else</span> <span class="st">"cpu"</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>feature_extractor <span class="op">=</span> torch.hub.load(<span class="st">'facebookresearch/dinov2'</span>, <span class="st">'dinov2_vitb14'</span>)</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>feature_extractor <span class="op">=</span> feature_extractor.to(device)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -532,11 +606,12 @@ Buslaev, Alexander, Vladimir I. Iglovikov, Eugene Khvedchenya, Alex Parinov, Mik
 <span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    </span>
 <span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>features <span class="op">=</span> torch.concat(features)</span>
 <span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>torch.save(features, <span class="st">"./image_embeddings.pt"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>And that’s it! We have successfully created our image database that we will retrieve similar images from.</p>
+<p>And that’s it! We have successfully created our image database that we will retrieve similar images from based on a query.</p>
 </section>
-<section id="inference-with-4m-21model-epfl-vilab4m-21_l-to-get-most-similar-image" class="level3" data-number="2.3.2">
-<h3 data-number="2.3.2" class="anchored" data-anchor-id="inference-with-4m-21model-epfl-vilab4m-21_l-to-get-most-similar-image"><span class="header-section-number">2.3.2</span> Inference with 4M-21model <code>EPFL-VILAB/4M-21_L</code> to get most similar image</h3>
-<p>So now that we have the database, next step is to actually be able to use inputs such as “caption”, “brightness” and “number of items” to get an embedding that will be used as our “query”. To do that we will need to work with the 4M framework.</p>
+<section id="sec-inference" class="level3" data-number="2.3.2">
+<h3 data-number="2.3.2" class="anchored" data-anchor-id="sec-inference"><span class="header-section-number">2.3.2</span> Inference with 4M-21model <code>EPFL-VILAB/4M-21_L</code> to get most similar image</h3>
+<p>So now that we have the database, our next step is to actually be able to use inputs such as “caption”, “brightness” and “number of items” to get an embedding that will be used as our “query”.</p>
+<p>We will closely follow the <a href="https://github.com/apple/ml-4m/blob/main/notebooks/generation_4M-21.ipynb">demo notebook</a> shared by the authors.</p>
 <div id="a7e69663" class="cell" data-execution_count="26">
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fourm.models.fm <span class="im">import</span> FM</span>
@@ -565,7 +640,7 @@ Buslaev, Alexander, Vladimir I. Iglovikov, Eugene Khvedchenya, Alex Parinov, Mik
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>fm_model <span class="op">=</span> FM.from_pretrained(FM_MODEL_PATH).<span class="bu">eval</span>().to(DEVICE)</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>sampler <span class="op">=</span> GenerationSampler(fm_model)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>Below, our input conditional domains become <code>caption</code> &amp; <code>metadata</code>. And our target domain is <code>tok_dinov2_global</code>. Since as discussed in the paper, we want to obtain the global embeddings of DINOv2 using input modalities.</p>
+<p>Below, our input conditional domains are <code>caption</code> &amp; <code>metadata</code>. And our target domain is <code>tok_dinov2_global</code>. As discussed in the paper, we want to obtain the global embeddings of DINOv2 using input modalities for retrieval.</p>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -576,7 +651,7 @@ Note
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>The authors shared how to do this in code <a href="https://github.com/apple/ml-4m/issues/2#issuecomment-2194141824">here</a>.</p>
+<p>The authors shared how to do multimodal retrieval in code <a href="https://github.com/apple/ml-4m/issues/2#issuecomment-2194141824">here</a>.</p>
 </div>
 </div>
 <div id="1055a0f6" class="cell" data-execution_count="8">
@@ -603,7 +678,7 @@ Note
 <span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>    <span class="op">**</span>generation_config</span>
 <span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>Now that we have a generation schedule to use <code>caption</code> and <code>metadata</code> as input to generate target <code>tok_dinov2_global</code>, we can create our dictionary of input and target modalities. let’s initialise the sample.</p>
+<p>Now that we have a generation schedule to use <code>caption</code> and <code>metadata</code> as inputs to generate target <code>tok_dinov2_global</code>, we can create our dictionary of input and target modalities. let’s initialise the sample.</p>
 <div id="0517bdb0" class="cell" data-execution_count="13">
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>batched_sample <span class="op">=</span> {}</span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> target_mod, ntoks <span class="kw">in</span> <span class="bu">zip</span>(target_domains, tokens_per_target):</span>
@@ -614,7 +689,7 @@ Note
 </div>
 <p>Let’s say that we want to retrieve a dark image of a swimming pool. So our input caption would be ‘swimming pool’, and metadata is passed in combination of V1 and V0s.</p>
 <p>V1 represents which metadata to pass in, the encoding for each metadata type is <a href="https://github.com/apple/ml-4m/blob/777c0d2fb388fbd0f177375bf74d606c4ae7e9e1/fourm/data/modality_transforms.py#L876-L898">here</a>.</p>
-<p>Brightness is encoded with number 10, and takes in range of values from 0-255. 0 represents a dark image whereas 255 represents a bright image.</p>
+<p>Brightness is encoded with number 10, and takes in range of values from 0-255. 0 represents a dark image whereas 255 represents a bright image. So to represent a brightness of 50/255, we will write <code>V1=10 V0=50</code>.</p>
 <div id="2500ff19" class="cell" data-execution_count="14">
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>caption <span class="op">=</span> <span class="st">"Swimming pool"</span></span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>metadata <span class="op">=</span> <span class="st">"v1=10 v0=68"</span> <span class="co">#brightness 68/255 as metadata</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -687,7 +762,7 @@ Note
 <img src="../images/4m-21-query.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="500">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-5-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;6: Image retrieval using EPFL-VILAB/4M-21_L for “swimming pool” and 68/255 brightness
+Figure&nbsp;7: Image retrieval using EPFL-VILAB/4M-21_L for “swimming pool” and 68/255 brightness
 </figcaption>
 </figure>
 </div>
@@ -698,14 +773,14 @@ Figure&nbsp;6: Image retrieval using EPFL-VILAB/4M-21_L for “swimming pool” 
 <img src="../images/4m-21-query-2.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="500">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-6-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;7: Image retrieval using EPFL-VILAB/4M-21_L for “swimming pool” and 255/255 brightness
+Figure&nbsp;8: Image retrieval using EPFL-VILAB/4M-21_L for “swimming pool” and 255/255 brightness
 </figcaption>
 </figure>
 </div>
 </section>
 <section id="gradio-app-with-required-filters" class="level3" data-number="2.3.3">
 <h3 data-number="2.3.3" class="anchored" data-anchor-id="gradio-app-with-required-filters"><span class="header-section-number">2.3.3</span> Gradio app with required filters</h3>
-<p>Now that we have all the underlying code, we can simply build a Gradio interface for the same! Why? This makes it very easy for all to use and play with the 4M-21 model. Feel free to create your own apps too. If you do, please don’t forget to let me know about it on my Twitter - <a href="https://x.com/amaarora"><span class="citation" data-cites="amaarora">(<span><strong>amaarora?</strong></span>)</span></a>.</p>
+<p>Now that we have all the underlying code, we can simply build a Gradio interface for the same! Why? This makes it very easy for all to use and play with the 4M-21 model. Feel free to create your own apps too. If you do, please don’t forget to let me know about it on my Twitter - https://x.com/amaarora.</p>
 <p>The code for the gradio app is pretty simple, I actually used Claude 3.5 Sonnet to help me build the app.</p>
 <div class="sourceCode" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> gr.Blocks() <span class="im">as</span> demo:</span>
 <span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>    gr.Markdown(<span class="st">"# Image Retrieval using 4M-21: An Any-to-Any Vision Model"</span>)</span>
@@ -744,7 +819,7 @@ Figure&nbsp;7: Image retrieval using EPFL-VILAB/4M-21_L for “swimming pool” 
 <img src="../images/4m-21-demo.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="500">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-7-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;8: caption &amp; metadata retrieval using EPFL-VILAB/4M-21_L
+Figure&nbsp;9: caption &amp; metadata retrieval using EPFL-VILAB/4M-21_L
 </figcaption>
 </figure>
 </div>
@@ -752,6 +827,14 @@ Figure&nbsp;8: caption &amp; metadata retrieval using EPFL-VILAB/4M-21_L
 <section id="deploy-app-to-huggingface-hub" class="level3" data-number="2.3.4">
 <h3 data-number="2.3.4" class="anchored" data-anchor-id="deploy-app-to-huggingface-hub"><span class="header-section-number">2.3.4</span> Deploy app to HuggingFace hub</h3>
 <p>We have deployed the app sucessfully to huggingface Spaces. We followed the documentation <a href="https://huggingface.co/docs/hub/en/spaces-overview">here</a>.</p>
+<p><strong>You can find the huggingface space <a href="https://huggingface.co/spaces/aroraaman/image-retrieval-using-apple-4M-21">here</a>.</strong></p>
+<p>Somem minor changes that we had to do between local and for the app to deployed on huggingface spaces:</p>
+<ol type="1">
+<li>All binary files had to be tracked by git-lfs. Read more about it <a href="https://github.com/git-lfs/git-lfs/blob/main/README.md">here</a></li>
+<li>Convert dataset to a huggingface dataset, as we were not able to upload <code>.jpg</code>, <code>.png</code> or other files</li>
+<li>The complete source code for the gradio app that works on HF spaces can be found <a href="https://huggingface.co/spaces/aroraaman/image-retrieval-using-apple-4M-21/blob/main/app.py">here</a>.</li>
+</ol>
+<p>Overall it was pretty straightforward and easy to deploy!</p>
 </section>
 </section>
 <section id="sec-appendixa" class="level2" data-number="2.4">
@@ -763,26 +846,72 @@ Figure&nbsp;8: caption &amp; metadata retrieval using EPFL-VILAB/4M-21_L
 <img src="../images/4m-finding-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="500">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-20-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;9: rgb-to-any retrieval using EPFL-VILAB/4M-21_L
+Figure&nbsp;10: rgb-to-any retrieval using EPFL-VILAB/4M-21_L
 </figcaption>
 </figure>
 </div>
+<section id="adding-color-palette-as-inputs" class="level3" data-number="2.4.1">
+<h3 data-number="2.4.1" class="anchored" data-anchor-id="adding-color-palette-as-inputs"><span class="header-section-number">2.4.1</span> Adding color palette as inputs</h3>
+<p>From the paper:</p>
+<p><em>For every RGB image, we extract between one and seven color palettes using <a href="https://github.com/adamgrieger/pypalette">PyPalette</a>. During training, we randomly sample one of the color palettes to enable users to input palettes with different levels of granularity.</em></p>
+<p><em>color palette sequence is formed as color = c R = r G = g B = b R = r, … where c takes a value between 1 and 7 and specifies the number of colors in the palette and r, g, b takes values between 0-255.</em></p>
+<p>We can write a small python function to convert any of seaborn <a href="https://seaborn.pydata.org/tutorial/color_palettes.html">color palettes</a> to the required format. Also, as per the <a href="https://github.com/apple/ml-4m/blob/777c0d2fb388fbd0f177375bf74d606c4ae7e9e1/fourm/data/modality_transforms.py#L1180-L1185">color palette transform</a>, the tokenizer expexts “color” to be replaced by “v1” and r,g,b with “v0”.</p>
+<p>Therefore, a color palette represented by <code>color=1 r=166 g=206 b=227</code> should be transformed to <code>v1=1 v0=166 v0=206 v0=227</code>.</p>
+<div id="7298bf5c" class="cell" data-execution_count="25">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="70d5de32" class="cell" data-execution_count="26">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> generate_color_palette(num_colors<span class="op">=</span><span class="dv">2</span>, palette_name<span class="op">=</span><span class="st">"Paired"</span>):</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>    palette <span class="op">=</span> sns.color_palette(palette_name, num_colors)</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>    rgb_values <span class="op">=</span> [(<span class="bu">int</span>(r<span class="op">*</span><span class="dv">255</span>), <span class="bu">int</span>(g<span class="op">*</span><span class="dv">255</span>), <span class="bu">int</span>(b<span class="op">*</span><span class="dv">255</span>)) <span class="cf">for</span> r, g, b <span class="kw">in</span> palette]</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>    color_strings <span class="op">=</span> [<span class="ss">f"v0=</span><span class="sc">{</span>r<span class="sc">}</span><span class="ss"> v0=</span><span class="sc">{</span>g<span class="sc">}</span><span class="ss"> v0=</span><span class="sc">{</span>b<span class="sc">}</span><span class="ss">"</span> <span class="cf">for</span> r, g, b <span class="kw">in</span> rgb_values]</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>    color_palette <span class="op">=</span> <span class="ss">f"v1=</span><span class="sc">{</span>num_colors<span class="sc">}</span><span class="ss"> "</span> <span class="op">+</span> <span class="st">" "</span>.join(color_strings)</span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> palette, color_palette</span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>palette, color_palette_string <span class="op">=</span> generate_color_palette(num_colors<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>palette</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="26">
+<svg width="110" height="55"><rect x="0" y="0" width="55" height="55" style="fill:#a6cee3;stroke-width:2;stroke:rgb(255,255,255)"></rect><rect x="55" y="0" width="55" height="55" style="fill:#1f78b4;stroke-width:2;stroke:rgb(255,255,255)"></rect></svg>
+</div>
+</div>
+<div id="e4deb7ce" class="cell" data-execution_count="27">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>color_palette_string</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="27">
+<pre><code>'v1=2 v0=166 v0=206 v0=227 v0=31 v0=120 v0=180'</code></pre>
+</div>
+</div>
+<p>Now we can simply pass in the string above as input and use <code>custom_text</code> function on our <code>batched_sample</code> to prepare batch for input to the model. We also need to add <code>color_palette</code> to the conditional domain as input.</p>
+<div class="sourceCode" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>cond_domains <span class="op">=</span> [<span class="st">"caption"</span>, <span class="st">"metadata"</span>, <span class="st">"color_palette"</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Once that’s done, we can now take our <code>color_palette_string</code> as input and created the <code>batched_sample</code> as before in <a href="#sec-inference" class="quarto-xref">Section&nbsp;2.3.2</a>.</p>
+<div class="sourceCode" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>batched_sample <span class="op">=</span> custom_text(</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>    batched_sample,</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>    input_text<span class="op">=</span>caption,</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>    eos_token<span class="op">=</span><span class="st">"[EOS]"</span>,</span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>    key<span class="op">=</span><span class="st">"caption"</span>,</span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>    device<span class="op">=</span>DEVICE,</span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>    text_tokenizer<span class="op">=</span>text_tokenizer,</span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>And that’s it! Everything else remains the same!</p>
 </section>
-<section id="credits" class="level2" data-number="2.5">
-<h2 data-number="2.5" class="anchored" data-anchor-id="credits"><span class="header-section-number">2.5</span> Credits</h2>
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Note
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>Thank you <strong>jarvislabs.ai</strong> for the compute, this blog post would not have been possible without the credits.</p>
-</div>
-</div>
+<section id="adding-more-metadata-as-input" class="level3" data-number="2.4.2">
+<h3 data-number="2.4.2" class="anchored" data-anchor-id="adding-more-metadata-as-input"><span class="header-section-number">2.4.2</span> Adding more metadata as input</h3>
+<p>In the demo application, we only utilised brightness and number of items as metadata inputs. But as descriped in the paper, we could have used many more metadata as inputs.</p>
+<p>To pass in any of the metadata available <a href="https://github.com/apple/ml-4m/blob/777c0d2fb388fbd0f177375bf74d606c4ae7e9e1/fourm/data/modality_transforms.py#L877-L897">here</a>, just pass in <code>v1=[key] v0=[val]</code> to the input string.</p>
+<p>For example, to add in metadata: “brightness 50/255 contrast 50/127 walkability 25/50”, simply write it as:</p>
+<p><code>v1=10 v0=50 v1=11 v0=50 v1=14 v0=25</code></p>
+<p>We simply replace the words by their corresponding metadata key and add the value with <code>v0=[val]</code>.</p>
+<p>And that’s it! Now the reader can also add any of the 20 metadata filters that the authors have trained the 4M-21 model on.</p>
+</section>
+</section>
+<section id="conclusion" class="level2 page-columns page-full" data-number="2.5">
+<h2 data-number="2.5" class="anchored" data-anchor-id="conclusion"><span class="header-section-number">2.5</span> Conclusion</h2>
+<p>As part of this blog post, we looked into the 4M-21: An Any-to-Any Vision Model for Tens of Tasks and Modalities <span class="citation" data-cites="4m-21">Bachmann et al. (<a href="#ref-4m-21" role="doc-biblioref">2024</a>)</span> paper and built an image retriever app on top as a real world application.</p>
+<div class="no-row-height column-margin column-container"><div id="ref-4m-21" class="csl-entry" role="listitem">
+Bachmann, Roman, Oğuzhan Fatih Kar, David Mizrahi, Ali Garjani, Mingfei Gao, David Griffiths, Jiaming Hu, Afshin Dehghan, and Amir Zamir. 2024. <span>“4M-21: An Any-to-Any Vision Model for Tens of Tasks and Modalities.”</span> <a href="https://arxiv.org/abs/2406.09406">https://arxiv.org/abs/2406.09406</a>.
+</div></div><p>In <a href="#sec-code" class="quarto-xref">Section&nbsp;2.3</a>, we also looked at the Python code to be able to build such an app on any custom database. We built a gradio app for demo purpose and also deployed it to Huggingface Spaces!</p>
+<p>All code and corresponding files can be found <a href="https://huggingface.co/spaces/aroraaman/image-retrieval-using-apple-4M-21/tree/main">here</a>.</p>
+<p>Finally in <a href="#sec-appendixa" class="quarto-xref">Section&nbsp;2.4</a>, we looked at ways of extending the demo and adding color palettes and more metadata as input filters for retrieval!</p>
+<p>Thank you readers for your time. If you have any feedback, please feel free to share it with me <a href="https://amaarora.github.io/about.html">here</a>.</p>
 
 
 
