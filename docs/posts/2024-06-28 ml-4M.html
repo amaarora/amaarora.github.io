@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-99.9.9">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Aman Arora">
+<meta name="dcterms.date" content="2024-07-01">
+<meta name="description" content="As part of this blog post we are going to build an image retriever app that can take in three inputs - caption, brightness and number of items per image and retrieve most similar image based on their values.">
+
+<title>Image retrieval app using Apple’s 4M-21 any-to-any vision model</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href=".././images/logo.png" rel="icon" type="image/png">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script src="../site_libs/quarto-contrib/videojs/video.min.js"></script>
+<link href="../site_libs/quarto-contrib/videojs/video-js.css" rel="stylesheet">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+<script type="text/javascript">
+
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+ga('create', 'UA-158677010-1', 'auto');
+
+ga('send', {
+  hitType: 'pageview',
+  'anonymizeIp': true,
+});
+</script>
+
+
+<meta name="twitter:title" content="Image retrieval app using Apple’s 4M-21 any-to-any vision model">
+<meta name="twitter:description" content="As part of this blog post we are going to build an image retriever app that can take in three inputs - caption, brightness and number of items per image and retrieve most similar image based on their values.">
+<meta name="twitter:image" content="../images/4m-21.png">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top quarto-banner">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html"> 
+<span class="menu-text">Aman Arora’s Blog</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../about.html"> 
+<span class="menu-text">Aman Arora</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/amaarora"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com/amaarora"> <i class="bi bi-twitter" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://www.linkedin.com/in/aroraaman/"> <i class="bi bi-linkedin" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Image retrieval app using Apple’s 4M-21 any-to-any vision model</h1>
+            <p class="subtitle lead">4M-21 An Any-to-Any Vision Model for Tens of Tasks and Modalities</p>
+                  <div>
+        <div class="description">
+          <p>As part of this blog post we are going to build an image retriever app that can take in three inputs - caption, brightness and number of items per image and retrieve most similar image based on their values.</p>
+        </div>
+      </div>
+                          <div class="quarto-categories">
+                <div class="quarto-category">VLM</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Aman Arora </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">July 1, 2024</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#image-retrieval-app" id="toc-image-retrieval-app" class="nav-link active" data-scroll-target="#image-retrieval-app"><span class="header-section-number">1</span> Image retrieval App</a>
+  <ul class="collapse">
+  <li><a href="#prerequisites" id="toc-prerequisites" class="nav-link" data-scroll-target="#prerequisites"><span class="header-section-number">1.1</span> Prerequisites</a></li>
+  </ul></li>
+  <li><a href="#m-21-an-any-to-any-vision-model-for-tens-of-tasks-and-modalities" id="toc-m-21-an-any-to-any-vision-model-for-tens-of-tasks-and-modalities" class="nav-link" data-scroll-target="#m-21-an-any-to-any-vision-model-for-tens-of-tasks-and-modalities"><span class="header-section-number">2</span> 4M-21: An Any-to-Any Vision Model for Tens of Tasks and Modalities</a>
+  <ul class="collapse">
+  <li><a href="#introduction" id="toc-introduction" class="nav-link" data-scroll-target="#introduction"><span class="header-section-number">2.1</span> Introduction</a></li>
+  <li><a href="#image-retrieval-using-4m-21" id="toc-image-retrieval-using-4m-21" class="nav-link" data-scroll-target="#image-retrieval-using-4m-21"><span class="header-section-number">2.2</span> Image retrieval using 4M-21</a></li>
+  <li><a href="#sec-code" id="toc-sec-code" class="nav-link" data-scroll-target="#sec-code"><span class="header-section-number">2.3</span> Python code for image retrieval</a>
+  <ul class="collapse">
+  <li><a href="#building-the-database" id="toc-building-the-database" class="nav-link" data-scroll-target="#building-the-database"><span class="header-section-number">2.3.1</span> Building the database</a></li>
+  <li><a href="#inference-with-4m-21model-epfl-vilab4m-21_l-to-get-most-similar-image" id="toc-inference-with-4m-21model-epfl-vilab4m-21_l-to-get-most-similar-image" class="nav-link" data-scroll-target="#inference-with-4m-21model-epfl-vilab4m-21_l-to-get-most-similar-image"><span class="header-section-number">2.3.2</span> Inference with 4M-21model <code>EPFL-VILAB/4M-21_L</code> to get most similar image</a></li>
+  <li><a href="#gradio-app-with-required-filters" id="toc-gradio-app-with-required-filters" class="nav-link" data-scroll-target="#gradio-app-with-required-filters"><span class="header-section-number">2.3.3</span> Gradio app with required filters</a></li>
+  <li><a href="#deploy-app-to-huggingface-hub" id="toc-deploy-app-to-huggingface-hub" class="nav-link" data-scroll-target="#deploy-app-to-huggingface-hub"><span class="header-section-number">2.3.4</span> Deploy app to HuggingFace hub</a></li>
+  </ul></li>
+  <li><a href="#sec-appendixa" id="toc-sec-appendixa" class="nav-link" data-scroll-target="#sec-appendixa"><span class="header-section-number">2.4</span> Appendix A</a></li>
+  <li><a href="#credits" id="toc-credits" class="nav-link" data-scroll-target="#credits"><span class="header-section-number">2.5</span> Credits</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block page-columns page-full" id="quarto-document-content">
+
+
+
+
+
+<section id="image-retrieval-app" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Image retrieval App</h1>
+<div id="fig-demo" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-demo-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="quarto-video"><video id="video_shortcode_videojs_video1" class="video-js vjs-default-skin vjs-fluid" controls="" preload="auto" data-setup="{}" title=""><source src="../images/4m-21-demo.mp4"></video></div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-demo-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Image retrieval using 4M-21 any-to-any vision model
+</figcaption>
+</figure>
+</div>
+<p>Before, we get started, let’s take a moment to understand what’s going on in the video:</p>
+<ol type="1">
+<li>This a demo of an image retrieval app that is capable of retrieving most similar images from any given database. It is built on top of gradio.</li>
+<li>As part of this demo, we are able to retrieve images based on the following filters:
+<ol type="a">
+<li><em>Caption</em> (description of the image)</li>
+<li><em>Brightness</em> (brightness in the image, lower represents darker image)</li>
+<li><em>Number of items</em> (lower represents lower number of items in the image)</li>
+</ol></li>
+<li>Starting with a lower number of brightness and items per image for dining room, we were able to retrieve an almost empty &amp; dark image of a dining room.</li>
+<li>Increasing the number of items to 50 retrieves a dark image of a dining room but with chairs and a dining table.</li>
+<li>As you’ll later see, we can also add a lot more filters such as an input image, image segmentation mask, image boundary, number of humans and more but we have limited ourselves to three for the purpose of this demo.</li>
+</ol>
+<p>With this understanding of the demo app, let’s get started and build one ourselves! If you’d like to skip over all the details, python code for this app has been shared in <a href="#sec-code" class="quarto-xref">Section&nbsp;2.3</a>.</p>
+<section id="prerequisites" class="level2" data-number="1.1">
+<h2 data-number="1.1" class="anchored" data-anchor-id="prerequisites"><span class="header-section-number">1.1</span> Prerequisites</h2>
+<p>As part of this blog post, we are going to assume that the reader has a basic understanding of embeddings, Vision Language Models and image retreival using top-K similarity search.</p>
+<p>Some good resources to get the readers going are shared below:</p>
+<ol type="1">
+<li><a href="https://huggingface.co/blog/image-similarity">Image Similarity with Hugging Face Datasets and Transformers</a> by Sayak Paul</li>
+<li><a href="https://jalammar.github.io/illustrated-word2vec/">The illustrated word2vec</a> by Jay Alammar</li>
+<li><a href="https://huggingface.co/blog/vlms">Vision Language Models Explained</a> by Merve Noyan &amp; Edward Beeching</li>
+</ol>
+</section>
+</section>
+<section id="m-21-an-any-to-any-vision-model-for-tens-of-tasks-and-modalities" class="level1 page-columns page-full" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> 4M-21: An Any-to-Any Vision Model for Tens of Tasks and Modalities</h1>
+<section id="introduction" class="level2 page-columns page-full" data-number="2.1">
+<h2 data-number="2.1" class="anchored" data-anchor-id="introduction"><span class="header-section-number">2.1</span> Introduction</h2>
+<p>As part of this blog post we will be utilising Apple’s <strong>4M-21: An Any-to-Any Vision Model for Tens of Tasks and Modalities</strong> <span class="citation" data-cites="4m-21">Bachmann et al. (<a href="#ref-4m-21" role="doc-biblioref">2024</a>)</span> paper to build a realtime search engine that is capable of using caption, brightness &amp; number of items per image as filters to query a database.</p>
+<div class="no-row-height column-margin column-container"></div><p>We will build an app using Gradio and also deploy it to Huggingface Hub for anyone to use.</p>
+<p>The 4M-21 paper is the second in the 4M series (Massively Multimodal Masked Modeling) by Apple, the first paper was also an any-to-any vision model capable of working with 7 modalities - <a href="https://arxiv.org/abs/2312.06647">4M: Massively Multimodal Masked Modeling</a> <span class="citation" data-cites="4m">Mizrahi et al. (<a href="#ref-4m" role="doc-biblioref">2023</a>)</span>.</p>
+<div class="no-row-height column-margin column-container"></div><div id="fig-1" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/4m-21.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="500">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: 4M-21 any-to-any vision model
+</figcaption>
+</figure>
+</div>
+<p>As shown in the image above, the model can work with with multiple modalities. It can take all modalities shared above as inputs of output any or all of the modalities using single or subset of modalities as input! Unbelievable right? Not anymore!</p>
+<p>As part of this blog post we will focus more on retrieval rather than generation. But, the basic concepts remain the same.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The authors have open sourced all code here - <a href="https://github.com/apple/ml-4m">https://github.com/apple/ml-4m</a>.</p>
+</div>
+</div>
+</section>
+<section id="image-retrieval-using-4m-21" class="level2 page-columns page-full" data-number="2.2">
+<h2 data-number="2.2" class="anchored" data-anchor-id="image-retrieval-using-4m-21"><span class="header-section-number">2.2</span> Image retrieval using 4M-21</h2>
+<div id="fig-2" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/4m-21-retreival.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="500">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: Different modes of multimodal retrieval
+</figcaption>
+</figure>
+</div>
+<p>As can be seen above, the authors showcased that the model is capable of using any or subet of 21 modalities as input to retrieve similar images from a database.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><a href="#fig-2" class="quarto-xref">Figure&nbsp;3</a> above is what prompted the idea for this blog post. What if we can utilise some or all of the modalities to query our own custom databases?</p>
+<p>Thank you dear authors for answering all my <a href="https://github.com/apple/ml-4m/issues/2#issuecomment-2192932207">questions</a>.</p>
+</div>
+</div>
+<p>We could have also added any of the input modalities from <a href="#fig-2" class="quarto-xref">Figure&nbsp;3</a> to our demo but we will leave this to the reader as an exercise to build on top of the code shared in this blog post. We have kept the input modalities limited to two as part of this blog post:</p>
+<ol type="1">
+<li>Image description (caption)</li>
+<li>Metadata (such as brightness, number of items per image)</li>
+</ol>
+<p>As part of writing this blog post, we did <a href="https://github.com/apple/ml-4m/issues/9">experiment with other modalities</a> such as:</p>
+<ol type="1">
+<li>Input image (using an image to find similar images)</li>
+<li>Colour palette (using color palette to find similar images matching the colour schema)</li>
+</ol>
+<p>Please refer to <a href="#sec-appendixa" class="quarto-xref">Section&nbsp;2.4</a> for our findings on our custom database. Using color palette was not giving satisying results. We tried both <code>EPFL-VILAB/4M-21_XL</code> and <code>EPFL-VILAB/4M-21_L</code> models for the same.</p>
+<p>Having said that, let’s dig deep into the paper and understand how this model is able to distill information from multiple modalities.</p>
+<p>As part of the training, each modality from <a href="#fig-1" class="quarto-xref">Figure&nbsp;2</a> was encoded using modality specific tokenizers. From the paper:</p>
+<p><em>We employ suitable tokenization schemes for different modalities based on their format and performance. For image-like modalities and feature maps, we use spatial VQ-VAEs with optional diffusion decoders for detail rich modalities like RGB. For non-spatial modalities like global tokens or parameterized poses, we compress them to a fixed number of discrete tokens using Memcodes with MLP encoders and decoders. All sequence modalities are encoded as text using WordPiece.</em></p>
+<div id="fig-3" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/4m-21-tokenizer.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="500">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4: Tokenization overview
+</figcaption>
+</figure>
+</div>
+<p>What this means is that authors were able to represent information into a limited number of tokens for multiple modalities. By training modality specific tokenizers, the authors were able to transform different modalities into a common representation. After converting all modalities to a common representation, the authors were able to train a standard encoder-decoder transformer. During training, random subsets of these tokens are selected from all modalities as inputs and targets, and the objective is to predict one subset from the other.</p>
+<div id="fig-4" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-4-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/4m-21-overview.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="500">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-4-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5: Method overview
+</figcaption>
+</figure>
+</div>
+<p>The complete method overview was shared by the authors in the 4M: Massively Multimodal Masked Modeling <span class="citation" data-cites="4m">Mizrahi et al. (<a href="#ref-4m" role="doc-biblioref">2023</a>)</span> paper.</p>
+<div class="no-row-height column-margin column-container"><div id="ref-4m" class="csl-entry" role="listitem">
+Mizrahi, David, Roman Bachmann, Oğuzhan Fatih Kar, Teresa Yeo, Mingfei Gao, Afshin Dehghan, and Amir Zamir. 2023. <span>“4M: Massively Multimodal Masked Modeling.”</span> <a href="https://arxiv.org/abs/2312.06647">https://arxiv.org/abs/2312.06647</a>.
+</div></div><p>As can be seen, here’s what’s exactly going on:</p>
+<ol type="1">
+<li>First the different modalities are converted to a number of tokens using modality specific tokenizers</li>
+<li>A random subset of tokens are selected as input</li>
+<li>A random subset of tokens are selected as output</li>
+</ol>
+<p>By doing so, the model learns to take in all or a subset of input modalities and predicts all or a subset of output modalities thus it is termed an “any-to-any vision model”.</p>
+<p>Now that we have a basic understanding of how the model works, let’ start building the retrieval app in Python.</p>
+</section>
+<section id="sec-code" class="level2 page-columns page-full" data-number="2.3">
+<h2 data-number="2.3" class="anchored" data-anchor-id="sec-code"><span class="header-section-number">2.3</span> Python code for image retrieval</h2>
+<p>We will follow the <a href="https://github.com/apple/ml-4m/blob/main/notebooks/generation_4M-21.ipynb">demo notebook</a> shared by the authors and build the retrieval sytem ourselves using a custom database (in this case a sample of 10 images).</p>
+<p>As also mentioned in the paper,</p>
+<p><em>Our model can also perform multimodal retrievals by predicting global embeddings of DINOv2 and ImageBind from any (subset) of the input modalities. Once the global embeddings are obtained, the retrieval is done by finding the retrieval set samples with the smallest cosine distance to the query.</em></p>
+<p>We can utilize either Imagebind or Dino-V2 to encode images as embeddings, as part of this demo we utilise Dino-V2.</p>
+<p><strong>ImageBind: One Embedding Space To Bind Them All</strong> by <span class="citation" data-cites="imagebind">Girdhar et al. (<a href="#ref-imagebind" role="doc-biblioref">2023</a>)</span> and <strong>DINOv2: Learning Robust Visual Features without Supervision</strong> by <span class="citation" data-cites="dinov2">Oquab et al. (<a href="#ref-dinov2" role="doc-biblioref">2024</a>)</span> are both multimodal vision models released previously by Meta. They are both capable of representing images to an embedding space.</p>
+<div class="no-row-height column-margin column-container"><div id="ref-imagebind" class="csl-entry" role="listitem">
+Girdhar, Rohit, Alaaeldin El-Nouby, Zhuang Liu, Mannat Singh, Kalyan Vasudev Alwala, Armand Joulin, and Ishan Misra. 2023. <span>“ImageBind: One Embedding Space to Bind Them All.”</span> <a href="https://arxiv.org/abs/2305.05665">https://arxiv.org/abs/2305.05665</a>.
+</div><div id="ref-dinov2" class="csl-entry" role="listitem">
+Oquab, Maxime, Timothée Darcet, Théo Moutakanni, Huy Vo, Marc Szafraniec, Vasil Khalidov, Pierre Fernandez, et al. 2024. <span>“DINOv2: Learning Robust Visual Features Without Supervision.”</span> <a href="https://arxiv.org/abs/2304.07193">https://arxiv.org/abs/2304.07193</a>.
+</div></div><section id="building-the-database" class="level3 page-columns page-full" data-number="2.3.1">
+<h3 data-number="2.3.1" class="anchored" data-anchor-id="building-the-database"><span class="header-section-number">2.3.1</span> Building the database</h3>
+<p>Since we wanted to showcase image description, brightness and number of items, our database consists of 15 images downloaded manually using <a href="https://images.google.com.au/">google image search</a>. The complete database can be found - <a href="https://huggingface.co/datasets/aroraaman/4m-21-demo">here</a>.</p>
+<p>Creating your own Huggingface dataset using an image folder is as simple as:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> datasets <span class="im">import</span> load_dataset</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>dataset <span class="op">=</span> load_dataset(<span class="st">"imagefolder"</span>, data_dir<span class="op">=</span><span class="st">"path/to/data"</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>dataset.push_to_hub()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>You can read more about it <a href="https://huggingface.co/docs/datasets/en/image_dataset">here</a>.</p>
+<div id="6e05c9b4" class="cell" data-execution_count="17">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> datasets <span class="im">import</span> load_dataset</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>dataset <span class="op">=</span> load_dataset(<span class="st">"aroraaman/4m-21-demo"</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="bu">len</span>(dataset[<span class="st">'train'</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="17">
+<pre><code>15</code></pre>
+</div>
+</div>
+<p>The dataset consists of a mix of dark and bright images of dining room and swimming pool. Some images contain lot of items and are cluttered while others look more “empty”.</p>
+<div id="be90f4b3" class="cell" data-execution_count="24">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>dataset[<span class="st">'train'</span>][<span class="st">'image'</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="24">
+<pre><code>[&lt;PIL.WebPImagePlugin.WebPImageFile image mode=RGB size=852x1200&gt;,
+ &lt;PIL.JpegImagePlugin.JpegImageFile image mode=RGB size=1280x853&gt;,
+ &lt;PIL.PngImagePlugin.PngImageFile image mode=P size=1500x1284&gt;,
+ &lt;PIL.JpegImagePlugin.JpegImageFile image mode=RGB size=564x846&gt;,
+ &lt;PIL.JpegImagePlugin.JpegImageFile image mode=RGB size=736x552&gt;,
+ &lt;PIL.JpegImagePlugin.JpegImageFile image mode=RGB size=275x183&gt;,
+ &lt;PIL.JpegImagePlugin.JpegImageFile image mode=RGB size=300x168&gt;,
+ &lt;PIL.JpegImagePlugin.JpegImageFile image mode=RGB size=194x259&gt;,
+ &lt;PIL.JpegImagePlugin.JpegImageFile image mode=RGB size=275x183&gt;,
+ &lt;PIL.JpegImagePlugin.JpegImageFile image mode=RGB size=616x462&gt;,
+ &lt;PIL.JpegImagePlugin.JpegImageFile image mode=RGB size=605x694&gt;,
+ &lt;PIL.JpegImagePlugin.JpegImageFile image mode=RGB size=612x408&gt;,
+ &lt;PIL.Image.Image image mode=RGB size=635x272&gt;,
+ &lt;PIL.WebPImagePlugin.WebPImageFile image mode=RGB size=800x533&gt;,
+ &lt;PIL.JpegImagePlugin.JpegImageFile image mode=RGB size=2399x3229&gt;]</code></pre>
+</div>
+</div>
+<p>Now that we have a list of images that we want to use as our database, let’s use DINO-V2 to convert them to embeddings.</p>
+<div id="ccc4cdce" class="cell" data-execution_count="25">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torch.utils.data <span class="im">import</span> Dataset, DataLoader</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn <span class="im">as</span> nn</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> PIL <span class="im">import</span> Image</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> albumentations <span class="im">as</span> A</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> tqdm.notebook <span class="im">import</span> tqdm</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now, let’s load the Dino-V2 model as our feature extractor. Speicifically we will be using the ViT-B14 version as mentioned in the <span class="citation" data-cites="4m-21">Bachmann et al. (<a href="#ref-4m-21" role="doc-biblioref">2024</a>)</span> paper.</p>
+<div class="no-row-height column-margin column-container"><div id="ref-4m-21" class="csl-entry" role="listitem">
+Bachmann, Roman, Oğuzhan Fatih Kar, David Mizrahi, Ali Garjani, Mingfei Gao, David Griffiths, Jiaming Hu, Afshin Dehghan, and Amir Zamir. 2024. <span>“4M-21: An Any-to-Any Vision Model for Tens of Tasks and Modalities.”</span> <a href="https://arxiv.org/abs/2406.09406">https://arxiv.org/abs/2406.09406</a>.
+</div></div><div id="02c5b25b" class="cell" data-execution_count="27">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>device <span class="op">=</span> <span class="st">"cuda"</span> <span class="cf">if</span> torch.cuda.is_available() <span class="cf">else</span> <span class="st">"cpu"</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>feature_extractor <span class="op">=</span> torch.hub.load(<span class="st">'facebookresearch/dinov2'</span>, <span class="st">'dinov2_vitb14'</span>)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>feature_extractor <span class="op">=</span> feature_extractor.to(device)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Using cache found in /home/ubuntu/.cache/torch/hub/facebookresearch_dinov2_main
+INFO:dinov2:using MLP layer as FFN</code></pre>
+</div>
+</div>
+<p>We transform every image by downsizing each image such that the shortest side is of size 224 pixels. We then center crop the image such that all images are of size 224x224. We use <a href="https://albumentations.ai/docs/api_reference/augmentations/geometric/resize/">Albumentations library</a> <span class="citation" data-cites="albu">Buslaev et al. (<a href="#ref-albu" role="doc-biblioref">2020</a>)</span> for the transforms.</p>
+<div class="no-row-height column-margin column-container"><div id="ref-albu" class="csl-entry" role="listitem">
+Buslaev, Alexander, Vladimir I. Iglovikov, Eugene Khvedchenya, Alex Parinov, Mikhail Druzhinin, and Alexandr A. Kalinin. 2020. <span>“Albumentations: Fast and Flexible Image Augmentations.”</span> <em>Information</em> 11 (2). <a href="https://doi.org/10.3390/info11020125">https://doi.org/10.3390/info11020125</a>.
+</div></div><div id="dd9147ad" class="cell" data-execution_count="28">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> FeatureExtractionDataset(Dataset):</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, feature_extractor: nn.Module, path: <span class="bu">str</span>, img_sz<span class="op">=</span><span class="dv">224</span>):</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.feature_extractor<span class="op">=</span>feature_extractor</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.path <span class="op">=</span> Path(path)</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.files <span class="op">=</span> <span class="bu">list</span>(<span class="va">self</span>.path.rglob(<span class="st">"*"</span>))</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.tfms <span class="op">=</span> A.Compose([</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>            A.SmallestMaxSize(img_sz),</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>            A.CenterCrop(img_sz, img_sz)</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>        ])</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.device <span class="op">=</span> <span class="st">"cuda"</span> <span class="cf">if</span> torch.cuda.is_available() <span class="cf">else</span> <span class="st">"cpu"</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__len__</span>(<span class="va">self</span>): <span class="cf">return</span> <span class="bu">len</span>(<span class="va">self</span>.files)</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__getitem__</span>(<span class="va">self</span>, idx):</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>        img <span class="op">=</span> Image.<span class="bu">open</span>(<span class="va">self</span>.files[idx]).convert(<span class="st">"RGB"</span>)</span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>        img <span class="op">=</span> np.array(img)</span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>        img <span class="op">=</span> <span class="va">self</span>.tfms(image<span class="op">=</span>img)[<span class="st">'image'</span>]</span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>        img <span class="op">=</span> torch.tensor(img, dtype<span class="op">=</span>torch.float32)<span class="op">/</span><span class="fl">255.</span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>        img <span class="op">=</span> img.permute(<span class="dv">2</span>,<span class="dv">0</span>,<span class="dv">1</span>)</span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> img</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Next, we can simply build the dataset, dataloader and store the image embeddings as a PyTorch tensor.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create the Dataset</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>dataset <span class="op">=</span> FeatureExtractionDataset(</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    feature_extractor<span class="op">=</span>feature_extractor, </span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    path<span class="op">=</span><span class="st">"/path/to/data"</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Create the DataLoader</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>dataloader <span class="op">=</span> DataLoader(</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    dataset,</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    batch_size<span class="op">=</span>batch_size,  </span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    shuffle<span class="op">=</span><span class="va">False</span>,</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    num_workers<span class="op">=</span><span class="dv">16</span>,  </span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>    pin_memory<span class="op">=</span><span class="va">True</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Finally we can extract the features from each image and store as a PyTorch Tensor.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>features <span class="op">=</span> []</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i,batch <span class="kw">in</span> tqdm(<span class="bu">enumerate</span>(dataloader), total<span class="op">=</span>(<span class="bu">len</span>(dataset)<span class="op">//</span>batch_size)<span class="op">+</span><span class="dv">1</span>):</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    batch <span class="op">=</span> batch.to(device)</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> torch.no_grad():</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>        _f <span class="op">=</span> feature_extractor(batch)</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    _f <span class="op">=</span> _f.to(<span class="st">"cpu"</span>)</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    features.append(_f)</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>features <span class="op">=</span> torch.concat(features)</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>torch.save(features, <span class="st">"./image_embeddings.pt"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>And that’s it! We have successfully created our image database that we will retrieve similar images from.</p>
+</section>
+<section id="inference-with-4m-21model-epfl-vilab4m-21_l-to-get-most-similar-image" class="level3" data-number="2.3.2">
+<h3 data-number="2.3.2" class="anchored" data-anchor-id="inference-with-4m-21model-epfl-vilab4m-21_l-to-get-most-similar-image"><span class="header-section-number">2.3.2</span> Inference with 4M-21model <code>EPFL-VILAB/4M-21_L</code> to get most similar image</h3>
+<p>So now that we have the database, next step is to actually be able to use inputs such as “caption”, “brightness” and “number of items” to get an embedding that will be used as our “query”. To do that we will need to work with the 4M framework.</p>
+<div id="a7e69663" class="cell" data-execution_count="26">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fourm.models.fm <span class="im">import</span> FM</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fourm.vq.vqvae <span class="im">import</span> VQVAE</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> tokenizers <span class="im">import</span> Tokenizer</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fourm.models.generate <span class="im">import</span> (</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    GenerationSampler,</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    build_chained_generation_schedules,</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    init_empty_target_modality,</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    custom_text,</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fourm.data.modality_info <span class="im">import</span> MODALITY_INFO</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fourm.utils.plotting_utils <span class="im">import</span> decode_dict</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fourm.vq.vqvae <span class="im">import</span> VQVAE</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="037caafe" class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>DEVICE <span class="op">=</span> <span class="st">"cuda"</span> <span class="cf">if</span> torch.cuda.is_available() <span class="cf">else</span> <span class="st">"cpu"</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>IMG_SIZE <span class="op">=</span> <span class="dv">224</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>TOKENIZER_PATH <span class="op">=</span> <span class="st">"./fourm/utils/tokenizer/trained/text_tokenizer_4m_wordpiece_30k.json"</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>FM_MODEL_PATH <span class="op">=</span> <span class="st">"EPFL-VILAB/4M-21_L"</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>IMAGE_DATASET_PATH <span class="op">=</span> <span class="st">"/home/ubuntu/GIT_REPOS/ml-4m/data/custom_data/"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>All tokenizers have been made available on the hub - <a href="https://huggingface.co/EPFL-VILAB">EPFL VILAB</a>. For our demo, we only need the text tokenizer, since we are using captions and metadata as inputs (both as text). We will also need to the fourm model to create the sampler that is able to create query embedding using input caption &amp; metadata.</p>
+<div id="e1bed193" class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>text_tokenizer <span class="op">=</span> Tokenizer.from_file(TOKENIZER_PATH)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>fm_model <span class="op">=</span> FM.from_pretrained(FM_MODEL_PATH).<span class="bu">eval</span>().to(DEVICE)</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>sampler <span class="op">=</span> GenerationSampler(fm_model)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Below, our input conditional domains become <code>caption</code> &amp; <code>metadata</code>. And our target domain is <code>tok_dinov2_global</code>. Since as discussed in the paper, we want to obtain the global embeddings of DINOv2 using input modalities.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The authors shared how to do this in code <a href="https://github.com/apple/ml-4m/issues/2#issuecomment-2194141824">here</a>.</p>
+</div>
+</div>
+<div id="1055a0f6" class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Generation configurations</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>cond_domains <span class="op">=</span> [<span class="st">"caption"</span>, <span class="st">"metadata"</span>]</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>target_domains <span class="op">=</span> [<span class="st">"tok_dinov2_global"</span>,]</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>tokens_per_target <span class="op">=</span> [<span class="dv">16</span>]</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>generation_config <span class="op">=</span> {</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"autoregression_schemes"</span>: [<span class="st">"roar"</span>],</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"decoding_steps"</span>: [<span class="dv">1</span>],</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"token_decoding_schedules"</span>: [<span class="st">"linear"</span>],</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"temps"</span>: [<span class="fl">2.0</span>],</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">"temp_schedules"</span>: [<span class="st">"onex:0.5:0.5"</span>],</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">"cfg_scales"</span>: [<span class="fl">1.0</span>],</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">"cfg_schedules"</span>: [<span class="st">"constant"</span>],</span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">"cfg_grow_conditioning"</span>: <span class="va">True</span>,</span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>top_p, top_k <span class="op">=</span> <span class="fl">0.8</span>, <span class="fl">0.0</span></span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>schedule <span class="op">=</span> build_chained_generation_schedules(</span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>    cond_domains<span class="op">=</span>cond_domains,</span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>    target_domains<span class="op">=</span>target_domains,</span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>    tokens_per_target<span class="op">=</span>tokens_per_target,</span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>    <span class="op">**</span>generation_config</span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now that we have a generation schedule to use <code>caption</code> and <code>metadata</code> as input to generate target <code>tok_dinov2_global</code>, we can create our dictionary of input and target modalities. let’s initialise the sample.</p>
+<div id="0517bdb0" class="cell" data-execution_count="13">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>batched_sample <span class="op">=</span> {}</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> target_mod, ntoks <span class="kw">in</span> <span class="bu">zip</span>(target_domains, tokens_per_target):</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    batched_sample <span class="op">=</span> init_empty_target_modality(</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>        batched_sample, MODALITY_INFO, target_mod, <span class="dv">1</span>, ntoks, DEVICE</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Let’s say that we want to retrieve a dark image of a swimming pool. So our input caption would be ‘swimming pool’, and metadata is passed in combination of V1 and V0s.</p>
+<p>V1 represents which metadata to pass in, the encoding for each metadata type is <a href="https://github.com/apple/ml-4m/blob/777c0d2fb388fbd0f177375bf74d606c4ae7e9e1/fourm/data/modality_transforms.py#L876-L898">here</a>.</p>
+<p>Brightness is encoded with number 10, and takes in range of values from 0-255. 0 represents a dark image whereas 255 represents a bright image.</p>
+<div id="2500ff19" class="cell" data-execution_count="14">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>caption <span class="op">=</span> <span class="st">"Swimming pool"</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>metadata <span class="op">=</span> <span class="st">"v1=10 v0=68"</span> <span class="co">#brightness 68/255 as metadata</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Let’s create the required dictionaries by the model as input using <code>custom_text</code> method as in the demo notebook.</p>
+<div id="6c59c53e" class="cell" data-execution_count="16">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>batched_sample <span class="op">=</span> custom_text(</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    batched_sample,</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    input_text<span class="op">=</span>caption,</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>    eos_token<span class="op">=</span><span class="st">"[EOS]"</span>,</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>    key<span class="op">=</span><span class="st">"caption"</span>,</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>    device<span class="op">=</span>DEVICE,</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>    text_tokenizer<span class="op">=</span>text_tokenizer,</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>batched_sample <span class="op">=</span> custom_text(</span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>    batched_sample,</span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>    input_text<span class="op">=</span>metadata,</span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>    eos_token<span class="op">=</span><span class="st">"[EOS]"</span>,</span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>    key<span class="op">=</span><span class="st">"metadata"</span>,</span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>    device<span class="op">=</span>DEVICE,</span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>    text_tokenizer<span class="op">=</span>text_tokenizer,</span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now, we can utilise the <code>sampler</code> that we created before to get the output from our model.</p>
+<div id="796c4d78" class="cell" data-execution_count="17">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>out_dict <span class="op">=</span> sampler.generate(</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>    batched_sample,</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    schedule,</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>    text_tokenizer<span class="op">=</span>text_tokenizer,</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>    verbose<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>    seed<span class="op">=</span><span class="dv">0</span>,</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>    top_p<span class="op">=</span>top_p,</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>    top_k<span class="op">=</span>top_k,</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>1it [00:00,  1.20it/s]</code></pre>
+</div>
+</div>
+<p>This output dictionary consists of <code>tok_dinov2_global</code> as key and the <code>tensor</code> represents the token IDs that make up the representation of the DINOv2 global embeddings.</p>
+<div id="696d3d39" class="cell" data-execution_count="20">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>out_dict[<span class="st">'tok_dinov2_global'</span>][<span class="st">'tensor'</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="20">
+<pre><code>tensor([[5426, 6424, 5294, 5716,  189, 4065, 7631, 8145, 3108, 7638, 4331, 7005,
+         5675, 1472, 3069, 5687]], device='cuda:0')</code></pre>
+</div>
+</div>
+<p>Let’s now use the decoder to get a 768 representation embedding for the image that becomes our “query” for retrieval purposes. To decode the tokens to the respective embedding, we will need to load the necessary VQ-VAE as well that was used during training.</p>
+<div id="68ff0de9" class="cell" data-execution_count="27">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>VQVAE_PATH <span class="op">=</span> <span class="st">"EPFL-VILAB/4M_tokenizers_DINOv2-B14-global_8k_16_224"</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>vqvae <span class="op">=</span> VQVAE.from_pretrained(VQVAE_PATH)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Let’s now get the image embeddings using <code>decode_dict</code> as in the demo notebook.</p>
+<div id="079b8fa9" class="cell" data-execution_count="28">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> torch.no_grad():</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>    dec_dict <span class="op">=</span> decode_dict(</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>        out_dict, {<span class="st">"tok_dinov2_global"</span>: vqvae.to(DEVICE)}, text_tokenizer, </span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>        image_size<span class="op">=</span>IMG_SIZE, patch_size<span class="op">=</span><span class="dv">16</span>, decoding_steps<span class="op">=</span><span class="dv">1</span></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>    )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="80c8c888" class="cell" data-execution_count="29">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>dec_dict[<span class="st">"tok_dinov2_global"</span>].shape</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="29">
+<pre><code>torch.Size([768])</code></pre>
+</div>
+</div>
+<p>As can be seen we have an embedding of size 768 which is our query embedding. Using cosine similarity, we can retrieve the most similar embedding from our image database.</p>
+<div id="fig-5" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-5-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/4m-21-query.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="500">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-5-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6: Image retrieval using EPFL-VILAB/4M-21_L for “swimming pool” and 68/255 brightness
+</figcaption>
+</figure>
+</div>
+<p>As can be seen, the model sucessfully returns the image of a swimming pool for low brightness. If we increased the brightness to 255/255 we get the following image.</p>
+<div id="fig-6" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-6-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/4m-21-query-2.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="500">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-6-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7: Image retrieval using EPFL-VILAB/4M-21_L for “swimming pool” and 255/255 brightness
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="gradio-app-with-required-filters" class="level3" data-number="2.3.3">
+<h3 data-number="2.3.3" class="anchored" data-anchor-id="gradio-app-with-required-filters"><span class="header-section-number">2.3.3</span> Gradio app with required filters</h3>
+<p>Now that we have all the underlying code, we can simply build a Gradio interface for the same! Why? This makes it very easy for all to use and play with the 4M-21 model. Feel free to create your own apps too. If you do, please don’t forget to let me know about it on my Twitter - <a href="https://x.com/amaarora"><span class="citation" data-cites="amaarora">(<span><strong>amaarora?</strong></span>)</span></a>.</p>
+<p>The code for the gradio app is pretty simple, I actually used Claude 3.5 Sonnet to help me build the app.</p>
+<div class="sourceCode" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> gr.Blocks() <span class="im">as</span> demo:</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>    gr.Markdown(<span class="st">"# Image Retrieval using 4M-21: An Any-to-Any Vision Model"</span>)</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> gr.Row():</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">with</span> gr.Column(scale<span class="op">=</span><span class="dv">1</span>):</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>            caption <span class="op">=</span> gr.Textbox(</span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>                label<span class="op">=</span><span class="st">"Caption Description"</span>, placeholder<span class="op">=</span><span class="st">"Enter image description..."</span></span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>            brightness <span class="op">=</span> gr.Slider(</span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>                minimum<span class="op">=</span><span class="dv">0</span>, maximum<span class="op">=</span><span class="dv">255</span>, value<span class="op">=</span><span class="dv">5</span>, step<span class="op">=</span><span class="dv">1</span>, </span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a>                label<span class="op">=</span><span class="st">"Brightness"</span>, info<span class="op">=</span><span class="st">"Adjust image brightness (0-255)"</span></span>
+<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a>            num_items <span class="op">=</span> gr.Slider(</span>
+<span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a>                minimum<span class="op">=</span><span class="dv">0</span>, maximum<span class="op">=</span><span class="dv">50</span>, value<span class="op">=</span><span class="dv">5</span>, step<span class="op">=</span><span class="dv">1</span>, </span>
+<span id="cb27-14"><a href="#cb27-14" aria-hidden="true" tabindex="-1"></a>                label<span class="op">=</span><span class="st">"Number of Items"</span>, info<span class="op">=</span><span class="st">"Number of COCO instances in image (0-50)"</span></span>
+<span id="cb27-15"><a href="#cb27-15" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb27-16"><a href="#cb27-16" aria-hidden="true" tabindex="-1"></a>        <span class="cf">with</span> gr.Column(scale<span class="op">=</span><span class="dv">1</span>):</span>
+<span id="cb27-17"><a href="#cb27-17" aria-hidden="true" tabindex="-1"></a>            output_images <span class="op">=</span> gr.Gallery(</span>
+<span id="cb27-18"><a href="#cb27-18" aria-hidden="true" tabindex="-1"></a>                label<span class="op">=</span><span class="st">"Retrieved Images"</span>,</span>
+<span id="cb27-19"><a href="#cb27-19" aria-hidden="true" tabindex="-1"></a>                show_label<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb27-20"><a href="#cb27-20" aria-hidden="true" tabindex="-1"></a>                elem_id<span class="op">=</span><span class="st">"gallery"</span>,</span>
+<span id="cb27-21"><a href="#cb27-21" aria-hidden="true" tabindex="-1"></a>                columns<span class="op">=</span><span class="dv">2</span>,</span>
+<span id="cb27-22"><a href="#cb27-22" aria-hidden="true" tabindex="-1"></a>                rows<span class="op">=</span><span class="dv">2</span>,</span>
+<span id="cb27-23"><a href="#cb27-23" aria-hidden="true" tabindex="-1"></a>                height<span class="op">=</span><span class="dv">512</span>,</span>
+<span id="cb27-24"><a href="#cb27-24" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb27-25"><a href="#cb27-25" aria-hidden="true" tabindex="-1"></a>    submit_btn <span class="op">=</span> gr.Button(<span class="st">"Retrieve Most Similar Image"</span>)</span>
+<span id="cb27-26"><a href="#cb27-26" aria-hidden="true" tabindex="-1"></a>    submit_btn.click(</span>
+<span id="cb27-27"><a href="#cb27-27" aria-hidden="true" tabindex="-1"></a>        fn<span class="op">=</span>get_similar_images,</span>
+<span id="cb27-28"><a href="#cb27-28" aria-hidden="true" tabindex="-1"></a>        inputs<span class="op">=</span>[caption, brightness, num_items],</span>
+<span id="cb27-29"><a href="#cb27-29" aria-hidden="true" tabindex="-1"></a>        outputs<span class="op">=</span>output_images,</span>
+<span id="cb27-30"><a href="#cb27-30" aria-hidden="true" tabindex="-1"></a>    )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Using above code, allows us to create the Gradio app that was shared in <a href="#fig-demo" class="quarto-xref">Figure&nbsp;1</a>.</p>
+<div id="fig-7" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-7-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/4m-21-demo.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="500">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-7-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8: caption &amp; metadata retrieval using EPFL-VILAB/4M-21_L
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="deploy-app-to-huggingface-hub" class="level3" data-number="2.3.4">
+<h3 data-number="2.3.4" class="anchored" data-anchor-id="deploy-app-to-huggingface-hub"><span class="header-section-number">2.3.4</span> Deploy app to HuggingFace hub</h3>
+<p>We have deployed the app sucessfully to huggingface Spaces. We followed the documentation <a href="https://huggingface.co/docs/hub/en/spaces-overview">here</a>.</p>
+</section>
+</section>
+<section id="sec-appendixa" class="level2" data-number="2.4">
+<h2 data-number="2.4" class="anchored" data-anchor-id="sec-appendixa"><span class="header-section-number">2.4</span> Appendix A</h2>
+<p>We used <strong>EPFL-VILAB/4M-21_L</strong> for all our experiments and image retrieval due to memory constraints. We found <strong>EPFL-VILAB/4M-21_XL</strong> requires around 28GB of VRAM along with respective tokenizers, and runtimes were slow on a A100 40GB instance.</p>
+<div id="fig-20" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-20-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/4m-finding-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="500">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-20-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;9: rgb-to-any retrieval using EPFL-VILAB/4M-21_L
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="credits" class="level2" data-number="2.5">
+<h2 data-number="2.5" class="anchored" data-anchor-id="credits"><span class="header-section-number">2.5</span> Credits</h2>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Thank you <strong>jarvislabs.ai</strong> for the compute, this blog post would not have been possible without the credits.</p>
+</div>
+</div>
+
+
+
+</section>
+</section>
+
+<link href="//cdn-images.mailchimp.com/embedcode/classic-071822.css" rel="stylesheet" type="text/css"><div id="mc_embed_signup">
+    <form action="https://github.us4.list-manage.com/subscribe/post?u=e847230346a7c78d4745ae796&amp;id=7a63b2b273&amp;f_id=005f58e8f0" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate="">
+        <div id="mc_embed_signup_scroll">
+        <h2 class="anchored">Subscribe to Aman Arora's blog:</h2>
+        <div class="indicates-required"><span class="asterisk">*</span> indicates required</div>
+<div class="mc-field-group">
+    <label for="mce-EMAIL">Email Address  <span class="asterisk">*</span>
+</label>
+    <input type="email" value="" name="EMAIL" class="required email" id="mce-EMAIL" required="">
+    <span id="mce-EMAIL-HELPERTEXT" class="helper_text"></span>
+</div>
+<div hidden="true"><input type="hidden" name="tags" value="7232948"></div>
+    <div id="mce-responses" class="clear foot">
+        <div class="response" id="mce-error-response" style="display:none"></div>
+        <div class="response" id="mce-success-response" style="display:none"></div>
+    </div>    <!-- real people should not fill this in and expect good things - do not remove this or risk form bot signups-->
+    <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_e847230346a7c78d4745ae796_7a63b2b273" tabindex="-1" value=""></div>
+        <div class="optionalParent">
+            <div class="clear foot">
+                <input type="submit" value="Subscribe" name="subscribe" id="mc-embedded-subscribe" class="button">
+                <p class="brandingLogo"><a href="http://eepurl.com/il3baM" title="Mailchimp - email marketing made easy and fun"><img src="https://eep.io/mc-cdn-images/template_images/branding_logo_text_dark_dtp.svg"></a></p>
+            </div>
+        </div>
+    </div>
+</form>
+</div><script type="text/javascript">(function($) {window.fnames = new Array(); window.ftypes = new Array();fnames[0]='EMAIL';ftypes[0]='email';fnames[1]='FNAME';ftypes[1]='text';fnames[2]='LNAME';ftypes[2]='text';fnames[3]='ADDRESS';ftypes[3]='address';fnames[4]='PHONE';ftypes[4]='phone';fnames[5]='BIRTHDAY';ftypes[5]='birthday';}(jQuery));var $mcj = jQuery.noConflict(true);</script></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+<script>videojs(video_shortcode_videojs_video1);</script>
+
+
+
+
+</body></html>
