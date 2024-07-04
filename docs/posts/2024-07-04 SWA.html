@@ -317,7 +317,7 @@ Figure&nbsp;1: Comparing the full self-attention pattern and the configuration o
 <div id="fig-matmul" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-matmul-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<div class="quarto-video"><video id="video_shortcode_videojs_video1" class="video-js vjs-default-skin vjs-fluid" controls="" preload="auto" data-setup="{}" title=""><source src="../images/matrix-mul.mp4"></video></div>
+<div class="quarto-video"><video id="video_shortcode_videojs_video1" width="300" class="video-js vjs-default-skin " controls="" preload="auto" data-setup="{}" title=""><source src="../images/matrix-mul.mp4"></video></div>
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-matmul-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;2: Visualisation of matrix multiplication from http://matrixmultiplication.xyz/
@@ -326,7 +326,7 @@ Figure&nbsp;2: Visualisation of matrix multiplication from http://matrixmultipli
 </div>
 <p>Before we get started with Sliding Window Attention, let’s implement <span class="math inline">\(Q.K^T\)</span> matrix multiplication with the help of <code>torch.einsum</code>.</p>
 <p>For a refresher/introduction to matrix multiplication and <a href="https://pytorch.org/docs/stable/generated/torch.einsum.html">torch.einsum</a>, I recommend the below amazing lecture by <a href="https://x.com/jeremyphoward">Jeremy Howard</a>.</p>
-<div class="quarto-video ratio ratio-16x9"><iframe data-external="1" src="https://www.youtube.com/embed/_xIzPbCgutY?start=652" title="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""></iframe></div>
+<div class="quarto-video"><iframe data-external="1" src="https://www.youtube.com/embed/_xIzPbCgutY?start=652" width="300" title="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""></iframe></div>
 <p>To implement, <span class="math inline">\(Q.K^T\)</span> using Einstein summation is as easy as doing:</p>
 <div id="14ab7d44" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch </span>
