@@ -7,8 +7,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Aman Arora">
-<meta name="dcterms.date" content="2024-07-07">
-<meta name="description" content="In this post, we take a deep dive into some of the architectural details of Gemma 2, such as grouped query attention, sliding window attention &amp; RoPE embeddings.">
+<meta name="dcterms.date" content="2024-07-09">
+<meta name="description" content="In this post, we take a deep dive into the architectural components of Gemma 2 such as Grouped Query Attention, Sliding Window Attention, RoPE Embeddings, Logit soft-capping &amp; Model-merging!">
 
 <title>Gemma 2</title>
 <style>
@@ -170,7 +170,7 @@ window.Quarto = {
 </script>
 
 <meta name="twitter:title" content="Gemma 2">
-<meta name="twitter:description" content="In this post, we take a deep dive into some of the architectural details of Gemma 2, such as grouped query attention, sliding window attention &amp; RoPE embeddings.">
+<meta name="twitter:description" content="In this post, we take a deep dive into the architectural components of Gemma 2 such as Grouped Query Attention, Sliding Window Attention, RoPE Embeddings, Logit soft-capping &amp; Model-merging!">
 <meta name="twitter:image" content="../images/gemma2-intro.png">
 <meta name="twitter:card" content="summary_large_image">
 </head>
@@ -227,7 +227,7 @@ window.Quarto = {
             <p class="subtitle lead">Improving Open Language Models at a Practical Size</p>
                   <div>
         <div class="description">
-          <p>In this post, we take a deep dive into some of the architectural details of Gemma 2, such as grouped query attention, sliding window attention &amp; RoPE embeddings.</p>
+          <p>In this post, we take a deep dive into the architectural components of Gemma 2 such as Grouped Query Attention, Sliding Window Attention, RoPE Embeddings, Logit soft-capping &amp; Model-merging!</p>
         </div>
       </div>
                           <div class="quarto-categories">
@@ -249,7 +249,7 @@ window.Quarto = {
       <div>
       <div class="quarto-title-meta-heading">Published</div>
       <div class="quarto-title-meta-contents">
-        <p class="date">July 7, 2024</p>
+        <p class="date">July 9, 2024</p>
       </div>
     </div>
     
@@ -265,14 +265,13 @@ window.Quarto = {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction"><span class="header-section-number">1</span> Introduction</a></li>
-  <li><a href="#gemma-2-report" id="toc-gemma-2-report" class="nav-link" data-scroll-target="#gemma-2-report"><span class="header-section-number">2</span> Gemma 2 Report</a></li>
-  <li><a href="#sec-gqa" id="toc-sec-gqa" class="nav-link" data-scroll-target="#sec-gqa"><span class="header-section-number">3</span> Group Query Attention</a></li>
-  <li><a href="#sec-swa" id="toc-sec-swa" class="nav-link" data-scroll-target="#sec-swa"><span class="header-section-number">4</span> Sliding Window Attention</a></li>
-  <li><a href="#sec-rope" id="toc-sec-rope" class="nav-link" data-scroll-target="#sec-rope"><span class="header-section-number">5</span> Rotary Positional Embeddings (RoPE)</a></li>
-  <li><a href="#sec-logits" id="toc-sec-logits" class="nav-link" data-scroll-target="#sec-logits"><span class="header-section-number">6</span> Logit soft-capping</a></li>
-  <li><a href="#sec-merge" id="toc-sec-merge" class="nav-link" data-scroll-target="#sec-merge"><span class="header-section-number">7</span> Model merging</a></li>
-  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion"><span class="header-section-number">8</span> Conclusion</a></li>
+  <li><a href="#gemma-2-architectural-details" id="toc-gemma-2-architectural-details" class="nav-link active" data-scroll-target="#gemma-2-architectural-details"><span class="header-section-number">1</span> Gemma 2 architectural details</a></li>
+  <li><a href="#sec-gqa" id="toc-sec-gqa" class="nav-link" data-scroll-target="#sec-gqa"><span class="header-section-number">2</span> Group Query Attention</a></li>
+  <li><a href="#sec-swa" id="toc-sec-swa" class="nav-link" data-scroll-target="#sec-swa"><span class="header-section-number">3</span> Sliding Window Attention</a></li>
+  <li><a href="#sec-rope" id="toc-sec-rope" class="nav-link" data-scroll-target="#sec-rope"><span class="header-section-number">4</span> Rotary Positional Embeddings (RoPE)</a></li>
+  <li><a href="#sec-logits" id="toc-sec-logits" class="nav-link" data-scroll-target="#sec-logits"><span class="header-section-number">5</span> Logit soft-capping</a></li>
+  <li><a href="#sec-merge" id="toc-sec-merge" class="nav-link" data-scroll-target="#sec-merge"><span class="header-section-number">6</span> Model merging</a></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion"><span class="header-section-number">7</span> Conclusion</a></li>
   </ul>
 </nav>
     </div>
@@ -283,8 +282,6 @@ window.Quarto = {
 
 
 
-<section id="introduction" class="level2" data-number="1">
-<h2 data-number="1" class="anchored" data-anchor-id="introduction"><span class="header-section-number">1</span> Introduction</h2>
 <p>I am sure by now you would have seen <a href="https://blog.google/technology/developers/google-gemma-2/">Gemma 2’s announcement</a> or <a href="https://aistudio.google.com/app/prompts/new_chat?model=gemma-2-27b-it">played around with the model</a>. If you haven’t yet, I highly recommend that you do.</p>
 <div id="fig-1" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
 <figure class="quarto-float quarto-float-fig figure">
@@ -316,11 +313,11 @@ Figure&nbsp;2: Evaluation of Gemma 2 9B and 27B Instruction Tuned models on the 
 </ul>
 <p>As part of this blog post, we will be going deeper into some of the architectural components of Gemma 2 <strong>along with their implementation in PyTorch</strong>. Specifically we will be looking into:</p>
 <ol type="1">
-<li><em>Grouped Query Attention</em> (<a href="#sec-gqa" class="quarto-xref">Section&nbsp;3</a>)</li>
-<li><em>Sliding Window Attention</em> (<a href="#sec-swa" class="quarto-xref">Section&nbsp;4</a>)</li>
-<li><em>Rotary Position Embeddings (RoPE)</em> (<a href="#sec-rope" class="quarto-xref">Section&nbsp;5</a>)</li>
-<li><em>Logit soft-capping</em> (<a href="#sec-logits" class="quarto-xref">Section&nbsp;6</a>)</li>
-<li><em>Model merging</em> (<a href="#sec-merge" class="quarto-xref">Section&nbsp;7</a>)</li>
+<li><em>Grouped Query Attention</em> (<a href="#sec-gqa" class="quarto-xref">Section&nbsp;2</a>)</li>
+<li><em>Sliding Window Attention</em> (<a href="#sec-swa" class="quarto-xref">Section&nbsp;3</a>)</li>
+<li><em>Rotary Position Embeddings (RoPE)</em> (<a href="#sec-rope" class="quarto-xref">Section&nbsp;4</a>)</li>
+<li><em>Logit soft-capping</em> (<a href="#sec-logits" class="quarto-xref">Section&nbsp;5</a>)</li>
+<li><em>Model merging</em> (<a href="#sec-merge" class="quarto-xref">Section&nbsp;6</a>)</li>
 </ol>
 <div class="callout callout-style-default callout-tip callout-titled">
 <div class="callout-header d-flex align-content-center">
@@ -335,9 +332,8 @@ Gentle introduction to Gemma 2
 <p>For a more gentle introduction, I would like to refer the readers to <a href="https://huggingface.co/blog/gemma2">Welcome Gemma 2 - Google’s new open LLM</a> by Huggingface.</p>
 </div>
 </div>
-</section>
-<section id="gemma-2-report" class="level2 page-columns page-full" data-number="2">
-<h2 data-number="2" class="anchored" data-anchor-id="gemma-2-report"><span class="header-section-number">2</span> Gemma 2 Report</h2>
+<section id="gemma-2-architectural-details" class="level2 page-columns page-full" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="gemma-2-architectural-details"><span class="header-section-number">1</span> Gemma 2 architectural details</h2>
 <p>In this section, we look into the architecture details as shared in the report - <a href="https://storage.googleapis.com/deepmind-media/gemma/gemma-2-report.pdf">Gemma 2: Improving Open Language Models at a Practical Size</a>.</p>
 <p>From the report:</p>
 <div class="page-columns page-full"><p><em>In this work, we introduce Gemma 2, a new addition to the Gemma family of lightweight, state-of-the-art open models, ranging in scale from 2 billion to 27 billion parameters. The 9 billion and 27 billion parameter models are available today, with a 2 billion parameter model to be released shortly. In this new version, we provide several technical modifications to our architecture, such as interleaving local-global attentions (<span class="citation" data-cites="longformer">Beltagy, Peters, and Cohan (<a href="#ref-longformer" role="doc-biblioref">2020</a>)</span>) and group-query attention (<span class="citation" data-cites="gqa">Ainslie et al. (<a href="#ref-gqa" role="doc-biblioref">2023</a>)</span>). We also train the 2B and 9B models with knowledge distillation (Hinton et al., 2015) instead of next token prediction. The resulting models deliver the best performance for their size, and even offer competitive alternatives to models that are 2-3× bigger.</em></p><div class="no-row-height column-margin column-container"></div></div>
@@ -361,8 +357,8 @@ Note
 AI@Meta. 2024. <span>“Llama 3 Model Card.”</span> <a href="https://github.com/meta-llama/llama3/blob/main/MODEL_CARD.md">https://github.com/meta-llama/llama3/blob/main/MODEL_CARD.md</a>.
 </div></div><p>In Gemma 2, the authors trained the smaller 2.6B and 9B models using knowledge distillation. This, alongside other architecture details, has allowed Gemma 2 to have the best in class performance given it’s size. Let’s look into each one of the components in the following sections.</p>
 </section>
-<section id="sec-gqa" class="level2 page-columns page-full" data-number="3">
-<h2 data-number="3" class="anchored" data-anchor-id="sec-gqa"><span class="header-section-number">3</span> Group Query Attention</h2>
+<section id="sec-gqa" class="level2 page-columns page-full" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="sec-gqa"><span class="header-section-number">2</span> Group Query Attention</h2>
 <p>Grouped query attention was introduced by <span class="citation" data-cites="gqa">Ainslie et al. (<a href="#ref-gqa" role="doc-biblioref">2023</a>)</span> in 2023. The key difference as compared to the standard Multi-headed attention has been highlighted in <a href="#fig-1" class="quarto-xref">Figure&nbsp;3</a>.</p>
 <div class="no-row-height column-margin column-container"><div id="ref-gqa" class="csl-entry" role="listitem">
 Ainslie, Joshua, James Lee-Thorp, Michiel de Jong, Yury Zemlyanskiy, Federico Lebrón, and Sumit Sanghai. 2023. <span>“GQA: Training Generalized Multi-Query Transformer Models from Multi-Head Checkpoints.”</span> <a href="https://arxiv.org/abs/2305.13245">https://arxiv.org/abs/2305.13245</a>.
@@ -534,16 +530,16 @@ Time to take a break and “think” 💭
 </div>
 <p>And that’s really all the magic that there is behind Group Query Attention (GQA)! You have just succesfully implemented it from scratch using PyTorch yourself!</p>
 </section>
-<section id="sec-swa" class="level2 page-columns page-full" data-number="4">
-<h2 data-number="4" class="anchored" data-anchor-id="sec-swa"><span class="header-section-number">4</span> Sliding Window Attention</h2>
+<section id="sec-swa" class="level2 page-columns page-full" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="sec-swa"><span class="header-section-number">3</span> Sliding Window Attention</h2>
 <p>For a detailed explanation &amp; implementation in PyTorch of Sliding Window Attention <span class="citation" data-cites="longformer">Beltagy, Peters, and Cohan (<a href="#ref-longformer" role="doc-biblioref">2020</a>)</span>, I would like to refer the readers to my <a href="https://amaarora.github.io/posts/2024-07-04%20SWA.html">previous blog post</a>.</p>
 <div class="no-row-height column-margin column-container"><div id="ref-longformer" class="csl-entry" role="listitem">
 Beltagy, Iz, Matthew E. Peters, and Arman Cohan. 2020. <span>“Longformer: The Long-Document Transformer.”</span> <a href="https://arxiv.org/abs/2004.05150">https://arxiv.org/abs/2004.05150</a>.
 </div></div><p>The authors interleaved local and global attentions in alternating layers, which helped reduce number of parameters (for compact model-size) while mantaining performance. This is pretty unique! From the paper:</p>
 <p><em>The sliding window size of local attention layers is set to 4096 tokens, while the span of the global attention layers is set to 8192 tokens.</em></p>
 </section>
-<section id="sec-rope" class="level2 page-columns page-full" data-number="5">
-<h2 data-number="5" class="anchored" data-anchor-id="sec-rope"><span class="header-section-number">5</span> Rotary Positional Embeddings (RoPE)</h2>
+<section id="sec-rope" class="level2 page-columns page-full" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="sec-rope"><span class="header-section-number">4</span> Rotary Positional Embeddings (RoPE)</h2>
 <p>RoPE were introduced as part of the RoFormer architecture <span class="citation" data-cites="roformer">Su et al. (<a href="#ref-roformer" role="doc-biblioref">2023</a>)</span>. From the paper itself:</p>
 <div class="no-row-height column-margin column-container"><div id="ref-roformer" class="csl-entry" role="listitem">
 Su, Jianlin, Yu Lu, Shengfeng Pan, Ahmed Murtadha, Bo Wen, and Yunfeng Liu. 2023. <span>“RoFormer: Enhanced Transformer with Rotary Position Embedding.”</span> <a href="https://arxiv.org/abs/2104.09864">https://arxiv.org/abs/2104.09864</a>.
@@ -557,7 +553,7 @@ Su, Jianlin, Yu Lu, Shengfeng Pan, Ahmed Murtadha, Bo Wen, and Yunfeng Liu. 2023
 <span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>inputs <span class="op">=</span> tokenizer(<span class="st">"Hello, my dog is cute"</span>, return_tensors<span class="op">=</span><span class="st">"pt"</span>)</span>
 <span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>model(<span class="op">**</span>inputs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div id="01d2e807" class="cell" hidden="true" data-execution_count="2">
+<div id="01d2e807" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn <span class="im">as</span> nn </span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> typing <span class="im">import</span> Optional</span>
@@ -573,7 +569,7 @@ PE_{(pos, 2i)} = \sin \left( \frac{pos}{10000^{\frac{2i}{d_{model}}}} \right)
 PE_{(pos, 2i+1)} = \cos \left( \frac{pos}{10000^{\frac{2i}{d_{model}}}} \right)
 \]</span></p>
 <p>They work with absolute positions, but, not with relative positions. From Huggingface’s implementation of the RoFormer architecture, this is how one could implement them in PyTorch code:</p>
-<div id="cb5373b2-5b3a-4bdb-8fde-eefc5498bcc0" class="cell" data-code_folding="[]" hidden="true" data-execution_count="3">
+<div id="cb5373b2-5b3a-4bdb-8fde-eefc5498bcc0" class="cell" data-code_folding="[]" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> RoFormerSinusoidalPositionalEmbedding(nn.Embedding):</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""This module produces sinusoidal positional embeddings of any length."""</span></span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -663,7 +659,7 @@ x_{d-1}
 \end{pmatrix}
 \tag{1}\]</span></span></p>
 <p>We can get the sinusoidal and cosine values of the matrix multiplication from <code>RoFormerSinusoidalPositionalEmbedding</code>.</p>
-<div id="b9317457" class="cell" hidden="true" data-execution_count="18">
+<div id="b9317457" class="cell" data-execution_count="18">
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>embedding_layer <span class="op">=</span> RoFormerSinusoidalPositionalEmbedding(<span class="dv">100</span>, <span class="dv">64</span>)</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>sinusoidal_pos <span class="op">=</span> embedding_layer([<span class="dv">1</span>, <span class="dv">9</span>])[<span class="va">None</span>, <span class="va">None</span>, :, :]</span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>sinusoidal_pos.shape</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -672,7 +668,7 @@ x_{d-1}
 </div>
 </div>
 <p>Assuming 12 attention heads, each with a dimension of 64, we can randomly initialise our query and key layer like so:</p>
-<div id="7e4f6d59" class="cell" hidden="true" data-execution_count="19">
+<div id="7e4f6d59" class="cell" data-execution_count="19">
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>query_layer <span class="op">=</span> torch.randn(<span class="dv">1</span>, <span class="dv">12</span>, <span class="dv">9</span>, <span class="dv">64</span>)</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>key_layer   <span class="op">=</span> torch.randn(<span class="dv">1</span>, <span class="dv">12</span>, <span class="dv">9</span>, <span class="dv">64</span>)</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>query_layer.shape, key_layer.shape</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -680,7 +676,7 @@ x_{d-1}
 <pre><code>(torch.Size([1, 12, 9, 64]), torch.Size([1, 12, 9, 64]))</code></pre>
 </div>
 </div>
-<div id="5d6404b1" class="cell" hidden="true" data-execution_count="21">
+<div id="5d6404b1" class="cell" data-execution_count="21">
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> apply_rotary_position_embeddings(sinusoidal_pos, query_layer, key_layer, value_layer<span class="op">=</span><span class="va">None</span>):</span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># https://kexue.fm/archives/8265</span></span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    <span class="co"># sin [batch_size, num_heads, sequence_length, embed_size_per_head//2]</span></span>
@@ -718,7 +714,7 @@ x_3 \\
 x_{d-1}
 \end{pmatrix}\]</span>
 <p>Finally, by doing <code>query_layer = query_layer * cos_pos + rotate_half_query_layer * sin_pos</code>, we are replicating the matrix multiplication as in <a href="#eq-1" class="quarto-xref">Equation&nbsp;1</a>.</p>
-<div id="953b3ee0" class="cell" hidden="true" data-execution_count="25">
+<div id="953b3ee0" class="cell" data-execution_count="25">
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>query_layer, key_layer <span class="op">=</span> apply_rotary_position_embeddings(sinusoidal_pos, query_layer, key_layer)</span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>query_layer.shape, key_layer.shape</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="25">
@@ -727,13 +723,12 @@ x_{d-1}
 </div>
 <p>And that is all that there is to Rotary Position Embeddings. We have successfully re-implemented RoPE in PyTorch.</p>
 </section>
-<section id="sec-logits" class="level2" data-number="6">
-<h2 data-number="6" class="anchored" data-anchor-id="sec-logits"><span class="header-section-number">6</span> Logit soft-capping</h2>
-<p>Another trick that was used by the authors of Gemma 2 was logit soft capping. Generally we use <code>torch.clip</code> or <code>torch.clamp</code> which is more like hard clipping.</p>
-<p><span class="math display">\[
-\text{logits} \leftarrow \text{soft_cap} * \tanh\left(\frac{\text{logits}}{\text{soft_cap}}\right)
-\]</span></p>
-<div id="ba981016" class="cell" hidden="true" data-execution_count="29">
+<section id="sec-logits" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="sec-logits"><span class="header-section-number">5</span> Logit soft-capping</h2>
+<p>Another trick that was used by the authors of Gemma 2 was logit soft capping. Generally we use <code>torch.clip</code> or <code>torch.clamp</code> which is more like hard clipping. Instead the authors utilised soft-capping which can be formulated as:</p>
+<p><span class="math display">\[\text{logits} \leftarrow \text{soft\_cap} * \tanh\left(\frac{\text{logits}}{\text{soft\_cap}}\right)\]</span></p>
+<p>Let’s have a look at the <strong>tanh</strong> function and plot it using <code>matplotlib</code>.</p>
+<div id="ba981016" class="cell" data-execution_count="29">
 <div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
 <span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>fig,ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">6</span>,<span class="dv">3</span>))</span>
@@ -785,8 +780,8 @@ Warning
 </div>
 </div>
 </section>
-<section id="sec-merge" class="level2 page-columns page-full" data-number="7">
-<h2 data-number="7" class="anchored" data-anchor-id="sec-merge"><span class="header-section-number">7</span> Model merging</h2>
+<section id="sec-merge" class="level2 page-columns page-full" data-number="6">
+<h2 data-number="6" class="anchored" data-anchor-id="sec-merge"><span class="header-section-number">6</span> Model merging</h2>
 <p>From the paper:</p>
 <div class="page-columns page-full"><p><em>Model merging. We average models from experiments run with different hyperparameters <span class="citation" data-cites="warp">Ramé et al. (<a href="#ref-warp" role="doc-biblioref">2024</a>)</span> .</em></p><div class="no-row-height column-margin column-container"><div id="ref-warp" class="csl-entry" role="listitem">
 Ramé, Alexandre, Johan Ferret, Nino Vieillard, Robert Dadashi, Léonard Hussenot, Pierre-Louis Cedoz, Pier Giuseppe Sessa, Sertan Girgin, Arthur Douillard, and Olivier Bachem. 2024. <span>“WARP: On the Benefits of Weight Averaged Rewarded Policies.”</span> <a href="https://arxiv.org/abs/2406.16768">https://arxiv.org/abs/2406.16768</a>.
@@ -818,8 +813,8 @@ Note
 </div>
 </div>
 </section>
-<section id="conclusion" class="level2" data-number="8">
-<h2 data-number="8" class="anchored" data-anchor-id="conclusion"><span class="header-section-number">8</span> Conclusion</h2>
+<section id="conclusion" class="level2" data-number="7">
+<h2 data-number="7" class="anchored" data-anchor-id="conclusion"><span class="header-section-number">7</span> Conclusion</h2>
 <p>As part of the following blog post we took a deep dive into grouped query qttention, sliding window attention, RoPE embeddings, logits soft-capping &amp; also model-merging.</p>
 <p>We did it all with the motivation from Gemma 2. The idea was to dig deeper into the Gemma 2 architecture. I hope that through this blog post, the reader is able to understand more about the Gemma 2 architecture in detail.</p>
 <p>Thank you for your time!</p>
