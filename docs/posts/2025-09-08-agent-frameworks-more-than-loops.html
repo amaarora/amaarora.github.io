@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.21">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Aman Arora">
+<meta name="dcterms.date" content="2025-09-08">
+<meta name="description" content="A balanced perspective on the recent debate about agent frameworks vs.&nbsp;simple while loops">
+
+<title>Agent Frameworks Are So Much More Than For Loops</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href=".././images/logo.png" rel="icon" type="image/png">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-ea1d7ac60288e0f1efdbc993fd8432ae.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-5b4ad623e5705c0698d39aec6f10cf02.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+<script type="text/javascript">
+
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+ga('create', 'UA-158677010-1', 'auto');
+
+ga('send', {
+  hitType: 'pageview',
+  'anonymizeIp': true,
+});
+</script>
+<script type="module" src="../site_libs/quarto-ojs/quarto-ojs-runtime.js"></script>
+<link href="../site_libs/quarto-ojs/quarto-ojs.css" rel="stylesheet">
+
+
+<meta name="twitter:title" content="Agent Frameworks Are So Much More Than For Loops">
+<meta name="twitter:description" content="A balanced perspective on the recent debate about agent frameworks vs.&nbsp;simple while loops">
+<meta name="twitter:image" content="../images/agent-framework.png">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+
+<body class="nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="../index.html" class="navbar-brand navbar-brand-logo">
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html"> 
+<span class="menu-text">Aman Arora’s Blog</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../about.html"> 
+<span class="menu-text">Aman Arora</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/amaarora"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com/amaarora"> <i class="bi bi-twitter" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://www.linkedin.com/in/aroraaman/"> <i class="bi bi-linkedin" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#agent-frameworks-to-use-or-not-to-use" id="toc-agent-frameworks-to-use-or-not-to-use" class="nav-link active" data-scroll-target="#agent-frameworks-to-use-or-not-to-use"><span class="header-section-number">1</span> Agent Frameworks: To Use or Not to Use</a></li>
+  <li><a href="#finding-the-middle-ground" id="toc-finding-the-middle-ground" class="nav-link" data-scroll-target="#finding-the-middle-ground"><span class="header-section-number">2</span> Finding the Middle Ground</a></li>
+  <li><a href="#so-where-does-this-leave-us" id="toc-so-where-does-this-leave-us" class="nav-link" data-scroll-target="#so-where-does-this-leave-us"><span class="header-section-number">3</span> So Where Does This Leave Us?</a></li>
+  <li><a href="#is-vibe-coding-productive" id="toc-is-vibe-coding-productive" class="nav-link" data-scroll-target="#is-vibe-coding-productive"><span class="header-section-number">4</span> Is vibe coding productive?</a></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion"><span class="header-section-number">5</span> Conclusion</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Agent Frameworks Are So Much More Than For Loops</h1>
+  <div class="quarto-categories">
+    <div class="quarto-category">AI</div>
+    <div class="quarto-category">Agents</div>
+    <div class="quarto-category">Software Architecture</div>
+  </div>
+  </div>
+
+<div>
+  <div class="description">
+    A balanced perspective on the recent debate about agent frameworks vs.&nbsp;simple while loops
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Aman Arora </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">September 8, 2025</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>Hello! I’m a full-time Lead AI Engineer. This blog reflects my personal opinions, not my company’s. In the past year, I’ve been responsible for multiple production agents - some successful, some not so much - but every time hitting problems at scale.</p>
+<p>Amidst all the clickbait and false news, there’s a debate worth having — do you actually need agent frameworks, or are they just overengineered abstractions?</p>
+<p>But before diving into the debate, I want to talk about a concept that’s reshaping how you might think about development - “vibe coding”.</p>
+<p>The term was coined by Andrej Karpathy in the following tweet:</p>
+<blockquote class="twitter-tweet tw-align-center blockquote">
+<p lang="en" dir="ltr">
+There's a new kind of coding I call "vibe coding", where you fully give in to the vibes, embrace exponentials, and forget that the code even exists. It's possible because the LLMs (e.g.&nbsp;Cursor Composer w Sonnet) are getting too good. Also I just talk to Composer with SuperWhisper…
+</p>
+— Andrej Karpathy (<span class="citation" data-cites="karpathy">(<a href="#ref-karpathy" role="doc-biblioref"><strong>karpathy?</strong></a>)</span>) <a href="https://twitter.com/karpathy/status/1886192184808149383?ref_src=twsrc%5Etfw">February 2, 2025</a>
+</blockquote>
+<script async="" src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+<p>So, why bring up vibe coding in a discussion about agent frameworks? Because, in my opinion, where you sit on the coding spectrum fundamentally shapes how you view this debate on agent frameworks. I believe one approach is not greater or better than the other. AI is a means to an end, not an end in itself.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>🎯 Interactive: Find Your Position on the Coding Spectrum
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Before we dive deeper, take a moment to explore where you fit on the coding philosophy spectrum. Click on any of the positions below to see which approach resonates with your experience and mindset.</p>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code hidden" id="cb1" data-startfrom="34" data-source-offset="-1"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 33;"><span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>positions <span class="op">=</span> [</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>  {</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>    <span class="dt">id</span><span class="op">:</span> <span class="dv">0</span><span class="op">,</span></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>    <span class="dt">name</span><span class="op">:</span> <span class="st">"Vibe Coder"</span><span class="op">,</span></span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>    <span class="dt">icon</span><span class="op">:</span> <span class="st">"https://cursor.sh/favicon.ico"</span><span class="op">,</span></span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>    <span class="dt">title</span><span class="op">:</span> <span class="st">"The AI-First Developer"</span><span class="op">,</span></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>    <span class="dt">description</span><span class="op">:</span> <span class="st">"You've never written traditional code and embrace AI-assisted development completely. You think in prompts, not syntax."</span><span class="op">,</span></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>    <span class="dt">background</span><span class="op">:</span> <span class="st">"You might have started coding in the era of ChatGPT and Cursor. Traditional debugging feels foreign."</span><span class="op">,</span></span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>    <span class="dt">color</span><span class="op">:</span> <span class="st">"#4ecdc4"</span></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>  }<span class="op">,</span></span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>  {</span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>    <span class="dt">id</span><span class="op">:</span> <span class="dv">1</span><span class="op">,</span></span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>    <span class="dt">name</span><span class="op">:</span> <span class="st">"AI Embracer"</span><span class="op">,</span></span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>    <span class="dt">icon</span><span class="op">:</span> <span class="st">"https://openai.com/favicon.ico"</span><span class="op">,</span></span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>    <span class="dt">title</span><span class="op">:</span> <span class="st">"The Productivity Maximizer"</span><span class="op">,</span></span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>    <span class="dt">description</span><span class="op">:</span> <span class="st">"You use AI tools extensively for productivity while maintaining solid coding fundamentals."</span><span class="op">,</span></span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>    <span class="dt">background</span><span class="op">:</span> <span class="st">"You learned to code traditionally but quickly adopted AI tools to accelerate your workflow."</span><span class="op">,</span></span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>    <span class="dt">color</span><span class="op">:</span> <span class="st">"#74b9ff"</span></span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a>  }<span class="op">,</span></span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a>  {</span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a>    <span class="dt">id</span><span class="op">:</span> <span class="dv">2</span><span class="op">,</span></span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a>    <span class="dt">name</span><span class="op">:</span> <span class="st">"Balanced"</span><span class="op">,</span></span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a>    <span class="dt">icon</span><span class="op">:</span> <span class="st">"https://www.anthropic.com/favicon.ico"</span><span class="op">,</span></span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a>    <span class="dt">title</span><span class="op">:</span> <span class="st">"The Pragmatist"</span><span class="op">,</span></span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a>    <span class="dt">description</span><span class="op">:</span> <span class="st">"You take a context-dependent approach, choosing tools based on project requirements."</span><span class="op">,</span></span>
+<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a>    <span class="dt">background</span><span class="op">:</span> <span class="st">"Experienced developer who evaluates trade-offs carefully. You've seen technologies come and go."</span><span class="op">,</span></span>
+<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a>    <span class="dt">color</span><span class="op">:</span> <span class="st">"#ff9f43"</span></span>
+<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a>  }<span class="op">,</span></span>
+<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a>  {</span>
+<span id="cb1-63"><a href="#cb1-63" aria-hidden="true" tabindex="-1"></a>    <span class="dt">id</span><span class="op">:</span> <span class="dv">3</span><span class="op">,</span></span>
+<span id="cb1-64"><a href="#cb1-64" aria-hidden="true" tabindex="-1"></a>    <span class="dt">name</span><span class="op">:</span> <span class="st">"Traditional"</span><span class="op">,</span></span>
+<span id="cb1-65"><a href="#cb1-65" aria-hidden="true" tabindex="-1"></a>    <span class="dt">icon</span><span class="op">:</span> <span class="st">"https://github.com/favicon.ico"</span><span class="op">,</span></span>
+<span id="cb1-66"><a href="#cb1-66" aria-hidden="true" tabindex="-1"></a>    <span class="dt">title</span><span class="op">:</span> <span class="st">"The Craftsperson"</span><span class="op">,</span></span>
+<span id="cb1-67"><a href="#cb1-67" aria-hidden="true" tabindex="-1"></a>    <span class="dt">description</span><span class="op">:</span> <span class="st">"You prefer manual coding with full understanding, using AI as an occasional helper. You want to keep AI on a tight leash."</span><span class="op">,</span></span>
+<span id="cb1-68"><a href="#cb1-68" aria-hidden="true" tabindex="-1"></a>    <span class="dt">background</span><span class="op">:</span> <span class="st">"You believe in understanding your tools deeply. You've built systems from scratch and value that knowledge, and you think AI tooling disrupts your workflow."</span><span class="op">,</span></span>
+<span id="cb1-69"><a href="#cb1-69" aria-hidden="true" tabindex="-1"></a>    <span class="dt">color</span><span class="op">:</span> <span class="st">"#74b9ff"</span></span>
+<span id="cb1-70"><a href="#cb1-70" aria-hidden="true" tabindex="-1"></a>  }<span class="op">,</span></span>
+<span id="cb1-71"><a href="#cb1-71" aria-hidden="true" tabindex="-1"></a>  {</span>
+<span id="cb1-72"><a href="#cb1-72" aria-hidden="true" tabindex="-1"></a>    <span class="dt">id</span><span class="op">:</span> <span class="dv">4</span><span class="op">,</span></span>
+<span id="cb1-73"><a href="#cb1-73" aria-hidden="true" tabindex="-1"></a>    <span class="dt">name</span><span class="op">:</span> <span class="st">"AI Skeptic"</span><span class="op">,</span></span>
+<span id="cb1-74"><a href="#cb1-74" aria-hidden="true" tabindex="-1"></a>    <span class="dt">icon</span><span class="op">:</span> <span class="st">"https://upload.wikimedia.org/wikipedia/commons/3/35/Tux.svg"</span><span class="op">,</span></span>
+<span id="cb1-75"><a href="#cb1-75" aria-hidden="true" tabindex="-1"></a>    <span class="dt">title</span><span class="op">:</span> <span class="st">"The Purist"</span><span class="op">,</span></span>
+<span id="cb1-76"><a href="#cb1-76" aria-hidden="true" tabindex="-1"></a>    <span class="dt">description</span><span class="op">:</span> <span class="st">"Full-stack developer who refuses AI tooling and prefers complete manual control."</span><span class="op">,</span></span>
+<span id="cb1-77"><a href="#cb1-77" aria-hidden="true" tabindex="-1"></a>    <span class="dt">background</span><span class="op">:</span> <span class="st">"You've mastered your craft through years of experience. You don't trust tools you can't fully understand."</span><span class="op">,</span></span>
+<span id="cb1-78"><a href="#cb1-78" aria-hidden="true" tabindex="-1"></a>    <span class="dt">color</span><span class="op">:</span> <span class="st">"#4ecdc4"</span></span>
+<span id="cb1-79"><a href="#cb1-79" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb1-80"><a href="#cb1-80" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb1-81"><a href="#cb1-81" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-82"><a href="#cb1-82" aria-hidden="true" tabindex="-1"></a>viewof selectedPosition <span class="op">=</span> {</span>
+<span id="cb1-83"><a href="#cb1-83" aria-hidden="true" tabindex="-1"></a>  <span class="kw">let</span> currentValue <span class="op">=</span> <span class="dv">2</span><span class="op">;</span></span>
+<span id="cb1-84"><a href="#cb1-84" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-85"><a href="#cb1-85" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> dispatch <span class="op">=</span> () <span class="kw">=&gt;</span> {</span>
+<span id="cb1-86"><a href="#cb1-86" aria-hidden="true" tabindex="-1"></a>    container<span class="op">.</span><span class="at">value</span> <span class="op">=</span> currentValue<span class="op">;</span></span>
+<span id="cb1-87"><a href="#cb1-87" aria-hidden="true" tabindex="-1"></a>    container<span class="op">.</span><span class="fu">dispatchEvent</span>(<span class="kw">new</span> <span class="bu">CustomEvent</span>(<span class="st">"input"</span><span class="op">,</span> {<span class="dt">bubbles</span><span class="op">:</span> <span class="kw">true</span>}))<span class="op">;</span></span>
+<span id="cb1-88"><a href="#cb1-88" aria-hidden="true" tabindex="-1"></a>  }<span class="op">;</span></span>
+<span id="cb1-89"><a href="#cb1-89" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-90"><a href="#cb1-90" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> container <span class="op">=</span> <span class="fu">html</span><span class="vs">`&lt;div style="display: none;"&gt;&lt;/div&gt;`</span><span class="op">;</span></span>
+<span id="cb1-91"><a href="#cb1-91" aria-hidden="true" tabindex="-1"></a>  container<span class="op">.</span><span class="at">value</span> <span class="op">=</span> currentValue<span class="op">;</span></span>
+<span id="cb1-92"><a href="#cb1-92" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-93"><a href="#cb1-93" aria-hidden="true" tabindex="-1"></a>  container<span class="op">.</span><span class="at">setValue</span> <span class="op">=</span> (newValue) <span class="kw">=&gt;</span> {</span>
+<span id="cb1-94"><a href="#cb1-94" aria-hidden="true" tabindex="-1"></a>    currentValue <span class="op">=</span> newValue<span class="op">;</span></span>
+<span id="cb1-95"><a href="#cb1-95" aria-hidden="true" tabindex="-1"></a>    <span class="fu">dispatch</span>()<span class="op">;</span></span>
+<span id="cb1-96"><a href="#cb1-96" aria-hidden="true" tabindex="-1"></a>  }<span class="op">;</span></span>
+<span id="cb1-97"><a href="#cb1-97" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-98"><a href="#cb1-98" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> container<span class="op">;</span></span>
+<span id="cb1-99"><a href="#cb1-99" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-100"><a href="#cb1-100" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-101"><a href="#cb1-101" aria-hidden="true" tabindex="-1"></a>currentPosition <span class="op">=</span> positions[selectedPosition]</span>
+<span id="cb1-102"><a href="#cb1-102" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-103"><a href="#cb1-103" aria-hidden="true" tabindex="-1"></a>spectrum <span class="op">=</span> {</span>
+<span id="cb1-104"><a href="#cb1-104" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> width <span class="op">=</span> <span class="dv">700</span><span class="op">;</span></span>
+<span id="cb1-105"><a href="#cb1-105" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> height <span class="op">=</span> <span class="dv">100</span><span class="op">;</span></span>
+<span id="cb1-106"><a href="#cb1-106" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> margin <span class="op">=</span> { <span class="dt">top</span><span class="op">:</span> <span class="dv">20</span><span class="op">,</span> <span class="dt">right</span><span class="op">:</span> <span class="dv">60</span><span class="op">,</span> <span class="dt">left</span><span class="op">:</span> <span class="dv">60</span><span class="op">,</span> <span class="dt">bottom</span><span class="op">:</span> <span class="dv">20</span> }<span class="op">;</span></span>
+<span id="cb1-107"><a href="#cb1-107" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-108"><a href="#cb1-108" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> svg <span class="op">=</span> d3<span class="op">.</span><span class="fu">create</span>(<span class="st">"svg"</span>)</span>
+<span id="cb1-109"><a href="#cb1-109" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"width"</span><span class="op">,</span> width)</span>
+<span id="cb1-110"><a href="#cb1-110" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"height"</span><span class="op">,</span> height)</span>
+<span id="cb1-111"><a href="#cb1-111" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">style</span>(<span class="st">"max-width"</span><span class="op">,</span> <span class="st">"100%"</span>)</span>
+<span id="cb1-112"><a href="#cb1-112" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">style</span>(<span class="st">"height"</span><span class="op">,</span> <span class="st">"auto"</span>)<span class="op">;</span></span>
+<span id="cb1-113"><a href="#cb1-113" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-114"><a href="#cb1-114" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> gradient <span class="op">=</span> svg<span class="op">.</span><span class="fu">append</span>(<span class="st">"defs"</span>)</span>
+<span id="cb1-115"><a href="#cb1-115" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">append</span>(<span class="st">"linearGradient"</span>)</span>
+<span id="cb1-116"><a href="#cb1-116" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"id"</span><span class="op">,</span> <span class="st">"spectrum-gradient"</span>)</span>
+<span id="cb1-117"><a href="#cb1-117" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"x1"</span><span class="op">,</span> <span class="st">"0%"</span>)</span>
+<span id="cb1-118"><a href="#cb1-118" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"x2"</span><span class="op">,</span> <span class="st">"100%"</span>)<span class="op">;</span></span>
+<span id="cb1-119"><a href="#cb1-119" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-120"><a href="#cb1-120" aria-hidden="true" tabindex="-1"></a>  gradient<span class="op">.</span><span class="fu">append</span>(<span class="st">"stop"</span>)</span>
+<span id="cb1-121"><a href="#cb1-121" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"offset"</span><span class="op">,</span> <span class="st">"0%"</span>)</span>
+<span id="cb1-122"><a href="#cb1-122" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"stop-color"</span><span class="op">,</span> <span class="st">"#4ecdc4"</span>)<span class="op">;</span></span>
+<span id="cb1-123"><a href="#cb1-123" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-124"><a href="#cb1-124" aria-hidden="true" tabindex="-1"></a>  gradient<span class="op">.</span><span class="fu">append</span>(<span class="st">"stop"</span>)</span>
+<span id="cb1-125"><a href="#cb1-125" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"offset"</span><span class="op">,</span> <span class="st">"25%"</span>)</span>
+<span id="cb1-126"><a href="#cb1-126" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"stop-color"</span><span class="op">,</span> <span class="st">"#74b9ff"</span>)<span class="op">;</span></span>
+<span id="cb1-127"><a href="#cb1-127" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-128"><a href="#cb1-128" aria-hidden="true" tabindex="-1"></a>  gradient<span class="op">.</span><span class="fu">append</span>(<span class="st">"stop"</span>)</span>
+<span id="cb1-129"><a href="#cb1-129" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"offset"</span><span class="op">,</span> <span class="st">"50%"</span>)</span>
+<span id="cb1-130"><a href="#cb1-130" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"stop-color"</span><span class="op">,</span> <span class="st">"#ff9f43"</span>)<span class="op">;</span></span>
+<span id="cb1-131"><a href="#cb1-131" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-132"><a href="#cb1-132" aria-hidden="true" tabindex="-1"></a>  gradient<span class="op">.</span><span class="fu">append</span>(<span class="st">"stop"</span>)</span>
+<span id="cb1-133"><a href="#cb1-133" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"offset"</span><span class="op">,</span> <span class="st">"75%"</span>)</span>
+<span id="cb1-134"><a href="#cb1-134" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"stop-color"</span><span class="op">,</span> <span class="st">"#74b9ff"</span>)<span class="op">;</span></span>
+<span id="cb1-135"><a href="#cb1-135" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-136"><a href="#cb1-136" aria-hidden="true" tabindex="-1"></a>  gradient<span class="op">.</span><span class="fu">append</span>(<span class="st">"stop"</span>)</span>
+<span id="cb1-137"><a href="#cb1-137" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"offset"</span><span class="op">,</span> <span class="st">"100%"</span>)</span>
+<span id="cb1-138"><a href="#cb1-138" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"stop-color"</span><span class="op">,</span> <span class="st">"#4ecdc4"</span>)<span class="op">;</span></span>
+<span id="cb1-139"><a href="#cb1-139" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-140"><a href="#cb1-140" aria-hidden="true" tabindex="-1"></a>  svg<span class="op">.</span><span class="fu">append</span>(<span class="st">"rect"</span>)</span>
+<span id="cb1-141"><a href="#cb1-141" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"x"</span><span class="op">,</span> margin<span class="op">.</span><span class="at">left</span>)</span>
+<span id="cb1-142"><a href="#cb1-142" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"y"</span><span class="op">,</span> height <span class="op">/</span> <span class="dv">2</span> <span class="op">-</span> <span class="dv">4</span>)</span>
+<span id="cb1-143"><a href="#cb1-143" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"width"</span><span class="op">,</span> width <span class="op">-</span> margin<span class="op">.</span><span class="at">left</span> <span class="op">-</span> margin<span class="op">.</span><span class="at">right</span>)</span>
+<span id="cb1-144"><a href="#cb1-144" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"height"</span><span class="op">,</span> <span class="dv">8</span>)</span>
+<span id="cb1-145"><a href="#cb1-145" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">attr</span>(<span class="st">"rx"</span><span class="op">,</span> <span class="dv">4</span>)</span>
+<span id="cb1-146"><a href="#cb1-146" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">style</span>(<span class="st">"fill"</span><span class="op">,</span> <span class="st">"url(#spectrum-gradient)"</span>)<span class="op">;</span></span>
+<span id="cb1-147"><a href="#cb1-147" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-148"><a href="#cb1-148" aria-hidden="true" tabindex="-1"></a>  positions<span class="op">.</span><span class="fu">forEach</span>((pos<span class="op">,</span> i) <span class="kw">=&gt;</span> {</span>
+<span id="cb1-149"><a href="#cb1-149" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> x <span class="op">=</span> margin<span class="op">.</span><span class="at">left</span> <span class="op">+</span> (i <span class="op">/</span> <span class="dv">4</span>) <span class="op">*</span> (width <span class="op">-</span> margin<span class="op">.</span><span class="at">left</span> <span class="op">-</span> margin<span class="op">.</span><span class="at">right</span>)<span class="op">;</span></span>
+<span id="cb1-150"><a href="#cb1-150" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> isSelected <span class="op">=</span> selectedPosition <span class="op">===</span> i<span class="op">;</span></span>
+<span id="cb1-151"><a href="#cb1-151" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-152"><a href="#cb1-152" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> posGroup <span class="op">=</span> svg<span class="op">.</span><span class="fu">append</span>(<span class="st">"g"</span>)</span>
+<span id="cb1-153"><a href="#cb1-153" aria-hidden="true" tabindex="-1"></a>      <span class="op">.</span><span class="fu">style</span>(<span class="st">"cursor"</span><span class="op">,</span> <span class="st">"pointer"</span>)</span>
+<span id="cb1-154"><a href="#cb1-154" aria-hidden="true" tabindex="-1"></a>      <span class="op">.</span><span class="fu">attr</span>(<span class="st">"class"</span><span class="op">,</span> <span class="st">"position-marker"</span>)</span>
+<span id="cb1-155"><a href="#cb1-155" aria-hidden="true" tabindex="-1"></a>      <span class="op">.</span><span class="fu">on</span>(<span class="st">"click"</span><span class="op">,</span> <span class="kw">function</span>() {</span>
+<span id="cb1-156"><a href="#cb1-156" aria-hidden="true" tabindex="-1"></a>        <span class="kw">const</span> viewofElement <span class="op">=</span> <span class="bu">document</span><span class="op">.</span><span class="fu">querySelector</span>(<span class="st">'div[style*="display: none"]'</span>)<span class="op">;</span></span>
+<span id="cb1-157"><a href="#cb1-157" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (viewofElement <span class="op">&amp;&amp;</span> viewofElement<span class="op">.</span><span class="at">setValue</span>) {</span>
+<span id="cb1-158"><a href="#cb1-158" aria-hidden="true" tabindex="-1"></a>          viewofElement<span class="op">.</span><span class="fu">setValue</span>(i)<span class="op">;</span></span>
+<span id="cb1-159"><a href="#cb1-159" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb1-160"><a href="#cb1-160" aria-hidden="true" tabindex="-1"></a>      })</span>
+<span id="cb1-161"><a href="#cb1-161" aria-hidden="true" tabindex="-1"></a>      <span class="op">.</span><span class="fu">on</span>(<span class="st">"mouseover"</span><span class="op">,</span> <span class="kw">function</span>() {</span>
+<span id="cb1-162"><a href="#cb1-162" aria-hidden="true" tabindex="-1"></a>        d3<span class="op">.</span><span class="fu">select</span>(<span class="kw">this</span>)<span class="op">.</span><span class="fu">select</span>(<span class="st">"circle"</span>)</span>
+<span id="cb1-163"><a href="#cb1-163" aria-hidden="true" tabindex="-1"></a>          <span class="op">.</span><span class="fu">transition</span>()</span>
+<span id="cb1-164"><a href="#cb1-164" aria-hidden="true" tabindex="-1"></a>          <span class="op">.</span><span class="fu">duration</span>(<span class="dv">200</span>)</span>
+<span id="cb1-165"><a href="#cb1-165" aria-hidden="true" tabindex="-1"></a>          <span class="op">.</span><span class="fu">attr</span>(<span class="st">"r"</span><span class="op">,</span> isSelected <span class="op">?</span> <span class="dv">10</span> <span class="op">:</span> <span class="dv">8</span>)</span>
+<span id="cb1-166"><a href="#cb1-166" aria-hidden="true" tabindex="-1"></a>          <span class="op">.</span><span class="fu">style</span>(<span class="st">"stroke-width"</span><span class="op">,</span> isSelected <span class="op">?</span> <span class="dv">4</span> <span class="op">:</span> <span class="dv">3</span>)<span class="op">;</span></span>
+<span id="cb1-167"><a href="#cb1-167" aria-hidden="true" tabindex="-1"></a>      })</span>
+<span id="cb1-168"><a href="#cb1-168" aria-hidden="true" tabindex="-1"></a>      <span class="op">.</span><span class="fu">on</span>(<span class="st">"mouseout"</span><span class="op">,</span> <span class="kw">function</span>() {</span>
+<span id="cb1-169"><a href="#cb1-169" aria-hidden="true" tabindex="-1"></a>        d3<span class="op">.</span><span class="fu">select</span>(<span class="kw">this</span>)<span class="op">.</span><span class="fu">select</span>(<span class="st">"circle"</span>)</span>
+<span id="cb1-170"><a href="#cb1-170" aria-hidden="true" tabindex="-1"></a>          <span class="op">.</span><span class="fu">transition</span>()</span>
+<span id="cb1-171"><a href="#cb1-171" aria-hidden="true" tabindex="-1"></a>          <span class="op">.</span><span class="fu">duration</span>(<span class="dv">200</span>)</span>
+<span id="cb1-172"><a href="#cb1-172" aria-hidden="true" tabindex="-1"></a>          <span class="op">.</span><span class="fu">attr</span>(<span class="st">"r"</span><span class="op">,</span> isSelected <span class="op">?</span> <span class="dv">8</span> <span class="op">:</span> <span class="dv">6</span>)</span>
+<span id="cb1-173"><a href="#cb1-173" aria-hidden="true" tabindex="-1"></a>          <span class="op">.</span><span class="fu">style</span>(<span class="st">"stroke-width"</span><span class="op">,</span> isSelected <span class="op">?</span> <span class="dv">3</span> <span class="op">:</span> <span class="dv">2</span>)<span class="op">;</span></span>
+<span id="cb1-174"><a href="#cb1-174" aria-hidden="true" tabindex="-1"></a>      })<span class="op">;</span></span>
+<span id="cb1-175"><a href="#cb1-175" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-176"><a href="#cb1-176" aria-hidden="true" tabindex="-1"></a>    posGroup<span class="op">.</span><span class="fu">append</span>(<span class="st">"circle"</span>)</span>
+<span id="cb1-177"><a href="#cb1-177" aria-hidden="true" tabindex="-1"></a>      <span class="op">.</span><span class="fu">attr</span>(<span class="st">"cx"</span><span class="op">,</span> x)</span>
+<span id="cb1-178"><a href="#cb1-178" aria-hidden="true" tabindex="-1"></a>      <span class="op">.</span><span class="fu">attr</span>(<span class="st">"cy"</span><span class="op">,</span> height <span class="op">/</span> <span class="dv">2</span>)</span>
+<span id="cb1-179"><a href="#cb1-179" aria-hidden="true" tabindex="-1"></a>      <span class="op">.</span><span class="fu">attr</span>(<span class="st">"r"</span><span class="op">,</span> isSelected <span class="op">?</span> <span class="dv">8</span> <span class="op">:</span> <span class="dv">6</span>)</span>
+<span id="cb1-180"><a href="#cb1-180" aria-hidden="true" tabindex="-1"></a>      <span class="op">.</span><span class="fu">style</span>(<span class="st">"fill"</span><span class="op">,</span> isSelected <span class="op">?</span> pos<span class="op">.</span><span class="at">color</span> <span class="op">:</span> <span class="st">"white"</span>)</span>
+<span id="cb1-181"><a href="#cb1-181" aria-hidden="true" tabindex="-1"></a>      <span class="op">.</span><span class="fu">style</span>(<span class="st">"stroke"</span><span class="op">,</span> pos<span class="op">.</span><span class="at">color</span>)</span>
+<span id="cb1-182"><a href="#cb1-182" aria-hidden="true" tabindex="-1"></a>      <span class="op">.</span><span class="fu">style</span>(<span class="st">"stroke-width"</span><span class="op">,</span> isSelected <span class="op">?</span> <span class="dv">3</span> <span class="op">:</span> <span class="dv">2</span>)</span>
+<span id="cb1-183"><a href="#cb1-183" aria-hidden="true" tabindex="-1"></a>      <span class="op">.</span><span class="fu">style</span>(<span class="st">"transition"</span><span class="op">,</span> <span class="st">"all 0.2s ease"</span>)<span class="op">;</span></span>
+<span id="cb1-184"><a href="#cb1-184" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-185"><a href="#cb1-185" aria-hidden="true" tabindex="-1"></a>    posGroup<span class="op">.</span><span class="fu">append</span>(<span class="st">"image"</span>)</span>
+<span id="cb1-186"><a href="#cb1-186" aria-hidden="true" tabindex="-1"></a>      <span class="op">.</span><span class="fu">attr</span>(<span class="st">"x"</span><span class="op">,</span> x <span class="op">-</span> <span class="dv">12</span>)</span>
+<span id="cb1-187"><a href="#cb1-187" aria-hidden="true" tabindex="-1"></a>      <span class="op">.</span><span class="fu">attr</span>(<span class="st">"y"</span><span class="op">,</span> height <span class="op">/</span> <span class="dv">2</span> <span class="op">-</span> <span class="dv">40</span>)</span>
+<span id="cb1-188"><a href="#cb1-188" aria-hidden="true" tabindex="-1"></a>      <span class="op">.</span><span class="fu">attr</span>(<span class="st">"width"</span><span class="op">,</span> <span class="dv">24</span>)</span>
+<span id="cb1-189"><a href="#cb1-189" aria-hidden="true" tabindex="-1"></a>      <span class="op">.</span><span class="fu">attr</span>(<span class="st">"height"</span><span class="op">,</span> <span class="dv">24</span>)</span>
+<span id="cb1-190"><a href="#cb1-190" aria-hidden="true" tabindex="-1"></a>      <span class="op">.</span><span class="fu">attr</span>(<span class="st">"href"</span><span class="op">,</span> pos<span class="op">.</span><span class="at">icon</span>)</span>
+<span id="cb1-191"><a href="#cb1-191" aria-hidden="true" tabindex="-1"></a>      <span class="op">.</span><span class="fu">style</span>(<span class="st">"pointer-events"</span><span class="op">,</span> <span class="st">"none"</span>)<span class="op">;</span></span>
+<span id="cb1-192"><a href="#cb1-192" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-193"><a href="#cb1-193" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="op">!</span>isSelected) {</span>
+<span id="cb1-194"><a href="#cb1-194" aria-hidden="true" tabindex="-1"></a>      posGroup<span class="op">.</span><span class="fu">append</span>(<span class="st">"circle"</span>)</span>
+<span id="cb1-195"><a href="#cb1-195" aria-hidden="true" tabindex="-1"></a>        <span class="op">.</span><span class="fu">attr</span>(<span class="st">"cx"</span><span class="op">,</span> x)</span>
+<span id="cb1-196"><a href="#cb1-196" aria-hidden="true" tabindex="-1"></a>        <span class="op">.</span><span class="fu">attr</span>(<span class="st">"cy"</span><span class="op">,</span> height <span class="op">/</span> <span class="dv">2</span> <span class="op">+</span> <span class="dv">1</span>)</span>
+<span id="cb1-197"><a href="#cb1-197" aria-hidden="true" tabindex="-1"></a>        <span class="op">.</span><span class="fu">attr</span>(<span class="st">"r"</span><span class="op">,</span> <span class="dv">6</span>)</span>
+<span id="cb1-198"><a href="#cb1-198" aria-hidden="true" tabindex="-1"></a>        <span class="op">.</span><span class="fu">style</span>(<span class="st">"fill"</span><span class="op">,</span> <span class="st">"rgba(0,0,0,0.1)"</span>)</span>
+<span id="cb1-199"><a href="#cb1-199" aria-hidden="true" tabindex="-1"></a>        <span class="op">.</span><span class="fu">style</span>(<span class="st">"stroke"</span><span class="op">,</span> <span class="st">"none"</span>)</span>
+<span id="cb1-200"><a href="#cb1-200" aria-hidden="true" tabindex="-1"></a>        <span class="op">.</span><span class="fu">style</span>(<span class="st">"pointer-events"</span><span class="op">,</span> <span class="st">"none"</span>)<span class="op">;</span></span>
+<span id="cb1-201"><a href="#cb1-201" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb1-202"><a href="#cb1-202" aria-hidden="true" tabindex="-1"></a>  })<span class="op">;</span></span>
+<span id="cb1-203"><a href="#cb1-203" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-204"><a href="#cb1-204" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> svg<span class="op">.</span><span class="fu">node</span>()<span class="op">;</span></span>
+<span id="cb1-205"><a href="#cb1-205" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-1-1" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-1-2" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-1-3" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<div id="ojs-cell-1-4" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code hidden" id="cb2" data-startfrom="209" data-source-offset="0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 208;"><span id="cb2-209"><a href="#cb2-209" aria-hidden="true" tabindex="-1"></a><span class="fu">html</span><span class="vs">`&lt;div style="</span></span>
+<span id="cb2-210"><a href="#cb2-210" aria-hidden="true" tabindex="-1"></a><span class="vs">  padding: 20px;</span></span>
+<span id="cb2-211"><a href="#cb2-211" aria-hidden="true" tabindex="-1"></a><span class="vs">  margin: 20px 0;</span></span>
+<span id="cb2-212"><a href="#cb2-212" aria-hidden="true" tabindex="-1"></a><span class="vs">  border-left: 4px solid </span><span class="sc">${</span>currentPosition<span class="op">.</span><span class="at">color</span><span class="sc">}</span><span class="vs">;</span></span>
+<span id="cb2-213"><a href="#cb2-213" aria-hidden="true" tabindex="-1"></a><span class="vs">  background: linear-gradient(135deg, </span><span class="sc">${</span>currentPosition<span class="op">.</span><span class="at">color</span><span class="sc">}</span><span class="vs">15, </span><span class="sc">${</span>currentPosition<span class="op">.</span><span class="at">color</span><span class="sc">}</span><span class="vs">05);</span></span>
+<span id="cb2-214"><a href="#cb2-214" aria-hidden="true" tabindex="-1"></a><span class="vs">  border-radius: 8px;</span></span>
+<span id="cb2-215"><a href="#cb2-215" aria-hidden="true" tabindex="-1"></a><span class="vs">"&gt;</span></span>
+<span id="cb2-216"><a href="#cb2-216" aria-hidden="true" tabindex="-1"></a><span class="vs">  &lt;h3 style="color: </span><span class="sc">${</span>currentPosition<span class="op">.</span><span class="at">color</span><span class="sc">}</span><span class="vs">; margin-top: 0;"&gt;</span></span>
+<span id="cb2-217"><a href="#cb2-217" aria-hidden="true" tabindex="-1"></a><span class="vs">    </span><span class="sc">${</span>currentPosition<span class="op">.</span><span class="at">name</span><span class="sc">}</span><span class="vs">: </span><span class="sc">${</span>currentPosition<span class="op">.</span><span class="at">title</span><span class="sc">}</span></span>
+<span id="cb2-218"><a href="#cb2-218" aria-hidden="true" tabindex="-1"></a><span class="vs">  &lt;/h3&gt;</span></span>
+<span id="cb2-219"><a href="#cb2-219" aria-hidden="true" tabindex="-1"></a><span class="vs">  </span></span>
+<span id="cb2-220"><a href="#cb2-220" aria-hidden="true" tabindex="-1"></a><span class="vs">  &lt;p&gt;&lt;strong&gt;Your Profile:&lt;/strong&gt; </span><span class="sc">${</span>currentPosition<span class="op">.</span><span class="at">description</span><span class="sc">}</span><span class="vs">&lt;/p&gt;</span></span>
+<span id="cb2-221"><a href="#cb2-221" aria-hidden="true" tabindex="-1"></a><span class="vs">  </span></span>
+<span id="cb2-222"><a href="#cb2-222" aria-hidden="true" tabindex="-1"></a><span class="vs">  &lt;p&gt;&lt;strong&gt;Background:&lt;/strong&gt; </span><span class="sc">${</span>currentPosition<span class="op">.</span><span class="at">background</span><span class="sc">}</span><span class="vs">&lt;/p&gt;</span></span>
+<span id="cb2-223"><a href="#cb2-223" aria-hidden="true" tabindex="-1"></a><span class="vs">&lt;/div&gt;`</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div id="ojs-cell-2" data-nodetype="expression">
+
+</div>
+</div>
+</div>
+<p>I’ve had the opportunity to work with brilliant minds on both extremes of this spectrum. And what follows is my informed opinion on the fundamental question - “do you need agent frameworks?”.</p>
+<section id="agent-frameworks-to-use-or-not-to-use" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="agent-frameworks-to-use-or-not-to-use"><span class="header-section-number">1</span> Agent Frameworks: To Use or Not to Use</h2>
+<p>Whether you need a framework or not really depends on your needs and background.</p>
+<p>You’re navigating changing times, much like the industrial revolution - but so much more impactful and with unprecedented economic potential. This has attracted a lot of attention from people in various industries - not always coming from a traditional coding background.</p>
+<p>And in these changing times, where the industry has not even settled on a clear definition of an agent - it is really hard to land on the need and necessity of frameworks.</p>
+<p>As in the coding spectrum above, we have a similar not so clear spectrum when it comes to agent adoption and use case. Some of you have been using AI agents for your daily lives and routines, others simply want “something agentic” as a use case in your company because there is a push to adopt AI from leadership.</p>
+<p>Where you are in the agent spectrum, and what’s the basis of your “agentic needs” really defines if you should go ahead with a framework or not.</p>
+<p>Frameworks have design decisions baked into them - which you may not agree with. At my company, we want complete control over the code we produce, and customize it based on our needs.</p>
+<p>On the other hand, if you’re not an AI-first company (be honest here) and are just starting out on your journey - exploring an agentic use case, it might be worth starting with a framework until you build the expertise in-house. Starting from scratch - you might spend more time getting the formats right instead of testing your “product idea”. Now, you could argue that it’s okay to just start with simple API calls and a while loop, but I believe there’s more chance of failure and frustration whereas within a framework - you’re more protected.</p>
+<p>Having said that, let’s look at some different perspectives currently floating around in the industry.</p>
+<blockquote class="twitter-tweet tw-align-center blockquote">
+<p lang="en" dir="ltr">
+Too many people use frameworks to build agents, when really, all you need are the raw LLM APIs and a while loop.<br><br>Don't overcomplicate what doesn't need to be overcomplicated.
+</p>
+— Matt Shumer (<span class="citation" data-cites="mattshumer_">(<a href="#ref-mattshumer_" role="doc-biblioref"><strong>mattshumer_?</strong></a>)</span>) <a href="https://twitter.com/mattshumer_/status/1963843389918446066?ref_src=twsrc%5Etfw">September 5, 2025</a>
+</blockquote>
+<script async="" src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+<p>Now, Matt is not wrong when he says agents are raw LLM APIs in a while loop. In essence, yes an agent is simply a number of API calls chained together - where you’re reliant on the LLM to make the right decisions based on system prompt and tool descriptions - to choose the right tool and call it with the correct arguments. The part that’s agentic - is the decision-making process of the LLM which separates it from a prescribed path to follow. Based on an observation (tool output), the LLM could decide to alter its path to achieve the goal defined by the user. This reasoning and acting pattern is formalized in the ReAct framework <span class="citation" data-cites="yao2023reactsynergizingreasoningacting">(<a href="#ref-yao2023reactsynergizingreasoningacting" role="doc-biblioref">Yao et al. 2023</a>)</span>.</p>
+<p>What happened after? Here is another completely different perspective by someone who is working on building an AI framework.</p>
+<blockquote class="twitter-tweet tw-align-center blockquote">
+<p lang="en" dir="ltr">
+Grifters like this are wasting your time and their Dunning-Kruger opinions should be ignored by serious builders. You either build on a framework or live long enough to roll your own (which is fine btw). Here’s why:<br><br>1. The "LLM API in a while loop" is your underlying agentic… <a href="https://t.co/uL0CqfaGVj">https://t.co/uL0CqfaGVj</a> <a href="https://t.co/s22H4iaOqG">pic.twitter.com/s22H4iaOqG</a>
+</p>
+— Ashpreet Bedi (<span class="citation" data-cites="ashpreetbedi">(<a href="#ref-ashpreetbedi" role="doc-biblioref"><strong>ashpreetbedi?</strong></a>)</span>) <a href="https://twitter.com/ashpreetbedi/status/1964362446627299598?ref_src=twsrc%5Etfw">September 6, 2025</a>
+</blockquote>
+<script async="" src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+<p>Now this got some impressions in the Twitter world, but it didn’t get my attention until Jeremy posted the following tweet.</p>
+<blockquote class="twitter-tweet tw-align-center blockquote">
+<p lang="en" dir="ltr">
+it's amazing how some people can make a simple agent loop sound so complicated <a href="https://t.co/n0BFGxDzAJ">https://t.co/n0BFGxDzAJ</a>
+</p>
+— Jeremy Howard (<span class="citation" data-cites="jeremyphoward">(<a href="#ref-jeremyphoward" role="doc-biblioref"><strong>jeremyphoward?</strong></a>)</span>) <a href="https://twitter.com/jeremyphoward/status/1964539633653731466?ref_src=twsrc%5Etfw">September 7, 2025</a>
+</blockquote>
+<script async="" src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>A Personal Detour
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>As someone who started my data science journey with fastai, I deeply value and respect Jeremy’s work and opinions. So it was natural for me to reflect on his view regarding not overcomplicating simple agent loops.</p>
+<p>His view on “rather than using complex frameworks, use simple small pieces that make the details accessible and understandable” deeply resonates with me.</p>
+</div>
+</div>
+<p>Production code should be simple, to the point - and steering away from frameworks as much as possible. It should be transparent, easily deducible.</p>
+</section>
+<section id="finding-the-middle-ground" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="finding-the-middle-ground"><span class="header-section-number">2</span> Finding the Middle Ground</h2>
+<p>After all this debate and reflections - I believe thinking of AI agents as either simple loops or complex frameworks represents two extremes of a spectrum you navigate based on context.</p>
+<p>I am more aligned with swyx’s views here:</p>
+<blockquote class="twitter-tweet tw-align-center blockquote">
+<p lang="en" dir="ltr">
+ok enough evals culture war, time for agents discourse. this is unneccessarily mean, but yes substance is correct.<br><br>i think people like Matt and <a href="https://twitter.com/thorstenball?ref_src=twsrc%5Etfw"><span class="citation" data-cites="thorstenball">(</span></a><a href="#ref-thorstenball" role="doc-biblioref"><strong>thorstenball?</strong></a>) mean well when they try to demystify agents into "just" llms in while loops. agents -are- more than that; at least the… <a href="https://t.co/9FF7Xfx6Tf">https://t.co/9FF7Xfx6Tf</a>
+</p>
+— swyx (<span class="citation" data-cites="swyx">(<a href="#ref-swyx" role="doc-biblioref"><strong>swyx?</strong></a>)</span>) <a href="https://twitter.com/swyx/status/1964473164127490095?ref_src=twsrc%5Etfw">September 6, 2025</a>
+</blockquote>
+<script async="" src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+</section>
+<section id="so-where-does-this-leave-us" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="so-where-does-this-leave-us"><span class="header-section-number">3</span> So Where Does This Leave Us?</h2>
+<p>As practitioners navigating this rapidly evolving landscape, you need to be pragmatic. My approach? Start with the simplest solution that could possibly work. If that’s a while loop, great. If you need a framework to move fast and test ideas, that’s fine too. The key is being intentional about your choices and understanding the trade-offs.</p>
+<p>Let me share how I navigate this debate in my daily work.</p>
+<p>The truth is, for enterprise production systems, you want complete control. No frameworks. Everything built from scratch using raw API calls - OpenAI’s, Anthropic’s, or whatever model provider you need. This gives you complete control over error handling, retry logic, streaming, and all the intricate details that matter when your agents are serving real users. No black boxes, no mysterious abstractions - just clean, transparent code that does exactly what you need.</p>
+<p>But for personal agents and experiments? That’s a different story. I reach for lean, minimal frameworks like smolagents <span class="citation" data-cites="huggingface2025smolagents">(<a href="#ref-huggingface2025smolagents" role="doc-biblioref">Hugging Face 2025</a>)</span> or openai-agents-python <span class="citation" data-cites="openai2025agentspython">(<a href="#ref-openai2025agentspython" role="doc-biblioref">OpenAI 2025</a>)</span>. These lightweight tools give me just enough structure to prototype quickly without the bloat of heavy frameworks. They’re perfect for experiments, personal automation, and testing new ideas before implementing them properly in production.</p>
+</section>
+<section id="is-vibe-coding-productive" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="is-vibe-coding-productive"><span class="header-section-number">4</span> Is vibe coding productive?</h2>
+<blockquote class="blockquote">
+<p>Hell, yeah!</p>
+</blockquote>
+<p>Depending on the task I am working on, I confidently shift gears. I am on multiple sides of the “Coding Spectrum” - sometimes running as many as <strong>3 Claude Code sessions in parallel</strong> working on different pull requests to go into development. This workflow has been inspired by Anthropic’s documentation on how to run Claude Code sessions in parallel using git worktrees <span class="citation" data-cites="anthropic2025claudecode">(<a href="#ref-anthropic2025claudecode" role="doc-biblioref">Anthropic 2025</a>)</span>. Features that used to take days, now take hours!</p>
+<p>BUT - and this is crucial - you need to actively steer Claude Code in the right direction to get results. I can’t just say “Add streaming support to my Agent to stream tool calls and messages to user” and then forget about it, have some breakfast and come back. That simply doesn’t work!</p>
+<p>Often what works is this:</p>
+<ol type="1">
+<li>Claude Code in plan mode</li>
+<li>Help me plan adding a new feature that allows me to stream tool calls and responses to the user in the frontend as they are executed. Look at <code>agent.py</code>, <code>Agent.run</code> method which is currently returning the complete list of messages back to the user once the agent has finished its task. Look at “smolagents” as a reference on how other frameworks handle streaming.</li>
+<li>Claude comes back with a plan.</li>
+<li>Mostly need to make multiple edits to the plan. Then tell Claude to implement.</li>
+<li>Now Claude adds inline comments everywhere.</li>
+<li>Press escape, to pause. “I asked you to not add verbose inline comments. Please remove them from your code. You need not communicate with me via comments.”</li>
+<li>Review Claude’s code - make manual edits.</li>
+<li>Finally merge to <code>development</code>.</li>
+</ol>
+<p>As you can see, the process is still very manual. What this does though, is that while Claude is busy implementing, I can go and fix another bug or read up on API docs to further expand my knowledge. As of today, terminal agents are very good at following instructions. And that’s it. That’s where the boundary is. As a vibe coder (which I too am when it comes to frontend) - I am overly reliant on the LLM to produce production-quality code which it very rarely does.</p>
+</section>
+<section id="conclusion" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="conclusion"><span class="header-section-number">5</span> Conclusion</h2>
+<p>After a year of building production agents and watching this recent Twitter debate unfold, here’s what I’ve learned: the framework vs.&nbsp;while loop argument misses the point entirely. It’s not about the tools - it’s about understanding your context and making pragmatic choices.</p>
+<p>If you’re a vibe coder just starting out, embrace the frameworks. They’ll protect you from footguns you don’t even know exist yet. If you’re a seasoned engineer with specific requirements, build exactly what you need - no more, no less. And if you’re somewhere in between? Well, that’s where most of us live, constantly balancing abstraction with control.</p>
+<p>The real skill isn’t choosing frameworks or while loops - it’s knowing when to use which approach. Sometimes you need fine-grained control with raw API calls. Sometimes you need a lightweight framework to move fast. Often, you’ll end up using both based on the use case.</p>
+<p>As this field evolves at breakneck speed, remember: AI is a means to an end, not an end in itself. Whether you’re team framework or team while loop, focus on what actually matters - solving real problems for real users in a domain where you’re the expert.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>🤖 Meta Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This blog post was peer-reviewed by Claude Code - because who better to review a post about AI agents than an AI agent itself? And yes, the thumbnail image comparing frameworks was generated by Nano Banana. We’re truly living in exciting times. :)</p>
+</div>
+</div>
+
+
+
+</section>
+
+<link href="//cdn-images.mailchimp.com/embedcode/classic-071822.css" rel="stylesheet" type="text/css"><div id="mc_embed_signup">
+    <form action="https://github.us4.list-manage.com/subscribe/post?u=e847230346a7c78d4745ae796&amp;id=7a63b2b273&amp;f_id=005f58e8f0" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate="">
+        <div id="mc_embed_signup_scroll">
+        <h2 class="anchored">Subscribe to Aman Arora's blog:</h2>
+        <div class="indicates-required"><span class="asterisk">*</span> indicates required</div>
+<div class="mc-field-group">
+    <label for="mce-EMAIL">Email Address  <span class="asterisk">*</span>
+</label>
+    <input type="email" value="" name="EMAIL" class="required email" id="mce-EMAIL" required="">
+    <span id="mce-EMAIL-HELPERTEXT" class="helper_text"></span>
+</div>
+<div hidden="true"><input type="hidden" name="tags" value="7232948"></div>
+    <div id="mce-responses" class="clear foot">
+        <div class="response" id="mce-error-response" style="display:none"></div>
+        <div class="response" id="mce-success-response" style="display:none"></div>
+    </div>    <!-- real people should not fill this in and expect good things - do not remove this or risk form bot signups-->
+    <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_e847230346a7c78d4745ae796_7a63b2b273" tabindex="-1" value=""></div>
+        <div class="optionalParent">
+            <div class="clear foot">
+                <input type="submit" value="Subscribe" name="subscribe" id="mc-embedded-subscribe" class="button">
+                <p class="brandingLogo"><a href="http://eepurl.com/il3baM" title="Mailchimp - email marketing made easy and fun"><img src="https://eep.io/mc-cdn-images/template_images/branding_logo_text_dark_dtp.svg"></a></p>
+            </div>
+        </div>
+    </div>
+</form>
+</div><script type="text/javascript">(function($) {window.fnames = new Array(); window.ftypes = new Array();fnames[0]='EMAIL';ftypes[0]='email';fnames[1]='FNAME';ftypes[1]='text';fnames[2]='LNAME';ftypes[2]='text';fnames[3]='ADDRESS';ftypes[3]='address';fnames[4]='PHONE';ftypes[4]='phone';fnames[5]='BIRTHDAY';ftypes[5]='birthday';}(jQuery));var $mcj = jQuery.noConflict(true);</script><div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-anthropic2025claudecode" class="csl-entry" role="listitem">
+Anthropic. 2025. <span>“Run Parallel Claude Code Sessions with Git Worktrees.”</span> Anthropic. <a href="https://docs.anthropic.com/en/docs/claude-code/common-workflows#run-parallel-claude-code-sessions-with-git-worktrees">https://docs.anthropic.com/en/docs/claude-code/common-workflows#run-parallel-claude-code-sessions-with-git-worktrees</a>.
+</div>
+<div id="ref-huggingface2025smolagents" class="csl-entry" role="listitem">
+Hugging Face. 2025. <span>“Smolagents: Simple and Modular Agent Framework.”</span> <a href="https://github.com/huggingface/smolagents" class="uri">https://github.com/huggingface/smolagents</a>.
+</div>
+<div id="ref-openai2025agentspython" class="csl-entry" role="listitem">
+OpenAI. 2025. <span>“OpenAI Agents Python.”</span> <a href="https://github.com/openai/openai-agents-python" class="uri">https://github.com/openai/openai-agents-python</a>.
+</div>
+<div id="ref-yao2023reactsynergizingreasoningacting" class="csl-entry" role="listitem">
+Yao, Shunyu, Jeffrey Zhao, Dian Yu, Nan Du, Izhak Shafran, Karthik Narasimhan, and Yuan Cao. 2023. <span>“ReAct: Synergizing Reasoning and Acting in Language Models.”</span> <a href="https://arxiv.org/abs/2210.03629">https://arxiv.org/abs/2210.03629</a>.
+</div>
+</div></section></div></main> <!-- /main -->
+<script type="ojs-module-contents">
+eyJjb250ZW50cyI6W3sibWV0aG9kTmFtZSI6ImludGVycHJldCIsImNlbGxOYW1lIjoib2pzLWNlbGwtMSIsImlubGluZSI6ZmFsc2UsInNvdXJjZSI6IlxucG9zaXRpb25zID0gW1xuICB7XG4gICAgaWQ6IDAsXG4gICAgbmFtZTogXCJWaWJlIENvZGVyXCIsXG4gICAgaWNvbjogXCJodHRwczovL2N1cnNvci5zaC9mYXZpY29uLmljb1wiLFxuICAgIHRpdGxlOiBcIlRoZSBBSS1GaXJzdCBEZXZlbG9wZXJcIixcbiAgICBkZXNjcmlwdGlvbjogXCJZb3UndmUgbmV2ZXIgd3JpdHRlbiB0cmFkaXRpb25hbCBjb2RlIGFuZCBlbWJyYWNlIEFJLWFzc2lzdGVkIGRldmVsb3BtZW50IGNvbXBsZXRlbHkuIFlvdSB0aGluayBpbiBwcm9tcHRzLCBub3Qgc3ludGF4LlwiLFxuICAgIGJhY2tncm91bmQ6IFwiWW91IG1pZ2h0IGhhdmUgc3RhcnRlZCBjb2RpbmcgaW4gdGhlIGVyYSBvZiBDaGF0R1BUIGFuZCBDdXJzb3IuIFRyYWRpdGlvbmFsIGRlYnVnZ2luZyBmZWVscyBmb3JlaWduLlwiLFxuICAgIGNvbG9yOiBcIiM0ZWNkYzRcIlxuICB9LFxuICB7XG4gICAgaWQ6IDEsXG4gICAgbmFtZTogXCJBSSBFbWJyYWNlclwiLFxuICAgIGljb246IFwiaHR0cHM6Ly9vcGVuYWkuY29tL2Zhdmljb24uaWNvXCIsXG4gICAgdGl0bGU6IFwiVGhlIFByb2R1Y3Rpdml0eSBNYXhpbWl6ZXJcIixcbiAgICBkZXNjcmlwdGlvbjogXCJZb3UgdXNlIEFJIHRvb2xzIGV4dGVuc2l2ZWx5IGZvciBwcm9kdWN0aXZpdHkgd2hpbGUgbWFpbnRhaW5pbmcgc29saWQgY29kaW5nIGZ1bmRhbWVudGFscy5cIixcbiAgICBiYWNrZ3JvdW5kOiBcIllvdSBsZWFybmVkIHRvIGNvZGUgdHJhZGl0aW9uYWxseSBidXQgcXVpY2tseSBhZG9wdGVkIEFJIHRvb2xzIHRvIGFjY2VsZXJhdGUgeW91ciB3b3JrZmxvdy5cIixcbiAgICBjb2xvcjogXCIjNzRiOWZmXCJcbiAgfSxcbiAge1xuICAgIGlkOiAyLFxuICAgIG5hbWU6IFwiQmFsYW5jZWRcIixcbiAgICBpY29uOiBcImh0dHBzOi8vd3d3LmFudGhyb3BpYy5jb20vZmF2aWNvbi5pY29cIixcbiAgICB0aXRsZTogXCJUaGUgUHJhZ21hdGlzdFwiLFxuICAgIGRlc2NyaXB0aW9uOiBcIllvdSB0YWtlIGEgY29udGV4dC1kZXBlbmRlbnQgYXBwcm9hY2gsIGNob29zaW5nIHRvb2xzIGJhc2VkIG9uIHByb2plY3QgcmVxdWlyZW1lbnRzLlwiLFxuICAgIGJhY2tncm91bmQ6IFwiRXhwZXJpZW5jZWQgZGV2ZWxvcGVyIHdobyBldmFsdWF0ZXMgdHJhZGUtb2ZmcyBjYXJlZnVsbHkuIFlvdSd2ZSBzZWVuIHRlY2hub2xvZ2llcyBjb21lIGFuZCBnby5cIixcbiAgICBjb2xvcjogXCIjZmY5ZjQzXCJcbiAgfSxcbiAge1xuICAgIGlkOiAzLFxuICAgIG5hbWU6IFwiVHJhZGl0aW9uYWxcIixcbiAgICBpY29uOiBcImh0dHBzOi8vZ2l0aHViLmNvbS9mYXZpY29uLmljb1wiLFxuICAgIHRpdGxlOiBcIlRoZSBDcmFmdHNwZXJzb25cIixcbiAgICBkZXNjcmlwdGlvbjogXCJZb3UgcHJlZmVyIG1hbnVhbCBjb2Rpbmcgd2l0aCBmdWxsIHVuZGVyc3RhbmRpbmcsIHVzaW5nIEFJIGFzIGFuIG9jY2FzaW9uYWwgaGVscGVyLiBZb3Ugd2FudCB0byBrZWVwIEFJIG9uIGEgdGlnaHQgbGVhc2guXCIsXG4gICAgYmFja2dyb3VuZDogXCJZb3UgYmVsaWV2ZSBpbiB1bmRlcnN0YW5kaW5nIHlvdXIgdG9vbHMgZGVlcGx5LiBZb3UndmUgYnVpbHQgc3lzdGVtcyBmcm9tIHNjcmF0Y2ggYW5kIHZhbHVlIHRoYXQga25vd2xlZGdlLCBhbmQgeW91IHRoaW5rIEFJIHRvb2xpbmcgZGlzcnVwdHMgeW91ciB3b3JrZmxvdy5cIixcbiAgICBjb2xvcjogXCIjNzRiOWZmXCJcbiAgfSxcbiAge1xuICAgIGlkOiA0LFxuICAgIG5hbWU6IFwiQUkgU2tlcHRpY1wiLFxuICAgIGljb246IFwiaHR0cHM6Ly91cGxvYWQud2lraW1lZGlhLm9yZy93aWtpcGVkaWEvY29tbW9ucy8zLzM1L1R1eC5zdmdcIixcbiAgICB0aXRsZTogXCJUaGUgUHVyaXN0XCIsXG4gICAgZGVzY3JpcHRpb246IFwiRnVsbC1zdGFjayBkZXZlbG9wZXIgd2hvIHJlZnVzZXMgQUkgdG9vbGluZyBhbmQgcHJlZmVycyBjb21wbGV0ZSBtYW51YWwgY29udHJvbC5cIixcbiAgICBiYWNrZ3JvdW5kOiBcIllvdSd2ZSBtYXN0ZXJlZCB5b3VyIGNyYWZ0IHRocm91Z2ggeWVhcnMgb2YgZXhwZXJpZW5jZS4gWW91IGRvbid0IHRydXN0IHRvb2xzIHlvdSBjYW4ndCBmdWxseSB1bmRlcnN0YW5kLlwiLFxuICAgIGNvbG9yOiBcIiM0ZWNkYzRcIlxuICB9XG5dXG5cbnZpZXdvZiBzZWxlY3RlZFBvc2l0aW9uID0ge1xuICBsZXQgY3VycmVudFZhbHVlID0gMjtcbiAgXG4gIGNvbnN0IGRpc3BhdGNoID0gKCkgPT4ge1xuICAgIGNvbnRhaW5lci52YWx1ZSA9IGN1cnJlbnRWYWx1ZTtcbiAgICBjb250YWluZXIuZGlzcGF0Y2hFdmVudChuZXcgQ3VzdG9tRXZlbnQoXCJpbnB1dFwiLCB7YnViYmxlczogdHJ1ZX0pKTtcbiAgfTtcbiAgXG4gIGNvbnN0IGNvbnRhaW5lciA9IGh0bWxgPGRpdiBzdHlsZT1cImRpc3BsYXk6IG5vbmU7XCI+PC9kaXY+YDtcbiAgY29udGFpbmVyLnZhbHVlID0gY3VycmVudFZhbHVlO1xuICBcbiAgY29udGFpbmVyLnNldFZhbHVlID0gKG5ld1ZhbHVlKSA9PiB7XG4gICAgY3VycmVudFZhbHVlID0gbmV3VmFsdWU7XG4gICAgZGlzcGF0Y2goKTtcbiAgfTtcbiAgXG4gIHJldHVybiBjb250YWluZXI7XG59XG5cbmN1cnJlbnRQb3NpdGlvbiA9IHBvc2l0aW9uc1tzZWxlY3RlZFBvc2l0aW9uXVxuXG5zcGVjdHJ1bSA9IHtcbiAgY29uc3Qgd2lkdGggPSA3MDA7XG4gIGNvbnN0IGhlaWdodCA9IDEwMDtcbiAgY29uc3QgbWFyZ2luID0geyB0b3A6IDIwLCByaWdodDogNjAsIGxlZnQ6IDYwLCBib3R0b206IDIwIH07XG4gIFxuICBjb25zdCBzdmcgPSBkMy5jcmVhdGUoXCJzdmdcIilcbiAgICAuYXR0cihcIndpZHRoXCIsIHdpZHRoKVxuICAgIC5hdHRyKFwiaGVpZ2h0XCIsIGhlaWdodClcbiAgICAuc3R5bGUoXCJtYXgtd2lkdGhcIiwgXCIxMDAlXCIpXG4gICAgLnN0eWxlKFwiaGVpZ2h0XCIsIFwiYXV0b1wiKTtcbiAgXG4gIGNvbnN0IGdyYWRpZW50ID0gc3ZnLmFwcGVuZChcImRlZnNcIilcbiAgICAuYXBwZW5kKFwibGluZWFyR3JhZGllbnRcIilcbiAgICAuYXR0cihcImlkXCIsIFwic3BlY3RydW0tZ3JhZGllbnRcIilcbiAgICAuYXR0cihcIngxXCIsIFwiMCVcIilcbiAgICAuYXR0cihcIngyXCIsIFwiMTAwJVwiKTtcbiAgXG4gIGdyYWRpZW50LmFwcGVuZChcInN0b3BcIilcbiAgICAuYXR0cihcIm9mZnNldFwiLCBcIjAlXCIpXG4gICAgLmF0dHIoXCJzdG9wLWNvbG9yXCIsIFwiIzRlY2RjNFwiKTtcbiAgXG4gIGdyYWRpZW50LmFwcGVuZChcInN0b3BcIilcbiAgICAuYXR0cihcIm9mZnNldFwiLCBcIjI1JVwiKVxuICAgIC5hdHRyKFwic3RvcC1jb2xvclwiLCBcIiM3NGI5ZmZcIik7XG4gIFxuICBncmFkaWVudC5hcHBlbmQoXCJzdG9wXCIpXG4gICAgLmF0dHIoXCJvZmZzZXRcIiwgXCI1MCVcIilcbiAgICAuYXR0cihcInN0b3AtY29sb3JcIiwgXCIjZmY5ZjQzXCIpO1xuICBcbiAgZ3JhZGllbnQuYXBwZW5kKFwic3RvcFwiKVxuICAgIC5hdHRyKFwib2Zmc2V0XCIsIFwiNzUlXCIpXG4gICAgLmF0dHIoXCJzdG9wLWNvbG9yXCIsIFwiIzc0YjlmZlwiKTtcbiAgXG4gIGdyYWRpZW50LmFwcGVuZChcInN0b3BcIilcbiAgICAuYXR0cihcIm9mZnNldFwiLCBcIjEwMCVcIilcbiAgICAuYXR0cihcInN0b3AtY29sb3JcIiwgXCIjNGVjZGM0XCIpO1xuICBcbiAgc3ZnLmFwcGVuZChcInJlY3RcIilcbiAgICAuYXR0cihcInhcIiwgbWFyZ2luLmxlZnQpXG4gICAgLmF0dHIoXCJ5XCIsIGhlaWdodCAvIDIgLSA0KVxuICAgIC5hdHRyKFwid2lkdGhcIiwgd2lkdGggLSBtYXJnaW4ubGVmdCAtIG1hcmdpbi5yaWdodClcbiAgICAuYXR0cihcImhlaWdodFwiLCA4KVxuICAgIC5hdHRyKFwicnhcIiwgNClcbiAgICAuc3R5bGUoXCJmaWxsXCIsIFwidXJsKCNzcGVjdHJ1bS1ncmFkaWVudClcIik7XG4gIFxuICBwb3NpdGlvbnMuZm9yRWFjaCgocG9zLCBpKSA9PiB7XG4gICAgY29uc3QgeCA9IG1hcmdpbi5sZWZ0ICsgKGkgLyA0KSAqICh3aWR0aCAtIG1hcmdpbi5sZWZ0IC0gbWFyZ2luLnJpZ2h0KTtcbiAgICBjb25zdCBpc1NlbGVjdGVkID0gc2VsZWN0ZWRQb3NpdGlvbiA9PT0gaTtcbiAgICBcbiAgICBjb25zdCBwb3NHcm91cCA9IHN2Zy5hcHBlbmQoXCJnXCIpXG4gICAgICAuc3R5bGUoXCJjdXJzb3JcIiwgXCJwb2ludGVyXCIpXG4gICAgICAuYXR0cihcImNsYXNzXCIsIFwicG9zaXRpb24tbWFya2VyXCIpXG4gICAgICAub24oXCJjbGlja1wiLCBmdW5jdGlvbigpIHtcbiAgICAgICAgY29uc3Qgdmlld29mRWxlbWVudCA9IGRvY3VtZW50LnF1ZXJ5U2VsZWN0b3IoJ2RpdltzdHlsZSo9XCJkaXNwbGF5OiBub25lXCJdJyk7XG4gICAgICAgIGlmICh2aWV3b2ZFbGVtZW50ICYmIHZpZXdvZkVsZW1lbnQuc2V0VmFsdWUpIHtcbiAgICAgICAgICB2aWV3b2ZFbGVtZW50LnNldFZhbHVlKGkpO1xuICAgICAgICB9XG4gICAgICB9KVxuICAgICAgLm9uKFwibW91c2VvdmVyXCIsIGZ1bmN0aW9uKCkge1xuICAgICAgICBkMy5zZWxlY3QodGhpcykuc2VsZWN0KFwiY2lyY2xlXCIpXG4gICAgICAgICAgLnRyYW5zaXRpb24oKVxuICAgICAgICAgIC5kdXJhdGlvbigyMDApXG4gICAgICAgICAgLmF0dHIoXCJyXCIsIGlzU2VsZWN0ZWQgPyAxMCA6IDgpXG4gICAgICAgICAgLnN0eWxlKFwic3Ryb2tlLXdpZHRoXCIsIGlzU2VsZWN0ZWQgPyA0IDogMyk7XG4gICAgICB9KVxuICAgICAgLm9uKFwibW91c2VvdXRcIiwgZnVuY3Rpb24oKSB7XG4gICAgICAgIGQzLnNlbGVjdCh0aGlzKS5zZWxlY3QoXCJjaXJjbGVcIilcbiAgICAgICAgICAudHJhbnNpdGlvbigpXG4gICAgICAgICAgLmR1cmF0aW9uKDIwMClcbiAgICAgICAgICAuYXR0cihcInJcIiwgaXNTZWxlY3RlZCA/IDggOiA2KVxuICAgICAgICAgIC5zdHlsZShcInN0cm9rZS13aWR0aFwiLCBpc1NlbGVjdGVkID8gMyA6IDIpO1xuICAgICAgfSk7XG4gICAgXG4gICAgcG9zR3JvdXAuYXBwZW5kKFwiY2lyY2xlXCIpXG4gICAgICAuYXR0cihcImN4XCIsIHgpXG4gICAgICAuYXR0cihcImN5XCIsIGhlaWdodCAvIDIpXG4gICAgICAuYXR0cihcInJcIiwgaXNTZWxlY3RlZCA/IDggOiA2KVxuICAgICAgLnN0eWxlKFwiZmlsbFwiLCBpc1NlbGVjdGVkID8gcG9zLmNvbG9yIDogXCJ3aGl0ZVwiKVxuICAgICAgLnN0eWxlKFwic3Ryb2tlXCIsIHBvcy5jb2xvcilcbiAgICAgIC5zdHlsZShcInN0cm9rZS13aWR0aFwiLCBpc1NlbGVjdGVkID8gMyA6IDIpXG4gICAgICAuc3R5bGUoXCJ0cmFuc2l0aW9uXCIsIFwiYWxsIDAuMnMgZWFzZVwiKTtcbiAgICBcbiAgICBwb3NHcm91cC5hcHBlbmQoXCJpbWFnZVwiKVxuICAgICAgLmF0dHIoXCJ4XCIsIHggLSAxMilcbiAgICAgIC5hdHRyKFwieVwiLCBoZWlnaHQgLyAyIC0gNDApXG4gICAgICAuYXR0cihcIndpZHRoXCIsIDI0KVxuICAgICAgLmF0dHIoXCJoZWlnaHRcIiwgMjQpXG4gICAgICAuYXR0cihcImhyZWZcIiwgcG9zLmljb24pXG4gICAgICAuc3R5bGUoXCJwb2ludGVyLWV2ZW50c1wiLCBcIm5vbmVcIik7XG4gICAgXG4gICAgaWYgKCFpc1NlbGVjdGVkKSB7XG4gICAgICBwb3NHcm91cC5hcHBlbmQoXCJjaXJjbGVcIilcbiAgICAgICAgLmF0dHIoXCJjeFwiLCB4KVxuICAgICAgICAuYXR0cihcImN5XCIsIGhlaWdodCAvIDIgKyAxKVxuICAgICAgICAuYXR0cihcInJcIiwgNilcbiAgICAgICAgLnN0eWxlKFwiZmlsbFwiLCBcInJnYmEoMCwwLDAsMC4xKVwiKVxuICAgICAgICAuc3R5bGUoXCJzdHJva2VcIiwgXCJub25lXCIpXG4gICAgICAgIC5zdHlsZShcInBvaW50ZXItZXZlbnRzXCIsIFwibm9uZVwiKTtcbiAgICB9XG4gIH0pO1xuICBcbiAgcmV0dXJuIHN2Zy5ub2RlKCk7XG59XG4ifSx7Im1ldGhvZE5hbWUiOiJpbnRlcnByZXQiLCJjZWxsTmFtZSI6Im9qcy1jZWxsLTIiLCJpbmxpbmUiOmZhbHNlLCJzb3VyY2UiOiJcbmh0bWxgPGRpdiBzdHlsZT1cIlxuICBwYWRkaW5nOiAyMHB4O1xuICBtYXJnaW46IDIwcHggMDtcbiAgYm9yZGVyLWxlZnQ6IDRweCBzb2xpZCAke2N1cnJlbnRQb3NpdGlvbi5jb2xvcn07XG4gIGJhY2tncm91bmQ6IGxpbmVhci1ncmFkaWVudCgxMzVkZWcsICR7Y3VycmVudFBvc2l0aW9uLmNvbG9yfTE1LCAke2N1cnJlbnRQb3NpdGlvbi5jb2xvcn0wNSk7XG4gIGJvcmRlci1yYWRpdXM6IDhweDtcblwiPlxuICA8aDMgc3R5bGU9XCJjb2xvcjogJHtjdXJyZW50UG9zaXRpb24uY29sb3J9OyBtYXJnaW4tdG9wOiAwO1wiPlxuICAgICR7Y3VycmVudFBvc2l0aW9uLm5hbWV9OiAke2N1cnJlbnRQb3NpdGlvbi50aXRsZX1cbiAgPC9oMz5cbiAgXG4gIDxwPjxzdHJvbmc+WW91ciBQcm9maWxlOjwvc3Ryb25nPiAke2N1cnJlbnRQb3NpdGlvbi5kZXNjcmlwdGlvbn08L3A+XG4gIFxuICA8cD48c3Ryb25nPkJhY2tncm91bmQ6PC9zdHJvbmc+ICR7Y3VycmVudFBvc2l0aW9uLmJhY2tncm91bmR9PC9wPlxuPC9kaXY+YFxuIn0seyJtZXRob2ROYW1lIjoiaW50ZXJwcmV0UXVpZXQiLCJzb3VyY2UiOiJzaGlueUlucHV0KCdzZWxlY3RlZFBvc2l0aW9uJykifV19
+</script>
+<script type="module">
+if (window.location.protocol === "file:") { alert("The OJS runtime does not work with file:// URLs. Please use a web server to view this document."); }
+window._ojs.paths.runtimeToDoc = "../../posts";
+window._ojs.paths.runtimeToRoot = "../..";
+window._ojs.paths.docToRoot = "..";
+window._ojs.selfContained = false;
+window._ojs.runtime.interpretFromScriptTags();
+</script>
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

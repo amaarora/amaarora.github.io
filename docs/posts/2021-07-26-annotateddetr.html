@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.3.433">
+<meta name="generator" content="quarto-1.8.21">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -24,6 +24,7 @@ ul.task-list li input[type="checkbox"] {
   vertical-align: middle;
 }
 /* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
 pre > code.sourceCode { white-space: pre; position: relative; }
 pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
@@ -68,22 +69,30 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
 <link href=".././images/logo.png" rel="icon" type="image/png">
-<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-ea1d7ac60288e0f1efdbc993fd8432ae.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-5b4ad623e5705c0698d39aec6f10cf02.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
   "collapse-after": 3,
   "panel-placement": "end",
   "type": "overlay",
-  "limit": 20,
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
   "language": {
     "search-no-results-text": "No results",
     "search-matching-documents-text": "matching documents",
@@ -92,6 +101,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     "search-more-match-text": "more match in this document",
     "search-more-matches-text": "more matches in this document",
     "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
     "search-detached-cancel-button-title": "Cancel",
     "search-submit-button-title": "Submit",
     "search-label": "Search"
@@ -112,8 +122,35 @@ ga('send', {
 });
 </script>
 
-  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <meta name="twitter:title" content="The Annotated DETR">
 <meta name="twitter:description" content="DETR Model Architecture explained with PyTorch implementation line-by-line.">
@@ -121,47 +158,51 @@ ga('send', {
 <meta name="twitter:card" content="summary_large_image">
 </head>
 
-<body class="nav-fixed">
+<body class="nav-fixed quarto-light">
 
 <div id="quarto-search-results"></div>
-  <header id="quarto-header" class="headroom fixed-top">
-    <nav class="navbar navbar-expand-lg navbar-dark ">
+  <header id="quarto-header" class="headroom fixed-top quarto-banner">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="../index.html" class="navbar-brand navbar-brand-logo">
+    </a>
+  </div>
             <div id="quarto-search" class="" title="Search"></div>
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
   <span class="navbar-toggler-icon"></span>
 </button>
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
-    <a class="nav-link" href="../index.html" rel="" target="">
- <span class="menu-text">Aman Arora’s Blog</span></a>
+    <a class="nav-link" href="../index.html"> 
+<span class="menu-text">Aman Arora’s Blog</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="../about.html" rel="" target="">
- <span class="menu-text">Aman Arora</span></a>
+    <a class="nav-link" href="../about.html"> 
+<span class="menu-text">Aman Arora</span></a>
   </li>  
 </ul>
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item compact">
-    <a class="nav-link" href="https://github.com/amaarora" rel="" target=""><i class="bi bi-github" role="img">
+    <a class="nav-link" href="https://github.com/amaarora"> <i class="bi bi-github" role="img">
 </i> 
- <span class="menu-text"></span></a>
+<span class="menu-text"></span></a>
   </li>  
   <li class="nav-item compact">
-    <a class="nav-link" href="https://twitter.com/amaarora" rel="" target=""><i class="bi bi-twitter" role="img">
+    <a class="nav-link" href="https://twitter.com/amaarora"> <i class="bi bi-twitter" role="img">
 </i> 
- <span class="menu-text"></span></a>
+<span class="menu-text"></span></a>
   </li>  
   <li class="nav-item compact">
-    <a class="nav-link" href="https://www.linkedin.com/in/aroraaman/" rel="" target=""><i class="bi bi-linkedin" role="img">
+    <a class="nav-link" href="https://www.linkedin.com/in/aroraaman/"> <i class="bi bi-linkedin" role="img">
 </i> 
- <span class="menu-text"></span></a>
+<span class="menu-text"></span></a>
   </li>  
 </ul>
+          </div> <!-- /navcollapse -->
             <div class="quarto-navbar-tools">
 </div>
-          </div> <!-- /navcollapse -->
       </div> <!-- /container-fluid -->
     </nav>
 </header>
@@ -246,6 +287,7 @@ ga('send', {
 
 
 
+
 <section id="foreword" class="level2" data-number="1">
 <h2 data-number="1" class="anchored" data-anchor-id="foreword"><span class="header-section-number">1</span> Foreword</h2>
 <p>Welcome to “<strong>The Annotated DETR</strong>”.</p>
@@ -283,7 +325,7 @@ ga('send', {
 <section id="coco-detection-dataset" class="level3" data-number="3.1">
 <h3 data-number="3.1" class="anchored" data-anchor-id="coco-detection-dataset"><span class="header-section-number">3.1</span> Coco Detection Dataset</h3>
 <p>The <code>CocoDetection</code> class below inherits from <code>torchvision.datasets.CocoDetection</code>, and adds custom <code>_transforms</code> on top. There’s also <code>ConvertCocoPolysToMask</code> class that is able to prepare the dataset for both object detection and panoptic segmentation.</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> CocoDetection(torchvision.datasets.CocoDetection):</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> CocoDetection(torchvision.datasets.CocoDetection):</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, img_folder, ann_file, transforms, return_masks):</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>(CocoDetection, <span class="va">self</span>).<span class="fu">__init__</span>(img_folder, ann_file)</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>._transforms <span class="op">=</span> transforms</span>
@@ -296,19 +338,19 @@ ga('send', {
 <span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>        img, target <span class="op">=</span> <span class="va">self</span>.prepare(img, target)</span>
 <span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="va">self</span>._transforms <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
 <span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>            img, target <span class="op">=</span> <span class="va">self</span>._transforms(img, target)</span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> img, target</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> img, target</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Note that in <code>__getitem__</code>, we first use <code>torchvision.datasets.CocoDetection.__getitem__</code> to get <code>img, target</code>. The <code>img</code> here is returned as a <code>PIL.Image</code> instance and <code>target</code> is a list of <code>Dict</code>s for each annotation. Here, the <code>img, target</code> look like below:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>img </span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>img </span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> <span class="op">&lt;</span>PIL.Image.Image image mode<span class="op">=</span>RGB size<span class="op">=</span><span class="dv">640</span><span class="er">x427</span> at <span class="bn">0x7F841F918520</span><span class="op">&gt;</span></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>target</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> [{<span class="st">'segmentation'</span>: [[<span class="fl">573.81</span>, <span class="fl">93.88</span>, <span class="fl">630.42</span>, <span class="fl">11.35</span>, <span class="fl">637.14</span>, <span class="fl">423.0</span>, <span class="fl">569.01</span>, <span class="fl">422.04</span>, <span class="fl">568.05</span>, <span class="fl">421.08</span>, <span class="fl">569.97</span>, <span class="fl">270.43</span>, <span class="fl">560.38</span>, <span class="fl">217.66</span>, <span class="fl">567.09</span>, <span class="fl">190.79</span>, <span class="fl">576.69</span>, <span class="fl">189.83</span>, <span class="fl">567.09</span>, <span class="fl">173.52</span>, <span class="fl">561.34</span>, <span class="fl">162.0</span>, <span class="fl">570.93</span>, <span class="fl">107.31</span>, <span class="fl">572.85</span>, <span class="fl">89.08</span>]], <span class="st">'area'</span>: <span class="fl">24373.2536</span>, <span class="st">'iscrowd'</span>: <span class="dv">0</span>, <span class="st">'image_id'</span>: <span class="dv">463309</span>, <span class="st">'bbox'</span>: [<span class="fl">560.38</span>, <span class="fl">11.35</span>, <span class="fl">76.76</span>, <span class="fl">411.65</span>], <span class="st">'category_id'</span>: <span class="dv">82</span>, <span class="st">'id'</span>: <span class="dv">331291</span>}, {<span class="st">'segmentation'</span>: [[<span class="fl">19.19</span>, <span class="fl">206.3</span>, <span class="fl">188.07</span>, <span class="fl">204.38</span>, <span class="fl">194.79</span>, <span class="fl">249.48</span>, <span class="fl">265.8</span>, <span class="fl">260.04</span>, <span class="fl">278.27</span>, <span class="fl">420.28</span>, <span class="fl">78.68</span>, <span class="fl">421.24</span>, <span class="fl">77.72</span>, <span class="fl">311.85</span>, <span class="fl">95.0</span>, <span class="fl">297.46</span>, <span class="fl">13.43</span>, <span class="fl">267.71</span>, <span class="fl">21.11</span>, <span class="fl">212.06</span>]], <span class="st">'area'</span>: <span class="fl">42141.60884999999</span>, <span class="st">'iscrowd'</span>: <span class="dv">0</span>, <span class="st">'image_id'</span>: <span class="dv">463309</span>, <span class="st">'bbox'</span>: [<span class="fl">13.43</span>, <span class="fl">204.38</span>, <span class="fl">264.84</span>, <span class="fl">216.86</span>], <span class="st">'category_id'</span>: <span class="dv">79</span>, <span class="st">'id'</span>: <span class="dv">1122176</span>}]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> [{<span class="st">'segmentation'</span>: [[<span class="fl">573.81</span>, <span class="fl">93.88</span>, <span class="fl">630.42</span>, <span class="fl">11.35</span>, <span class="fl">637.14</span>, <span class="fl">423.0</span>, <span class="fl">569.01</span>, <span class="fl">422.04</span>, <span class="fl">568.05</span>, <span class="fl">421.08</span>, <span class="fl">569.97</span>, <span class="fl">270.43</span>, <span class="fl">560.38</span>, <span class="fl">217.66</span>, <span class="fl">567.09</span>, <span class="fl">190.79</span>, <span class="fl">576.69</span>, <span class="fl">189.83</span>, <span class="fl">567.09</span>, <span class="fl">173.52</span>, <span class="fl">561.34</span>, <span class="fl">162.0</span>, <span class="fl">570.93</span>, <span class="fl">107.31</span>, <span class="fl">572.85</span>, <span class="fl">89.08</span>]], <span class="st">'area'</span>: <span class="fl">24373.2536</span>, <span class="st">'iscrowd'</span>: <span class="dv">0</span>, <span class="st">'image_id'</span>: <span class="dv">463309</span>, <span class="st">'bbox'</span>: [<span class="fl">560.38</span>, <span class="fl">11.35</span>, <span class="fl">76.76</span>, <span class="fl">411.65</span>], <span class="st">'category_id'</span>: <span class="dv">82</span>, <span class="st">'id'</span>: <span class="dv">331291</span>}, {<span class="st">'segmentation'</span>: [[<span class="fl">19.19</span>, <span class="fl">206.3</span>, <span class="fl">188.07</span>, <span class="fl">204.38</span>, <span class="fl">194.79</span>, <span class="fl">249.48</span>, <span class="fl">265.8</span>, <span class="fl">260.04</span>, <span class="fl">278.27</span>, <span class="fl">420.28</span>, <span class="fl">78.68</span>, <span class="fl">421.24</span>, <span class="fl">77.72</span>, <span class="fl">311.85</span>, <span class="fl">95.0</span>, <span class="fl">297.46</span>, <span class="fl">13.43</span>, <span class="fl">267.71</span>, <span class="fl">21.11</span>, <span class="fl">212.06</span>]], <span class="st">'area'</span>: <span class="fl">42141.60884999999</span>, <span class="st">'iscrowd'</span>: <span class="dv">0</span>, <span class="st">'image_id'</span>: <span class="dv">463309</span>, <span class="st">'bbox'</span>: [<span class="fl">13.43</span>, <span class="fl">204.38</span>, <span class="fl">264.84</span>, <span class="fl">216.86</span>], <span class="st">'category_id'</span>: <span class="dv">79</span>, <span class="st">'id'</span>: <span class="dv">1122176</span>}]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Next, we pass the <code>img</code> and <code>target</code> through <code>self.prepare</code> method which is an instance of <code>ConvertCocoPolysToMask</code> class, and perform pre-processing on the outputs from <code>torchvision.datasets.CocoDetection.__getitem__</code>.</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>img</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>img</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> <span class="op">&lt;</span>PIL.Image.Image image mode<span class="op">=</span>RGB size<span class="op">=</span><span class="dv">640</span><span class="er">x427</span> at <span class="bn">0x7F841F918520</span><span class="op">&gt;</span></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>target</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> {<span class="st">'boxes'</span>: tensor([[<span class="fl">560.3800</span>,  <span class="fl">11.3500</span>, <span class="fl">637.1400</span>, <span class="fl">423.0000</span>], [ <span class="fl">13.4300</span>, <span class="fl">204.3800</span>, <span class="fl">278.2700</span>, <span class="fl">421.2400</span>]]), <span class="st">'labels'</span>: tensor([<span class="dv">82</span>, <span class="dv">79</span>]), <span class="st">'image_id'</span>: tensor([<span class="dv">463309</span>]), <span class="st">'area'</span>: tensor([<span class="fl">24373.2539</span>, <span class="fl">42141.6094</span>]),  <span class="st">'iscrowd'</span>: tensor([<span class="dv">0</span>, <span class="dv">0</span>]), <span class="st">'orig_size'</span>: tensor([<span class="dv">427</span>, <span class="dv">640</span>]), <span class="st">'size'</span>: tensor([<span class="dv">427</span>, <span class="dv">640</span>])}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> {<span class="st">'boxes'</span>: tensor([[<span class="fl">560.3800</span>,  <span class="fl">11.3500</span>, <span class="fl">637.1400</span>, <span class="fl">423.0000</span>], [ <span class="fl">13.4300</span>, <span class="fl">204.3800</span>, <span class="fl">278.2700</span>, <span class="fl">421.2400</span>]]), <span class="st">'labels'</span>: tensor([<span class="dv">82</span>, <span class="dv">79</span>]), <span class="st">'image_id'</span>: tensor([<span class="dv">463309</span>]), <span class="st">'area'</span>: tensor([<span class="fl">24373.2539</span>, <span class="fl">42141.6094</span>]),  <span class="st">'iscrowd'</span>: tensor([<span class="dv">0</span>, <span class="dv">0</span>]), <span class="st">'orig_size'</span>: tensor([<span class="dv">427</span>, <span class="dv">640</span>]), <span class="st">'size'</span>: tensor([<span class="dv">427</span>, <span class="dv">640</span>])}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>This is what happened inside the <code>self.prepare</code> method: 1. Converted <code>boxes</code>, <code>labels</code>, <code>image_id</code>, <code>area</code>.. to a <code>tensor</code>. 2. We no longer return segmentation masks since we are just working with Object Detection. 3. Filter out objects if <code>iscrowd=1</code>. 4. Convert annotation from <span class="math inline">\([X, Y, W, H]\)</span> to <span class="math inline">\([X_1, Y_1, X_2, Y_2]\)</span> format. 5. Filter out objects if <span class="math inline">\(X_2 &lt; X_1\)</span> or <span class="math inline">\(Y_2 &lt; Y_1\)</span>.</p>
 <blockquote class="blockquote">
 <p>I am going to skip over the source code of <code>ConvertCocoPolysToMask</code> but you can find it <a href="https://github.com/facebookresearch/detr/blob/master/datasets/coco.py#L50-L112">here</a> if interested. I am also going to skip over the transforms for brevity, but you can find them <a href="https://github.com/facebookresearch/detr/blob/master/datasets/coco.py#L115-L144">here</a> if interested.</p>
@@ -316,7 +358,7 @@ ga('send', {
 <p>From the paper, transforms/augmentations that get applied are:</p>
 <p><em>We use scale augmentation, resizing the input images such that the shortest side is at least 480 and at most 800 pixels while the longest at most 1333. To help learning global relationships through the self-attention of the encoder, we also apply random crop augmentations during training, improving the performance by approximately 1 AP. Specifically, a train image is cropped with probability 0.5 to a random rectangular patch which is then resized again to 800-1333.</em></p>
 <p>The overall process of creating this dataset looks like below:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> detr.datasets.coco <span class="im">import</span> make_coco_transforms, CocoDetection</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> detr.datasets.coco <span class="im">import</span> make_coco_transforms, CocoDetection</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>coco_img_folder <span class="op">=</span> <span class="st">'../../kaggle/mscoco/train2017/'</span></span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>coco_ann_file   <span class="op">=</span> <span class="st">'../../kaggle/mscoco/annotations/instances_train2017.json'</span></span>
@@ -344,7 +386,7 @@ ga('send', {
 <span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>           <span class="fl">3565.9253</span>,   <span class="fl">7758.4976</span>,   <span class="fl">6395.6035</span>]),</span>
 <span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a> <span class="st">'iscrowd'</span>: tensor([<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>]),</span>
 <span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a> <span class="st">'orig_size'</span>: tensor([<span class="dv">480</span>, <span class="dv">640</span>]),</span>
-<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a> <span class="st">'size'</span>: tensor([<span class="dv">704</span>, <span class="dv">938</span>])}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a> <span class="st">'size'</span>: tensor([<span class="dv">704</span>, <span class="dv">938</span>])}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>As can be seen, the <code>coco_dset</code> returns the image as a <code>tensor</code> and also returns the <code>target</code> which is of type <code>Dict</code>. But, right now, the images are of different shape, and we need to make them all to be of the same shape before they can be batched together and passed to the DETR model as input. Let’s see how that looks like next.</p>
 </section>
 <section id="tensor-and-mask" class="level3" data-number="3.2">
@@ -353,12 +395,12 @@ ga('send', {
 <p>Let’s suppose our <code>batch_size</code> is <span class="math inline">\(2\)</span>, where the first image is of shape <code>[3, 765, 512]</code> in blue and the second image is of shape <code>[3, 608, 911]</code> in orange. This has been shown in Figure-2 below:</p>
 <p><img src="../images/input_img_detr.png" title="Figure-2: Input images in batch of shapes - [[3, 765, 512], [3, 608, 911]]." class="img-fluid"></p>
 <p>This is how the collate function looks like:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> collate_fn(batch):</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> collate_fn(batch):</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    batch <span class="op">=</span> <span class="bu">list</span>(<span class="bu">zip</span>(<span class="op">*</span>batch))</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    batch[<span class="dv">0</span>] <span class="op">=</span> nested_tensor_from_tensor_list(batch[<span class="dv">0</span>])</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">tuple</span>(batch)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">tuple</span>(batch)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><code>nested_tensor_from_tensor_list</code> is responsible for zero padding the original images, to ensure they all have the same dimensions <span class="math inline">\((H_0,W_0)\)</span> as the largest image of the batch. Let’s look at its source code:</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> nested_tensor_from_tensor_list(tensor_list: List[Tensor]):</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> nested_tensor_from_tensor_list(tensor_list: List[Tensor]):</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># </span><span class="al">TODO</span><span class="co"> make this more general</span></span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> tensor_list[<span class="dv">0</span>].ndim <span class="op">==</span> <span class="dv">3</span>:</span>
 <span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> torchvision._is_tracing():</span>
@@ -380,16 +422,16 @@ ga('send', {
 <span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>            m[: img.shape[<span class="dv">1</span>], :img.shape[<span class="dv">2</span>]] <span class="op">=</span> <span class="va">False</span></span>
 <span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
 <span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>        <span class="cf">raise</span> <span class="pp">ValueError</span>(<span class="st">'not supported'</span>)</span>
-<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> NestedTensor(tensor, mask)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> NestedTensor(tensor, mask)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>This <code>nested_tensor_from_tensor_list</code> receives a <code>tensor_list</code>, which is a list of <code>img</code> tensors of varying shape - <code>[[3, 608, 911], [3, 765, 512]]</code>. We calculate the <code>max_size</code> in <code>max_size = _max_by_axis([list(img.shape) for img in tensor_list])</code>. This <code>_max_by_axis</code> function returns the maximum value for each axis. Therefore, the value of returned <code>max_size</code> is <code>[3, 765, 911]</code>.</p>
 <p>Next, our <code>batch_shape</code> is <code>[len(tensor_list)] + max_size</code>, which equals <code>[2, 3, 765, 911]</code> in our example so far.</p>
 <p>Next, we define <code>tensor</code> and <code>mask</code> which are of shapes <code>[2, 3, 765, 911]</code> and <code>[2, 765, 911]</code> respectively.</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>tensor <span class="op">=</span> torch.zeros(batch_shape, dtype<span class="op">=</span>dtype, device<span class="op">=</span>device)</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>mask <span class="op">=</span> torch.ones((b, h, w), dtype<span class="op">=</span>torch.<span class="bu">bool</span>, device<span class="op">=</span>device)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>tensor <span class="op">=</span> torch.zeros(batch_shape, dtype<span class="op">=</span>dtype, device<span class="op">=</span>device)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>mask <span class="op">=</span> torch.ones((b, h, w), dtype<span class="op">=</span>torch.<span class="bu">bool</span>, device<span class="op">=</span>device)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Finally, we fill the <code>tensor</code> and <code>mask</code> values with the <code>img</code> values which were of shapes <code>[[3, 608, 911], [3, 765, 512]]</code>, and also set the <code>mask</code> values to be <code>False</code> inside the actual image shape.</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> img, pad_img, m <span class="kw">in</span> <span class="bu">zip</span>(tensor_list, tensor, mask):</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> img, pad_img, m <span class="kw">in</span> <span class="bu">zip</span>(tensor_list, tensor, mask):</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    pad_img[: img.shape[<span class="dv">0</span>], : img.shape[<span class="dv">1</span>], : img.shape[<span class="dv">2</span>]].copy_(img)</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    m[: img.shape[<span class="dv">1</span>], :img.shape[<span class="dv">2</span>]] <span class="op">=</span> <span class="va">False</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    m[: img.shape[<span class="dv">1</span>], :img.shape[<span class="dv">2</span>]] <span class="op">=</span> <span class="va">False</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>This has been illustrated in Figure-3 below:</p>
 <p><img src="../images/collate_img_detr.png" title="Figure-3: Zero padding input images and setting appropriate mask values." class="img-fluid"></p>
 <p>Here, the <code>blue</code> region and <code>orange</code> region in both respective resized images represent the filled values. For these <code>blue</code> and <code>orange</code> regions, the <code>mask</code> values are set to <code>False</code>, whereas in the grey region outside the <code>mask</code> values are set to <code>True</code>. In code, this looks like:</p>
@@ -401,7 +443,7 @@ ga('send', {
 <section id="nestedtensor" class="level3" data-number="3.3">
 <h3 data-number="3.3" class="anchored" data-anchor-id="nestedtensor"><span class="header-section-number">3.3</span> NestedTensor</h3>
 <p><code>NestedTensor</code> is a simple tensor class that puts <code>tensors</code> and <code>masks</code> together as below:</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> NestedTensor(<span class="bu">object</span>):</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> NestedTensor(<span class="bu">object</span>):</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, tensors, mask: Optional[Tensor]):</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.tensors <span class="op">=</span> tensors</span>
 <span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.mask <span class="op">=</span> mask</span>
@@ -421,10 +463,10 @@ ga('send', {
 <span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.tensors, <span class="va">self</span>.mask</span>
 <span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__repr__</span>(<span class="va">self</span>):</span>
-<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="bu">str</span>(<span class="va">self</span>.tensors)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="bu">str</span>(<span class="va">self</span>.tensors)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>As can be seen from the <code>NestedTensor</code> source code, it combines <code>tensors</code> and <code>mask</code> and stores them as <code>self.tensors</code> and <code>self.mask</code> attributes.</p>
 <p>This <code>NestedTensor</code> class is really simple - it has two main methods: 1. <code>to</code>: casts both <code>tensors</code> and <code>mask</code> to <code>device</code> (typically <code>"cuda"</code>) and returns a new <code>NestedTensor</code> containing <code>cast_tensor</code> and <code>cast_mask</code>. 2. <code>decompose</code>: returns <code>tensors</code> and <code>mask</code> as a tuple, thus decomposing the “nested” tensor.</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> detr.util.misc <span class="im">import</span> NestedTensor</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="co"># represents outputs from custom collate function that we looked at before</span></span>
@@ -437,7 +479,7 @@ ga('send', {
 <span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> torch.Size([<span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">765</span>, <span class="dv">911</span>])</span>
 <span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>nested_tensor.mask.shape</span>
-<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> torch.Size([<span class="dv">2</span>, <span class="dv">765</span>, <span class="dv">911</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> torch.Size([<span class="dv">2</span>, <span class="dv">765</span>, <span class="dv">911</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>And that’s it! This <code>NestedTensor</code> is what get’s fed as input to the DETR Backbone CNN in Figure-1.</p>
 </section>
 </section>
@@ -446,7 +488,7 @@ ga('send', {
 <p><em>The overall DETR architecture is surprisingly simple and depicted in Figure-1 below. It contains three main components: a CNN backbone to extract a compact feature representation, an encoder-decoder transformer, and a simple feed forward network (FFN) that makes the final detection prediction.</em></p>
 <p><img src="../images/detr_architecture.png" title="Figure-4: DETR Architecture" class="img-fluid"></p>
 <p>The overall implementation of the DETR architecture has been shown below:</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> DETR(nn.Module):</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> DETR(nn.Module):</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">""" This is the DETR module that performs object detection """</span></span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, backbone, transformer, num_classes, num_queries, aux_loss<span class="op">=</span><span class="va">False</span>):</span>
 <span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
@@ -472,13 +514,13 @@ ga('send', {
 <span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>        out <span class="op">=</span> {<span class="st">'pred_logits'</span>: outputs_class[<span class="op">-</span><span class="dv">1</span>], <span class="st">'pred_boxes'</span>: outputs_coord[<span class="op">-</span><span class="dv">1</span>]}</span>
 <span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="va">self</span>.aux_loss:</span>
 <span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a>            out[<span class="st">'aux_outputs'</span>] <span class="op">=</span> <span class="va">self</span>._set_aux_loss(outputs_class, outputs_coord)</span>
-<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> out</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> out</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>All the magic happens inside <code>backbone</code> and <code>transformer</code>, which we will look at next.</p>
 </section>
 <section id="backbone" class="level2" data-number="5">
 <h2 data-number="5" class="anchored" data-anchor-id="backbone"><span class="header-section-number">5</span> Backbone</h2>
 <p><em>Starting from the initial image <span class="math inline">\(x_{img} ∈ R^3×H_0×W_0\)</span> (with 3 color channels), a conventional CNN backbone generates a lower-resolution activation map <span class="math inline">\(f ∈ R^{C×H×W}\)</span>. Typical values we use are C = 2048 and H,W = <span class="math inline">\(\frac{H0}{32} , \frac{W0}{32}\)</span>.</em></p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Backbone(BackboneBase):</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Backbone(BackboneBase):</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""ResNet backbone with frozen BatchNorm."""</span></span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, name: <span class="bu">str</span>,</span>
 <span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>                 train_backbone: <span class="bu">bool</span>,</span>
@@ -488,13 +530,13 @@ ga('send', {
 <span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>            replace_stride_with_dilation<span class="op">=</span>[<span class="va">False</span>, <span class="va">False</span>, dilation],</span>
 <span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>            pretrained<span class="op">=</span>is_main_process(), norm_layer<span class="op">=</span>FrozenBatchNorm2d)</span>
 <span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>        num_channels <span class="op">=</span> <span class="dv">512</span> <span class="cf">if</span> name <span class="kw">in</span> (<span class="st">'resnet18'</span>, <span class="st">'resnet34'</span>) <span class="cf">else</span> <span class="dv">2048</span></span>
-<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>(backbone, train_backbone, num_channels, return_interm_layers)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>(backbone, train_backbone, num_channels, return_interm_layers)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Above we create a simple backbone that inherits from <code>BackboneBase</code>. The backbone is created using <code>torchvision.models</code> and supports all models implemented in <code>torchvision</code>. For a complete list of supported models, refer <a href="https://pytorch.org/vision/stable/models.html">here</a>.</p>
 <p>As also mentioned above, the typical value for number of channels in the output feature map is 2048, therefore, for all models except <code>resnet18</code> &amp; <code>resnet34</code>, the <code>num_channels</code> variable is set to 2048. This <code>Backbone</code> accepts a three channel input image tensor of shape <span class="math inline">\(3×H_0×W_0\)</span>, where <span class="math inline">\(H_0\)</span> refers to the input image height, and <span class="math inline">\(W_0\)</span> refers to the input image width.</p>
 <p>Since all the fun happens inside the <code>BackboneBase</code> class including the <code>forward</code> method, let’s look at that next.</p>
 <section id="backbonebase" class="level3" data-number="5.1">
 <h3 data-number="5.1" class="anchored" data-anchor-id="backbonebase"><span class="header-section-number">5.1</span> BackboneBase</h3>
-<div class="sourceCode" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> BackboneBase(nn.Module):</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> BackboneBase(nn.Module):</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, backbone: nn.Module, train_backbone: <span class="bu">bool</span>, num_channels: <span class="bu">int</span>, return_interm_layers: <span class="bu">bool</span>):</span>
 <span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
@@ -516,17 +558,17 @@ ga('send', {
 <span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>            <span class="cf">assert</span> m <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span></span>
 <span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>            mask <span class="op">=</span> F.interpolate(m[<span class="va">None</span>].<span class="bu">float</span>(), size<span class="op">=</span>x.shape[<span class="op">-</span><span class="dv">2</span>:]).to(torch.<span class="bu">bool</span>)[<span class="dv">0</span>]</span>
 <span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>            out[name] <span class="op">=</span> NestedTensor(x, mask)</span>
-<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> out</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> out</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>The <code>forward</code> method of <code>BackboneBase</code> accepts an instance of <code>NestedTensor</code> class that contains <code>tensors</code> and <code>mask</code> as we saw in secion <a href="https://amaarora.github.io/2021/07/26/annotateddetr.html#data-preparation">Data preparation</a>. <code>BackboneBase</code> then takes the <code>tensors</code> and passes that through <code>self.body</code> in <code>xs = self.body(tensor_list.tensors)</code>, which is responsible for getting the output feature map of shape <span class="math inline">\(f ∈ R^{C×H×W}\)</span>, where <span class="math inline">\(C\)</span> is typically set to 2048.</p>
 <p><strong>Note:</strong> The <code>self.body</code> either returns the output from the last layer of the backbone model, or from all intermediate layers and the final layer depending on the value of <code>return_layers</code>. For an introduction to <code>IntermediateLayerGetter</code>, please refer to <a href="https://visual.readthedocs.io/en/latest/_modules/visual/models/utils.html">torchvision docs</a>.</p>
 <p>The output of <code>self.body</code> is a <code>Dict</code> that looks something like <code>{"0": &lt;torch.Tensor&gt;}</code> or <code>{"0": &lt;torch.Tensor&gt;, "1": &lt;torch.Tensor&gt;, "2": &lt;torch.Tensor&gt;...}</code> depending on whether <code>return_interm_layers</code> is <code>True</code> or <code>False</code>. Finally, we iterate through this <code>Dict</code> output of <code>self.body</code> which we call <code>xs</code>, interpolate the mask to have the same <span class="math inline">\(H\)</span> and <span class="math inline">\(W\)</span> as the lower-resolution activation map <span class="math inline">\(f ∈ R^{C×H×W}\)</span> output from <code>Backbone</code> and store both <code>x</code> and <code>mask</code> in <code>NestedTensor</code> as shown below:</p>
-<div class="sourceCode" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> name, x <span class="kw">in</span> xs.items():</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> name, x <span class="kw">in</span> xs.items():</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>            m <span class="op">=</span> tensor_list.mask</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>            <span class="cf">assert</span> m <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span></span>
 <span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>            mask <span class="op">=</span> F.interpolate(m[<span class="va">None</span>].<span class="bu">float</span>(), size<span class="op">=</span>x.shape[<span class="op">-</span><span class="dv">2</span>:]).to(torch.<span class="bu">bool</span>)[<span class="dv">0</span>]</span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>            out[name] <span class="op">=</span> NestedTensor(x, mask)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>            out[name] <span class="op">=</span> NestedTensor(x, mask)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>In summary, the Backbone is responsible for accepting an input <code>NestedTensor</code> that consists of the input image as <code>tensors</code> and a <code>mask</code> corresponding to the image. The backbone merely extracts the features from this input image, interpolates the mask to match the feature map size and returns them as a <code>NestedTensor</code> in a <code>Dict</code>. Let’s see the Backbone in action in code:</p>
-<div class="sourceCode" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> detr.util.misc <span class="im">import</span> NestedTensor </span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> detr.models.backbone <span class="im">import</span> Backbone </span>
 <span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a></span>
@@ -543,14 +585,14 @@ ga('send', {
 <span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>out.keys()</span>
 <span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> dict_keys([<span class="st">'0'</span>])</span>
 <span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>out[<span class="st">'0'</span>].__class__</span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>out[<span class="st">'0'</span>].<span class="va">__class__</span></span>
 <span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> detr.util.misc.NestedTensor</span>
 <span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>out[<span class="st">'0'</span>].tensors.shape</span>
 <span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> torch.Size([<span class="dv">2</span>, <span class="dv">2048</span>, <span class="dv">24</span>, <span class="dv">29</span>])</span>
 <span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a>out[<span class="st">'0'</span>].mask.shape</span>
-<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> torch.Size([<span class="dv">2</span>, <span class="dv">24</span>, <span class="dv">29</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> torch.Size([<span class="dv">2</span>, <span class="dv">24</span>, <span class="dv">29</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Therefore, starting from the initial image <span class="math inline">\(x_{img} ∈ {3 x 765 x 911}\)</span> (with 3 color channels), a conventional CNN backbone generates a lower-resolution activation map <span class="math inline">\(f ∈ R^{2048 x 24 x 29}\)</span>.</p>
 </section>
 <section id="positional-encoding" class="level3" data-number="5.2">
@@ -565,7 +607,7 @@ ga('send', {
 </blockquote>
 <p>There are two options to define the spatial positional encodings: 1. Fixed positional encodings (<code>PositionEmbeddingSine</code>) 2. Learned positional encodings (<code>PositionEmbeddingLearned</code>)</p>
 <p>Below, we only look at <code>PositionEmbeddingSine</code> as an example:</p>
-<div class="sourceCode" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> PositionEmbeddingSine(nn.Module):</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> PositionEmbeddingSine(nn.Module):</span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="co">    This is a more standard version of the position embedding, very similar to the one</span></span>
 <span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="co">    used by the Attention is all you need paper, generalized to work on images.</span></span>
@@ -601,7 +643,7 @@ ga('send', {
 <span id="cb16-34"><a href="#cb16-34" aria-hidden="true" tabindex="-1"></a>        pos_x <span class="op">=</span> torch.stack((pos_x[:, :, :, <span class="dv">0</span>::<span class="dv">2</span>].sin(), pos_x[:, :, :, <span class="dv">1</span>::<span class="dv">2</span>].cos()), dim<span class="op">=</span><span class="dv">4</span>).flatten(<span class="dv">3</span>)</span>
 <span id="cb16-35"><a href="#cb16-35" aria-hidden="true" tabindex="-1"></a>        pos_y <span class="op">=</span> torch.stack((pos_y[:, :, :, <span class="dv">0</span>::<span class="dv">2</span>].sin(), pos_y[:, :, :, <span class="dv">1</span>::<span class="dv">2</span>].cos()), dim<span class="op">=</span><span class="dv">4</span>).flatten(<span class="dv">3</span>)</span>
 <span id="cb16-36"><a href="#cb16-36" aria-hidden="true" tabindex="-1"></a>        pos <span class="op">=</span> torch.cat((pos_y, pos_x), dim<span class="op">=</span><span class="dv">3</span>).permute(<span class="dv">0</span>, <span class="dv">3</span>, <span class="dv">1</span>, <span class="dv">2</span>)</span>
-<span id="cb16-37"><a href="#cb16-37" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> pos</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb16-37"><a href="#cb16-37" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> pos</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>As we already know from the <a href="https://arxiv.org/abs/1706.03762">Attention is all you need</a> paper, the fixed positional encodings can be mathematically defined as:</p>
 <p><span class="math display">\[
 PE(pos, 2i) = \sin(\frac{pos}{10000^{\frac{2i}{d_{model}}}}) \tag{1}
@@ -621,7 +663,7 @@ PE(pos, 2i) = \cos(\frac{pos}{10000^{\frac{2i}{d_{model}}}}) \tag{2}
 <h3 data-number="5.3" class="anchored" data-anchor-id="joiner"><span class="header-section-number">5.3</span> Joiner</h3>
 <p><em>Since the transformer architecture is permutation-invariant, we supplement it with fixed positional encodings that are <strong>added to the input of each attention layer</strong>.</em></p>
 <p>The <code>Joiner</code> class below, is merely a convenience class, that accepts a <code>backbone</code> and <code>position_embedding</code> as defined previously, and a <code>NestedTensor</code> as input. It then generates a lower-resolution activation map of size <span class="math inline">\(f ∈ R^{C×H×W}\)</span> and positional embeddings of the same-size corresponding to the <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> positions on the grid.</p>
-<div class="sourceCode" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Joiner(nn.Sequential):</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Joiner(nn.Sequential):</span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, backbone, position_embedding):</span>
 <span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>(backbone, position_embedding)</span>
 <span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a></span>
@@ -633,9 +675,9 @@ PE(pos, 2i) = \cos(\frac{pos}{10000^{\frac{2i}{d_{model}}}}) \tag{2}
 <span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>            out.append(x)</span>
 <span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>            <span class="co"># position encoding</span></span>
 <span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>            pos.append(<span class="va">self</span>[<span class="dv">1</span>](x).to(x.tensors.dtype))</span>
-<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> out, pos</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> out, pos</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Let’s see it in action below:</p>
-<div class="sourceCode" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch </span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch </span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> detr.util.misc <span class="im">import</span> NestedTensor</span>
 <span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> detr.models.backbone <span class="im">import</span> <span class="op">*</span></span>
 <span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> detr.models.position_encoding <span class="im">import</span> PositionEmbeddingSine</span>
@@ -653,7 +695,7 @@ PE(pos, 2i) = \cos(\frac{pos}{10000^{\frac{2i}{d_{model}}}}) \tag{2}
 <span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a><span class="co"># get output </span></span>
 <span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a>out, pos <span class="op">=</span> joiner(bb_input)</span>
 <span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a>out[<span class="op">-</span><span class="dv">1</span>].__class__</span>
+<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a>out[<span class="op">-</span><span class="dv">1</span>].<span class="va">__class__</span></span>
 <span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> detr.util.misc.NestedTensor</span>
 <span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a><span class="co"># reduced lower-resolution feature map output from backbone</span></span>
@@ -662,7 +704,7 @@ PE(pos, 2i) = \cos(\frac{pos}{10000^{\frac{2i}{d_{model}}}}) \tag{2}
 <span id="cb18-25"><a href="#cb18-25" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb18-26"><a href="#cb18-26" aria-hidden="true" tabindex="-1"></a><span class="co"># positional encodings with same shape as lower-resolution feature map </span></span>
 <span id="cb18-27"><a href="#cb18-27" aria-hidden="true" tabindex="-1"></a>pos[<span class="op">-</span><span class="dv">1</span>].shape</span>
-<span id="cb18-28"><a href="#cb18-28" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span>  torch.Size([<span class="dv">2</span>, <span class="dv">256</span>, <span class="dv">24</span>, <span class="dv">29</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb18-28"><a href="#cb18-28" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span>  torch.Size([<span class="dv">2</span>, <span class="dv">256</span>, <span class="dv">24</span>, <span class="dv">29</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="summary" class="level3" data-number="5.4">
 <h3 data-number="5.4" class="anchored" data-anchor-id="summary"><span class="header-section-number">5.4</span> Summary</h3>
@@ -680,7 +722,7 @@ PE(pos, 2i) = \cos(\frac{pos}{10000^{\frac{2i}{d_{model}}}}) \tag{2}
 <p>As also mentioned in the paper,</p>
 <p><em>The encoder expects a sequence as input, hence we collapse the spatial dimensions of <span class="math inline">\(z_0\)</span> into one dimension, resulting in a <span class="math inline">\(d×HW\)</span> feature map.</em></p>
 <p>Therefore, we can reshape both feature map and spatial positional encodings to shape <span class="math inline">\(696 x 1 x 256\)</span> as shown in Figure-5 above. The overall <code>Transformer</code> can be implemented as below:</p>
-<div class="sourceCode" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Transformer(nn.Module):</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Transformer(nn.Module):</span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, d_model<span class="op">=</span><span class="dv">512</span>, nhead<span class="op">=</span><span class="dv">8</span>, num_encoder_layers<span class="op">=</span><span class="dv">6</span>,</span>
 <span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>                 num_decoder_layers<span class="op">=</span><span class="dv">6</span>, dim_feedforward<span class="op">=</span><span class="dv">2048</span>, dropout<span class="op">=</span><span class="fl">0.1</span>,</span>
@@ -721,7 +763,7 @@ PE(pos, 2i) = \cos(\frac{pos}{10000^{\frac{2i}{d_{model}}}}) \tag{2}
 <span id="cb19-39"><a href="#cb19-39" aria-hidden="true" tabindex="-1"></a>        memory <span class="op">=</span> <span class="va">self</span>.encoder(src, src_key_padding_mask<span class="op">=</span>mask, pos<span class="op">=</span>pos_embed)</span>
 <span id="cb19-40"><a href="#cb19-40" aria-hidden="true" tabindex="-1"></a>        hs <span class="op">=</span> <span class="va">self</span>.decoder(tgt, memory, memory_key_padding_mask<span class="op">=</span>mask,</span>
 <span id="cb19-41"><a href="#cb19-41" aria-hidden="true" tabindex="-1"></a>                          pos<span class="op">=</span>pos_embed, query_pos<span class="op">=</span>query_embed)</span>
-<span id="cb19-42"><a href="#cb19-42" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> hs.transpose(<span class="dv">1</span>, <span class="dv">2</span>), memory.permute(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">0</span>).view(bs, c, h, w)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb19-42"><a href="#cb19-42" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> hs.transpose(<span class="dv">1</span>, <span class="dv">2</span>), memory.permute(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">0</span>).view(bs, c, h, w)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Below, let’s look at the <code>TransformerEncoder</code>, <code>TransformerEncoderLayer</code>, <code>TransformerDecoder</code> and <code>TransformerDecoderLayer</code> in detail.</p>
 </section>
 <section id="transformer-encoder" class="level2" data-number="7">
@@ -729,7 +771,7 @@ PE(pos, 2i) = \cos(\frac{pos}{10000^{\frac{2i}{d_{model}}}}) \tag{2}
 <p>Each encoder layer has a standard architecture and consists of a multi-head self-attention module and a feed forward network (FFN).</p>
 <p>In terms of implementation, from this point on the Transformer architecture is implemented very similarly to the implementation as explained in The Annotated Transformer. But, for completeness, I will also share the implementations below.</p>
 <p>The Transformer Encoder consists of multiple Transformer Encoder layers. Thus, it can be easily implemented as below:</p>
-<div class="sourceCode" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> TransformerEncoder(nn.Module):</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> TransformerEncoder(nn.Module):</span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, encoder_layer, num_layers, norm<span class="op">=</span><span class="va">None</span>):</span>
 <span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
 <span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.layers <span class="op">=</span> _get_clones(encoder_layer, num_layers)</span>
@@ -746,10 +788,10 @@ PE(pos, 2i) = \cos(\frac{pos}{10000^{\frac{2i}{d_{model}}}}) \tag{2}
 <span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>                           src_key_padding_mask<span class="op">=</span>src_key_padding_mask, pos<span class="op">=</span>pos)</span>
 <span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="va">self</span>.norm <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
 <span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a>            output <span class="op">=</span> <span class="va">self</span>.norm(output)</span>
-<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> output</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> output</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><code>_get_clones</code> simply clones the Transformer Encoder layer (explained below), <code>num_layers</code> number of times and returns <code>nn.ModuleList</code>.</p>
 <p>Below, the <code>TransformerEncoderLayer</code> has been implemented.</p>
-<div class="sourceCode" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> TransformerEncoderLayer(nn.Module):</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> TransformerEncoderLayer(nn.Module):</span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, d_model, nhead, dim_feedforward<span class="op">=</span><span class="dv">2048</span>, dropout<span class="op">=</span><span class="fl">0.1</span>,</span>
 <span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>                 activation<span class="op">=</span><span class="st">"relu"</span>, normalize_before<span class="op">=</span><span class="va">False</span>):</span>
@@ -783,7 +825,7 @@ PE(pos, 2i) = \cos(\frac{pos}{10000^{\frac{2i}{d_{model}}}}) \tag{2}
 <span id="cb21-32"><a href="#cb21-32" aria-hidden="true" tabindex="-1"></a>        src2 <span class="op">=</span> <span class="va">self</span>.norm2(src)</span>
 <span id="cb21-33"><a href="#cb21-33" aria-hidden="true" tabindex="-1"></a>        src2 <span class="op">=</span> <span class="va">self</span>.linear2(<span class="va">self</span>.dropout(<span class="va">self</span>.activation(<span class="va">self</span>.linear1(src2))))</span>
 <span id="cb21-34"><a href="#cb21-34" aria-hidden="true" tabindex="-1"></a>        src <span class="op">=</span> src <span class="op">+</span> <span class="va">self</span>.dropout2(src2)</span>
-<span id="cb21-35"><a href="#cb21-35" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> src</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb21-35"><a href="#cb21-35" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> src</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>It’s really straightforward, we accept an input which is called <code>src</code>, it is normalized using <code>nn.LayerNorm</code>, and finally we set the query and key matrices <span class="math inline">\(q\)</span> and <span class="math inline">\(k\)</span> as the same by adding positional encoding to the normalized input. Finally, self-attention operation is performed to get <code>src2</code> as the output. In this case, since we can attend to anywhere in the sequence - both forwards and backwards, <code>attn_mask</code> is set to <code>None</code>. Whereas, the <code>key_padding_mask</code> are the elements in the key that are ignored by attention.</p>
 <p>As per the PyTorch Docs for <code>key_padding_mask</code>, when given a binary mask and a value is True, the corresponding value on the attention layer will be ignored. We already from Data Preparation section that <code>mask</code> is set to <code>True</code> for the gray area in Figure-3, thus, it makes sense to not attend to these positions.</p>
 <p>Next, let’s look at the TransformerDecoder!</p>
@@ -792,7 +834,7 @@ PE(pos, 2i) = \cos(\frac{pos}{10000^{\frac{2i}{d_{model}}}}) \tag{2}
 <h2 data-number="8" class="anchored" data-anchor-id="transformer-decoder"><span class="header-section-number">8</span> Transformer Decoder</h2>
 <p><em>The decoder follows the standard architecture of the transformer, transforming <span class="math inline">\(N\)</span> embeddings of size <span class="math inline">\(d\)</span> using multi-headed self-attention and encoder-decoder attention mechanisms. The difference with the original transformer is that our model decodes the <span class="math inline">\(N\)</span> objects in parallel at each decoder layer, while Vaswani et al.&nbsp;use an autoregressive model that predicts the output sequence one element at a time. We refer the reader unfamiliar with the concepts to the supplementary material. Since the decoder is also permutation-invariant, the <span class="math inline">\(N\)</span> input embeddings must be different to produce different results. These input embeddings are learnt positional encodings that we refer to as object queries, and similarly to the encoder, we add them to the input of each attention layer. The N object queries are transformed into an output embedding by the decoder. They are then independently decoded into box coordinates and class labels by a feed forward network (described in the next subsection), resulting <span class="math inline">\(N\)</span> final predictions. Using self-attention and encoder-decoder attention over these embeddings, the model globally reasons about all objects together using pair-wise relations between them, while being able to use the whole image as context.</em></p>
 <p>Similar to the Transformer Encoder, the Transformer Decoder consists of repeated Transformer Decoder layers and can be easily implemented as below:</p>
-<div class="sourceCode" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> TransformerDecoder(nn.Module):</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> TransformerDecoder(nn.Module):</span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, decoder_layer, num_layers, norm<span class="op">=</span><span class="va">None</span>, return_intermediate<span class="op">=</span><span class="va">False</span>):</span>
 <span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
@@ -828,12 +870,12 @@ PE(pos, 2i) = \cos(\frac{pos}{10000^{\frac{2i}{d_{model}}}}) \tag{2}
 <span id="cb22-34"><a href="#cb22-34" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="va">self</span>.return_intermediate:</span>
 <span id="cb22-35"><a href="#cb22-35" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> torch.stack(intermediate)</span>
 <span id="cb22-36"><a href="#cb22-36" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-37"><a href="#cb22-37" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> output.unsqueeze(<span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb22-37"><a href="#cb22-37" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> output.unsqueeze(<span class="dv">0</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>The main difference is the option to return intermediate outputs for Auxilary losses (we’ll look at losses later in the blog post). If <code>self.return_intermediate</code> is set to <code>True</code>, stacked output from every decoder layer is returned otherwise, output from the last decoder layer is returned.</p>
 <section id="transformer-decoder-layer" class="level3" data-number="8.1">
 <h3 data-number="8.1" class="anchored" data-anchor-id="transformer-decoder-layer"><span class="header-section-number">8.1</span> Transformer Decoder Layer</h3>
 <p>As for the Transformer Decoder layer, its implementation is also very similar to the Transformer Encoder layer.</p>
-<div class="sourceCode" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> TransformerDecoderLayer(nn.Module):</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> TransformerDecoderLayer(nn.Module):</span>
 <span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, d_model, nhead, dim_feedforward<span class="op">=</span><span class="dv">2048</span>, dropout<span class="op">=</span><span class="fl">0.1</span>,</span>
 <span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>                 activation<span class="op">=</span><span class="st">"relu"</span>, normalize_before<span class="op">=</span><span class="va">False</span>):</span>
 <span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
@@ -878,7 +920,7 @@ PE(pos, 2i) = \cos(\frac{pos}{10000^{\frac{2i}{d_{model}}}}) \tag{2}
 <span id="cb23-43"><a href="#cb23-43" aria-hidden="true" tabindex="-1"></a>        tgt2 <span class="op">=</span> <span class="va">self</span>.norm3(tgt)</span>
 <span id="cb23-44"><a href="#cb23-44" aria-hidden="true" tabindex="-1"></a>        tgt2 <span class="op">=</span> <span class="va">self</span>.linear2(<span class="va">self</span>.dropout(<span class="va">self</span>.activation(<span class="va">self</span>.linear1(tgt2))))</span>
 <span id="cb23-45"><a href="#cb23-45" aria-hidden="true" tabindex="-1"></a>        tgt <span class="op">=</span> tgt <span class="op">+</span> <span class="va">self</span>.dropout3(tgt2)</span>
-<span id="cb23-46"><a href="#cb23-46" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> tgt</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb23-46"><a href="#cb23-46" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> tgt</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>The <code>TransformerDecoderLayer</code> requires a bit more attention than <code>TransformerEncoderLayer</code> (pun intended). First, the <code>tgt</code> variable in this case is just a bunch of zeroes of shape <span class="math inline">\(100 x 1 x 256\)</span> which represents Object Queries as in Figure-5.</p>
 <blockquote class="blockquote">
 <p>The difference with the original transformer is that the DETR model decodes the <span class="math inline">\(N\)</span> objects in parallel at each decoder layer, while Vaswani et al.&nbsp;used an autoregressive model that predicts the output sequence one element at a time. Since the decoder is also permutation-invariant, the <span class="math inline">\(N\)</span> input embeddings must be different to produce different results. These learnt positional encodings are called object queries and as can be seen in Figure-5, similar to the Encoder, these object queries are also added to the input at each attention layer in the Decoder.</p>
@@ -931,239 +973,406 @@ PE(pos, 2i) = \cos(\frac{pos}{10000^{\frac{2i}{d_{model}}}}) \tag{2}
 </form>
 </div><script type="text/javascript">(function($) {window.fnames = new Array(); window.ftypes = new Array();fnames[0]='EMAIL';ftypes[0]='email';fnames[1]='FNAME';ftypes[1]='text';fnames[2]='LNAME';ftypes[2]='text';fnames[3]='ADDRESS';ftypes[3]='address';fnames[4]='PHONE';ftypes[4]='phone';fnames[5]='BIRTHDAY';ftypes[5]='birthday';}(jQuery));var $mcj = jQuery.noConflict(true);</script></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
-window.document.addEventListener("DOMContentLoaded", function (event) {
-  const toggleBodyColorMode = (bsSheetEl) => {
-    const mode = bsSheetEl.getAttribute("data-mode");
-    const bodyEl = window.document.querySelector("body");
-    if (mode === "dark") {
-      bodyEl.classList.add("quarto-dark");
-      bodyEl.classList.remove("quarto-light");
-    } else {
-      bodyEl.classList.add("quarto-light");
-      bodyEl.classList.remove("quarto-dark");
-    }
-  }
-  const toggleBodyColorPrimary = () => {
-    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
-    if (bsSheetEl) {
-      toggleBodyColorMode(bsSheetEl);
-    }
-  }
-  toggleBodyColorPrimary();  
-  const icon = "";
-  const anchorJS = new window.AnchorJS();
-  anchorJS.options = {
-    placement: 'right',
-    icon: icon
-  };
-  anchorJS.add('.anchored');
-  const isCodeAnnotation = (el) => {
-    for (const clz of el.classList) {
-      if (clz.startsWith('code-annotation-')) {                     
-        return true;
-      }
-    }
-    return false;
-  }
-  const clipboard = new window.ClipboardJS('.code-copy-button', {
-    text: function(trigger) {
-      const codeEl = trigger.previousElementSibling.cloneNode(true);
-      for (const childEl of codeEl.children) {
-        if (isCodeAnnotation(childEl)) {
-          childEl.remove();
-        }
-      }
-      return codeEl.innerText;
-    }
-  });
-  clipboard.on('success', function(e) {
-    // button target
-    const button = e.trigger;
-    // don't keep focus
-    button.blur();
-    // flash "checked"
-    button.classList.add('code-copy-button-checked');
-    var currentTitle = button.getAttribute("title");
-    button.setAttribute("title", "Copied!");
-    let tooltip;
-    if (window.bootstrap) {
-      button.setAttribute("data-bs-toggle", "tooltip");
-      button.setAttribute("data-bs-placement", "left");
-      button.setAttribute("data-bs-title", "Copied!");
-      tooltip = new bootstrap.Tooltip(button, 
-        { trigger: "manual", 
-          customClass: "code-copy-button-tooltip",
-          offset: [0, -8]});
-      tooltip.show();    
-    }
-    setTimeout(function() {
-      if (tooltip) {
-        tooltip.hide();
-        button.removeAttribute("data-bs-title");
-        button.removeAttribute("data-bs-toggle");
-        button.removeAttribute("data-bs-placement");
-      }
-      button.setAttribute("title", currentTitle);
-      button.classList.remove('code-copy-button-checked');
-    }, 1000);
-    // clear code selection
-    e.clearSelection();
-  });
-  function tippyHover(el, contentFn) {
-    const config = {
-      allowHTML: true,
-      content: contentFn,
-      maxWidth: 500,
-      delay: 100,
-      arrow: false,
-      appendTo: function(el) {
-          return el.parentElement;
-      },
-      interactive: true,
-      interactiveBorder: 10,
-      theme: 'quarto',
-      placement: 'bottom-start'
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
     };
-    window.tippy(el, config); 
-  }
-  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
-  for (var i=0; i<noterefs.length; i++) {
-    const ref = noterefs[i];
-    tippyHover(ref, function() {
-      // use id or data attribute instead here
-      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
-      try { href = new URL(href).hash; } catch {}
-      const id = href.replace(/^#\/?/, "");
-      const note = window.document.getElementById(id);
-      return note.innerHTML;
-    });
-  }
-      let selectedAnnoteEl;
-      const selectorForAnnotation = ( cell, annotation) => {
-        let cellAttr = 'data-code-cell="' + cell + '"';
-        let lineAttr = 'data-code-annotation="' +  annotation + '"';
-        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
-        return selector;
-      }
-      const selectCodeLines = (annoteEl) => {
-        const doc = window.document;
-        const targetCell = annoteEl.getAttribute("data-target-cell");
-        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
-        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
-        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
-        const lineIds = lines.map((line) => {
-          return targetCell + "-" + line;
-        })
-        let top = null;
-        let height = null;
-        let parent = null;
-        if (lineIds.length > 0) {
-            //compute the position of the single el (top and bottom and make a div)
-            const el = window.document.getElementById(lineIds[0]);
-            top = el.offsetTop;
-            height = el.offsetHeight;
-            parent = el.parentElement.parentElement;
-          if (lineIds.length > 1) {
-            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
-            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
-            height = bottom - top;
-          }
-          if (top !== null && height !== null && parent !== null) {
-            // cook up a div (if necessary) and position it 
-            let div = window.document.getElementById("code-annotation-line-highlight");
-            if (div === null) {
-              div = window.document.createElement("div");
-              div.setAttribute("id", "code-annotation-line-highlight");
-              div.style.position = 'absolute';
-              parent.appendChild(div);
-            }
-            div.style.top = top - 2 + "px";
-            div.style.height = height + 4 + "px";
-            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
-            if (gutterDiv === null) {
-              gutterDiv = window.document.createElement("div");
-              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
-              gutterDiv.style.position = 'absolute';
-              const codeCell = window.document.getElementById(targetCell);
-              const gutter = codeCell.querySelector('.code-annotation-gutter');
-              gutter.appendChild(gutterDiv);
-            }
-            gutterDiv.style.top = top - 2 + "px";
-            gutterDiv.style.height = height + 4 + "px";
-          }
-          selectedAnnoteEl = annoteEl;
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
         }
-      };
-      const unselectCodeLines = () => {
-        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
-        elementsIds.forEach((elId) => {
-          const div = window.document.getElementById(elId);
-          if (div) {
-            div.remove();
-          }
-        });
-        selectedAnnoteEl = undefined;
-      };
-      // Attach click handler to the DT
-      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
-      for (const annoteDlNode of annoteDls) {
-        annoteDlNode.addEventListener('click', (event) => {
-          const clickedEl = event.target;
-          if (clickedEl !== selectedAnnoteEl) {
-            unselectCodeLines();
-            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
-            if (activeEl) {
-              activeEl.classList.remove('code-annotation-active');
-            }
-            selectCodeLines(clickedEl);
-            clickedEl.classList.add('code-annotation-active');
-          } else {
-            // Unselect the line
-            unselectCodeLines();
-            clickedEl.classList.remove('code-annotation-active');
-          }
-        });
       }
-  const findCites = (el) => {
-    const parentEl = el.parentElement;
-    if (parentEl) {
-      const cites = parentEl.dataset.cites;
-      if (cites) {
-        return {
-          el,
-          cites: cites.split(' ')
-        };
-      } else {
-        return findCites(el.parentElement)
-      }
-    } else {
-      return undefined;
+      return false;
     }
-  };
-  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
-  for (var i=0; i<bibliorefs.length; i++) {
-    const ref = bibliorefs[i];
-    const citeInfo = findCites(ref);
-    if (citeInfo) {
-      tippyHover(citeInfo.el, function() {
-        var popup = window.document.createElement('div');
-        citeInfo.cites.forEach(function(cite) {
-          var citeDiv = window.document.createElement('div');
-          citeDiv.classList.add('hanging-indent');
-          citeDiv.classList.add('csl-entry');
-          var biblioDiv = window.document.getElementById('ref-' + cite);
-          if (biblioDiv) {
-            citeDiv.innerHTML = biblioDiv.innerHTML;
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
           }
-          popup.appendChild(citeDiv);
-        });
-        return popup.innerHTML;
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
       });
     }
-  }
-});
-</script>
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
 </div> <!-- /content -->
+
 
 
 

@@ -1,0 +1,325 @@
+---
+title: "Agent Frameworks Are So Much More Than For Loops"
+author: "Aman Arora"
+date: "2025-09-08"
+toc: true
+number-sections: true
+categories: [AI, Agents, Software Architecture]
+description: "A balanced perspective on the recent debate about agent frameworks vs. simple while loops"
+bibliography: ../references.bib
+image: ../images/agent-framework.png
+---
+
+Hello! I'm a full-time Lead AI Engineer. This blog reflects my personal opinions, not my company's. In the past year, I've been responsible for multiple production agents - some successful, some not so much - but every time hitting problems at scale.
+
+Amidst all the clickbait and false news, there's a debate worth having — do you actually need agent frameworks, or are they just overengineered abstractions?
+
+But before diving into the debate, I want to talk about a concept that's reshaping how you might think about development - "vibe coding".
+
+The term was coined by Andrej Karpathy in the following tweet:
+
+<blockquote class="twitter-tweet tw-align-center"><p lang="en" dir="ltr">There&#39;s a new kind of coding I call &quot;vibe coding&quot;, where you fully give in to the vibes, embrace exponentials, and forget that the code even exists. It&#39;s possible because the LLMs (e.g. Cursor Composer w Sonnet) are getting too good. Also I just talk to Composer with SuperWhisper…</p>&mdash; Andrej Karpathy (@karpathy) <a href="https://twitter.com/karpathy/status/1886192184808149383?ref_src=twsrc%5Etfw">February 2, 2025</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+So, why bring up vibe coding in a discussion about agent frameworks? Because, in my opinion, where you sit on the coding spectrum fundamentally shapes how you view this debate on agent frameworks. I believe one approach is not greater or better than the other. AI is a means to an end, not an end in itself. 
+
+::: {.callout-tip}
+## 🎯 Interactive: Find Your Position on the Coding Spectrum
+
+Before we dive deeper, take a moment to explore where you fit on the coding philosophy spectrum. Click on any of the positions below to see which approach resonates with your experience and mindset.
+:::
+
+```{ojs}
+//| echo: false
+
+positions = [
+  {
+    id: 0,
+    name: "Vibe Coder",
+    icon: "https://cursor.sh/favicon.ico",
+    title: "The AI-First Developer",
+    description: "You've never written traditional code and embrace AI-assisted development completely. You think in prompts, not syntax.",
+    background: "You might have started coding in the era of ChatGPT and Cursor. Traditional debugging feels foreign.",
+    color: "#4ecdc4"
+  },
+  {
+    id: 1,
+    name: "AI Embracer",
+    icon: "https://openai.com/favicon.ico",
+    title: "The Productivity Maximizer",
+    description: "You use AI tools extensively for productivity while maintaining solid coding fundamentals.",
+    background: "You learned to code traditionally but quickly adopted AI tools to accelerate your workflow.",
+    color: "#74b9ff"
+  },
+  {
+    id: 2,
+    name: "Balanced",
+    icon: "https://www.anthropic.com/favicon.ico",
+    title: "The Pragmatist",
+    description: "You take a context-dependent approach, choosing tools based on project requirements.",
+    background: "Experienced developer who evaluates trade-offs carefully. You've seen technologies come and go.",
+    color: "#ff9f43"
+  },
+  {
+    id: 3,
+    name: "Traditional",
+    icon: "https://github.com/favicon.ico",
+    title: "The Craftsperson",
+    description: "You prefer manual coding with full understanding, using AI as an occasional helper. You want to keep AI on a tight leash.",
+    background: "You believe in understanding your tools deeply. You've built systems from scratch and value that knowledge, and you think AI tooling disrupts your workflow.",
+    color: "#74b9ff"
+  },
+  {
+    id: 4,
+    name: "AI Skeptic",
+    icon: "https://upload.wikimedia.org/wikipedia/commons/3/35/Tux.svg",
+    title: "The Purist",
+    description: "Full-stack developer who refuses AI tooling and prefers complete manual control.",
+    background: "You've mastered your craft through years of experience. You don't trust tools you can't fully understand.",
+    color: "#4ecdc4"
+  }
+]
+
+viewof selectedPosition = {
+  let currentValue = 2;
+  
+  const dispatch = () => {
+    container.value = currentValue;
+    container.dispatchEvent(new CustomEvent("input", {bubbles: true}));
+  };
+  
+  const container = html`<div style="display: none;"></div>`;
+  container.value = currentValue;
+  
+  container.setValue = (newValue) => {
+    currentValue = newValue;
+    dispatch();
+  };
+  
+  return container;
+}
+
+currentPosition = positions[selectedPosition]
+
+spectrum = {
+  const width = 700;
+  const height = 100;
+  const margin = { top: 20, right: 60, left: 60, bottom: 20 };
+  
+  const svg = d3.create("svg")
+    .attr("width", width)
+    .attr("height", height)
+    .style("max-width", "100%")
+    .style("height", "auto");
+  
+  const gradient = svg.append("defs")
+    .append("linearGradient")
+    .attr("id", "spectrum-gradient")
+    .attr("x1", "0%")
+    .attr("x2", "100%");
+  
+  gradient.append("stop")
+    .attr("offset", "0%")
+    .attr("stop-color", "#4ecdc4");
+  
+  gradient.append("stop")
+    .attr("offset", "25%")
+    .attr("stop-color", "#74b9ff");
+  
+  gradient.append("stop")
+    .attr("offset", "50%")
+    .attr("stop-color", "#ff9f43");
+  
+  gradient.append("stop")
+    .attr("offset", "75%")
+    .attr("stop-color", "#74b9ff");
+  
+  gradient.append("stop")
+    .attr("offset", "100%")
+    .attr("stop-color", "#4ecdc4");
+  
+  svg.append("rect")
+    .attr("x", margin.left)
+    .attr("y", height / 2 - 4)
+    .attr("width", width - margin.left - margin.right)
+    .attr("height", 8)
+    .attr("rx", 4)
+    .style("fill", "url(#spectrum-gradient)");
+  
+  positions.forEach((pos, i) => {
+    const x = margin.left + (i / 4) * (width - margin.left - margin.right);
+    const isSelected = selectedPosition === i;
+    
+    const posGroup = svg.append("g")
+      .style("cursor", "pointer")
+      .attr("class", "position-marker")
+      .on("click", function() {
+        const viewofElement = document.querySelector('div[style*="display: none"]');
+        if (viewofElement && viewofElement.setValue) {
+          viewofElement.setValue(i);
+        }
+      })
+      .on("mouseover", function() {
+        d3.select(this).select("circle")
+          .transition()
+          .duration(200)
+          .attr("r", isSelected ? 10 : 8)
+          .style("stroke-width", isSelected ? 4 : 3);
+      })
+      .on("mouseout", function() {
+        d3.select(this).select("circle")
+          .transition()
+          .duration(200)
+          .attr("r", isSelected ? 8 : 6)
+          .style("stroke-width", isSelected ? 3 : 2);
+      });
+    
+    posGroup.append("circle")
+      .attr("cx", x)
+      .attr("cy", height / 2)
+      .attr("r", isSelected ? 8 : 6)
+      .style("fill", isSelected ? pos.color : "white")
+      .style("stroke", pos.color)
+      .style("stroke-width", isSelected ? 3 : 2)
+      .style("transition", "all 0.2s ease");
+    
+    posGroup.append("image")
+      .attr("x", x - 12)
+      .attr("y", height / 2 - 40)
+      .attr("width", 24)
+      .attr("height", 24)
+      .attr("href", pos.icon)
+      .style("pointer-events", "none");
+    
+    if (!isSelected) {
+      posGroup.append("circle")
+        .attr("cx", x)
+        .attr("cy", height / 2 + 1)
+        .attr("r", 6)
+        .style("fill", "rgba(0,0,0,0.1)")
+        .style("stroke", "none")
+        .style("pointer-events", "none");
+    }
+  });
+  
+  return svg.node();
+}
+```
+
+```{ojs}
+//| echo: false
+
+html`<div style="
+  padding: 20px;
+  margin: 20px 0;
+  border-left: 4px solid ${currentPosition.color};
+  background: linear-gradient(135deg, ${currentPosition.color}15, ${currentPosition.color}05);
+  border-radius: 8px;
+">
+  <h3 style="color: ${currentPosition.color}; margin-top: 0;">
+    ${currentPosition.name}: ${currentPosition.title}
+  </h3>
+  
+  <p><strong>Your Profile:</strong> ${currentPosition.description}</p>
+  
+  <p><strong>Background:</strong> ${currentPosition.background}</p>
+</div>`
+```
+
+I've had the opportunity to work with brilliant minds on both extremes of this spectrum. And what follows is my informed opinion on the fundamental question - "do you need agent frameworks?".
+
+## Agent Frameworks: To Use or Not to Use
+
+Whether you need a framework or not really depends on your needs and background.
+
+You're navigating changing times, much like the industrial revolution - but so much more impactful and with unprecedented economic potential. This has attracted a lot of attention from people in various industries - not always coming from a traditional coding background.
+
+And in these changing times, where the industry has not even settled on a clear definition of an agent - it is really hard to land on the need and necessity of frameworks.
+
+As in the coding spectrum above, we have a similar not so clear spectrum when it comes to agent adoption and use case. Some of you have been using AI agents for your daily lives and routines, others simply want "something agentic" as a use case in your company because there is a push to adopt AI from leadership. 
+
+Where you are in the agent spectrum, and what's the basis of your "agentic needs" really defines if you should go ahead with a framework or not. 
+
+Frameworks have design decisions baked into them - which you may not agree with. At my company, we want complete control over the code we produce, and customize it based on our needs. 
+
+On the other hand, if you're not an AI-first company (be honest here) and are just starting out on your journey - exploring an agentic use case, it might be worth starting with a framework until you build the expertise in-house. Starting from scratch - you might spend more time getting the formats right instead of testing your "product idea". Now, you could argue that it's okay to just start with simple API calls and a while loop, but I believe there's more chance of failure and frustration whereas within a framework - you're more protected. 
+
+Having said that, let's look at some different perspectives currently floating around in the industry. 
+
+<blockquote class="twitter-tweet tw-align-center"><p lang="en" dir="ltr">Too many people use frameworks to build agents, when really, all you need are the raw LLM APIs and a while loop.<br><br>Don&#39;t overcomplicate what doesn&#39;t need to be overcomplicated.</p>&mdash; Matt Shumer (@mattshumer_) <a href="https://twitter.com/mattshumer_/status/1963843389918446066?ref_src=twsrc%5Etfw">September 5, 2025</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+Now, Matt is not wrong when he says agents are raw LLM APIs in a while loop. In essence, yes an agent is simply a number of API calls chained together - where you're reliant on the LLM to make the right decisions based on system prompt and tool descriptions - to choose the right tool and call it with the correct arguments. The part that's agentic - is the decision-making process of the LLM which separates it from a prescribed path to follow. Based on an observation (tool output), the LLM could decide to alter its path to achieve the goal defined by the user. This reasoning and acting pattern is formalized in the ReAct framework [@yao2023reactsynergizingreasoningacting].
+
+What happened after? Here is another completely different perspective by someone who is working on building an AI framework. 
+
+<blockquote class="twitter-tweet tw-align-center"><p lang="en" dir="ltr">Grifters like this are wasting your time and their Dunning-Kruger opinions should be ignored by serious builders. You either build on a framework or live long enough to roll your own (which is fine btw). Here’s why:<br><br>1. The &quot;LLM API in a while loop&quot; is your underlying agentic… <a href="https://t.co/uL0CqfaGVj">https://t.co/uL0CqfaGVj</a> <a href="https://t.co/s22H4iaOqG">pic.twitter.com/s22H4iaOqG</a></p>&mdash; Ashpreet Bedi (@ashpreetbedi) <a href="https://twitter.com/ashpreetbedi/status/1964362446627299598?ref_src=twsrc%5Etfw">September 6, 2025</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+Now this got some impressions in the Twitter world, but it didn't get my attention until Jeremy posted the following tweet.
+
+<blockquote class="twitter-tweet tw-align-center"><p lang="en" dir="ltr">it&#39;s amazing how some people can make a simple agent loop sound so complicated <a href="https://t.co/n0BFGxDzAJ">https://t.co/n0BFGxDzAJ</a></p>&mdash; Jeremy Howard (@jeremyphoward) <a href="https://twitter.com/jeremyphoward/status/1964539633653731466?ref_src=twsrc%5Etfw">September 7, 2025</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+
+::: {.callout-note}
+
+## A Personal Detour
+
+As someone who started my data science journey with fastai, I deeply value and respect Jeremy's work and opinions. So it was natural for me to reflect on his view regarding not overcomplicating simple agent loops. 
+
+His view on "rather than using complex frameworks, use simple small pieces that make the details accessible and understandable" deeply resonates with me.
+:::
+
+Production code should be simple, to the point - and steering away from frameworks as much as possible. It should be transparent, easily deducible.
+
+## Finding the Middle Ground
+
+After all this debate and reflections - I believe thinking of AI agents as either simple loops or complex frameworks represents two extremes of a spectrum you navigate based on context.
+
+I am more aligned with swyx's views here: 
+
+<blockquote class="twitter-tweet tw-align-center"><p lang="en" dir="ltr">ok enough evals culture war, time for agents discourse. this is unneccessarily mean, but yes substance is correct.<br><br>i think people like Matt and <a href="https://twitter.com/thorstenball?ref_src=twsrc%5Etfw">@thorstenball</a> mean well when they try to demystify agents into &quot;just&quot; llms in while loops. agents -are- more than that; at least the… <a href="https://t.co/9FF7Xfx6Tf">https://t.co/9FF7Xfx6Tf</a></p>&mdash; swyx (@swyx) <a href="https://twitter.com/swyx/status/1964473164127490095?ref_src=twsrc%5Etfw">September 6, 2025</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+## So Where Does This Leave Us?
+
+As practitioners navigating this rapidly evolving landscape, you need to be pragmatic. My approach? Start with the simplest solution that could possibly work. If that's a while loop, great. If you need a framework to move fast and test ideas, that's fine too. The key is being intentional about your choices and understanding the trade-offs.
+
+Let me share how I navigate this debate in my daily work.
+
+The truth is, for enterprise production systems, you want complete control. No frameworks. Everything built from scratch using raw API calls - OpenAI's, Anthropic's, or whatever model provider you need. This gives you complete control over error handling, retry logic, streaming, and all the intricate details that matter when your agents are serving real users. No black boxes, no mysterious abstractions - just clean, transparent code that does exactly what you need.
+
+But for personal agents and experiments? That's a different story. I reach for lean, minimal frameworks like smolagents [@huggingface2025smolagents] or openai-agents-python [@openai2025agentspython]. These lightweight tools give me just enough structure to prototype quickly without the bloat of heavy frameworks. They're perfect for experiments, personal automation, and testing new ideas before implementing them properly in production.
+
+## Is vibe coding productive?
+
+> Hell, yeah!
+
+Depending on the task I am working on, I confidently shift gears. I am on multiple sides of the "Coding Spectrum" - sometimes running as many as **3 Claude Code sessions in parallel** working on different pull requests to go into development. This workflow has been inspired by Anthropic's documentation on how to run Claude Code sessions in parallel using git worktrees [@anthropic2025claudecode]. Features that used to take days, now take hours!
+
+BUT - and this is crucial - you need to actively steer Claude Code in the right direction to get results. I can't just say "Add streaming support to my Agent to stream tool calls and messages to user" and then forget about it, have some breakfast and come back. That simply doesn't work!
+
+Often what works is this:
+
+1. Claude Code in plan mode
+2. Help me plan adding a new feature that allows me to stream tool calls and responses to the user in the frontend as they are executed. Look at `agent.py`, `Agent.run` method which is currently returning the complete list of messages back to the user once the agent has finished its task. Look at "smolagents" as a reference on how other frameworks handle streaming.
+3. Claude comes back with a plan.
+4. Mostly need to make multiple edits to the plan. Then tell Claude to implement.
+5. Now Claude adds inline comments everywhere.
+6. Press escape, to pause. "I asked you to not add verbose inline comments. Please remove them from your code. You need not communicate with me via comments."
+7. Review Claude's code - make manual edits. 
+8. Finally merge to `development`.
+
+As you can see, the process is still very manual. What this does though, is that while Claude is busy implementing, I can go and fix another bug or read up on API docs to further expand my knowledge. As of today, terminal agents are very good at following instructions. And that's it. That's where the boundary is. As a vibe coder (which I too am when it comes to frontend) - I am overly reliant on the LLM to produce production-quality code which it very rarely does.
+
+## Conclusion
+
+After a year of building production agents and watching this recent Twitter debate unfold, here's what I've learned: the framework vs. while loop argument misses the point entirely. It's not about the tools - it's about understanding your context and making pragmatic choices.
+
+If you're a vibe coder just starting out, embrace the frameworks. They'll protect you from footguns you don't even know exist yet. If you're a seasoned engineer with specific requirements, build exactly what you need - no more, no less. And if you're somewhere in between? Well, that's where most of us live, constantly balancing abstraction with control.
+
+The real skill isn't choosing frameworks or while loops - it's knowing when to use which approach. Sometimes you need fine-grained control with raw API calls. Sometimes you need a lightweight framework to move fast. Often, you'll end up using both based on the use case.
+
+As this field evolves at breakneck speed, remember: AI is a means to an end, not an end in itself. Whether you're team framework or team while loop, focus on what actually matters - solving real problems for real users in a domain where you're the expert.
+
+::: {.callout-tip}
+## 🤖 Meta Note
+
+This blog post was peer-reviewed by Claude Code - because who better to review a post about AI agents than an AI agent itself? And yes, the thumbnail image comparing frameworks was generated by Nano Banana. We're truly living in exciting times. :)
+:::

@@ -9,3 +9,5 @@ vendor
 *.ipynb_checkpoints
 nbs/
 /.quarto/
+
+**/*.quarto_ipynb

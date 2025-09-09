@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.3.433">
+<meta name="generator" content="quarto-1.8.21">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -24,6 +24,7 @@ ul.task-list li input[type="checkbox"] {
   vertical-align: middle;
 }
 /* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
 pre > code.sourceCode { white-space: pre; position: relative; }
 pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
@@ -68,22 +69,30 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
 <link href=".././images/logo.png" rel="icon" type="image/png">
-<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-ea1d7ac60288e0f1efdbc993fd8432ae.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-5b4ad623e5705c0698d39aec6f10cf02.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
   "collapse-after": 3,
   "panel-placement": "end",
   "type": "overlay",
-  "limit": 20,
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
   "language": {
     "search-no-results-text": "No results",
     "search-matching-documents-text": "matching documents",
@@ -92,6 +101,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     "search-more-match-text": "more match in this document",
     "search-more-matches-text": "more matches in this document",
     "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
     "search-detached-cancel-button-title": "Cancel",
     "search-submit-button-title": "Submit",
     "search-label": "Search"
@@ -119,47 +129,51 @@ ga('send', {
 <meta name="twitter:card" content="summary_large_image">
 </head>
 
-<body class="nav-fixed">
+<body class="nav-fixed quarto-light">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
-    <nav class="navbar navbar-expand-lg navbar-dark ">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="../index.html" class="navbar-brand navbar-brand-logo">
+    </a>
+  </div>
             <div id="quarto-search" class="" title="Search"></div>
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
   <span class="navbar-toggler-icon"></span>
 </button>
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
-    <a class="nav-link" href="../index.html" rel="" target="">
- <span class="menu-text">Aman Arora’s Blog</span></a>
+    <a class="nav-link" href="../index.html"> 
+<span class="menu-text">Aman Arora’s Blog</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="../about.html" rel="" target="">
- <span class="menu-text">Aman Arora</span></a>
+    <a class="nav-link" href="../about.html"> 
+<span class="menu-text">Aman Arora</span></a>
   </li>  
 </ul>
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item compact">
-    <a class="nav-link" href="https://github.com/amaarora" rel="" target=""><i class="bi bi-github" role="img">
+    <a class="nav-link" href="https://github.com/amaarora"> <i class="bi bi-github" role="img">
 </i> 
- <span class="menu-text"></span></a>
+<span class="menu-text"></span></a>
   </li>  
   <li class="nav-item compact">
-    <a class="nav-link" href="https://twitter.com/amaarora" rel="" target=""><i class="bi bi-twitter" role="img">
+    <a class="nav-link" href="https://twitter.com/amaarora"> <i class="bi bi-twitter" role="img">
 </i> 
- <span class="menu-text"></span></a>
+<span class="menu-text"></span></a>
   </li>  
   <li class="nav-item compact">
-    <a class="nav-link" href="https://www.linkedin.com/in/aroraaman/" rel="" target=""><i class="bi bi-linkedin" role="img">
+    <a class="nav-link" href="https://www.linkedin.com/in/aroraaman/"> <i class="bi bi-linkedin" role="img">
 </i> 
- <span class="menu-text"></span></a>
+<span class="menu-text"></span></a>
   </li>  
 </ul>
+          </div> <!-- /navcollapse -->
             <div class="quarto-navbar-tools">
 </div>
-          </div> <!-- /navcollapse -->
       </div> <!-- /container-fluid -->
     </nav>
 </header>
@@ -224,7 +238,9 @@ ga('send', {
   </div>
   
 
+
 </header>
+
 
 <p>This blog post is a direct continuation of my <a href="https://amaarora.github.io/2021/01/11/efficientdet.html">previous blog post</a> explaining EfficientDets. In my previous post, we looked and understood what’s inside an <strong>EfficientDet</strong> and also read about the various components such as <strong>BiFPN</strong> and <strong>Compound Scaling</strong> that make an EfficientDet network so powerful.</p>
 <p>Today, our focus will be to build on top of that knowledge and showcase how to implement the network using PyTorch step-by-step. Throughout this blog post I have added some side notes to be able to explain things better.</p>
@@ -241,7 +257,7 @@ ga('send', {
 <section id="resamplefeaturemap" class="level2" data-number="1">
 <h2 data-number="1" class="anchored" data-anchor-id="resamplefeaturemap"><span class="header-section-number">1</span> ResampleFeatureMap</h2>
 <p>So, the first thing we are going to implement is a class called <code>ResampleFeatureMap</code> that is able to upsample or downsample an input feature map based on a parameter called <code>reduction_ratio</code>. This class typically represents the “arrows” in the architecture diagram above.</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> ResampleFeatureMap(nn.Sequential):</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> ResampleFeatureMap(nn.Sequential):</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>, in_channels, out_channels, reduction_ratio<span class="op">=</span><span class="fl">1.</span>, pad_type<span class="op">=</span><span class="st">''</span>, downsample<span class="op">=</span><span class="va">None</span>, upsample<span class="op">=</span><span class="va">None</span>,</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>            norm_layer<span class="op">=</span>nn.BatchNorm2d, apply_bn<span class="op">=</span><span class="va">False</span>, conv_after_downsample<span class="op">=</span><span class="va">False</span>, redundant_bias<span class="op">=</span><span class="va">False</span>):</span>
@@ -277,11 +293,11 @@ ga('send', {
 <span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>                <span class="va">self</span>.add_module(<span class="st">'conv'</span>, conv)</span>
 <span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> reduction_ratio <span class="op">&lt;</span> <span class="dv">1</span>:</span>
 <span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>                scale <span class="op">=</span> <span class="bu">int</span>(<span class="dv">1</span> <span class="op">//</span> reduction_ratio)</span>
-<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>                <span class="va">self</span>.add_module(<span class="st">'upsample'</span>, Interpolate2d(scale_factor<span class="op">=</span>scale, mode<span class="op">=</span>upsample))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>                <span class="va">self</span>.add_module(<span class="st">'upsample'</span>, Interpolate2d(scale_factor<span class="op">=</span>scale, mode<span class="op">=</span>upsample))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Here is the general idea - if <code>out_channels</code> is not equal to <code>in_channels</code>, then use a 1x1 convolution operation to make them the same. Also, if the reduction ratio is not equal to 1, then either upsample or downsample the input feature map based on the requirements. If <code>reduction_ratio&lt;1</code> then, <strong>Upsample</strong> the input, otherwise if <code>reduction_ratio&gt;1</code> then, <strong>Downsample</strong> the input.</p>
 <p>Upsampling or Downsampling in simple terms refers to making the spatial dimensions of the input feature map larger or smaller. Upsampling is generally done using bilinear interpolation and downsampling is generally done using pooling.</p>
 <p>So an example of using this class, assuming all imports work, would be:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># downsampling</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># downsampling</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>inp <span class="op">=</span> torch.randn(<span class="dv">1</span>, <span class="dv">40</span>, <span class="dv">64</span>, <span class="dv">64</span>)</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>resample <span class="op">=</span> ResampleFeatureMap(in_channels<span class="op">=</span><span class="dv">40</span>, out_channels<span class="op">=</span><span class="dv">112</span>, reduction_ratio<span class="op">=</span><span class="dv">2</span>)</span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>out <span class="op">=</span> resample(inp)</span>
@@ -295,11 +311,11 @@ ga('send', {
 <span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>out <span class="op">=</span> resample(inp)</span>
 <span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(inp.shape, out.shape) </span>
 <span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> torch.Size([<span class="dv">1</span>, <span class="dv">40</span>, <span class="dv">64</span>, <span class="dv">64</span>]) torch.Size([<span class="dv">1</span>, <span class="dv">112</span>, <span class="dv">128</span>, <span class="dv">128</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> torch.Size([<span class="dv">1</span>, <span class="dv">40</span>, <span class="dv">64</span>, <span class="dv">64</span>]) torch.Size([<span class="dv">1</span>, <span class="dv">112</span>, <span class="dv">128</span>, <span class="dv">128</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>One key thing that’s part of this class, is that the class does not have a <code>forward</code> method defined that is common to almost all layers in PyTorch. The reason is that this class inherits from <code>nn.Sequential</code> instead of <code>nn.Module</code>. This class does not need a <code>forward</code> method to be defined and automatically calls the modules defined in this class one by one. That is why we do things like <code>self.add_module</code> inside the <code>ResampleFeatureMap</code> class.</p>
 <p>Another thing, the convolution operation inside this <code>ResampleFeatureMap</code> calls <code>ConvBnAct2d</code> and not <code>nn.Conv2d</code>. <code>ConvBnAct2d</code> as the name suggests is a Convolution operation followed by Batch Normalization and an Activation function.</p>
 <p>So, here is the implementation of <code>ConvBnAct2d</code>:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> ConvBnAct2d(nn.Module):</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> ConvBnAct2d(nn.Module):</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, in_channels, out_channels, kernel_size, stride<span class="op">=</span><span class="dv">1</span>, dilation<span class="op">=</span><span class="dv">1</span>, padding<span class="op">=</span><span class="st">''</span>, bias<span class="op">=</span><span class="va">False</span>,</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>                 norm_layer<span class="op">=</span>nn.BatchNorm2d, act_layer<span class="op">=</span>_ACT_LAYER):</span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>(ConvBnAct2d, <span class="va">self</span>).<span class="fu">__init__</span>()</span>
@@ -314,7 +330,7 @@ ga('send', {
 <span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>            x <span class="op">=</span> <span class="va">self</span>.bn(x)</span>
 <span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="va">self</span>.act <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
 <span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>            x <span class="op">=</span> <span class="va">self</span>.act(x)</span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> x</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> x</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>The <code>create_conv2d</code> is a function from <code>timm</code>, that creates a <code>nn.Conv2d</code> layer in our case. We won’t go into the source code of this function as it is part of the <code>timm</code> library, which we will look into a series of blog posts later.</p>
 <p>Now, let’s start to get into the tricky bits. Let’s see how could we implement a single <code>BiFpnLayer</code>.</p>
 </section>
@@ -325,10 +341,10 @@ ga('send', {
 <p>Also, each arrow is the <code>ResampleFeatureMap</code> class where the <span style="color:blue">blue arrows</span> perform <span style="color:blue"><strong>DownSampling</strong></span> and the <span style="color:red">red arrows</span> perform <span style="color:red"><strong>Upsampling</strong></span>. From a code perspective, there are some things that we need to be able to implement the BiFPN Layer: 1. We need to be able to extract the feature maps from the EfficientNet Backbone. <code>timm</code> will do this for us. As you’ll notice later, we call <code>timm.create_model</code> method passing in a parameter called <code>out_indices</code> and also <code>features_only=True</code>. This tells <code>timm</code> to create a model that extracts the required feature maps for us at the correct level. 2. We need to be able to combine the features coming from different nodes at different levels. The class <code>FpnCombine</code> will take care of this for us which we will look at below. 3. We need to define the numbers and structures of the nodes in Python similar to the diagram. &gt; For example, our implementation should know that <code>Node-6</code> is the intermediate Node at level <code>**P5**</code> and it accepts the outputs of <code>Node-5</code> and <code>Node-2</code> as inputs. 4. Not all <code>Node</code>s accept the same number of inputs. Some accept 2 inputs whereas some nodes (such as 9, 10, 11) accept 3 inputs as shown in the <code>fig-2</code>. We can clearly satisfy this requirement by passing the inputs as a <code>List</code> of <code>tensors</code>. 5. The output features from the <code>EfficientNet-B0</code>backbone at level <strong>P3</strong>-<strong>P5</strong> have 40, 112, 320 number of channels respectively and each spatial dimension is half that of the previous level. &gt; This is important to note: considering an input image of size <code>[3, 512, 512]</code>, the size of feature maps at levels <strong>P3</strong>-<strong>P5</strong> would be <code>[40, 64, 64]</code>, <code>[112, 32, 32]</code>, <code>[320, 16, 16]</code> respectively.</p>
 <p>With this general understanding, let’s get to work.</p>
 <p>First things first, how could our implementation get to know about the numbers and structures of the nodes? There is a function called <code>get_fpn_config</code> that returns a Python dictionary like so:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>fpn_config <span class="op">=</span> get_fpn_config()</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>fpn_config <span class="op">=</span> get_fpn_config()</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>fpn_config </span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> {<span class="st">'nodes'</span>: [{<span class="st">'reduction'</span>: <span class="dv">64</span>, <span class="st">'inputs_offsets'</span>: [<span class="dv">3</span>, <span class="dv">4</span>], <span class="st">'weight_method'</span>: <span class="st">'fastattn'</span>}, {<span class="st">'reduction'</span>: <span class="dv">32</span>, <span class="st">'inputs_offsets'</span>: [<span class="dv">2</span>, <span class="dv">5</span>], <span class="st">'weight_method'</span>: <span class="st">'fastattn'</span>}, {<span class="st">'reduction'</span>: <span class="dv">16</span>, <span class="st">'inputs_offsets'</span>: [<span class="dv">1</span>, <span class="dv">6</span>], <span class="st">'weight_method'</span>: <span class="st">'fastattn'</span>}, {<span class="st">'reduction'</span>: <span class="dv">8</span>, <span class="st">'inputs_offsets'</span>: [<span class="dv">0</span>, <span class="dv">7</span>], <span class="st">'weight_method'</span>: <span class="st">'fastattn'</span>}, {<span class="st">'reduction'</span>: <span class="dv">16</span>, <span class="st">'inputs_offsets'</span>: [<span class="dv">1</span>, <span class="dv">7</span>, <span class="dv">8</span>], <span class="st">'weight_method'</span>: <span class="st">'fastattn'</span>}, {<span class="st">'reduction'</span>: <span class="dv">32</span>, <span class="st">'inputs_offsets'</span>: [<span class="dv">2</span>, <span class="dv">6</span>, <span class="dv">9</span>], <span class="st">'weight_method'</span>: <span class="st">'fastattn'</span>}, {<span class="st">'reduction'</span>: <span class="dv">64</span>, <span class="st">'inputs_offsets'</span>: [<span class="dv">3</span>, <span class="dv">5</span>, <span class="dv">10</span>], <span class="st">'weight_method'</span>: <span class="st">'fastattn'</span>}, {<span class="st">'reduction'</span>: <span class="dv">128</span>, <span class="st">'inputs_offsets'</span>: [<span class="dv">4</span>, <span class="dv">11</span>], <span class="st">'weight_method'</span>: <span class="st">'fastattn'</span>}]}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> {<span class="st">'nodes'</span>: [{<span class="st">'reduction'</span>: <span class="dv">64</span>, <span class="st">'inputs_offsets'</span>: [<span class="dv">3</span>, <span class="dv">4</span>], <span class="st">'weight_method'</span>: <span class="st">'fastattn'</span>}, {<span class="st">'reduction'</span>: <span class="dv">32</span>, <span class="st">'inputs_offsets'</span>: [<span class="dv">2</span>, <span class="dv">5</span>], <span class="st">'weight_method'</span>: <span class="st">'fastattn'</span>}, {<span class="st">'reduction'</span>: <span class="dv">16</span>, <span class="st">'inputs_offsets'</span>: [<span class="dv">1</span>, <span class="dv">6</span>], <span class="st">'weight_method'</span>: <span class="st">'fastattn'</span>}, {<span class="st">'reduction'</span>: <span class="dv">8</span>, <span class="st">'inputs_offsets'</span>: [<span class="dv">0</span>, <span class="dv">7</span>], <span class="st">'weight_method'</span>: <span class="st">'fastattn'</span>}, {<span class="st">'reduction'</span>: <span class="dv">16</span>, <span class="st">'inputs_offsets'</span>: [<span class="dv">1</span>, <span class="dv">7</span>, <span class="dv">8</span>], <span class="st">'weight_method'</span>: <span class="st">'fastattn'</span>}, {<span class="st">'reduction'</span>: <span class="dv">32</span>, <span class="st">'inputs_offsets'</span>: [<span class="dv">2</span>, <span class="dv">6</span>, <span class="dv">9</span>], <span class="st">'weight_method'</span>: <span class="st">'fastattn'</span>}, {<span class="st">'reduction'</span>: <span class="dv">64</span>, <span class="st">'inputs_offsets'</span>: [<span class="dv">3</span>, <span class="dv">5</span>, <span class="dv">10</span>], <span class="st">'weight_method'</span>: <span class="st">'fastattn'</span>}, {<span class="st">'reduction'</span>: <span class="dv">128</span>, <span class="st">'inputs_offsets'</span>: [<span class="dv">4</span>, <span class="dv">11</span>], <span class="st">'weight_method'</span>: <span class="st">'fastattn'</span>}]}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <blockquote class="blockquote">
 <p>For now, let’s not worry about where this function comes from. Let’s just consider we know that such a function exists which returns a dictionary output like above. And let’s assume that we need to build our <code>BiFPN Layer</code> using the config returned from the <code>get_fpn_config()</code>.</p>
 </blockquote>
@@ -342,7 +358,7 @@ ga('send', {
 <section id="fnode" class="level3" data-number="2.1">
 <h3 data-number="2.1" class="anchored" data-anchor-id="fnode"><span class="header-section-number">2.1</span> FNode</h3>
 <p>Now inside a <code>Node</code>, we need to be able to accept some iputs, combine those together, perform some computation on this combined input and output a <code>tensor</code>.</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Fnode(nn.Module):</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Fnode(nn.Module):</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">""" A simple wrapper used in place of nn.Sequential for torchscript typing</span></span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co">    Handles input type List[Tensor] -&gt; output type Tensor</span></span>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
@@ -352,7 +368,7 @@ ga('send', {
 <span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.after_combine <span class="op">=</span> after_combine</span>
 <span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x: List[torch.Tensor]) <span class="op">-&gt;</span> torch.Tensor:</span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.after_combine(<span class="va">self</span>.combine(x))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.after_combine(<span class="va">self</span>.combine(x))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>This is exactly what this class <code>Fnode</code> does above. As can be seen in the <code>forward</code> method, it accepts <code>List</code> of <code>Tensors</code>, performs the <code>combine</code> to combine the inputs together and also performs the computations <code>after_combine</code> operation on them and returns the output.</p>
 <p>Now what are these <code>combine</code> and <code>after_combine</code> operations? The <code>combine</code> operation is the one that will make sure that the input tensors are changed to be of the same resolution and once they are of the same size, it will combine them together. Remember <code>fig-2</code>? A <code>Node</code> can accept inputs from various other <code>Nodes</code> that might not necessarily be at the same level. Thus there might be a need to do a <code>resampling</code> operation before we can combine the inputs to make them be of the same size and same number of channels. Only then can we sum the inputs up.</p>
 <blockquote class="blockquote">
@@ -369,7 +385,7 @@ ga('send', {
 <p>Assuming that the combine operation is simply a <code>sum</code> operation for now. As can be seen from the figure above, <code>Node-5</code> accepts the inputs from <code>Node-3</code> and <code>Node-4</code>. Now these feature maps are of <strong>different sizes and have different number of channels</strong> so we simply can’t sum them up. The feature map size at <code>Node-4</code> is <code>[64, 4, 4]</code> whereas at <code>Node-3</code> is <code>[64, 8, 8]</code>. So to be able to combine at <code>Node-5</code>, we will convert both feature maps to be of the size <code>[64, 8, 8]</code> cause that’s what the size of feature map at <code>Node-5</code> should be.</p>
 <p>This class, merely does this operation. It will first <code>resample</code> both feature maps to be of the same size as the required <code>[64, 8, 8]</code> and then it will combine them together.</p>
 <p>So, now that we have some idea of what we want to accomplish, let’s look at the code implementation.</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> FpnCombine(nn.Module):</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> FpnCombine(nn.Module):</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, feature_info, fpn_config, fpn_channels, inputs_offsets, target_reduction, pad_type<span class="op">=</span><span class="st">''</span>,</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>                 downsample<span class="op">=</span><span class="va">None</span>, upsample<span class="op">=</span><span class="va">None</span>, norm_layer<span class="op">=</span>nn.BatchNorm2d, apply_resample_bn<span class="op">=</span><span class="va">False</span>,</span>
 <span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>                 conv_after_downsample<span class="op">=</span><span class="va">False</span>, redundant_bias<span class="op">=</span><span class="va">False</span>, weight_method<span class="op">=</span><span class="st">'attn'</span>):</span>
@@ -418,23 +434,23 @@ ga('send', {
 <span id="cb6-47"><a href="#cb6-47" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
 <span id="cb6-48"><a href="#cb6-48" aria-hidden="true" tabindex="-1"></a>            <span class="cf">raise</span> <span class="pp">ValueError</span>(<span class="st">'unknown weight_method </span><span class="sc">{}</span><span class="st">'</span>.<span class="bu">format</span>(<span class="va">self</span>.weight_method))</span>
 <span id="cb6-49"><a href="#cb6-49" aria-hidden="true" tabindex="-1"></a>        out <span class="op">=</span> torch.<span class="bu">sum</span>(out, dim<span class="op">=-</span><span class="dv">1</span>)</span>
-<span id="cb6-50"><a href="#cb6-50" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> out</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb6-50"><a href="#cb6-50" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> out</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>There’s actually quite a bit happening in this layer but hey, don’t be worried. Take a deep breath and read on! This layer will make sense. :)</p>
 <p>Something new that we have encountered in this class is <code>feature_info</code>. What is it? It’s something that comes from <code>timm</code>. Do you remember that we are using the <code>EfficientNet</code> backbone? This backbone has something called a <code>feature_info</code> which we can see below.</p>
 <blockquote class="blockquote">
 <p>Let’s not worry about how this <code>get_feature_info</code> function is actually implemented. But, let’s just assume there is this beatiful function that gives us the desired outputs.</p>
 </blockquote>
-<div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>backbone <span class="op">=</span> timm.create_model(</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>backbone <span class="op">=</span> timm.create_model(</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>        config.backbone_name, features_only<span class="op">=</span><span class="va">True</span>, out_indices<span class="op">=</span>(<span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>),</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>        pretrained<span class="op">=</span><span class="va">True</span>, <span class="op">**</span>config.backbone_args)</span>
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>feature_info <span class="op">=</span> get_feature_info(backbone)</span>
 <span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(feature_info, <span class="st">'</span><span class="ch">\n</span><span class="st">'</span>)</span>
 <span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> [{<span class="st">'num_chs'</span>: <span class="dv">40</span>, <span class="st">'reduction'</span>: <span class="dv">8</span>}, {<span class="st">'num_chs'</span>: <span class="dv">112</span>, <span class="st">'reduction'</span>: <span class="dv">16</span>}, {<span class="st">'num_chs'</span>: <span class="dv">320</span>, <span class="st">'reduction'</span>: <span class="dv">32</span>}]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> [{<span class="st">'num_chs'</span>: <span class="dv">40</span>, <span class="st">'reduction'</span>: <span class="dv">8</span>}, {<span class="st">'num_chs'</span>: <span class="dv">112</span>, <span class="st">'reduction'</span>: <span class="dv">16</span>}, {<span class="st">'num_chs'</span>: <span class="dv">320</span>, <span class="st">'reduction'</span>: <span class="dv">32</span>}]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>So the <code>feature_info</code> is something that tells us how many channels are there at each <code>reduction</code> level. For example, the number of channels at level <strong>P5</strong> or <code>reduction</code> 32 is 320 as shown in the <code>feature_info</code> dictionary. Note that this matches the number of channels shown in <code>fig-2</code>. Note that this <code>feature_info</code> is actually missing levels <strong>P6</strong> and <strong>P7</strong> where the <code>reduction</code> is 64 and 128 respectively. Let’s again assume there is some part of code that updates this <code>feature_info</code> so it actually looks something like below for the first <code>BiFpnLayer</code>:</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> [{<span class="st">'num_chs'</span>: <span class="dv">40</span>, <span class="st">'reduction'</span>: <span class="dv">8</span>}, {<span class="st">'num_chs'</span>: <span class="dv">112</span>, <span class="st">'reduction'</span>: <span class="dv">16</span>}, {<span class="st">'num_chs'</span>: <span class="dv">320</span>, <span class="st">'reduction'</span>: <span class="dv">32</span>}, {<span class="st">'num_chs'</span>: <span class="dv">64</span>, <span class="st">'reduction'</span>: <span class="dv">64</span>}, {<span class="st">'num_chs'</span>: <span class="dv">64</span>, <span class="st">'reduction'</span>: <span class="dv">128</span>}]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> [{<span class="st">'num_chs'</span>: <span class="dv">40</span>, <span class="st">'reduction'</span>: <span class="dv">8</span>}, {<span class="st">'num_chs'</span>: <span class="dv">112</span>, <span class="st">'reduction'</span>: <span class="dv">16</span>}, {<span class="st">'num_chs'</span>: <span class="dv">320</span>, <span class="st">'reduction'</span>: <span class="dv">32</span>}, {<span class="st">'num_chs'</span>: <span class="dv">64</span>, <span class="st">'reduction'</span>: <span class="dv">64</span>}, {<span class="st">'num_chs'</span>: <span class="dv">64</span>, <span class="st">'reduction'</span>: <span class="dv">128</span>}]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Great, now let’s dissect the <code>__init__</code> method of this <code>FpnCombine</code> class.</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, feature_info, fpn_config, fpn_channels, inputs_offsets, target_reduction, pad_type<span class="op">=</span><span class="st">''</span>,</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, feature_info, fpn_config, fpn_channels, inputs_offsets, target_reduction, pad_type<span class="op">=</span><span class="st">''</span>,</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>                downsample<span class="op">=</span><span class="va">None</span>, upsample<span class="op">=</span><span class="va">None</span>, norm_layer<span class="op">=</span>nn.BatchNorm2d, apply_resample_bn<span class="op">=</span><span class="va">False</span>,</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>                conv_after_downsample<span class="op">=</span><span class="va">False</span>, redundant_bias<span class="op">=</span><span class="va">False</span>, weight_method<span class="op">=</span><span class="st">'attn'</span>):</span>
 <span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    <span class="bu">super</span>(FpnCombine, <span class="va">self</span>).<span class="fu">__init__</span>()</span>
@@ -459,12 +475,12 @@ ga('send', {
 <span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> weight_method <span class="op">==</span> <span class="st">'attn'</span> <span class="kw">or</span> weight_method <span class="op">==</span> <span class="st">'fastattn'</span>:</span>
 <span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.edge_weights <span class="op">=</span> nn.Parameter(torch.ones(<span class="bu">len</span>(inputs_offsets)), requires_grad<span class="op">=</span><span class="va">True</span>)  <span class="co"># WSM</span></span>
 <span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
-<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.edge_weights <span class="op">=</span> <span class="va">None</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.edge_weights <span class="op">=</span> <span class="va">None</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>As a general idea: &gt; This <code>FpnCombine</code> layer accepts a list of nodes as input nodes. Then it calculates some parameters which are then passed to <code>ResampleFeatureMap</code> to make sure that we resample/resize the feature maps from the input nodes such that we can combine them.</p>
 <p>The class accepts <code>feature_info</code>, <code>fpn_config</code>, <code>fpn_channels</code>, <code>inputs_offsets</code> and <code>target_reduction</code> as required inputs. We will focus just on these. We already know the values of <code>feature_info</code> and <code>fpn_config</code>. Let me share them below once again for reference:</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> feature_info <span class="op">=</span>  [{<span class="st">'num_chs'</span>: <span class="dv">40</span>, <span class="st">'reduction'</span>: <span class="dv">8</span>}, {<span class="st">'num_chs'</span>: <span class="dv">112</span>, <span class="st">'reduction'</span>: <span class="dv">16</span>}, {<span class="st">'num_chs'</span>: <span class="dv">320</span>, <span class="st">'reduction'</span>: <span class="dv">32</span>}, {<span class="st">'num_chs'</span>: <span class="dv">64</span>, <span class="st">'reduction'</span>: <span class="dv">64</span>}, {<span class="st">'num_chs'</span>: <span class="dv">64</span>, <span class="st">'reduction'</span>: <span class="dv">128</span>}]</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> feature_info <span class="op">=</span>  [{<span class="st">'num_chs'</span>: <span class="dv">40</span>, <span class="st">'reduction'</span>: <span class="dv">8</span>}, {<span class="st">'num_chs'</span>: <span class="dv">112</span>, <span class="st">'reduction'</span>: <span class="dv">16</span>}, {<span class="st">'num_chs'</span>: <span class="dv">320</span>, <span class="st">'reduction'</span>: <span class="dv">32</span>}, {<span class="st">'num_chs'</span>: <span class="dv">64</span>, <span class="st">'reduction'</span>: <span class="dv">64</span>}, {<span class="st">'num_chs'</span>: <span class="dv">64</span>, <span class="st">'reduction'</span>: <span class="dv">128</span>}]</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> fpn_config <span class="op">=</span> {<span class="st">'nodes'</span>: [{<span class="st">'reduction'</span>: <span class="dv">64</span>, <span class="st">'inputs_offsets'</span>: [<span class="dv">3</span>, <span class="dv">4</span>], <span class="st">'weight_method'</span>: <span class="st">'fastattn'</span>}, {<span class="st">'reduction'</span>: <span class="dv">32</span>, <span class="st">'inputs_offsets'</span>: [<span class="dv">2</span>, <span class="dv">5</span>], <span class="st">'weight_method'</span>: <span class="st">'fastattn'</span>}, {<span class="st">'reduction'</span>: <span class="dv">16</span>, <span class="st">'inputs_offsets'</span>: [<span class="dv">1</span>, <span class="dv">6</span>], <span class="st">'weight_method'</span>: <span class="st">'fastattn'</span>}, {<span class="st">'reduction'</span>: <span class="dv">8</span>, <span class="st">'inputs_offsets'</span>: [<span class="dv">0</span>, <span class="dv">7</span>], <span class="st">'weight_method'</span>: <span class="st">'fastattn'</span>}, {<span class="st">'reduction'</span>: <span class="dv">16</span>, <span class="st">'inputs_offsets'</span>: [<span class="dv">1</span>, <span class="dv">7</span>, <span class="dv">8</span>], <span class="st">'weight_method'</span>: <span class="st">'fastattn'</span>}, {<span class="st">'reduction'</span>: <span class="dv">32</span>, <span class="st">'inputs_offsets'</span>: [<span class="dv">2</span>, <span class="dv">6</span>, <span class="dv">9</span>], <span class="st">'weight_method'</span>: <span class="st">'fastattn'</span>}, {<span class="st">'reduction'</span>: <span class="dv">64</span>, <span class="st">'inputs_offsets'</span>: [<span class="dv">3</span>, <span class="dv">5</span>, <span class="dv">10</span>], <span class="st">'weight_method'</span>: <span class="st">'fastattn'</span>}, {<span class="st">'reduction'</span>: <span class="dv">128</span>, <span class="st">'inputs_offsets'</span>: [<span class="dv">4</span>, <span class="dv">11</span>], <span class="st">'weight_method'</span>: <span class="st">'fastattn'</span>}]}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> fpn_config <span class="op">=</span> {<span class="st">'nodes'</span>: [{<span class="st">'reduction'</span>: <span class="dv">64</span>, <span class="st">'inputs_offsets'</span>: [<span class="dv">3</span>, <span class="dv">4</span>], <span class="st">'weight_method'</span>: <span class="st">'fastattn'</span>}, {<span class="st">'reduction'</span>: <span class="dv">32</span>, <span class="st">'inputs_offsets'</span>: [<span class="dv">2</span>, <span class="dv">5</span>], <span class="st">'weight_method'</span>: <span class="st">'fastattn'</span>}, {<span class="st">'reduction'</span>: <span class="dv">16</span>, <span class="st">'inputs_offsets'</span>: [<span class="dv">1</span>, <span class="dv">6</span>], <span class="st">'weight_method'</span>: <span class="st">'fastattn'</span>}, {<span class="st">'reduction'</span>: <span class="dv">8</span>, <span class="st">'inputs_offsets'</span>: [<span class="dv">0</span>, <span class="dv">7</span>], <span class="st">'weight_method'</span>: <span class="st">'fastattn'</span>}, {<span class="st">'reduction'</span>: <span class="dv">16</span>, <span class="st">'inputs_offsets'</span>: [<span class="dv">1</span>, <span class="dv">7</span>, <span class="dv">8</span>], <span class="st">'weight_method'</span>: <span class="st">'fastattn'</span>}, {<span class="st">'reduction'</span>: <span class="dv">32</span>, <span class="st">'inputs_offsets'</span>: [<span class="dv">2</span>, <span class="dv">6</span>, <span class="dv">9</span>], <span class="st">'weight_method'</span>: <span class="st">'fastattn'</span>}, {<span class="st">'reduction'</span>: <span class="dv">64</span>, <span class="st">'inputs_offsets'</span>: [<span class="dv">3</span>, <span class="dv">5</span>, <span class="dv">10</span>], <span class="st">'weight_method'</span>: <span class="st">'fastattn'</span>}, {<span class="st">'reduction'</span>: <span class="dv">128</span>, <span class="st">'inputs_offsets'</span>: [<span class="dv">4</span>, <span class="dv">11</span>], <span class="st">'weight_method'</span>: <span class="st">'fastattn'</span>}]}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><strong>Let’s just assume that we are currently creating an instance of this class for <code>Node-5</code> as an example.</strong></p>
 <p>The <code>inputs_offsets</code> would be a list of <code>Node</code> id’s such as <code>[3,4]</code> for <code>Node-5</code>. This states that <code>Node-5</code> accepts the outputs of <code>Node-3</code> and <code>Node-4</code> as inputs and has to combine them.</p>
 <p>The only variables that we do not know the values of are <code>fpn_channels</code> and <code>target_reduction</code>. The <code>fpn_channels</code> has a value of 64.Great, what about <code>target_reduction</code>? <code>target_reduction</code> just refers to the <code>reduction</code> value of the current <code>Node</code> for which we are creating this <code>FpnCombine</code> class. So, from the <code>fpn_config</code> we can see the <code>reduction</code> for <code>Node-5</code> is <code>64</code>. Thus <code>target_reduction=64</code>.</p>
@@ -472,27 +488,27 @@ ga('send', {
 <p>Note that the value of <code>target_reduction</code> for <code>Node-6</code> be 32, for <code>Node-7</code> it will be 16 and so on..</p>
 </blockquote>
 <p>I leave it to the reader to see how the <code>self.resample</code> inside the <code>FpnCombine</code> is a list of <code>ResampleFeatureMap</code> that looks something like below for <code>Node-5</code>:</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> <span class="va">self</span>.resample</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> <span class="va">self</span>.resample</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>ModuleDict(</span>
 <span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  (<span class="dv">3</span>): ResampleFeatureMap: (inp_ch:<span class="dv">64</span>, out_ch:<span class="dv">64</span>, reduction:<span class="fl">1.0</span>)</span>
 <span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  (<span class="dv">4</span>): ResampleFeatureMap: (inp_ch:<span class="dv">64</span>, out_ch:<span class="dv">64</span>, reduction:<span class="fl">0.5</span>)</span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>For <code>Node-6</code>, this looks something like:</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> ModuleDict(</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;</span> ModuleDict(</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  (<span class="dv">2</span>): ResampleFeatureMap: (inp_ch:<span class="dv">320</span>, out_ch:<span class="dv">64</span>, reduction:<span class="fl">1.0</span>)</span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  (<span class="dv">5</span>): ResampleFeatureMap: (inp_ch:<span class="dv">64</span>, out_ch:<span class="dv">64</span>, reduction:<span class="fl">0.5</span>)</span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>And finally for <code>Node-7</code> as an example, this looks like:</p>
-<div class="sourceCode" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>ModuleDict(</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>ModuleDict(</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  (<span class="dv">1</span>): ResampleFeatureMap: (inp_ch:<span class="dv">112</span>, out_ch:<span class="dv">64</span>, reduction:<span class="fl">1.0</span>)</span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  (<span class="dv">6</span>): ResampleFeatureMap: (inp_ch:<span class="dv">64</span>, out_ch:<span class="dv">64</span>, reduction:<span class="fl">0.5</span>)</span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <blockquote class="blockquote">
 <p>If you follow along the <code>for</code> loop inside the <code>__init__</code> method, what I have stated above will become pretty clear to you. It might be a good idea right now to take out a pen and paper, and actually try to guess the values that get passed to <code>ResampleFeatureMap</code> for each input offset. If you don’t get it, feel free to reach out to me and I’ll share the solution. Contact details have been provided at the last of this blog post.</p>
 </blockquote>
 <p>I hope that you’ve been able to trace the values of <code>self.resample</code> for the various <code>Node</code>s. Now that we have already looked at <code>__init__</code>, the <code>forward</code> method is pretty straightforward:</p>
-<div class="sourceCode" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x: List[torch.Tensor]):</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x: List[torch.Tensor]):</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>        dtype <span class="op">=</span> x[<span class="dv">0</span>].dtype</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>        nodes <span class="op">=</span> []</span>
 <span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> offset, resample <span class="kw">in</span> <span class="bu">zip</span>(<span class="va">self</span>.inputs_offsets, <span class="va">self</span>.resample.values()):</span>
@@ -513,18 +529,18 @@ ga('send', {
 <span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
 <span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>            <span class="cf">raise</span> <span class="pp">ValueError</span>(<span class="st">'unknown weight_method </span><span class="sc">{}</span><span class="st">'</span>.<span class="bu">format</span>(<span class="va">self</span>.weight_method))</span>
 <span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>        out <span class="op">=</span> torch.<span class="bu">sum</span>(out, dim<span class="op">=-</span><span class="dv">1</span>)</span>
-<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> out</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> out</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>There isn’t a lot happening. We just go over the inputs one by one, perform the required <code>resample</code> operation as in <code>self.resample</code> to make the input feature maps to be of the required size and finally do the “combination” inside the forward.</p>
 </section>
 <section id="the-after_combine-method" class="level4" data-number="2.1.2">
 <h4 data-number="2.1.2" class="anchored" data-anchor-id="the-after_combine-method"><span class="header-section-number">2.1.2</span> The <code>after_combine</code> method</h4>
 <p>The <code>after_combine</code> method is nothing but a** Depthwise Separable Convolution** that we will look at as part of the <code>BiFpnLayer</code> implementation. But for completeness of <code>FNode</code>, I state it below too:</p>
-<div class="sourceCode" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>conv_kwargs <span class="op">=</span> <span class="bu">dict</span>(</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>conv_kwargs <span class="op">=</span> <span class="bu">dict</span>(</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>                in_channels<span class="op">=</span>fpn_channels, out_channels<span class="op">=</span>fpn_channels, kernel_size<span class="op">=</span><span class="dv">3</span>, padding<span class="op">=</span>pad_type,</span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>                bias<span class="op">=</span><span class="va">False</span>, norm_layer<span class="op">=</span>norm_layer, act_layer<span class="op">=</span>act_layer)</span>
 <span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>after_combine <span class="op">=</span> nn.Sequential()</span>
 <span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>after_combine.add_module(</span>
-<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>                <span class="st">'conv'</span>, SeparableConv2d(<span class="op">**</span>conv_kwargs))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>                <span class="st">'conv'</span>, SeparableConv2d(<span class="op">**</span>conv_kwargs))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 </section>
 </section>
@@ -535,7 +551,7 @@ ga('send', {
 <p>If you have understood the implementation of <code>FpnCombine</code>, and also the general idea so far, then you will find the implementation of <code>BiFPN Layer</code> as something that brings all the pieces together. It should be intuitive rather than complex.</p>
 </blockquote>
 <p>So, let’s have a look at it.</p>
-<div class="sourceCode" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> BiFpnLayer(nn.Module):</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> BiFpnLayer(nn.Module):</span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, feature_info, fpn_config, fpn_channels, num_levels<span class="op">=</span><span class="dv">5</span>, pad_type<span class="op">=</span><span class="st">''</span>,</span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>                 downsample<span class="op">=</span><span class="va">None</span>, upsample<span class="op">=</span><span class="va">None</span>, norm_layer<span class="op">=</span>nn.BatchNorm2d, act_layer<span class="op">=</span>_ACT_LAYER,</span>
 <span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>                 apply_resample_bn<span class="op">=</span><span class="va">False</span>, conv_after_downsample<span class="op">=</span><span class="va">True</span>, conv_bn_relu_pattern<span class="op">=</span><span class="va">False</span>,</span>
@@ -574,13 +590,13 @@ ga('send', {
 <span id="cb16-37"><a href="#cb16-37" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x: List[torch.Tensor]):</span>
 <span id="cb16-38"><a href="#cb16-38" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> fn <span class="kw">in</span> <span class="va">self</span>.fnode:</span>
 <span id="cb16-39"><a href="#cb16-39" aria-hidden="true" tabindex="-1"></a>            x.append(fn(x))</span>
-<span id="cb16-40"><a href="#cb16-40" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> x[<span class="op">-</span><span class="va">self</span>.num_levels::]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb16-40"><a href="#cb16-40" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> x[<span class="op">-</span><span class="va">self</span>.num_levels::]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>We already know what the values of the required parameters are <code>feature_info</code>, <code>fpn_config</code> and <code>fpn_channels</code>. I share them for reference below once again:</p>
-<div class="sourceCode" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>feature_info <span class="op">=</span> [{<span class="st">'num_chs'</span>: <span class="dv">40</span>, <span class="st">'reduction'</span>: <span class="dv">8</span>}, {<span class="st">'num_chs'</span>: <span class="dv">112</span>, <span class="st">'reduction'</span>: <span class="dv">16</span>}, {<span class="st">'num_chs'</span>: <span class="dv">320</span>, <span class="st">'reduction'</span>: <span class="dv">32</span>}, {<span class="st">'num_chs'</span>: <span class="dv">64</span>, <span class="st">'reduction'</span>: <span class="dv">64</span>}, {<span class="st">'num_chs'</span>: <span class="dv">64</span>, <span class="st">'reduction'</span>: <span class="dv">128</span>}]</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>feature_info <span class="op">=</span> [{<span class="st">'num_chs'</span>: <span class="dv">40</span>, <span class="st">'reduction'</span>: <span class="dv">8</span>}, {<span class="st">'num_chs'</span>: <span class="dv">112</span>, <span class="st">'reduction'</span>: <span class="dv">16</span>}, {<span class="st">'num_chs'</span>: <span class="dv">320</span>, <span class="st">'reduction'</span>: <span class="dv">32</span>}, {<span class="st">'num_chs'</span>: <span class="dv">64</span>, <span class="st">'reduction'</span>: <span class="dv">64</span>}, {<span class="st">'num_chs'</span>: <span class="dv">64</span>, <span class="st">'reduction'</span>: <span class="dv">128</span>}]</span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>fpn_config <span class="op">=</span> {<span class="st">'nodes'</span>: [{<span class="st">'reduction'</span>: <span class="dv">64</span>, <span class="st">'inputs_offsets'</span>: [<span class="dv">3</span>, <span class="dv">4</span>], <span class="st">'weight_method'</span>: <span class="st">'fastattn'</span>}, {<span class="st">'reduction'</span>: <span class="dv">32</span>, <span class="st">'inputs_offsets'</span>: [<span class="dv">2</span>, <span class="dv">5</span>], <span class="st">'weight_method'</span>: <span class="st">'fastattn'</span>}, {<span class="st">'reduction'</span>: <span class="dv">16</span>, <span class="st">'inputs_offsets'</span>: [<span class="dv">1</span>, <span class="dv">6</span>], <span class="st">'weight_method'</span>: <span class="st">'fastattn'</span>}, {<span class="st">'reduction'</span>: <span class="dv">8</span>, <span class="st">'inputs_offsets'</span>: [<span class="dv">0</span>, <span class="dv">7</span>], <span class="st">'weight_method'</span>: <span class="st">'fastattn'</span>}, {<span class="st">'reduction'</span>: <span class="dv">16</span>, <span class="st">'inputs_offsets'</span>: [<span class="dv">1</span>, <span class="dv">7</span>, <span class="dv">8</span>], <span class="st">'weight_method'</span>: <span class="st">'fastattn'</span>}, {<span class="st">'reduction'</span>: <span class="dv">32</span>, <span class="st">'inputs_offsets'</span>: [<span class="dv">2</span>, <span class="dv">6</span>, <span class="dv">9</span>], <span class="st">'weight_method'</span>: <span class="st">'fastattn'</span>}, {<span class="st">'reduction'</span>: <span class="dv">64</span>, <span class="st">'inputs_offsets'</span>: [<span class="dv">3</span>, <span class="dv">5</span>, <span class="dv">10</span>], <span class="st">'weight_method'</span>: <span class="st">'fastattn'</span>}, {<span class="st">'reduction'</span>: <span class="dv">128</span>, <span class="st">'inputs_offsets'</span>: [<span class="dv">4</span>, <span class="dv">11</span>], <span class="st">'weight_method'</span>: <span class="st">'fastattn'</span>}]}</span>
 <span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>fpn_channels <span class="op">=</span> <span class="dv">64</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>fpn_channels <span class="op">=</span> <span class="dv">64</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>The BiFPN Layer implementation is the glue that binds the <code>FNode</code>, <code>FpnCombine</code>, <code>ResampleFeatureMap</code> classes together. Let’s see how?</p>
 <p>Inside the <code>__init__</code> method, we iterate over the <code>Nodes</code>. For each node, <code>combine</code> is an instance of <code>FpnCombine</code> and <code>after_combine</code> is a <code>SeparableConv2d</code> nn Module. Next, we create a <code>FNode</code> for each of the <code>Node</code>s inside the <code>fpn_config</code> with each <code>FNode</code> having it’s own <code>combine</code> and <code>after_combine</code> values.</p>
 <p>Finally, in the <code>forward</code> method, where the input <code>x</code> is list of feature maps from levels <strong>P3</strong>-<strong>P7</strong>, is passed through to each node and we append the outputs. Finally, we return the last 5 outputs (feature maps), that are then passed on to another <code>BiFpnLayer</code> which does the same thing again.</p>
@@ -591,7 +607,7 @@ ga('send', {
 <section id="bifpn" class="level2" data-number="4">
 <h2 data-number="4" class="anchored" data-anchor-id="bifpn"><span class="header-section-number">4</span> BiFPN</h2>
 <p>Having already understood how to implement the <code>BiFPN Layer</code>, let’s now look at how to implement the <code>BiFPN</code> network. It’s really a simple case of having multiple <code>BiFPN layers</code> inside a single <code>BiFPN</code> network.</p>
-<div class="sourceCode" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> BiFpn(nn.Module):</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> BiFpn(nn.Module):</span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, config, feature_info):</span>
 <span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>(BiFpn, <span class="va">self</span>).<span class="fu">__init__</span>()</span>
@@ -653,18 +669,18 @@ ga('send', {
 <span id="cb18-60"><a href="#cb18-60" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> resample <span class="kw">in</span> <span class="va">self</span>.resample.values():</span>
 <span id="cb18-61"><a href="#cb18-61" aria-hidden="true" tabindex="-1"></a>            x.append(resample(x[<span class="op">-</span><span class="dv">1</span>]))</span>
 <span id="cb18-62"><a href="#cb18-62" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="va">self</span>.cell(x)</span>
-<span id="cb18-63"><a href="#cb18-63" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> x</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb18-63"><a href="#cb18-63" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> x</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>So let’s have a look at what is <code>self.resample</code> inside here? As you will see in the implementation of the <code>EfficientDet</code> Architecture in the next section, the backbone <code>EfficientNet</code> only returns a total of 3 feature maps for levels <strong>P3</strong>-<strong>P5</strong>. We still need to calculate feature maps for levels <strong>P6</strong> &amp; <strong>P7</strong>. This is what the <code>self.resample</code> layer does here.</p>
 <p>As you can see in the forward method:</p>
-<div class="sourceCode" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> resample <span class="kw">in</span> <span class="va">self</span>.resample.values():</span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>            x.append(resample(x[<span class="op">-</span><span class="dv">1</span>]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> resample <span class="kw">in</span> <span class="va">self</span>.resample.values():</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>            x.append(resample(x[<span class="op">-</span><span class="dv">1</span>]))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>As I mentioned, <code>x</code> has total of 3 feature maps reprenting levels <strong>P3</strong>-<strong>P5</strong>. We call the <code>resample</code> method and append 2 more feature maps to <code>x</code> to make the total length 5 representing the feature maps for levels <strong>P3</strong>-<strong>P7</strong>.</p>
 <p>Finally, what is <code>self.cell</code>? It’s simply a repetition of <code>BiFPN Layers</code> to represent the <code>BiFPN Network</code>. Since the <code>self.cell</code> is a <code>SequentialList</code>, each <code>BiFPNLayer</code> is called one by one.:)</p>
 </section>
 <section id="efficientdet-architecture" class="level2" data-number="5">
 <h2 data-number="5" class="anchored" data-anchor-id="efficientdet-architecture"><span class="header-section-number">5</span> EfficientDet Architecture</h2>
 <p>This class is the main one - or is it? Considering we have all the pieces already, this class merely puts them all together.</p>
-<div class="sourceCode" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> EfficientDet(nn.Module):</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> EfficientDet(nn.Module):</span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, config, pretrained_backbone<span class="op">=</span><span class="va">True</span>, alternate_init<span class="op">=</span><span class="va">False</span>):</span>
 <span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>(EfficientDet, <span class="va">self</span>).<span class="fu">__init__</span>()</span>
@@ -690,7 +706,7 @@ ga('send', {
 <span id="cb20-24"><a href="#cb20-24" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="va">self</span>.fpn(x)</span>
 <span id="cb20-25"><a href="#cb20-25" aria-hidden="true" tabindex="-1"></a>        x_class <span class="op">=</span> <span class="va">self</span>.class_net(x)</span>
 <span id="cb20-26"><a href="#cb20-26" aria-hidden="true" tabindex="-1"></a>        x_box <span class="op">=</span> <span class="va">self</span>.box_net(x)</span>
-<span id="cb20-27"><a href="#cb20-27" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> x_class, x_box</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb20-27"><a href="#cb20-27" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> x_class, x_box</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>The reader should by now be able to read this code and understand what’s going on. We have already done the bulk of the work together here. Though there are some notable things that I would like to mention: 1. <code>self.backbone</code> returns a total of 3 feature maps because we passed the <code>out_indices=(2, 3, 4)</code>. As to how? This comes from <code>timm</code>. 2. I have not explained what a <code>HeadNet</code> is. It is basically a custom head that takes the final outputs of the <code>BiFPN</code> network and either returns a class or bounding box coordinates. The <code>self.class_net</code> and <code>self.box_net</code> together represent the Box Prediction Net as in <code>fig-1</code>.</p>
 </section>
 <section id="conclusion" class="level2" data-number="6">
@@ -698,10 +714,10 @@ ga('send', {
 <p>I truly believe that it wasn’t easy to understand how to implement <code>EfficientDet</code>s in Tensorflow or PyTorch. The official implementation exists <a href="https://github.com/google/automl/tree/master/efficientdet">here</a> and the PyTorch version is <a href="https://github.com/rwightman/efficientdet-pytorch">here</a>.</p>
 <p>Thanks to <a href="https://twitter.com/wightmanr">Ross Wightman</a> for his wonderful work in providing us with a PyTorch implementation of the <strong>EfficientDet</strong> network. It really makes things super easy for the native PyTorch users.</p>
 <p>Something I have realised during this exercise, is that, when we are doing something like:</p>
-<div class="sourceCode" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> effdet <span class="im">import</span> get_efficientdet_config, EfficientDet</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> effdet <span class="im">import</span> get_efficientdet_config, EfficientDet</span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>config <span class="op">=</span> get_efficientdet_config(<span class="st">'efficientdet_d0'</span>)</span>
 <span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>efficientdet <span class="op">=</span> EfficientDet(config)</span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>output <span class="op">=</span> efficientdet(inputs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>output <span class="op">=</span> efficientdet(inputs)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>When we are merely using the library, it is hard to appreciate the hard work that the author has put into making things so simple for us. In doing this exercise of going through the source code and to try and explain it to everyone, I have noticed the minor details and have tremendous appreciation for Ross’s hard work. So, thanks so much Ross! And of course to the authors of the <strong>EfficientDet</strong> for open sourcing the implementation in Tensorflow.</p>
 <p>I hope that in today’s blog post I have been able to explain how to implement <code>EfficientDet</code>s in Code and take away all the confusion and doubt in case you had any.</p>
 <p>As always, constructive feedback is always welcome at <a href="https://twitter.com/amaarora"><span class="citation" data-cites="amaarora">@amaarora</span></a>.</p>
@@ -737,239 +753,406 @@ ga('send', {
 </form>
 </div><script type="text/javascript">(function($) {window.fnames = new Array(); window.ftypes = new Array();fnames[0]='EMAIL';ftypes[0]='email';fnames[1]='FNAME';ftypes[1]='text';fnames[2]='LNAME';ftypes[2]='text';fnames[3]='ADDRESS';ftypes[3]='address';fnames[4]='PHONE';ftypes[4]='phone';fnames[5]='BIRTHDAY';ftypes[5]='birthday';}(jQuery));var $mcj = jQuery.noConflict(true);</script></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
-window.document.addEventListener("DOMContentLoaded", function (event) {
-  const toggleBodyColorMode = (bsSheetEl) => {
-    const mode = bsSheetEl.getAttribute("data-mode");
-    const bodyEl = window.document.querySelector("body");
-    if (mode === "dark") {
-      bodyEl.classList.add("quarto-dark");
-      bodyEl.classList.remove("quarto-light");
-    } else {
-      bodyEl.classList.add("quarto-light");
-      bodyEl.classList.remove("quarto-dark");
-    }
-  }
-  const toggleBodyColorPrimary = () => {
-    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
-    if (bsSheetEl) {
-      toggleBodyColorMode(bsSheetEl);
-    }
-  }
-  toggleBodyColorPrimary();  
-  const icon = "";
-  const anchorJS = new window.AnchorJS();
-  anchorJS.options = {
-    placement: 'right',
-    icon: icon
-  };
-  anchorJS.add('.anchored');
-  const isCodeAnnotation = (el) => {
-    for (const clz of el.classList) {
-      if (clz.startsWith('code-annotation-')) {                     
-        return true;
-      }
-    }
-    return false;
-  }
-  const clipboard = new window.ClipboardJS('.code-copy-button', {
-    text: function(trigger) {
-      const codeEl = trigger.previousElementSibling.cloneNode(true);
-      for (const childEl of codeEl.children) {
-        if (isCodeAnnotation(childEl)) {
-          childEl.remove();
-        }
-      }
-      return codeEl.innerText;
-    }
-  });
-  clipboard.on('success', function(e) {
-    // button target
-    const button = e.trigger;
-    // don't keep focus
-    button.blur();
-    // flash "checked"
-    button.classList.add('code-copy-button-checked');
-    var currentTitle = button.getAttribute("title");
-    button.setAttribute("title", "Copied!");
-    let tooltip;
-    if (window.bootstrap) {
-      button.setAttribute("data-bs-toggle", "tooltip");
-      button.setAttribute("data-bs-placement", "left");
-      button.setAttribute("data-bs-title", "Copied!");
-      tooltip = new bootstrap.Tooltip(button, 
-        { trigger: "manual", 
-          customClass: "code-copy-button-tooltip",
-          offset: [0, -8]});
-      tooltip.show();    
-    }
-    setTimeout(function() {
-      if (tooltip) {
-        tooltip.hide();
-        button.removeAttribute("data-bs-title");
-        button.removeAttribute("data-bs-toggle");
-        button.removeAttribute("data-bs-placement");
-      }
-      button.setAttribute("title", currentTitle);
-      button.classList.remove('code-copy-button-checked');
-    }, 1000);
-    // clear code selection
-    e.clearSelection();
-  });
-  function tippyHover(el, contentFn) {
-    const config = {
-      allowHTML: true,
-      content: contentFn,
-      maxWidth: 500,
-      delay: 100,
-      arrow: false,
-      appendTo: function(el) {
-          return el.parentElement;
-      },
-      interactive: true,
-      interactiveBorder: 10,
-      theme: 'quarto',
-      placement: 'bottom-start'
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
     };
-    window.tippy(el, config); 
-  }
-  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
-  for (var i=0; i<noterefs.length; i++) {
-    const ref = noterefs[i];
-    tippyHover(ref, function() {
-      // use id or data attribute instead here
-      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
-      try { href = new URL(href).hash; } catch {}
-      const id = href.replace(/^#\/?/, "");
-      const note = window.document.getElementById(id);
-      return note.innerHTML;
-    });
-  }
-      let selectedAnnoteEl;
-      const selectorForAnnotation = ( cell, annotation) => {
-        let cellAttr = 'data-code-cell="' + cell + '"';
-        let lineAttr = 'data-code-annotation="' +  annotation + '"';
-        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
-        return selector;
-      }
-      const selectCodeLines = (annoteEl) => {
-        const doc = window.document;
-        const targetCell = annoteEl.getAttribute("data-target-cell");
-        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
-        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
-        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
-        const lineIds = lines.map((line) => {
-          return targetCell + "-" + line;
-        })
-        let top = null;
-        let height = null;
-        let parent = null;
-        if (lineIds.length > 0) {
-            //compute the position of the single el (top and bottom and make a div)
-            const el = window.document.getElementById(lineIds[0]);
-            top = el.offsetTop;
-            height = el.offsetHeight;
-            parent = el.parentElement.parentElement;
-          if (lineIds.length > 1) {
-            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
-            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
-            height = bottom - top;
-          }
-          if (top !== null && height !== null && parent !== null) {
-            // cook up a div (if necessary) and position it 
-            let div = window.document.getElementById("code-annotation-line-highlight");
-            if (div === null) {
-              div = window.document.createElement("div");
-              div.setAttribute("id", "code-annotation-line-highlight");
-              div.style.position = 'absolute';
-              parent.appendChild(div);
-            }
-            div.style.top = top - 2 + "px";
-            div.style.height = height + 4 + "px";
-            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
-            if (gutterDiv === null) {
-              gutterDiv = window.document.createElement("div");
-              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
-              gutterDiv.style.position = 'absolute';
-              const codeCell = window.document.getElementById(targetCell);
-              const gutter = codeCell.querySelector('.code-annotation-gutter');
-              gutter.appendChild(gutterDiv);
-            }
-            gutterDiv.style.top = top - 2 + "px";
-            gutterDiv.style.height = height + 4 + "px";
-          }
-          selectedAnnoteEl = annoteEl;
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
         }
-      };
-      const unselectCodeLines = () => {
-        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
-        elementsIds.forEach((elId) => {
-          const div = window.document.getElementById(elId);
-          if (div) {
-            div.remove();
-          }
-        });
-        selectedAnnoteEl = undefined;
-      };
-      // Attach click handler to the DT
-      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
-      for (const annoteDlNode of annoteDls) {
-        annoteDlNode.addEventListener('click', (event) => {
-          const clickedEl = event.target;
-          if (clickedEl !== selectedAnnoteEl) {
-            unselectCodeLines();
-            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
-            if (activeEl) {
-              activeEl.classList.remove('code-annotation-active');
-            }
-            selectCodeLines(clickedEl);
-            clickedEl.classList.add('code-annotation-active');
-          } else {
-            // Unselect the line
-            unselectCodeLines();
-            clickedEl.classList.remove('code-annotation-active');
-          }
-        });
       }
-  const findCites = (el) => {
-    const parentEl = el.parentElement;
-    if (parentEl) {
-      const cites = parentEl.dataset.cites;
-      if (cites) {
-        return {
-          el,
-          cites: cites.split(' ')
-        };
-      } else {
-        return findCites(el.parentElement)
-      }
-    } else {
-      return undefined;
+      return false;
     }
-  };
-  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
-  for (var i=0; i<bibliorefs.length; i++) {
-    const ref = bibliorefs[i];
-    const citeInfo = findCites(ref);
-    if (citeInfo) {
-      tippyHover(citeInfo.el, function() {
-        var popup = window.document.createElement('div');
-        citeInfo.cites.forEach(function(cite) {
-          var citeDiv = window.document.createElement('div');
-          citeDiv.classList.add('hanging-indent');
-          citeDiv.classList.add('csl-entry');
-          var biblioDiv = window.document.getElementById('ref-' + cite);
-          if (biblioDiv) {
-            citeDiv.innerHTML = biblioDiv.innerHTML;
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
           }
-          popup.appendChild(citeDiv);
-        });
-        return popup.innerHTML;
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
       });
     }
-  }
-});
-</script>
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
 </div> <!-- /content -->
+
 
 
 
