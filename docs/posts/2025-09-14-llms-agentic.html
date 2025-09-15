@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.21">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Aman Arora">
+<meta name="dcterms.date" content="2025-09-14">
+<meta name="description" content="Demystifying tool calling in LLMs - how special tokens and training patterns create the illusion of agency, when it’s really just next token prediction with clever scaffolding">
+
+<title>What Makes Modern Day LLMs Agentic</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href=".././images/logo.png" rel="icon" type="image/png">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-ea1d7ac60288e0f1efdbc993fd8432ae.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-5b4ad623e5705c0698d39aec6f10cf02.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+<script type="text/javascript">
+
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+ga('create', 'UA-158677010-1', 'auto');
+
+ga('send', {
+  hitType: 'pageview',
+  'anonymizeIp': true,
+});
+</script>
+
+
+<meta name="twitter:title" content="What Makes Modern Day LLMs Agentic">
+<meta name="twitter:description" content="Demystifying tool calling in LLMs - how special tokens and training patterns create the illusion of agency, when it’s really just next token prediction with clever scaffolding">
+<meta name="twitter:image" content="../images/tool-calling.png">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+
+<body class="nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="../index.html" class="navbar-brand navbar-brand-logo">
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html"> 
+<span class="menu-text">Aman Arora’s Blog</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../about.html"> 
+<span class="menu-text">Aman Arora</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/amaarora"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com/amaarora"> <i class="bi bi-twitter" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://www.linkedin.com/in/aroraaman/"> <i class="bi bi-linkedin" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#the-illusion-of-agency" id="toc-the-illusion-of-agency" class="nav-link active" data-scroll-target="#the-illusion-of-agency"><span class="header-section-number">1</span> The Illusion of Agency</a></li>
+  <li><a href="#from-gpt-2-to-gpt-5-same-generate-loop-different-tokens" id="toc-from-gpt-2-to-gpt-5-same-generate-loop-different-tokens" class="nav-link" data-scroll-target="#from-gpt-2-to-gpt-5-same-generate-loop-different-tokens"><span class="header-section-number">2</span> From GPT-2 to GPT-5: Same Generate Loop, Different Tokens</a>
+  <ul class="collapse">
+  <li><a href="#prompt-completion-without-tool-calling" id="toc-prompt-completion-without-tool-calling" class="nav-link" data-scroll-target="#prompt-completion-without-tool-calling"><span class="header-section-number">2.1</span> Prompt completion without tool calling</a></li>
+  <li><a href="#prompt-completion-with-tool-calling" id="toc-prompt-completion-with-tool-calling" class="nav-link" data-scroll-target="#prompt-completion-with-tool-calling"><span class="header-section-number">2.2</span> Prompt completion with tool calling</a></li>
+  </ul></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion"><span class="header-section-number">3</span> Conclusion</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">What Makes Modern Day LLMs Agentic</h1>
+<p class="subtitle lead">It’s Still Just Next Token Prediction</p>
+  <div class="quarto-categories">
+    <div class="quarto-category">AI</div>
+    <div class="quarto-category">LLMs</div>
+    <div class="quarto-category">Agents</div>
+  </div>
+  </div>
+
+<div>
+  <div class="description">
+    Demystifying tool calling in LLMs - how special tokens and training patterns create the illusion of agency, when it’s really just next token prediction with clever scaffolding
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Aman Arora </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">September 14, 2025</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="the-illusion-of-agency" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="the-illusion-of-agency"><span class="header-section-number">1</span> The Illusion of Agency</h2>
+<p>Raise your hand if you have heard the word agent before. :)</p>
+<p>Today, AI agents are everywhere - but have you ever wondered what makes the modern-day LLM “agentic”? There are multiple definitions of what is an agent today - from OpenAI’s <span class="citation" data-cites="openai2025chatgptagent">(<a href="#ref-openai2025chatgptagent" role="doc-biblioref">OpenAI 2025b</a>)</span>, Anthropic <span class="citation" data-cites="anthropic2025buildingagents">(<a href="#ref-anthropic2025buildingagents" role="doc-biblioref">Anthropic 2025</a>)</span>, and multiple other frameworks like Manus <span class="citation" data-cites="manus2025">(<a href="#ref-manus2025" role="doc-biblioref">Manus 2025</a>)</span>, Genspark <span class="citation" data-cites="genspark2025">(<a href="#ref-genspark2025" role="doc-biblioref">Genspark 2025</a>)</span> - all claim to be truly “agentic”.</p>
+<p>But what makes these systems “agentic” rather than a simple chat completion? It is tool-calling! Tool calling is what provides the LLM with “extra” context - to be able to complete user request and act on behalf of the user.</p>
+<p>Prior to tool calling, you couldn’t ask ChatGPT to research a topic on your behalf, or find the cheapest flights. It is possible today - and it is due to tool calling. The field has shifted from prompt completion - think <code>gpt-3.5-turbo</code> in its early days! To refresh your memory, here is an example of ChatGPT back in 2022 from the <a href="https://openai.com/index/chatgpt/">original release post</a>:</p>
+<div id="fig-chatgpt-2022" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-chatgpt-2022-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/chatgpt-example.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="600">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-chatgpt-2022-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: ChatGPT example from 2022 showing a simple Q&amp;A about Fermat’s Little Theorem
+</figcaption>
+</figure>
+</div>
+<p><strong>Back in 2022, the model was still prompt completion!</strong> It was sophisticated, but it couldn’t still ACT on your behalf. It couldn’t browse the web, it couldn’t create images based on a prompt (you probably had to use DALL-E by browsing to a different website), it could definitely not do RAG (as we know it today) - and yet in three years a lot has changed!</p>
+<p>If you ask the same question today, ChatGPT has the capability (one amongst many) to search the internet, and reference results in its final response.</p>
+<div id="fig-chatgpt-2025" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-chatgpt-2025-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/chatgpt-example-2025.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="600">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-chatgpt-2025-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: ChatGPT in 2025 with web search capabilities showing sources and citations
+</figcaption>
+</figure>
+</div>
+<p>One of the key things that has changed between LLMs back in 2022 to now is support for tool-calling! Back in 2022, when a user entered a question, the LLM could at best, based on its own training data, - write a response to help with user query.</p>
+<p>But, today - LLMs have “built-in tools” that they can use to lookup for more information before responding to the user.</p>
+<div style="margin: 2em 0; padding-left: 1.5em; border-left: 4px solid #667eea;">
+<p style="font-size: 1.1em; line-height: 1.6; margin: 0; font-style: italic;">
+What makes modern day LLMs “agentic” is this ability to <strong>tool-call</strong>. This ability by the LLM to recognise a tool-call and its execution is what transforms an LLM into an “Agent” - enabling the LLM to take actions on your behalf and not just generate responses.
+</p>
+</div>
+</section>
+<section id="from-gpt-2-to-gpt-5-same-generate-loop-different-tokens" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="from-gpt-2-to-gpt-5-same-generate-loop-different-tokens"><span class="header-section-number">2</span> From GPT-2 to GPT-5: Same Generate Loop, Different Tokens</h2>
+<p>Back in 2020, I wrote <a href="https://amaarora.github.io/posts/2020-02-18-annotatedGPT2.html">“The Annotated GPT-2”</a>, breaking down how the model worked. In the blog from 5 years ago, I used the generate function:</p>
+<div id="bd73925f" class="cell" data-execution_count="1">
+<details class="code-fold">
+<summary>GPT-2 generate loop from 2020</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> generate(context, ntok<span class="op">=</span><span class="dv">20</span>):</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(ntok):</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>        out <span class="op">=</span> model(context)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>        logits <span class="op">=</span> out[:, <span class="op">-</span><span class="dv">1</span>, :]</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>        next_tok <span class="op">=</span> torch.multinomial(F.softmax(logits, dim<span class="op">=-</span><span class="dv">1</span>), num_samples<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>        context <span class="op">=</span> torch.cat([context, next_tok.unsqueeze(<span class="op">-</span><span class="dv">1</span>)], dim<span class="op">=-</span><span class="dv">1</span>)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> context</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>I used a loop to generate 20 tokens from the model. Today, tool calling or not - LLMs follow the same generate loop where the input tokens are formatted differently. Let me show you what I mean.</p>
+<p>The easiest way to understand how tool-calling differs from standard prompt completion that we all know is to see how the input tokens are formatted with and without tools. We will use Qwen3 0.6B version as an example.</p>
+<section id="prompt-completion-without-tool-calling" class="level3" data-number="2.1">
+<h3 data-number="2.1" class="anchored" data-anchor-id="prompt-completion-without-tool-calling"><span class="header-section-number">2.1</span> Prompt completion without tool calling</h3>
+<p>A typical prompt completion without tools, looks something like below:</p>
+<div id="b04c7a2a" class="cell" data-execution_count="2">
+<details class="code-fold">
+<summary>Basic prompt setup</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> transformers <span class="im">import</span> AutoModelForCausalLM, AutoTokenizer</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>model_name <span class="op">=</span> <span class="st">"Qwen/Qwen3-0.6B"</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>tokenizer <span class="op">=</span> AutoTokenizer.from_pretrained(model_name)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>messages <span class="op">=</span> [</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  {<span class="st">"role"</span>: <span class="st">"system"</span>, <span class="st">"content"</span>: <span class="st">"You are a bot that responds to weather queries. You should reply with the unit used in the queried location."</span>},</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  {<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: <span class="st">"Hey, what's the temperature in Paris right now?"</span>}</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>inputs <span class="op">=</span> tokenizer.apply_chat_template(messages, add_generation_prompt<span class="op">=</span><span class="va">True</span>, tokenize<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(inputs)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p><strong>Output:</strong></p>
+<pre><code>&lt;|im_start|&gt;system
+You are a bot that responds to weather queries. You should reply with the unit used in the queried location.&lt;|im_end|&gt;
+&lt;|im_start|&gt;user
+Hey, what's the temperature in Paris right now?&lt;|im_end|&gt;
+&lt;|im_start|&gt;assistant</code></pre>
+<p>This is what the model sees - the conversation formatted with special tokens <code>&lt;|im_start|&gt;</code> and <code>&lt;|im_end|&gt;</code> that mark the boundaries of each message.</p>
+<p>Now, to generate the model response, we could simply call <code>model.generate()</code> as shown below:</p>
+<div id="d3116035" class="cell" data-execution_count="3">
+<details class="code-fold">
+<summary>Model generation without tools</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>inputs <span class="op">=</span> tokenizer.apply_chat_template(messages, add_generation_prompt<span class="op">=</span><span class="va">True</span>, tokenize<span class="op">=</span><span class="va">True</span>, return_tensors<span class="op">=</span><span class="st">"pt"</span>, return_dict<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> AutoModelForCausalLM.from_pretrained(model_name, dtype<span class="op">=</span><span class="st">"auto"</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>outputs <span class="op">=</span> model.generate(<span class="op">**</span>inputs.to(model.device), max_new_tokens<span class="op">=</span><span class="dv">1024</span>)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(tokenizer.decode(outputs[<span class="dv">0</span>][<span class="bu">len</span>(inputs[<span class="st">"input_ids"</span>][<span class="dv">0</span>]):]))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p><strong>Output:</strong></p>
+<pre><code>&lt;think&gt;
+Okay, the user is asking for the current temperature in Paris. I need to check the weather data for Paris. Since I don't have real-time data, I should mention that I can't provide the exact temperature. I should also offer to help with other weather-related questions. Let me make sure to use the correct units and respond in a friendly manner.
+&lt;/think&gt;
+
+I don't have access to real-time weather data. Could you please ask a different question? For the current temperature in Paris, you can check a weather service or app. Let me know if you have any other questions!&lt;|im_end|&gt;</code></pre>
+<p>Without tools, here’s how the conversation unfolds:</p>
+<div style="max-width: 700px; margin: 2em auto; background-color: #f9f9f9; padding: 1.5em; border-radius: 8px;">
+<p><strong>User:</strong> Hey, what’s the temperature in Paris right now?</p>
+<p><strong>Assistant:</strong></p>
+<pre><code>&lt;think&gt;
+Okay, the user is asking for the current temperature in Paris. I need to check the weather data for Paris. Since I don't have real-time data, I should mention that I can't provide the exact temperature. I should also offer to help with other weather-related questions. Let me make sure to use the correct units and respond in a friendly manner.
+&lt;/think&gt;</code></pre>
+<p>I don’t have access to real-time weather data. Could you please ask a different question? For the current temperature in Paris, you can check a weather service or app. Let me know if you have any other questions!</p>
+</div>
+<p>The model can only respond based on its training data - it cannot actually fetch the temperature. Therefore, LLMs without tools aren’t “agentic”.</p>
+</section>
+<section id="prompt-completion-with-tool-calling" class="level3" data-number="2.2">
+<h3 data-number="2.2" class="anchored" data-anchor-id="prompt-completion-with-tool-calling"><span class="header-section-number">2.2</span> Prompt completion with tool calling</h3>
+<p>Now let’s see what happens when we give the model access to tools:</p>
+<div id="b94ccdb1" class="cell" data-execution_count="4">
+<details class="code-fold">
+<summary>Tool-enabled prompt setup</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> transformers <span class="im">import</span> AutoModelForCausalLM, AutoTokenizer</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>model_name <span class="op">=</span> <span class="st">"Qwen/Qwen3-0.6B"</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>tokenizer <span class="op">=</span> AutoTokenizer.from_pretrained(model_name)</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>messages <span class="op">=</span> [</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  {<span class="st">"role"</span>: <span class="st">"system"</span>, <span class="st">"content"</span>: <span class="st">"You are a bot that responds to weather queries. You should reply with the unit used in the queried location."</span>},</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  {<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: <span class="st">"Hey, what's the temperature in Paris right now?"</span>}</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get_current_temperature(location: <span class="bu">str</span>, unit: <span class="bu">str</span>):</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="co">    Get the current temperature at a location.</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="co">    Args:</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="co">        location: The location to get the temperature for, in the format "City, Country"</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a><span class="co">        unit: The unit to return the temperature in. (choices: ["celsius", "fahrenheit"])</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="fl">22.</span>  <span class="co"># A real function should probably actually get the temperature!</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get_current_wind_speed(location: <span class="bu">str</span>):</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a><span class="co">    Get the current wind speed in km/h at a given location.</span></span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a><span class="co">    Args:</span></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a><span class="co">        location: The location to get the wind speed for, in the format "City, Country"</span></span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="fl">6.</span>  <span class="co"># A real function should probably actually get the wind speed!</span></span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>tools <span class="op">=</span> [get_current_temperature, get_current_wind_speed]</span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>inputs <span class="op">=</span> tokenizer.apply_chat_template(messages, tools<span class="op">=</span>tools, add_generation_prompt<span class="op">=</span><span class="va">True</span>, tokenize<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(inputs)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p><strong>Output:</strong></p>
+<pre><code>&lt;|im_start|&gt;system
+You are a bot that responds to weather queries. You should reply with the unit used in the queried location.
+
+# Tools
+
+You may call one or more functions to assist with the user query.
+
+You are provided with function signatures within &lt;tools&gt;&lt;/tools&gt; XML tags:
+&lt;tools&gt;
+{"type": "function", "function": {"name": "get_current_temperature", "description": "Get the current temperature at a location.", "parameters": {"type": "object", "properties": {"location": {"type": "string", "description": "The location to get the temperature for, in the format \"City, Country\""}, "unit": {"type": "string", "enum": ["celsius", "fahrenheit"], "description": "The unit to return the temperature in."}}, "required": ["location", "unit"]}}}
+{"type": "function", "function": {"name": "get_current_wind_speed", "description": "Get the current wind speed in km/h at a given location.", "parameters": {"type": "object", "properties": {"location": {"type": "string", "description": "The location to get the wind speed for, in the format \"City, Country\""}}, "required": ["location"]}}}
+&lt;/tools&gt;
+
+For each function call, return a json object with function name and arguments within &lt;tool_call&gt;&lt;/tool_call&gt; XML tags:
+&lt;tool_call&gt;
+{"name": &lt;function-name&gt;, "arguments": &lt;args-json-object&gt;}
+&lt;/tool_call&gt;&lt;|im_end|&gt;
+&lt;|im_start|&gt;user
+Hey, what's the temperature in Paris right now?&lt;|im_end|&gt;
+&lt;|im_start|&gt;assistant</code></pre>
+<div style="margin: 2em 0; padding-left: 1.5em; border-left: 4px solid #667eea;">
+<p style="font-size: 1.1em; line-height: 1.6; margin: 0; font-style: italic;">
+Notice how the tools are now part of the prompt! They’re just text tokens describing what functions are available.
+</p>
+</div>
+<p>Now let’s generate the model’s response:</p>
+<div id="75f3c9f0" class="cell" data-execution_count="5">
+<details class="code-fold">
+<summary>Model generation with tools</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> AutoModelForCausalLM.from_pretrained(model_name, torch_dtype<span class="op">=</span><span class="st">"auto"</span>, device_map<span class="op">=</span><span class="st">"auto"</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>inputs <span class="op">=</span> tokenizer.apply_chat_template(</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    messages,</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    tools<span class="op">=</span>tools,</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    add_generation_prompt<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    return_dict<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    return_tensors<span class="op">=</span><span class="st">"pt"</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>outputs <span class="op">=</span> model.generate(<span class="op">**</span>inputs.to(model.device), max_new_tokens<span class="op">=</span><span class="dv">1024</span>)</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(tokenizer.decode(outputs[<span class="dv">0</span>][<span class="bu">len</span>(inputs[<span class="st">"input_ids"</span>][<span class="dv">0</span>]):]))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p><strong>Output:</strong></p>
+<pre><code>&lt;think&gt;
+Okay, the user is asking for the current temperature in Paris. I need to use the get_current_temperature function. The parameters required are location and unit. The location here is Paris, and the unit isn't specified, so maybe default to Celsius since that's commonly used in Europe. Let me check the function's enum for unit. The enum is celsius and fahrenheit. Since Paris is in France, which uses Celsius, I'll set the unit to celsius. So the tool call should include location: "Paris" and unit: "celsius". That should get the temperature for Paris.
+&lt;/think&gt;
+
+&lt;tool_call&gt;
+{"name": "get_current_temperature", "arguments": {"location": "Paris", "unit": "celsius"}}
+&lt;/tool_call&gt;&lt;|im_end|&gt;</code></pre>
+<div style="margin: 2em 0; padding-left: 1.5em; border-left: 4px solid #667eea;">
+<p style="font-size: 1.1em; line-height: 1.6; margin: 0; font-style: italic;">
+<strong>The key insight:</strong> The model isn’t “calling” a function - it’s predicting tokens that happen to be <code>&lt;tool_call&gt;</code> followed by JSON. It learned this pattern during training, just like it learned to predict “Paris” after “The capital of France is”.
+</p>
+</div>
+<p>With tools, here’s how the conversation looks:</p>
+<div style="max-width: 700px; margin: 2em auto; background-color: #f9f9f9; padding: 1.5em; border-radius: 8px;">
+<p><strong>User:</strong> Hey, what’s the temperature in Paris right now?</p>
+<p><strong>Assistant:</strong></p>
+<pre><code>&lt;think&gt;
+Okay, the user is asking for the current temperature in Paris. I need to use the get_current_temperature function. The parameters required are location and unit. The location here is Paris, and the unit isn't specified, so maybe default to Celsius since that's commonly used in Europe. Let me check the function's enum for unit. The enum is celsius and fahrenheit. Since Paris is in France, which uses Celsius, I'll set the unit to celsius. So the tool call should include location: "Paris" and unit: "celsius". That should get the temperature for Paris.
+&lt;/think&gt;
+
+&lt;tool_call&gt;
+{"name": "get_current_temperature", "arguments": {"location": "Paris", "unit": "celsius"}}
+&lt;/tool_call&gt;</code></pre>
+</div>
+<p>Now that the model has predicted something with <code>&lt;tool_call&gt;</code>, in the Responses API, we see this as <code>response.output[0].function_call</code> ! But internally, behind the APIs in model inference land - it’s all still next token prediction!</p>
+<p>The LLMs themselves don’t have the capability to execute the tool call, they can only decide which tool to call and pass in the required arguments. The developer on their end makes the tool call. As in the example, the tool response is simply “22”. So, let’s update the messages with tool call and tool response.</p>
+<div id="7d883de9" class="cell" data-execution_count="6">
+<details class="code-fold">
+<summary>Update messages with tool call and response</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>tool_call <span class="op">=</span> {<span class="st">"name"</span>: <span class="st">"get_current_temperature"</span>, <span class="st">"arguments"</span>: {<span class="st">"location"</span>: <span class="st">"Paris, France"</span>, <span class="st">"unit"</span>: <span class="st">"celsius"</span>}}</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>messages.append({<span class="st">"role"</span>: <span class="st">"assistant"</span>, <span class="st">"tool_calls"</span>: [{<span class="st">"type"</span>: <span class="st">"function"</span>, <span class="st">"function"</span>: tool_call}]})</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>messages.append({<span class="st">"role"</span>: <span class="st">"tool"</span>, <span class="st">"content"</span>: <span class="st">"22"</span>})</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>inputs <span class="op">=</span> tokenizer.apply_chat_template(messages, tools<span class="op">=</span>tools, add_generation_prompt<span class="op">=</span><span class="va">True</span>, tokenize<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(inputs)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p><strong>Output:</strong></p>
+<pre><code>&lt;|im_start|&gt;system
+You are a bot that responds to weather queries. You should reply with the unit used in the queried location.
+
+# Tools
+
+You may call one or more functions to assist with the user query.
+
+You are provided with function signatures within &lt;tools&gt;&lt;/tools&gt; XML tags:
+&lt;tools&gt;
+{"type": "function", "function": {"name": "get_current_temperature", "description": "Get the current temperature at a location.", "parameters": {"type": "object", "properties": {"location": {"type": "string", "description": "The location to get the temperature for, in the format \"City, Country\""}, "unit": {"type": "string", "enum": ["celsius", "fahrenheit"], "description": "The unit to return the temperature in."}}, "required": ["location", "unit"]}}}
+{"type": "function", "function": {"name": "get_current_wind_speed", "description": "Get the current wind speed in km/h at a given location.", "parameters": {"type": "object", "properties": {"location": {"type": "string", "description": "The location to get the wind speed for, in the format \"City, Country\""}}, "required": ["location"]}}}
+&lt;/tools&gt;
+
+For each function call, return a json object with function name and arguments within &lt;tool_call&gt;&lt;/tool_call&gt; XML tags:
+&lt;tool_call&gt;
+{"name": &lt;function-name&gt;, "arguments": &lt;args-json-object&gt;}
+&lt;/tool_call&gt;&lt;|im_end|&gt;
+&lt;|im_start|&gt;user
+Hey, what's the temperature in Paris right now?&lt;|im_end|&gt;
+&lt;|im_start|&gt;assistant
+&lt;tool_call&gt;
+{"name": "get_current_temperature", "arguments": {"location": "Paris, France", "unit": "celsius"}}
+&lt;/tool_call&gt;&lt;|im_end|&gt;
+&lt;|im_start|&gt;user
+&lt;tool_response&gt;
+22
+&lt;/tool_response&gt;&lt;|im_end|&gt;
+&lt;|im_start|&gt;assistant</code></pre>
+<p>Notice how the tool response is formatted as a user message with <code>&lt;tool_response&gt;</code> tags. Now we call prompt completion again, since the model is trained to expect tool responses and knows what to do next:</p>
+<div id="f023701b" class="cell" data-execution_count="7">
+<details class="code-fold">
+<summary>Generate final response with tool result</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>inputs <span class="op">=</span> tokenizer.apply_chat_template(messages, tools<span class="op">=</span>tools, add_generation_prompt<span class="op">=</span><span class="va">True</span>, return_dict<span class="op">=</span><span class="va">True</span>, return_tensors<span class="op">=</span><span class="st">"pt"</span>)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>out <span class="op">=</span> model.generate(<span class="op">**</span>inputs.to(model.device), max_new_tokens<span class="op">=</span><span class="dv">1024</span>)</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(tokenizer.decode(out[<span class="dv">0</span>][<span class="bu">len</span>(inputs[<span class="st">"input_ids"</span>][<span class="dv">0</span>]):]))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p><strong>Output:</strong></p>
+<pre><code>&lt;think&gt;
+Okay, the user asked for the temperature in Paris right now. I used the get_current_temperature function with Paris, France, and celsius. The response came back as 22. Now I need to present this answer clearly.
+
+I should mention the city, the unit, and the temperature. Let me check if the unit is correct. The user didn't specify, but since they asked in a general query, maybe they expect Celsius. Also, make sure to keep it friendly and concise. Maybe add a note about the current weather. Alright, that should cover it.
+&lt;/think&gt;
+
+The current temperature in Paris is **22°C**. Let me know if you need further details! 🌤️&lt;|im_end|&gt;</code></pre>
+<p>Here’s the complete conversation flow with tool calling:</p>
+<div style="max-width: 700px; margin: 2em auto; background-color: #f9f9f9; padding: 1.5em; border-radius: 8px;">
+<p><strong>User:</strong> Hey, what’s the temperature in Paris right now?</p>
+<p><strong>Assistant:</strong></p>
+<pre><code>&lt;tool_call&gt;
+{"name": "get_current_temperature", "arguments": {"location": "Paris, France", "unit": "celsius"}}
+&lt;/tool_call&gt;</code></pre>
+<p><strong>Tool Response:</strong> 22</p>
+<p><strong>Assistant:</strong> The current temperature in Paris is <strong>22°C</strong>. Let me know if you need further details! 🌤️</p>
+</div>
+<p>This exact flow has been explained at a high level by OpenAI in their <a href="https://platform.openai.com/docs/guides/function-calling">function calling documentation</a> <span class="citation" data-cites="openai2025functioncalling">(<a href="#ref-openai2025functioncalling" role="doc-biblioref">OpenAI 2025a</a>)</span>:</p>
+<div id="fig-3" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/tool-call.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="600">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: OpenAI’s function calling flow diagram
+</figcaption>
+</figure>
+</div>
+<p>The diagram shows the same pattern we’ve demonstrated: prompt → tool call prediction → execution → response generation. It’s all token prediction underneath!</p>
+</section>
+</section>
+<section id="conclusion" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="conclusion"><span class="header-section-number">3</span> Conclusion</h2>
+<p>Underneath, behind the APIs and the abstractions - it’s all still next token prediction with specialized tokens such as <code>&lt;tool_call&gt;...&lt;/tool_call&gt;</code> for model to predict which tool to call based on available functions and <code>&lt;tool&gt;...&lt;/tool&gt;</code> for tool response for model to see the tool response, and finally generate a final answer to the user - <code>&lt;|im_start|&gt;assistant...&lt;|im_end|&gt;</code>!</p>
+<p>The difference between LLMs back in 2022 and today is in the training data, where the LLMs have learned how to correctly parse arguments (structured outputs) based on the user request, and choose the appropriate tool to call from a list of available.</p>
+<p>The more we continue to use tool calling, the more data AI labs get, thus leading to better parsing and better predictions by the model. Hence, we see the overall accuracy going up every few months!</p>
+<p>I hope that as part of this blog post, I have been able to showcase how tool calling underneath is still just next token prediction with specialised tokens. If you enjoyed reading, consider subscribing to the blog for some special access! :)</p>
+<p>Thank you for reading!</p>
+
+
+
+</section>
+
+<link href="//cdn-images.mailchimp.com/embedcode/classic-071822.css" rel="stylesheet" type="text/css"><div id="mc_embed_signup">
+    <form action="https://github.us4.list-manage.com/subscribe/post?u=e847230346a7c78d4745ae796&amp;id=7a63b2b273&amp;f_id=005f58e8f0" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate="">
+        <div id="mc_embed_signup_scroll">
+        <h2 class="anchored">Subscribe to Aman Arora's blog:</h2>
+        <div class="indicates-required"><span class="asterisk">*</span> indicates required</div>
+<div class="mc-field-group">
+    <label for="mce-EMAIL">Email Address  <span class="asterisk">*</span>
+</label>
+    <input type="email" value="" name="EMAIL" class="required email" id="mce-EMAIL" required="">
+    <span id="mce-EMAIL-HELPERTEXT" class="helper_text"></span>
+</div>
+<div hidden="true"><input type="hidden" name="tags" value="7232948"></div>
+    <div id="mce-responses" class="clear foot">
+        <div class="response" id="mce-error-response" style="display:none"></div>
+        <div class="response" id="mce-success-response" style="display:none"></div>
+    </div>    <!-- real people should not fill this in and expect good things - do not remove this or risk form bot signups-->
+    <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_e847230346a7c78d4745ae796_7a63b2b273" tabindex="-1" value=""></div>
+        <div class="optionalParent">
+            <div class="clear foot">
+                <input type="submit" value="Subscribe" name="subscribe" id="mc-embedded-subscribe" class="button">
+                <p class="brandingLogo"><a href="http://eepurl.com/il3baM" title="Mailchimp - email marketing made easy and fun"><img src="https://eep.io/mc-cdn-images/template_images/branding_logo_text_dark_dtp.svg"></a></p>
+            </div>
+        </div>
+    </div>
+</form>
+</div><script type="text/javascript">(function($) {window.fnames = new Array(); window.ftypes = new Array();fnames[0]='EMAIL';ftypes[0]='email';fnames[1]='FNAME';ftypes[1]='text';fnames[2]='LNAME';ftypes[2]='text';fnames[3]='ADDRESS';ftypes[3]='address';fnames[4]='PHONE';ftypes[4]='phone';fnames[5]='BIRTHDAY';ftypes[5]='birthday';}(jQuery));var $mcj = jQuery.noConflict(true);</script><div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-anthropic2025buildingagents" class="csl-entry" role="listitem">
+Anthropic. 2025. <span>“Building Effective Agents.”</span> <a href="https://www.anthropic.com/engineering/building-effective-agents" class="uri">https://www.anthropic.com/engineering/building-effective-agents</a>.
+</div>
+<div id="ref-genspark2025" class="csl-entry" role="listitem">
+Genspark. 2025. <span>“Genspark.”</span> <a href="https://www.genspark.ai/" class="uri">https://www.genspark.ai/</a>.
+</div>
+<div id="ref-manus2025" class="csl-entry" role="listitem">
+Manus. 2025. <span>“Manus.”</span> <a href="https://manus.im/" class="uri">https://manus.im/</a>.
+</div>
+<div id="ref-openai2025functioncalling" class="csl-entry" role="listitem">
+OpenAI. 2025a. <span>“Function Calling - OpenAI API Documentation.”</span> <a href="https://platform.openai.com/docs/guides/function-calling" class="uri">https://platform.openai.com/docs/guides/function-calling</a>.
+</div>
+<div id="ref-openai2025chatgptagent" class="csl-entry" role="listitem">
+———. 2025b. <span>“Introducing ChatGPT Agent.”</span> <a href="https://openai.com/index/introducing-chatgpt-agent/" class="uri">https://openai.com/index/introducing-chatgpt-agent/</a>.
+</div>
+</div></section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
