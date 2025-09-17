@@ -10,12 +10,13 @@ description: "The step-by-step story of building a voice AI agent that conducts 
 bibliography: ../references.bib
 image: ../images/voice-survey-agent.png
 code-fold: true
+draft: true
 ---
 
 ## Listen First: An AI Conducting a Real Survey
 
 <audio controls style="width: 100%; margin: 20px 0;">
-  <source src="https://storage.vapi.ai/0c6a3c9f-4ea0-4467-837f-2bfae8137220-1758074127567-70a058f8-b029-4acd-8dd9-50e276ccb7f4-mono.wav" type="audio/wav">
+  <source src="https://storage.vapi.ai/29c6ccb9-142f-41f7-89a3-8ad528c9488c-1758098057914-2b6b52ab-64dc-4066-8d97-6168d42eeae4-mono.wav" type="audio/wav">
   Your browser does not support the audio element.
 </audio>
 
@@ -35,7 +36,7 @@ The numbers are staggering:
 
 - **200 residents** × 4 surveys/year = 800 calls
 - **10 minutes** per call = 133 hours of staff time
-- **$30/hour** staff cost = $4,000 just for the calls
+- **$35/hour** staff cost = $4,667 just for the calls
 - **3-week backlog** because staff prioritize actual care (rightfully so)
 
 The real issue: When residents complain about problems, it often takes weeks for that feedback to reach decision-makers. By then, the damage is done.
@@ -79,7 +80,7 @@ Here's where things got interesting. The difference between a robotic survey bot
 #| eval: false
 
 PROMPT = """
-You are Riley, a customer service agent working at Fairmont Australia Aged Care centre. Today, you are going to call Aman, a resident \
+You are Riley, a customer service agent working at an aged care centre. Today, you are going to call Aman, a resident \
 at the aged care centre.
 
 You are calling him regarding a survey that offers Aman the opportunity to share feedback about the quality of care they receive at the aged care centre.
@@ -157,7 +158,6 @@ from prompt import PROMPT
 def create_survey_agent():
     client = Vapi(token=os.getenv("VAPI_API_KEY"))
 
-    # Create the AI assistant with personality
     assistant = client.assistants.create(
         name="Aged care survey",
         model={
@@ -170,15 +170,14 @@ def create_survey_agent():
                 }
             ],
         },
-        voice={"provider": "vapi", "voiceId": "Harry"},  # Australian accent
+        voice={"provider": "vapi", "voiceId": "Harry"},
         first_message="Hi Aman, I am Riley. I am calling on behalf of We Care.
                        Would you have 5 minutes for me today?",
     )
 
-    # Make the actual phone call
     call = client.calls.create(
-        phone_number_id="your-phone-id",  # Your Twilio number
-        customer={"number": "<phone_number>"},  # Aman's number
+        phone_number_id="your-phone-id",
+        customer={"number": "<phone_number>"},
         assistant_id=assistant.id,
     )
 
@@ -200,17 +199,17 @@ During the first test call, I monitored how the AI handled various conversationa
 ::: {.callout-note}
 ## Transcript Excerpt: Handling Confusion
 
-**Riley:** "First question, do staff treat you with respect? Please give a rating from 1 to 5."
+**Riley:** "Let's begin on a scale of 1 to 5. Do staff treat you with respect?"
 
-**Aman:** "Sorry. What are the ratings again?"
+**Aman:** "Sorry. What's 1 and what's 5 again?"
 
-**Riley:** "No problem. The scale is from 1 to 5, where 1 means strongly disagree, and 5 means strongly agree."
+**Riley:** "1 represents strongly disagree, and 5 represents strongly agree."
 
-**Aman:** "Was that about the staff?"
+**Aman:** "And the question is do staff treat me with respect?"
 
-**Riley:** "Yes. The question is, do staff treat you with respect?"
+**Riley:** "Yes. That's correct."
 
-**Aman:** "3"
+**Aman:** "Okay. For this 1, 3."
 :::
 
 This was an important test moment. The AI handled the clarification request smoothly - repeating the scale explanation clearly and patiently, exactly as a professional interviewer would.
@@ -230,13 +229,13 @@ The model naturally reduced redundancy as the conversation progressed, following
 ::: {.callout-note}
 ## Capturing Critical Feedback
 
-**Riley (2:35):** "Last question. What is 1 thing you would suggest as an improvement at this service?"
+**Riley:** "Now what is 1 thing you would suggest as an improvement at this service?"
 
-**Aman:** "I think the toilets are very... the toilets aren't clean at all."
+**Aman:** "The the toilets aren't clean."
 
-**Riley:** "Thank you for sharing that, Aman. Can you provide more details about the cleanliness issues with the toilets?"
+**Riley:** "I'm sorry to hear that. Do you have any specific suggestions on how they could improve the cleanliness of the toilets?"
 
-**Aman:** "Yeah... I think the cleaner doesn't come in enough times in the day. So anytime I go in, sometimes there's missing toilet paper or something..."
+**Aman:** "The cleaner doesn't come enough times in the day. It only comes... the cleaner comes once in the day. If they did it to 3 times a day, I think that'll be better."
 :::
 
 *"The toilets aren't clean at all."*
@@ -245,11 +244,15 @@ This wasn't a number on a scale. This was a real complaint from a vulnerable per
 
 This is exactly the kind of active listening I programmed in. Riley didn't just record the complaint; it showed genuine interest in understanding the problem better.
 
-But here's what also caught my attention - when asked about the best thing about the service, Aman said *"I think the staff is always smiling. Like, they always have a smile on their face, and they treat me with respect."* Despite rating staff respect as only a 3 earlier! The nuance in these responses is fascinating.
+When asked about the best thing about the service, Aman's response was unexpectedly specific: *"The best thing is the breakfast, actually. Actually. They do give really nice breakfast. I really like it."*
 
-And notice how Riley asked a follow-up question about the toilets? That's the active listening I programmed in - showing genuine interest in understanding the problem.
+Riley followed up beautifully: *"Could you tell me more about what you like about the breakfast?"* And Aman elaborated: *"They give me yogurt, and sometimes there's, like, fruits and berries in that yogurt."*
 
-This combination of quantitative scores and qualitative insights provides actionable data for facility improvement.
+Notice how Riley asked follow-up questions for both the positive and negative feedback? That's the active listening I programmed in - showing genuine interest in understanding both what works and what needs improvement.
+
+The best thing? **"The breakfast - yogurt with fruits and berries."** When asked for more details, Aman's voice brightened: "They give me yogurt, and sometimes there's, like, fruits and berries in that yogurt."
+
+It's these specific details that make the difference. Not just "food is good" but exactly what makes residents happy. This combination of quantitative scores and qualitative insights provides actionable data for facility improvement.
 
 ## Survey Results and Analysis
 
@@ -261,32 +264,32 @@ The automated survey captured both quantitative metrics and qualitative feedback
 #| eval: false
 
 survey_responses = {
-    # 5 Likert scale questions
     "Staff respect": 3,
-    "Feel safe": 4,
-    "Well run": 1,  # Critical finding!
-    "Care received": 5,  # Interesting contrast
-    "Staff competence": 4,
-
-    # Open-ended responses
-    "Best thing": "Staff always smiling, treat me with respect",
-    "Improvement needed": "Toilets aren't clean, missing supplies"
+    "Feel safe": 2,
+    "Well run": 3,
+    "Care received": 3,
+    "Staff competence": 3,
+    "Best thing": "The breakfast - yogurt with fruits and berries",
+    "Improvement needed": "Toilets aren't clean - cleaner only comes once a day"
 }
 ```
 
 Analysis of the responses revealed interesting contradictions:
 
-**Paradox**
-Rated "well run" as 1/5 but "care received" as 5/5
+**Consistency**
+All ratings centered around 3/5 except safety (2/5) - indicating mediocre overall experience
 
-**Consistency issue**
-Staff respect rated 3/5, but praised staff smiling and respect in open feedback
+**Safety concern**
+Rated feeling safe as only 2/5 - this needs immediate attention
 
 **Clear problem**
-Toilet cleanliness and missing supplies (specific, actionable feedback)
+Toilet cleanliness - cleaner only comes once per day, resident wants 3 times daily
+
+**Bright spot**
+Breakfast is the highlight - specific mention of yogurt with fruits and berries
 
 **Key insight**
-Good care delivery but poor facility management
+Food quality is excellent, but facility maintenance and safety perceptions need improvement
 
 The data was immediately available for review, with accurate transcription and no manual processing required.
 
@@ -300,12 +303,12 @@ Analysis of the conversation data showed the following performance characteristi
 #| eval: false
 
 conversation_metrics = {
-    "total_duration": 191.2,  # seconds (just over 3 minutes)
-    "questions_asked": 7,  # 5 Likert + 2 open-ended
-    "clarifications_handled": 2,  # Scale explanation + staff question
-    "follow_up_questions": 1,  # Asked for toilet details
+    "total_duration": 180.8,
+    "questions_asked": 7,
+    "clarifications_handled": 2,
+    "follow_up_questions": 2,
     "successful_completion": True,
-    "transcript_accuracy": "99%",  # estimated
+    "transcript_accuracy": "99%",
 }
 ```
 
@@ -315,7 +318,7 @@ Key metrics:
 ~500ms average between user input and AI response
 
 **Call duration**
-Under 3 minutes for complete survey
+3 minutes for complete survey
 
 **Error handling**
 Successfully managed clarification requests
@@ -328,15 +331,15 @@ Natural Australian accent maintained throughout
 Comparative cost breakdown:
 
 **Traditional approach:**
-- Human caller: $30/hour × 1/6 hour (10 minutes) = $5.00/survey
-- 800 annual surveys = $4,000
+- Human caller: $35/hour × 1/6 hour (10 minutes) = $5.83/survey
+- 800 annual surveys = $4,664
 - Plus: training, scheduling, data entry overhead
 
 **AI approach:**
 - Total cost per call: $0.45
 - 800 annual surveys = $360
 
-This represents a **91% cost reduction**, allowing facilities to reallocate resources from administrative tasks to direct patient care.
+This represents a **92.3% cost reduction**, allowing facilities to reallocate resources from administrative tasks to direct patient care.
 
 ## The Lesson That Changed My Perspective
 
