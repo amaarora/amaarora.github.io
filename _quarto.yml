@@ -22,4 +22,6 @@ website:
   body-footer: subscribe.html
 format:
   html:
-    theme: cosmo
+    theme:
+      - flatly
+      - custom.scss

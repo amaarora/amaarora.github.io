@@ -3,6 +3,7 @@ title: "Deciphering LangChain: A Deep Dive into Code Complexity"
 description: Analyzing LangChain's source code reveals impressive modularity but also surprising complexity in executing simple text generation. The deep call stack makes tracing execution flow challenging.
 author: Aman Arora
 date: "07/25/2023"
+categories: [AI Agents, Programming]
 toc: true
 number-sections: true
 title-block-banner: true

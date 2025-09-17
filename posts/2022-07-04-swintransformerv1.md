@@ -5,8 +5,7 @@ description: |
     Swin Transformer Model Architecture explained with PyTorch implementation line-by-line.
 categories:
   - Computer Vision
-  - Model Architecure
-  - Transformers
+  - Large Language Models
 author: Aman Arora
 date: "07/04/2022"
 toc: true

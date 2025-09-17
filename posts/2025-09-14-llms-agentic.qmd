@@ -5,7 +5,7 @@ author: "Aman Arora"
 date: "2025-09-14"
 toc: true
 number-sections: true
-categories: [AI, LLMs, Agents]
+categories: [Large Language Models, AI Agents]
 description: "Demystifying tool calling in LLMs - how special tokens and training patterns create the illusion of agency, when it's really just next token prediction with clever scaffolding"
 bibliography: ../references.bib
 image: ../images/tool-calling.png

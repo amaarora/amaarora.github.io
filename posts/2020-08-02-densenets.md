@@ -4,9 +4,8 @@ subtitle: Densely Connected Convolutional Networks
 description: | 
     In this blog post, we introduce dense blocks, transition layers and look at the TorchVision implementation of DenseNet step-by-step.
 categories:
-  - Programming
   - Computer Vision
-  - Model Architecture
+  - Programming
 author: Aman Arora
 date: "08/02/2020"
 toc: true

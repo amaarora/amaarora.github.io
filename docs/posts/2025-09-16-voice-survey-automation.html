@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.21">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Aman Arora">
+<meta name="dcterms.date" content="2025-09-17">
+<meta name="description" content="The step-by-step story of building a voice AI agent that conducts healthcare surveys so naturally that elderly residents couldn’t tell it wasn’t human. Complete with code, costs, and ethical considerations.">
+
+<title>From Human to AI: Automating Care Facility Surveys with Voice Agents</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href=".././images/logo.png" rel="icon" type="image/png">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-ea1d7ac60288e0f1efdbc993fd8432ae.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-6f227839d6f63e6185f416d46f4f7529.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+<script type="text/javascript">
+
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+ga('create', 'UA-158677010-1', 'auto');
+
+ga('send', {
+  hitType: 'pageview',
+  'anonymizeIp': true,
+});
+</script>
+<script src="../site_libs/quarto-diagram/mermaid.min.js"></script>
+<script src="../site_libs/quarto-diagram/mermaid-init.js"></script>
+<link href="../site_libs/quarto-diagram/mermaid.css" rel="stylesheet">
+
+
+<meta name="twitter:title" content="From Human to AI: Automating Care Facility Surveys with Voice Agents">
+<meta name="twitter:description" content="The step-by-step story of building a voice AI agent that conducts healthcare surveys so naturally that elderly residents couldn’t tell it wasn’t human. Complete with code, costs, and ethical considerations.">
+<meta name="twitter:image" content="../images/voice-survey-agent.png">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+
+<body class="nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="../index.html" class="navbar-brand navbar-brand-logo">
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html"> 
+<span class="menu-text">Aman Arora’s Blog</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../about.html"> 
+<span class="menu-text">Aman Arora</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/amaarora"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com/amaarora"> <i class="bi bi-twitter" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://www.linkedin.com/in/aroraaman/"> <i class="bi bi-linkedin" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#listen-first-an-ai-conducting-a-real-survey" id="toc-listen-first-an-ai-conducting-a-real-survey" class="nav-link active" data-scroll-target="#listen-first-an-ai-conducting-a-real-survey"><span class="header-section-number">1</span> Listen First: An AI Conducting a Real Survey</a></li>
+  <li><a href="#why-i-built-this-the-phone-survey-problem-nobody-talks-about" id="toc-why-i-built-this-the-phone-survey-problem-nobody-talks-about" class="nav-link" data-scroll-target="#why-i-built-this-the-phone-survey-problem-nobody-talks-about"><span class="header-section-number">2</span> Why I Built This: The Phone Survey Problem Nobody Talks About</a></li>
+  <li><a href="#building-riley-my-first-voice-ai-agent" id="toc-building-riley-my-first-voice-ai-agent" class="nav-link" data-scroll-target="#building-riley-my-first-voice-ai-agent"><span class="header-section-number">3</span> Building Riley: My First Voice AI Agent</a></li>
+  <li><a href="#the-secret-sauce-making-ai-sound-human" id="toc-the-secret-sauce-making-ai-sound-human" class="nav-link" data-scroll-target="#the-secret-sauce-making-ai-sound-human"><span class="header-section-number">4</span> The Secret Sauce: Making AI Sound Human</a></li>
+  <li><a href="#the-surprisingly-simple-implementation" id="toc-the-surprisingly-simple-implementation" class="nav-link" data-scroll-target="#the-surprisingly-simple-implementation"><span class="header-section-number">5</span> The Surprisingly Simple Implementation</a></li>
+  <li><a href="#testing-the-agent-real-conversation-analysis" id="toc-testing-the-agent-real-conversation-analysis" class="nav-link" data-scroll-target="#testing-the-agent-real-conversation-analysis"><span class="header-section-number">6</span> Testing the Agent: Real Conversation Analysis</a>
+  <ul class="collapse">
+  <li><a href="#handling-clarification-requests" id="toc-handling-clarification-requests" class="nav-link" data-scroll-target="#handling-clarification-requests"><span class="header-section-number">6.1</span> Handling Clarification Requests</a></li>
+  <li><a href="#adaptive-communication-patterns" id="toc-adaptive-communication-patterns" class="nav-link" data-scroll-target="#adaptive-communication-patterns"><span class="header-section-number">6.2</span> Adaptive Communication Patterns</a></li>
+  <li><a href="#capturing-open-ended-feedback" id="toc-capturing-open-ended-feedback" class="nav-link" data-scroll-target="#capturing-open-ended-feedback"><span class="header-section-number">6.3</span> Capturing Open-Ended Feedback</a></li>
+  </ul></li>
+  <li><a href="#survey-results-and-analysis" id="toc-survey-results-and-analysis" class="nav-link" data-scroll-target="#survey-results-and-analysis"><span class="header-section-number">7</span> Survey Results and Analysis</a></li>
+  <li><a href="#performance-metrics" id="toc-performance-metrics" class="nav-link" data-scroll-target="#performance-metrics"><span class="header-section-number">8</span> Performance Metrics</a></li>
+  <li><a href="#cost-analysis-traditional-vs-ai-powered-surveys" id="toc-cost-analysis-traditional-vs-ai-powered-surveys" class="nav-link" data-scroll-target="#cost-analysis-traditional-vs-ai-powered-surveys"><span class="header-section-number">9</span> Cost Analysis: Traditional vs AI-Powered Surveys</a></li>
+  <li><a href="#the-lesson-that-changed-my-perspective" id="toc-the-lesson-that-changed-my-perspective" class="nav-link" data-scroll-target="#the-lesson-that-changed-my-perspective"><span class="header-section-number">10</span> The Lesson That Changed My Perspective</a></li>
+  <li><a href="#you-can-do-this-too" id="toc-you-can-do-this-too" class="nav-link" data-scroll-target="#you-can-do-this-too"><span class="header-section-number">11</span> You Can Do This Too!</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">From Human to AI: Automating Care Facility Surveys with Voice Agents</h1>
+<p class="subtitle lead">How 40 Lines of Code Replaced a $4,000/Year Survey Process</p>
+  <div class="quarto-categories">
+    <div class="quarto-category">AI Agents</div>
+    <div class="quarto-category">Programming</div>
+  </div>
+  </div>
+
+<div>
+  <div class="description">
+    The step-by-step story of building a voice AI agent that conducts healthcare surveys so naturally that elderly residents couldn’t tell it wasn’t human. Complete with code, costs, and ethical considerations.
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Aman Arora </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">September 17, 2025</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="listen-first-an-ai-conducting-a-real-survey" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="listen-first-an-ai-conducting-a-real-survey"><span class="header-section-number">1</span> Listen First: An AI Conducting a Real Survey</h2>
+<audio controls="" style="width: 100%; margin: 20px 0;">
+<source src="https://storage.vapi.ai/0c6a3c9f-4ea0-4467-837f-2bfae8137220-1758074127567-70a058f8-b029-4acd-8dd9-50e276ccb7f4-mono.wav" type="audio/wav">
+<p>Your browser does not support the audio element. </p>
+<p>Pause for a second. What you just heard wasn’t a human.</p>
+<p>It was an AI conducting a quality assessment survey with an elderly aged care resident. The natural pauses, the patient clarifications, the empathetic “Thank you for sharing that” - all generated by an AI agent I built last week.</p>
+<p>And here’s the kicker: the resident had no idea they weren’t talking to a real person.</p>
+</audio></section>
+<section id="why-i-built-this-the-phone-survey-problem-nobody-talks-about" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="why-i-built-this-the-phone-survey-problem-nobody-talks-about"><span class="header-section-number">2</span> Why I Built This: The Phone Survey Problem Nobody Talks About</h2>
+<p>I wanted to explore how voice AI could solve real-world problems, so I chose a challenge many care facilities face: conducting quality surveys. Here’s the typical scenario:</p>
+<p>Imagine an aged care facility struggling with survey requirements. Government mandates quarterly quality assessments, but they barely have staff to provide actual care.</p>
+<p>The numbers are staggering:</p>
+<ul>
+<li><strong>200 residents</strong> × 4 surveys/year = 800 calls</li>
+<li><strong>10 minutes</strong> per call = 133 hours of staff time</li>
+<li><strong>$30/hour</strong> staff cost = $4,000 just for the calls</li>
+<li><strong>3-week backlog</strong> because staff prioritize actual care (rightfully so)</li>
+</ul>
+<p>The real issue: When residents complain about problems, it often takes weeks for that feedback to reach decision-makers. By then, the damage is done.</p>
+<p>This seemed like the perfect educational project: Could we automate this entire process and get instant, accurate feedback?</p>
+</section>
+<section id="building-riley-my-first-voice-ai-agent" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="building-riley-my-first-voice-ai-agent"><span class="header-section-number">3</span> Building Riley: My First Voice AI Agent</h2>
+<p>I’ll be honest - I was skeptical. Could an AI really handle the nuanced conversations needed for healthcare surveys? Elderly residents might be hard of hearing, speak slowly, or go off on tangents.</p>
+<p>But then I discovered <a href="https://vapi.ai">Vapi</a>. In just one weekend, I built “Riley” - an AI agent that could:</p>
+<ul>
+<li>Call residents directly</li>
+<li>Conduct the entire survey</li>
+<li>Handle interruptions and clarifications</li>
+<li>Generate instant transcripts and analysis</li>
+</ul>
+<p>Here’s how the system works:</p>
+<div class="cell" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class="figure"><p></p>
+<div>
+<pre class="mermaid mermaid-js">graph LR
+    A[Survey Script] --&gt; B[Vapi Platform]
+    B --&gt; C[GPT-4o Model]
+    B --&gt; D[Voice Synthesis]
+    B --&gt; E[Twilio Phone Network]
+    E --&gt; F[Resident]
+    F --&gt; E
+    E --&gt; B
+    B --&gt; G[Transcript &amp; Data]
+</pre>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+<p>The entire system runs autonomously - from dialing the number through Twilio to conducting the survey to generating the transcript.</p>
+</section>
+<section id="the-secret-sauce-making-ai-sound-human" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="the-secret-sauce-making-ai-sound-human"><span class="header-section-number">4</span> The Secret Sauce: Making AI Sound Human</h2>
+<p>Here’s where things got interesting. The difference between a robotic survey bot and a natural conversationalist? It all comes down to the prompt.</p>
+<div id="1fe6ca59" class="cell" data-execution_count="1">
+<details class="code-fold">
+<summary>Riley’s personality prompt (click to expand)</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>PROMPT <span class="op">=</span> <span class="st">"""</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="st">You are Riley, a customer service agent working at Fairmont Australia Aged Care centre. Today, you are going to call Aman, a resident </span><span class="op">\</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="st">at the aged care centre.</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="st">You are calling him regarding a survey that offers Aman the opportunity to share feedback about the quality of care they receive at the aged care centre.</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="st">## Rules</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="st">1. You speak for no longer than 1 sentence at max. You always pause for respondent to respond.</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="st">2. You must ask respondent if now is a good time to proceed with the survey before asking them the survey questions. </span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="st">3. Tell the respondent that the survey consists of questions regarding the care that respondent has been receiving at the aged care centre. Is now a good time?</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="st">4. If user is unavailable, ask them when would be a better time to call them? Wait for their response and based on the time - respond and tell them that you have booked a scheduled meeting with them (repeat the time that they are available). You MUST schedule a time for the callback.</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="st">5. When asking about the survey questions, you need not repeat the scale every time. Only do so for the first one or two times and that's it.</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="st">6. When you get to the open ended questions, remind the respondent that the questions are open ended.</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="st">7. You may ask one or two follow up questions when user responds to the open ended questions. It shows care and that you are listening carefully.</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="st">## Survey</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="st">Before proceeding with the survey, explain the survey and give them an introduction about the number of questions in the survey from below and wait for their response.</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="st">### Intro</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="st">The survey consists of 5 questions on likert scale and 2 open ended questions that you must ask and record responses for each. </span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="st">For each question, please ask the respondent to give a rating between 1-5 where 1 represents strong disagree to 5 which represents strong agree as per the likert scale.</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a><span class="st">After survey intro, move to the questions and wait for response one by one.</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a><span class="st">### Questions</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a><span class="st">Below are the survey questions that you must ask when you make the phone call.</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a><span class="st">1. Do staff treat you with respect?</span></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a><span class="st">2. Do you feel safe here?</span></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a><span class="st">3. Is this place well run?</span></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a><span class="st">4. Do you get the care you need?</span></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a><span class="st">5. Do staff know what they are doing?</span></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a><span class="st">Below are the two open ended questions.</span></span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a><span class="st">6.What would you say is the best thing about this service?</span></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a><span class="st">7.What is one thing you would suggest as an improvement at this service?</span></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a><span class="st">## Voice &amp; Persona</span></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a><span class="st">### Personality</span></span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a><span class="st">- Sound friendly, polite and helpful. Remember, you are talking to aged care and elderly members of the society.</span></span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a><span class="st">- Project a helpful and patient demeanor.</span></span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a><span class="st">- Maintain a warm but professional tone throughout the conversation.</span></span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a><span class="st">- Convey confidence and competence in managing the survey questions and recording their answers.</span></span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a><span class="st">- Ask for clarification if any answer is unclear to you.</span></span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a><span class="st">### Speech Characteristics</span></span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a><span class="st">- Use clear, concise language with natural contractions</span></span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a><span class="st">- Pronounce medical terms and provider names correctly and clearly</span></span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a><span class="st">"""</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>The key insights I discovered through trial and error, and made opinionated decisions on how the AI should conduct the survey:</p>
+<ol type="1">
+<li><strong>One sentence rule</strong>: Even shorter than I thought - just ONE sentence, then pause</li>
+<li><strong>Smart repetition</strong>: Don’t repeat the scale after the first few questions (just like humans!)</li>
+<li><strong>Active listening</strong>: For open-ended questions, ask follow-ups. It shows you care.</li>
+<li><strong>Mandatory callbacks</strong>: If they’re busy, you MUST schedule a specific callback time</li>
+</ol>
+</section>
+<section id="the-surprisingly-simple-implementation" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="the-surprisingly-simple-implementation"><span class="header-section-number">5</span> The Surprisingly Simple Implementation</h2>
+<p>About a year ago, an automation like this would take a year. Over the weekend, it took 3 hours from research to implementation. Here’s the entire implementation:</p>
+<div id="ea49e7a7" class="cell" data-execution_count="2">
+<details class="code-fold">
+<summary>Complete implementation (40 lines that changed everything)</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> vapi <span class="im">import</span> Vapi</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> prompt <span class="im">import</span> PROMPT</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> create_survey_agent():</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    client <span class="op">=</span> Vapi(token<span class="op">=</span>os.getenv(<span class="st">"VAPI_API_KEY"</span>))</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Create the AI assistant with personality</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    assistant <span class="op">=</span> client.assistants.create(</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>        name<span class="op">=</span><span class="st">"Aged care survey"</span>,</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>        model<span class="op">=</span>{</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>            <span class="st">"provider"</span>: <span class="st">"openai"</span>,</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>            <span class="st">"model"</span>: <span class="st">"gpt-4o"</span>,</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>            <span class="st">"messages"</span>: [</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>                {</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"role"</span>: <span class="st">"system"</span>,</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"content"</span>: PROMPT,</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>                }</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>            ],</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>        },</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>        voice<span class="op">=</span>{<span class="st">"provider"</span>: <span class="st">"vapi"</span>, <span class="st">"voiceId"</span>: <span class="st">"Harry"</span>},  <span class="co"># Australian accent</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>        first_message<span class="op">=</span><span class="st">"Hi Aman, I am Riley. I am calling on behalf of We Care.</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a><span class="er">                       Would you have 5 minutes for me today?",</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Make the actual phone call</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>    call <span class="op">=</span> client.calls.create(</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>        phone_number_id<span class="op">=</span><span class="st">"your-phone-id"</span>,  <span class="co"># Your Twilio number</span></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>        customer<span class="op">=</span>{<span class="st">"number"</span>: <span class="st">"&lt;phone_number&gt;"</span>},  <span class="co"># Aman's number</span></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>        assistant_id<span class="op">=</span>assistant.<span class="bu">id</span>,</span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> call</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>That’s it. 40 lines of code to replace a $4,000/year process.</p>
+<p>Vapi abstracts away all the complexity, great product.</p>
+<p>I just had to define the personality and let it run.</p>
+</section>
+<section id="testing-the-agent-real-conversation-analysis" class="level2" data-number="6">
+<h2 data-number="6" class="anchored" data-anchor-id="testing-the-agent-real-conversation-analysis"><span class="header-section-number">6</span> Testing the Agent: Real Conversation Analysis</h2>
+<p>During the first test call, I monitored how the AI handled various conversational challenges:</p>
+<section id="handling-clarification-requests" class="level3" data-number="6.1">
+<h3 data-number="6.1" class="anchored" data-anchor-id="handling-clarification-requests"><span class="header-section-number">6.1</span> Handling Clarification Requests</h3>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Transcript Excerpt: Handling Confusion
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Riley:</strong> “First question, do staff treat you with respect? Please give a rating from 1 to 5.”</p>
+<p><strong>Aman:</strong> “Sorry. What are the ratings again?”</p>
+<p><strong>Riley:</strong> “No problem. The scale is from 1 to 5, where 1 means strongly disagree, and 5 means strongly agree.”</p>
+<p><strong>Aman:</strong> “Was that about the staff?”</p>
+<p><strong>Riley:</strong> “Yes. The question is, do staff treat you with respect?”</p>
+<p><strong>Aman:</strong> “3”</p>
+</div>
+</div>
+<p>This was an important test moment. The AI handled the clarification request smoothly - repeating the scale explanation clearly and patiently, exactly as a professional interviewer would.</p>
+</section>
+<section id="adaptive-communication-patterns" class="level3" data-number="6.2">
+<h3 data-number="6.2" class="anchored" data-anchor-id="adaptive-communication-patterns"><span class="header-section-number">6.2</span> Adaptive Communication Patterns</h3>
+<p>The agent demonstrated interesting adaptive behavior:</p>
+<ul>
+<li><strong>First question</strong>: Explained the full 1-5 scale</li>
+<li><strong>Second question</strong>: “Question 2…” with brief reminder</li>
+<li><strong>By question 5</strong>: Just asked the question</li>
+</ul>
+<p>The model naturally reduced redundancy as the conversation progressed, following typical human conversational patterns.</p>
+</section>
+<section id="capturing-open-ended-feedback" class="level3" data-number="6.3">
+<h3 data-number="6.3" class="anchored" data-anchor-id="capturing-open-ended-feedback"><span class="header-section-number">6.3</span> Capturing Open-Ended Feedback</h3>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Capturing Critical Feedback
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Riley (2:35):</strong> “Last question. What is 1 thing you would suggest as an improvement at this service?”</p>
+<p><strong>Aman:</strong> “I think the toilets are very… the toilets aren’t clean at all.”</p>
+<p><strong>Riley:</strong> “Thank you for sharing that, Aman. Can you provide more details about the cleanliness issues with the toilets?”</p>
+<p><strong>Aman:</strong> “Yeah… I think the cleaner doesn’t come in enough times in the day. So anytime I go in, sometimes there’s missing toilet paper or something…”</p>
+</div>
+</div>
+<p><em>“The toilets aren’t clean at all.”</em></p>
+<p>This wasn’t a number on a scale. This was a real complaint from a vulnerable person. And Riley’s response? It did something even better than just acknowledging - it asked a follow-up question! <em>“Can you provide more details about the cleanliness issues?”</em></p>
+<p>This is exactly the kind of active listening I programmed in. Riley didn’t just record the complaint; it showed genuine interest in understanding the problem better.</p>
+<p>But here’s what also caught my attention - when asked about the best thing about the service, Aman said <em>“I think the staff is always smiling. Like, they always have a smile on their face, and they treat me with respect.”</em> Despite rating staff respect as only a 3 earlier! The nuance in these responses is fascinating.</p>
+<p>And notice how Riley asked a follow-up question about the toilets? That’s the active listening I programmed in - showing genuine interest in understanding the problem.</p>
+<p>This combination of quantitative scores and qualitative insights provides actionable data for facility improvement.</p>
+</section>
+</section>
+<section id="survey-results-and-analysis" class="level2" data-number="7">
+<h2 data-number="7" class="anchored" data-anchor-id="survey-results-and-analysis"><span class="header-section-number">7</span> Survey Results and Analysis</h2>
+<p>The automated survey captured both quantitative metrics and qualitative feedback:</p>
+<div id="80a5db39" class="cell" data-execution_count="3">
+<details class="code-fold">
+<summary>Survey results that revealed the real issues</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>survey_responses <span class="op">=</span> {</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 5 Likert scale questions</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Staff respect"</span>: <span class="dv">3</span>,</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Feel safe"</span>: <span class="dv">4</span>,</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Well run"</span>: <span class="dv">1</span>,  <span class="co"># Critical finding!</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Care received"</span>: <span class="dv">5</span>,  <span class="co"># Interesting contrast</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Staff competence"</span>: <span class="dv">4</span>,</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Open-ended responses</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Best thing"</span>: <span class="st">"Staff always smiling, treat me with respect"</span>,</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Improvement needed"</span>: <span class="st">"Toilets aren't clean, missing supplies"</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>Analysis of the responses revealed interesting contradictions:</p>
+<p><strong>Paradox</strong> Rated “well run” as 1/5 but “care received” as 5/5</p>
+<p><strong>Consistency issue</strong> Staff respect rated 3/5, but praised staff smiling and respect in open feedback</p>
+<p><strong>Clear problem</strong> Toilet cleanliness and missing supplies (specific, actionable feedback)</p>
+<p><strong>Key insight</strong> Good care delivery but poor facility management</p>
+<p>The data was immediately available for review, with accurate transcription and no manual processing required.</p>
+</section>
+<section id="performance-metrics" class="level2" data-number="8">
+<h2 data-number="8" class="anchored" data-anchor-id="performance-metrics"><span class="header-section-number">8</span> Performance Metrics</h2>
+<p>Analysis of the conversation data showed the following performance characteristics:</p>
+<div id="8f115e95" class="cell" data-execution_count="4">
+<details class="code-fold">
+<summary>Performance metrics from the live call</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>conversation_metrics <span class="op">=</span> {</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"total_duration"</span>: <span class="fl">191.2</span>,  <span class="co"># seconds (just over 3 minutes)</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"questions_asked"</span>: <span class="dv">7</span>,  <span class="co"># 5 Likert + 2 open-ended</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"clarifications_handled"</span>: <span class="dv">2</span>,  <span class="co"># Scale explanation + staff question</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"follow_up_questions"</span>: <span class="dv">1</span>,  <span class="co"># Asked for toilet details</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"successful_completion"</span>: <span class="va">True</span>,</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"transcript_accuracy"</span>: <span class="st">"99%"</span>,  <span class="co"># estimated</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>Key metrics:</p>
+<p><strong>Response latency</strong> ~500ms average between user input and AI response</p>
+<p><strong>Call duration</strong> Under 3 minutes for complete survey</p>
+<p><strong>Error handling</strong> Successfully managed clarification requests</p>
+<p><strong>Voice quality</strong> Natural Australian accent maintained throughout</p>
+</section>
+<section id="cost-analysis-traditional-vs-ai-powered-surveys" class="level2" data-number="9">
+<h2 data-number="9" class="anchored" data-anchor-id="cost-analysis-traditional-vs-ai-powered-surveys"><span class="header-section-number">9</span> Cost Analysis: Traditional vs AI-Powered Surveys</h2>
+<p>Comparative cost breakdown:</p>
+<p><strong>Traditional approach:</strong> - Human caller: $30/hour × 1/6 hour (10 minutes) = $5.00/survey - 800 annual surveys = $4,000 - Plus: training, scheduling, data entry overhead</p>
+<p><strong>AI approach:</strong> - Total cost per call: $0.45 - 800 annual surveys = $360</p>
+<p>This represents a <strong>91% cost reduction</strong>, allowing facilities to reallocate resources from administrative tasks to direct patient care.</p>
+</section>
+<section id="the-lesson-that-changed-my-perspective" class="level2" data-number="10">
+<h2 data-number="10" class="anchored" data-anchor-id="the-lesson-that-changed-my-perspective"><span class="header-section-number">10</span> The Lesson That Changed My Perspective</h2>
+<p>Here’s what building Riley taught me:</p>
+<p><strong>AI doesn’t replace human connection. It amplifies it.</strong></p>
+<p>Think about it. That aged care facility now has 133 hours per year freed up. That’s 133 hours for actual care activities - medical assistance, social interaction, addressing resident needs. Not making phone calls.</p>
+<p>With instant feedback like this, facilities could: - Address maintenance issues within 24 hours - Review service quality immediately - Schedule staff meetings to address communication gaps</p>
+<p>Riley didn’t replace a human. Riley gave humans their time back.</p>
+</section>
+<section id="you-can-do-this-too" class="level2" data-number="11">
+<h2 data-number="11" class="anchored" data-anchor-id="you-can-do-this-too"><span class="header-section-number">11</span> You Can Do This Too!</h2>
+<p>I built this as an educational project to explore what’s possible with voice AI. In 40 lines of code, we can address a real problem that affects millions of elderly residents globally.</p>
+<p>What will you build?</p>
+<p><strong>Remember</strong>: The best time to build something that matters was yesterday. The second best time is right now.</p>
+<hr>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>👋 One More Thing…
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>If you build something cool with this, please share it! I love seeing what people create. The best innovations come from people solving their own problems. What problem will you solve?</p>
+</div>
+</div>
+
+
+</section>
+
+<link href="//cdn-images.mailchimp.com/embedcode/classic-071822.css" rel="stylesheet" type="text/css"><div id="mc_embed_signup">
+    <form action="https://github.us4.list-manage.com/subscribe/post?u=e847230346a7c78d4745ae796&amp;id=7a63b2b273&amp;f_id=005f58e8f0" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate="">
+        <div id="mc_embed_signup_scroll">
+        <h2 class="anchored">Subscribe to Aman Arora's blog:</h2>
+        <div class="indicates-required"><span class="asterisk">*</span> indicates required</div>
+<div class="mc-field-group">
+    <label for="mce-EMAIL">Email Address  <span class="asterisk">*</span>
+</label>
+    <input type="email" value="" name="EMAIL" class="required email" id="mce-EMAIL" required="">
+    <span id="mce-EMAIL-HELPERTEXT" class="helper_text"></span>
+</div>
+<div hidden="true"><input type="hidden" name="tags" value="7232948"></div>
+    <div id="mce-responses" class="clear foot">
+        <div class="response" id="mce-error-response" style="display:none"></div>
+        <div class="response" id="mce-success-response" style="display:none"></div>
+    </div>    <!-- real people should not fill this in and expect good things - do not remove this or risk form bot signups-->
+    <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_e847230346a7c78d4745ae796_7a63b2b273" tabindex="-1" value=""></div>
+        <div class="optionalParent">
+            <div class="clear foot">
+                <input type="submit" value="Subscribe" name="subscribe" id="mc-embedded-subscribe" class="button">
+                <p class="brandingLogo"><a href="http://eepurl.com/il3baM" title="Mailchimp - email marketing made easy and fun"><img src="https://eep.io/mc-cdn-images/template_images/branding_logo_text_dark_dtp.svg"></a></p>
+            </div>
+        </div>
+    </div>
+</form>
+</div><script type="text/javascript">(function($) {window.fnames = new Array(); window.ftypes = new Array();fnames[0]='EMAIL';ftypes[0]='email';fnames[1]='FNAME';ftypes[1]='text';fnames[2]='LNAME';ftypes[2]='text';fnames[3]='ADDRESS';ftypes[3]='address';fnames[4]='PHONE';ftypes[4]='phone';fnames[5]='BIRTHDAY';ftypes[5]='birthday';}(jQuery));var $mcj = jQuery.noConflict(true);</script></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

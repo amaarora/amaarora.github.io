@@ -79,7 +79,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-ea1d7ac60288e0f1efdbc993fd8432ae.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-5b4ad623e5705c0698d39aec6f10cf02.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-f93c2b1f3f0577f377aefa4848a86a36.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script src="../site_libs/quarto-contrib/videojs/video.min.js"></script>
 <link href="../site_libs/quarto-contrib/videojs/video-js.css" rel="stylesheet">
 <script id="quarto-search-options" type="application/json">{
@@ -125,6 +125,7 @@ ga('send', {
 </script>
 
 
+<link rel="stylesheet" href="../styles.css">
 <meta name="twitter:title" content="Support bot with Claude 3.5 Sonnet using Claudette and Slack-SDK">
 <meta name="twitter:description" content="As part of this blog post we will build a support bot on Slack that can respond to queries in a slack channel using Claudette (a thin python wrapper on top of Anthropic CLI)">
 <meta name="twitter:image" content="../images/claudette-title.png">
@@ -191,7 +192,8 @@ ga('send', {
         </div>
       </div>
                           <div class="quarto-categories">
-                <div class="quarto-category">LLM</div>
+                <div class="quarto-category">Large Language Models</div>
+                <div class="quarto-category">AI Agents</div>
               </div>
                   </div>
   </div>
@@ -239,6 +241,7 @@ ga('send', {
 
 
 
+<p>—title: Support bot with Claude 3.5 Sonnet using Claudette and Slack-SDKsubtitle: Creating a support bot that supports API calls using Claudettedescription: | As part of this blog post we will build a support bot on Slack that can respond to queries in a slack channel using Claudette (a thin python wrapper on top of Anthropic CLI)categories: - Large Language Models - AI Agentsauthor: Aman Aroradate: “06/22/2024”toc: truenumber-sections: truetitle-block-banner: truebibliography: ../references.bibreference-location: margincitation-location: margincode-fold: falseimage: ../images/claudette-title.png—</p>
 <div class="quarto-video"><video id="video_shortcode_videojs_video1" class="video-js vjs-default-skin vjs-fluid" controls="" preload="auto" data-setup="{}" title="Claudette in Slack"><source src="../images/claudette.mp4"></video></div>
 <p><strong>Problem Statement:</strong> You are the owner of a graphical and tech company called <em>“DRAMA77IC”</em> that creates dramatic and graphical visualisations for games for users all over the world. You have an API that contains information about various games such as genre, date of release, description and so on. You want to create a support channel, so your users can directly ask questions about your offerings, place orders and also return games through this Slack channel.</p>
 <p>Now that we have a well defined problem statement, let’s go about creating a solution using <code>Claudette</code>!</p>

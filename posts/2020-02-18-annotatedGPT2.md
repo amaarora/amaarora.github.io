@@ -4,8 +4,7 @@ subtitle: Better language models and their implications
 description: | 
     This post presents an annotated version of the paper in the form of a line-by-line implementation in PyTorch. This document itself is a working notebook, and should be a completely usable implementation.
 categories:
-  - NLP
-  - Transformers
+  - Large Language Models
 author: Aman Arora
 date: "02/18/2020"
 toc: true

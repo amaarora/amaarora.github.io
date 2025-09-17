@@ -5,7 +5,7 @@ date: "2025-09-10"
 toc: true
 number-sections: true
 code-fold: true
-categories: [AI, Claude, Productivity, Spreadsheets]
+categories: [AI]
 description: "A hands-on exploration of Claude's new file creation and spreadsheet analysis capabilities, with real-world testing results and insights"
 bibliography: ../references.bib
 image: ../images/claude-files.png

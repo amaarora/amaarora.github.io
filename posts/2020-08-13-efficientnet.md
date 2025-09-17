@@ -5,7 +5,6 @@ description: |
     Look at the current SOTA, with top-1 accuracy of 88.5% on ImageNet.
 categories:
   - Computer Vision
-  - Model Architecture
 author: Aman Arora
 date: "08/13/2020"
 toc: true

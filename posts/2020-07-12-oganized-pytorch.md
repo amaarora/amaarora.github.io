@@ -5,7 +5,6 @@ description: |
     In this blogpost, we will be going through an introduction to Pytorch Lightning and implement all the cool tricks like - Gradient Accumulation, 16-bit precision training, and also add TPU/multi-gpu support - all in a few lines of code. We will use Pytorch Lightning to work on SIIM-ISIC Melanoma Classification challenge on Kaggle.
 categories:
   - Programming
-  - Computer Vision
 author: Aman Arora
 date: "07/12/2020"
 toc: true

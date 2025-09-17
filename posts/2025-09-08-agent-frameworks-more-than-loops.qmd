@@ -4,7 +4,7 @@ author: "Aman Arora"
 date: "2025-09-08"
 toc: true
 number-sections: true
-categories: [AI, Agents, Software Architecture]
+categories: [AI Agents, Programming]
 description: "A balanced perspective on the recent debate about agent frameworks vs. simple while loops"
 bibliography: ../references.bib
 image: ../images/agent-framework.png

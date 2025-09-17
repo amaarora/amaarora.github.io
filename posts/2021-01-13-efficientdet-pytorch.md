@@ -4,8 +4,6 @@ description: |
     In this blog post, we will look at how to implement the EfficientDet architecture in PyTorch from scratch.
 categories:
   - Computer Vision
-  - Model Architecture
-  - Object Detection
 author: Aman Arora
 date: "01/13/2021"
 toc: true

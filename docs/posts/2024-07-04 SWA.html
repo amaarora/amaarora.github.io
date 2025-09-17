@@ -99,7 +99,7 @@ div.csl-indent {
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-ea1d7ac60288e0f1efdbc993fd8432ae.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-5b4ad623e5705c0698d39aec6f10cf02.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-f93c2b1f3f0577f377aefa4848a86a36.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script src="../site_libs/quarto-contrib/videojs/video.min.js"></script>
 <link href="../site_libs/quarto-contrib/videojs/video-js.css" rel="stylesheet">
 <script id="quarto-search-options" type="application/json">{
@@ -174,6 +174,7 @@ window.Quarto = {
 };
 </script>
 
+<link rel="stylesheet" href="../styles.css">
 <meta name="twitter:title" content="Sliding Window Attention">
 <meta name="twitter:description" content="In this post, we take a deep dive into Sliding Window Attention that allowed transformers to have long context length. We do this with the help of animations and also implement it from scrath in PyTorch code.">
 <meta name="twitter:image" content="../images/swa.png">
@@ -240,7 +241,7 @@ window.Quarto = {
         </div>
       </div>
                           <div class="quarto-categories">
-                <div class="quarto-category">LLM</div>
+                <div class="quarto-category">Large Language Models</div>
               </div>
                   </div>
   </div>
@@ -288,6 +289,7 @@ window.Quarto = {
 
 
 
+<p>—title: Sliding Window Attentionsubtitle: Longformer - The Long-Document Transformer description: | In this post, we take a deep dive into Sliding Window Attention that allowed transformers to have long context length. We do this with the help of animations and also implement it from scrath in PyTorch code.categories: - Large Language Modelsauthor: Aman Aroradate: “07/04/2024”toc: truenumber-sections: truetitle-block-banner: truebibliography: ../references.bibreference-location: margincitation-location: margincode-fold: falseimage: ../images/swa.png—</p>
 <p>As part of this blog post, we will look take a deep dive into <strong>Sliding Window Attention (SWA)</strong> that was introduced as part of the Longformer architecture (<span class="citation" data-cites="longformer">Beltagy, Peters, and Cohan (<a href="#ref-longformer" role="doc-biblioref">2020</a>)</span>), and also understand how it’s implemented in PyTorch!</p>
 <div class="no-row-height column-margin column-container"></div><p>When I first started looking into sliding window attention, below tweet kind of summarises my journey. O thought it’s pretty complicated and hard to implement. But, as is usual with many things, the more time you spend on it, the easier it gets.</p>
 <blockquote class="twitter-tweet tw-align-center blockquote">

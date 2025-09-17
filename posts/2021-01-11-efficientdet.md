@@ -4,8 +4,6 @@ description: |
     As part of this blog post I will explain how EfficientDets work step-by-step. 
 categories:
   - Computer Vision
-  - Model Architecture
-  - Object Detection
 author: Aman Arora
 date: "01/11/2021"
 toc: true

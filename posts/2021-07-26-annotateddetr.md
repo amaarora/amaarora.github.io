@@ -5,9 +5,7 @@ description: |
     DETR Model Architecture explained with PyTorch implementation line-by-line.
 categories:
   - Computer Vision
-  - Model Architecure
-  - Object Detection 
-  - Transformers
+  - Large Language Models
 author: Aman Arora
 date: "07/26/2021"
 toc: true

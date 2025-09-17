@@ -5,7 +5,6 @@ description: |
     In this blogpost, we will understand what Focal Loss and when is it used. We will also take a dive into its math and implement step-by-step in PyTorch.
 categories:
   - Computer Vision
-  - Loss Function
 author: Aman Arora
 date: "06/29/2020"
 toc: true
