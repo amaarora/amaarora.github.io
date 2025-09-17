@@ -14,16 +14,6 @@ about:
       href: https://github.com/amaarora
 ---
 
-Aman Arora is the Data Science Lead at [PropTrack](https://www.proptrack.com.au/). Outside of work, Aman enjoys playing badminton and going for runs along the beach.
+I'm Aman. I write about AI agents, Large Language Models, and building autonomous systems that actually work in production (yes, they exist).
 
-Being largely self-taught, Aman dedicates much of his time to staying current with the latest research. He has a strong passion for sharing his knowledge and insights, which he documents on this blog.
-
-## Experience
-1. **Data Science Lead,** REA Group, May 2022 – Present 
-2. **Machine Learning Engineer,** Weights and Biases, Mar 2021 – May 2022
-3. **Applied AI Scientist,** Harrison AI, Nov 2020 – Mar 2021
-4. **Data Scientist,** CoreLogic Australia, Mar 2019 – Nov 2020 
-
-## Education
-1. **Master of Technology - MTech,** Information Technology, Charles Sturt University
-2. **Bachelor of Technology - BTech,** Electrical, Electronics and Communications Engineering, Maharaja Surajmal Institute of Technology
+Previously, I led data science at REA Group, building property valuation models for 12.2 million Australian homes. This blog reaches over 200,000 readers annually across 131 countries.
