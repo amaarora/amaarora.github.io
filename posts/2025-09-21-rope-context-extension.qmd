@@ -8,9 +8,9 @@ categories:
   - Positional Encodings
   - Context Extension
 author: Aman Arora
-date: "01/21/2025"
+date: "09/22/2025"
 toc: true
-toc-location: body
+toc-location: left
 toc-depth: 3
 toc-title: "Contents"
 number-sections: true

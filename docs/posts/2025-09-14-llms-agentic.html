@@ -299,7 +299,7 @@ What makes modern day LLMs “agentic” is this ability to <strong>tool-call</s
 <section id="from-gpt-2-to-gpt-5-same-generate-loop-different-tokens" class="level2" data-number="2">
 <h2 data-number="2" class="anchored" data-anchor-id="from-gpt-2-to-gpt-5-same-generate-loop-different-tokens"><span class="header-section-number">2</span> From GPT-2 to GPT-5: Same Generate Loop, Different Tokens</h2>
 <p>Back in 2020, I wrote <a href="https://amaarora.github.io/posts/2020-02-18-annotatedGPT2.html">“The Annotated GPT-2”</a>, breaking down how the model worked. In the blog from 5 years ago, I used the generate function:</p>
-<div id="52a99fe1" class="cell" data-execution_count="1">
+<div id="b25fc6c0" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>GPT-2 generate loop from 2020</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> generate(context, ntok<span class="op">=</span><span class="dv">20</span>):</span>
@@ -316,7 +316,7 @@ What makes modern day LLMs “agentic” is this ability to <strong>tool-call</s
 <section id="prompt-completion-without-tool-calling" class="level3" data-number="2.1">
 <h3 data-number="2.1" class="anchored" data-anchor-id="prompt-completion-without-tool-calling"><span class="header-section-number">2.1</span> Prompt completion without tool calling</h3>
 <p>A typical prompt completion without tools, looks something like below:</p>
-<div id="ce1fb637" class="cell" data-execution_count="2">
+<div id="33e9eda6" class="cell" data-execution_count="2">
 <details class="code-fold">
 <summary>Basic prompt setup</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> transformers <span class="im">import</span> AutoModelForCausalLM, AutoTokenizer</span>
@@ -341,7 +341,7 @@ Hey, what's the temperature in Paris right now?&lt;|im_end|&gt;
 &lt;|im_start|&gt;assistant</code></pre>
 <p>This is what the model sees - the conversation formatted with special tokens <code>&lt;|im_start|&gt;</code> and <code>&lt;|im_end|&gt;</code> that mark the boundaries of each message.</p>
 <p>Now, to generate the model response, we could simply call <code>model.generate()</code> as shown below:</p>
-<div id="e92522c8" class="cell" data-execution_count="3">
+<div id="421ead37" class="cell" data-execution_count="3">
 <details class="code-fold">
 <summary>Model generation without tools</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>inputs <span class="op">=</span> tokenizer.apply_chat_template(messages, add_generation_prompt<span class="op">=</span><span class="va">True</span>, tokenize<span class="op">=</span><span class="va">True</span>, return_tensors<span class="op">=</span><span class="st">"pt"</span>, return_dict<span class="op">=</span><span class="va">True</span>)</span>
@@ -370,7 +370,7 @@ Okay, the user is asking for the current temperature in Paris. I need to check t
 <section id="prompt-completion-with-tool-calling" class="level3" data-number="2.2">
 <h3 data-number="2.2" class="anchored" data-anchor-id="prompt-completion-with-tool-calling"><span class="header-section-number">2.2</span> Prompt completion with tool calling</h3>
 <p>Now let’s see what happens when we give the model access to tools:</p>
-<div id="407208a5" class="cell" data-execution_count="4">
+<div id="4396c92a" class="cell" data-execution_count="4">
 <details class="code-fold">
 <summary>Tool-enabled prompt setup</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> transformers <span class="im">import</span> AutoModelForCausalLM, AutoTokenizer</span>
@@ -433,7 +433,7 @@ Notice how the tools are now part of the prompt! They’re just text tokens desc
 </p>
 </div>
 <p>Now let’s generate the model’s response:</p>
-<div id="88e2f8d6" class="cell" data-execution_count="5">
+<div id="15bbdba4" class="cell" data-execution_count="5">
 <details class="code-fold">
 <summary>Model generation with tools</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> AutoModelForCausalLM.from_pretrained(model_name, torch_dtype<span class="op">=</span><span class="st">"auto"</span>, device_map<span class="op">=</span><span class="st">"auto"</span>)</span>
@@ -475,7 +475,7 @@ Okay, the user is asking for the current temperature in Paris. I need to use the
 </div>
 <p>Now that the model has predicted something with <code>&lt;tool_call&gt;</code>, in the Responses API, we see this as <code>response.output[0].function_call</code> ! But internally, behind the APIs in model inference land - it’s all still next token prediction!</p>
 <p>The LLMs themselves don’t have the capability to execute the tool call, they can only decide which tool to call and pass in the required arguments. The developer on their end makes the tool call. As in the example, the tool response is simply “22”. So, let’s update the messages with tool call and tool response.</p>
-<div id="1af84276" class="cell" data-execution_count="6">
+<div id="ba349661" class="cell" data-execution_count="6">
 <details class="code-fold">
 <summary>Update messages with tool call and response</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>tool_call <span class="op">=</span> {<span class="st">"name"</span>: <span class="st">"get_current_temperature"</span>, <span class="st">"arguments"</span>: {<span class="st">"location"</span>: <span class="st">"Paris, France"</span>, <span class="st">"unit"</span>: <span class="st">"celsius"</span>}}</span>
@@ -515,7 +515,7 @@ Hey, what's the temperature in Paris right now?&lt;|im_end|&gt;
 &lt;/tool_response&gt;&lt;|im_end|&gt;
 &lt;|im_start|&gt;assistant</code></pre>
 <p>Notice how the tool response is formatted as a user message with <code>&lt;tool_response&gt;</code> tags. Now we call prompt completion again, since the model is trained to expect tool responses and knows what to do next:</p>
-<div id="a4e76034" class="cell" data-execution_count="7">
+<div id="e702bef2" class="cell" data-execution_count="7">
 <details class="code-fold">
 <summary>Generate final response with tool result</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>inputs <span class="op">=</span> tokenizer.apply_chat_template(messages, tools<span class="op">=</span>tools, add_generation_prompt<span class="op">=</span><span class="va">True</span>, return_dict<span class="op">=</span><span class="va">True</span>, return_tensors<span class="op">=</span><span class="st">"pt"</span>)</span>
