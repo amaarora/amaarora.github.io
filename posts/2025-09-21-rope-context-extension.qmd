@@ -8,7 +8,7 @@ categories:
 author: Aman Arora
 date: "09/22/2025"
 toc: true
-toc-location: left
+toc-location: body
 toc-depth: 3
 toc-title: "Contents"
 number-sections: true
