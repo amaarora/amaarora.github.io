@@ -357,14 +357,20 @@ nav#TOC > ul > li > a {
 </style>
 <section id="introduction" class="level2 page-columns page-full" data-number="1">
 <h2 data-number="1" class="anchored" data-anchor-id="introduction"><span class="header-section-number">1</span> Introduction</h2>
-<p>When the original Transformer was introduced in 2017, it came with a context window of just 512 tokens. Fast forward to today, and we have model Grok-4-fast that was released with 2M context length! <span class="citation" data-cites="xai2025grok4fast">(<a href="#ref-xai2025grok4fast" role="doc-biblioref">xAI 2025</a>)</span> The Gemini series was the first to allow accepting 1 million tokens. <span class="citation" data-cites="google2025gemini">(<a href="#ref-google2025gemini" role="doc-biblioref">Google AI 2025</a>)</span></p>
+<p>If we look back 8 years ago, we will notice that the original Transformer architecture came with a context length of 512 tokens! Fast forward to today, and we have model Grok-4-fast that was released with 2M context length! <span class="citation" data-cites="xai2025grok4fast">(<a href="#ref-xai2025grok4fast" role="doc-biblioref">xAI 2025</a>)</span> The Gemini series was the first to allow accepting 1 million tokens. <span class="citation" data-cites="google2025gemini">(<a href="#ref-google2025gemini" role="doc-biblioref">Google AI 2025</a>)</span></p>
 <div class="no-row-height column-margin column-container"><div id="ref-xai2025grok4fast" class="csl-entry" role="listitem">
 xAI. 2025. <span>“Introducing Grok-4-Fast.”</span> <a href="https://x.ai/news/grok-4-fast" class="uri">https://x.ai/news/grok-4-fast</a>.
 </div><div id="ref-google2025gemini" class="csl-entry" role="listitem">
 Google AI. 2025. <span>“Gemini API Long Context Documentation.”</span> <a href="https://ai.google.dev/gemini-api/docs/long-context" class="uri">https://ai.google.dev/gemini-api/docs/long-context</a>.
-</div></div><p>This 4000x improvement didn’t come from training larger models or using more data - it came from fundamental advances in how models encode position. Many of these breakthroughs emerged from the open source community, with key discoveries documented in blog posts and forums before being formalized in academic papers.</p>
-<p>In this blog post, we’ll examine the evolution of positional encodings - from the Transformer’s sinusoidal functions (APE) to RoPE’s rotational matrices, from Position Interpolation to Dynamic Scaling. We’ll implement each technique, visualize the underlying mathematics, and understand the critical insight that models memorize positional patterns rather than learning generalizable representations.</p>
-<p>This is a highly technical deep dive with working PyTorch code throughout. By the end, you’ll understand exactly how modern LLMs can process entire books, why they catastrophically fail at position 1025, and how the community solved problems that seemed mathematically impossible.</p>
+</div><div id="ref-tongyi2025deepresearch" class="csl-entry" role="listitem">
+DeepResearch Team, Tongyi Lab. 2025. <span>“Tongyi DeepResearch: A New Era of Open-Source AI Researchers.”</span> Blog post. <a href="https://tongyi-agent.github.io/blog/introducing-tongyi-deep-research/">https://tongyi-agent.github.io/blog/introducing-tongyi-deep-research/</a>.
+</div></div><p>In the world of agents, where context deeply affects, context lengths play a crucial role in supporting the industry reach new state of the art solutions and integrations with Large language models. The recent accomplishment from Tongyi Labs introducing Tongyi Deepresearch <span class="citation" data-cites="tongyi2025deepresearch">(<a href="#ref-tongyi2025deepresearch" role="doc-biblioref">DeepResearch Team, Tongyi Lab 2025</a>)</span> termed the 128K context length as insufficient! Often times using Claude Code, we run into context limits - where the conversation is then “compacted” by the terminal agent. On the other hand, Gemini CLI has a massive 1M context length! While at longer context, the accuracy of retrieval reduces, there are techniques to suppress that and it is pretty handy to have larger context lengths.</p>
+<p>However, the improvement in context length didn’t come from model architecture upgrades alone. In addition to the chosen attention mechanism, positional embeddings play a crucial role in long context modeling. <span class="citation" data-cites="yang2025ropenopeagainnew">(<a href="#ref-yang2025ropenopeagainnew" role="doc-biblioref">Yang et al. 2025</a>)</span></p>
+<div class="no-row-height column-margin column-container"><div id="ref-yang2025ropenopeagainnew" class="csl-entry" role="listitem">
+Yang, Bowen, Bharat Venkitesh, Dwarak Talupuru, Hangyu Lin, David Cairuz, Phil Blunsom, and Acyr Locatelli. 2025. <span>“Rope to Nope and Back Again: A New Hybrid Attention Strategy.”</span> <a href="https://arxiv.org/abs/2501.18795">https://arxiv.org/abs/2501.18795</a>.
+</div></div><p>As part of this blog post, you and I are going to take a deep dive into techniques that have enabled context length improvements since the original Transformer architecture was introduced in 2017! For every technique, I have also included it’s PyTorch implementation - either from Huggingface or the repository shared by the paper itself along with intuitive and practical explanations that I hope the reader finds easy to follow.</p>
+<p>We kickstart the journey with absolute positional embeddings, and learn how each dimensions are oscillating at different frequencies allowing for unique fingerprints, or absolute position coordinates for tokens in a sequence. We follow this up with rotary embeddings (RoPE), and also get an intuitive understanding of simply thinking in complex number terms, helps embed position information into embedding vectors through rotation. RoPE encodes the absolute position with a rotation matrix and meanwhile incorporates the explicit relative position dependency in self-attention formulation. Finally, we look into three adaptions of RoPE - namely NTK aware RoPE, dynamic scaling and NTK by parts. Some of these innovations were in fact announced as Reddit posts! Lastly, we look at YaRN - “Yet Another rope extentioN” method which combines NTK by parts with an introduction of temperature parameter to the attention formulation. <strong>Most modern LLMs today such as Qwen, DeepSeek, LLaMA, gpt-oss are finetuned using YaRN to enable context length expansion only utilising a small percentage of the pre-trained dataset.</strong></p>
+<p>With that being, let’s get started!</p>
 </section>
 <section id="sec-ape" class="level2 page-columns page-full" data-number="2">
 <h2 data-number="2" class="anchored" data-anchor-id="sec-ape"><span class="header-section-number">2</span> APE (Absolute positional embeddings)</h2>
@@ -412,7 +418,7 @@ Vaswani, Ashish, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan 
 <section id="visualizing-positional-encoding-frequencies" class="level3" data-number="2.1">
 <h3 data-number="2.1" class="anchored" data-anchor-id="visualizing-positional-encoding-frequencies"><span class="header-section-number">2.1</span> Visualizing Positional Encoding Frequencies</h3>
 <p>Each dimension oscillates at a different frequency. As a result, each position gets a unique encoding - think of it like a fingerprint. Lower dimensions oscillate rapidly while higher dimensions change slowly:</p>
-<div id="6c0539df" class="cell" data-execution_count="1">
+<div id="b3e0f962" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> warnings</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>warnings.filterwarnings(<span class="st">'ignore'</span>)</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -486,23 +492,23 @@ Vaswani, Ashish, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan 
 <div class="cell-output cell-output-display" data-execution_count="1">
 
 <style>
-  #altair-viz-534a39e1f84e420982b08cbee18e4a52.vega-embed {
+  #altair-viz-525c30833ccc4242832b28d2453ed274.vega-embed {
     width: 100%;
     display: flex;
   }
 
-  #altair-viz-534a39e1f84e420982b08cbee18e4a52.vega-embed details,
-  #altair-viz-534a39e1f84e420982b08cbee18e4a52.vega-embed details summary {
+  #altair-viz-525c30833ccc4242832b28d2453ed274.vega-embed details,
+  #altair-viz-525c30833ccc4242832b28d2453ed274.vega-embed details summary {
     position: relative;
   }
 </style>
-<div id="altair-viz-534a39e1f84e420982b08cbee18e4a52"></div>
+<div id="altair-viz-525c30833ccc4242832b28d2453ed274"></div>
 <script type="text/javascript">
   var VEGA_DEBUG = (typeof VEGA_DEBUG == "undefined") ? {} : VEGA_DEBUG;
   (function(spec, embedOpt){
     let outputDiv = document.currentScript.previousElementSibling;
-    if (outputDiv.id !== "altair-viz-534a39e1f84e420982b08cbee18e4a52") {
-      outputDiv = document.getElementById("altair-viz-534a39e1f84e420982b08cbee18e4a52");
+    if (outputDiv.id !== "altair-viz-525c30833ccc4242832b28d2453ed274") {
+      outputDiv = document.getElementById("altair-viz-525c30833ccc4242832b28d2453ed274");
     }
     const paths = {
       "vega": "https://cdn.jsdelivr.net/npm/vega@5?noext",
@@ -558,7 +564,7 @@ Vaswani, Ashish, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan 
 <section id="sec-position-fingerprints" class="level3" data-number="2.2">
 <h3 data-number="2.2" class="anchored" data-anchor-id="sec-position-fingerprints"><span class="header-section-number">2.2</span> Understanding Position Fingerprints</h3>
 <p>Let’s visualize how different positions create unique encodings and how the model learns proximity:</p>
-<div id="29a65c48" class="cell" data-execution_count="2">
+<div id="6c35adb3" class="cell" data-execution_count="2">
 <details class="code-fold">
 <summary>Show code for position fingerprint visualization</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> warnings</span>
@@ -703,23 +709,23 @@ Vaswani, Ashish, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan 
 <div class="cell-output cell-output-display" data-execution_count="2">
 
 <style>
-  #altair-viz-996bf601104147e0be4fce933f477ced.vega-embed {
+  #altair-viz-4ac3966de5834f5c8109978a0ae0b881.vega-embed {
     width: 100%;
     display: flex;
   }
 
-  #altair-viz-996bf601104147e0be4fce933f477ced.vega-embed details,
-  #altair-viz-996bf601104147e0be4fce933f477ced.vega-embed details summary {
+  #altair-viz-4ac3966de5834f5c8109978a0ae0b881.vega-embed details,
+  #altair-viz-4ac3966de5834f5c8109978a0ae0b881.vega-embed details summary {
     position: relative;
   }
 </style>
-<div id="altair-viz-996bf601104147e0be4fce933f477ced"></div>
+<div id="altair-viz-4ac3966de5834f5c8109978a0ae0b881"></div>
 <script type="text/javascript">
   var VEGA_DEBUG = (typeof VEGA_DEBUG == "undefined") ? {} : VEGA_DEBUG;
   (function(spec, embedOpt){
     let outputDiv = document.currentScript.previousElementSibling;
-    if (outputDiv.id !== "altair-viz-996bf601104147e0be4fce933f477ced") {
-      outputDiv = document.getElementById("altair-viz-996bf601104147e0be4fce933f477ced");
+    if (outputDiv.id !== "altair-viz-4ac3966de5834f5c8109978a0ae0b881") {
+      outputDiv = document.getElementById("altair-viz-4ac3966de5834f5c8109978a0ae0b881");
     }
     const paths = {
       "vega": "https://cdn.jsdelivr.net/npm/vega@5?noext",
@@ -769,7 +775,7 @@ Vaswani, Ashish, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan 
 </script>
 </div>
 </div>
-<div id="51742f0f" class="cell" data-execution_count="3">
+<div id="017b8366" class="cell" data-execution_count="3">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"🔍 Position Fingerprints (showing dims 4-7 only):</span><span class="ch">\n</span><span class="st">"</span>)</span>
@@ -845,7 +851,7 @@ What is the pass key? The pass key is ___</code></pre>
 <p>The model must retrieve the 5-digit passkey buried in thousands of tokens of repetitive text. If the model can’t find it, it means it cannot effectively use that portion of its context window.</p>
 </div>
 </div>
-<div id="3de141f8" class="cell" data-execution_count="4">
+<div id="06868256" class="cell" data-execution_count="4">
 <details class="code-fold">
 <summary>Show code for table generation</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
@@ -1303,7 +1309,7 @@ Figure&nbsp;1: Implementation of Rotary Position Embedding (RoPE)
 <p>Let’s look at a complete PyTorch implementation to understand how RoPE works in practice (adapted from HuggingFace Transformers <span class="citation" data-cites="wolf-etal-2020-transformers">(<a href="#ref-wolf-etal-2020-transformers" role="doc-biblioref">Wolf et al. 2020</a>)</span>):</p>
 <div class="no-row-height column-margin column-container"><div id="ref-wolf-etal-2020-transformers" class="csl-entry" role="listitem">
 Wolf, Thomas, Lysandre Debut, Victor Sanh, Julien Chaumond, Clement Delangue, Anthony Moi, Pierric Cistac, et al. 2020. <span>“Transformers: State-of-the-Art Natural Language Processing.”</span> In <em>Proceedings of the 2020 Conference on Empirical Methods in Natural Language Processing: System Demonstrations</em>, 38–45. Online: Association for Computational Linguistics. <a href="https://www.aclweb.org/anthology/2020.emnlp-demos.6">https://www.aclweb.org/anthology/2020.emnlp-demos.6</a>.
-</div></div><div id="7c659434" class="cell" data-execution_count="5">
+</div></div><div id="60f43920" class="cell" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn <span class="im">as</span> nn</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -1442,7 +1448,7 @@ Dot product for positions (2,100) with distance=98: -0.8193</code></pre>
 <section id="long-term-decay-of-rope" class="level3" data-number="3.5">
 <h3 data-number="3.5" class="anchored" data-anchor-id="long-term-decay-of-rope"><span class="header-section-number">3.5</span> Long-term Decay of RoPE</h3>
 <p>Let’s recreate the long-term decay pattern of RoPE, showing how attention naturally decreases with relative distance:</p>
-<div id="3a307ca3" class="cell" data-execution_count="6">
+<div id="97a760d1" class="cell" data-execution_count="6">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
@@ -1648,7 +1654,7 @@ Figure&nbsp;3: Extrapolation versus interpolation. Left: A fitted attention scor
 <span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> inv_freq, attention_factor</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Note the clever implementation detail: instead of scaling position IDs directly, they scale the inverse frequencies by the same factor. Since the computation is <code>embs = inv_freq @ position_ids</code>, scaling inverse frequencies is mathematically equivalent but more efficient.</p>
 <p>Here’s a simplified implementation showing the core concept:</p>
-<div id="ff24f92b" class="cell" data-execution_count="7">
+<div id="67246222" class="cell" data-execution_count="7">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> apply_positional_interpolation(position_ids, original_max_length, target_max_length):</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="co">    Scale position IDs to fit within the original training range.</span></span>
@@ -1912,6 +1918,7 @@ Peng, Bowen, Jeffrey Quesnelle, Honglu Fan, and Enrico Shippole. 2023. <span>“
 <p><span class="math display">\[\text{softmax}\left(\frac{\mathbf{q}_m^T \mathbf{k}_n}{t\sqrt{D}}\right)\]</span></p>
 <p>where <span class="math inline">\(t = \sqrt{1/s} = 0.1\ln(s) + 1\)</span> for scale factor <span class="math inline">\(s\)</span>.</p>
 <p>The reparametrization of RoPE as 2D rotation matrices provides an elegant implementation. By scaling the complex RoPE embeddings by <span class="math inline">\(\sqrt{1/t}\)</span>, YaRN effectively alters the attention mechanism without modifying its code. This “length scaling” trick scales both <span class="math inline">\(\mathbf{q}_m\)</span> and <span class="math inline">\(\mathbf{k}_n\)</span> by a constant factor, achieving the temperature effect with zero overhead during inference.</p>
+<p>This may seem counter-intuitive - a higher temperature actually <em>softens</em> the attention distribution, making the model pay attention to more tokens rather than focusing sharply. However, this is precisely why it works: position interpolation compresses positional information, which can create artifacts where certain keys get artificially inflated scores. By softening the softmax, YaRN prevents the model from over-relying on a single, potentially incorrect high-scoring key. Instead, it forces the model to consider a broader range of keys, making its decisions more robust to the slight loss of precision from position interpolation. It’s a counter-intuitive but powerful idea - deliberately making attention “fuzzier” to handle compressed positions better.</p>
 <p>YaRN combines: 1. <strong>NTK-by-parts interpolation</strong>: Frequency-aware scaling from the previous section 2. <strong>Attention temperature scaling</strong>: Preserves local token distinctions</p>
 <p>From the paper, this dual approach allows YaRN to:</p>
 <ul>

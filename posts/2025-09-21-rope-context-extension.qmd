@@ -37,13 +37,17 @@ nav#TOC > ul > li > a {
 
 ## Introduction
 
-When the original Transformer was introduced in 2017, it came with a context window of just 512 tokens. Fast forward to today, and we have model Grok-4-fast that was released with 2M context length! [@xai2025grok4fast] The Gemini series was the first to allow accepting 1 million tokens. [@google2025gemini]
+If we look back 8 years ago, we will notice that the original Transformer architecture came with a context length of 512 tokens! Fast forward to today, and we have model Grok-4-fast that was released with 2M context length! [@xai2025grok4fast] The Gemini series was the first to allow accepting 1 million tokens. [@google2025gemini]
 
-This 4000x improvement didn't come from training larger models or using more data - it came from fundamental advances in how models encode position. Many of these breakthroughs emerged from the open source community, with key discoveries documented in blog posts and forums before being formalized in academic papers.
+In the world of agents, where context deeply affects, context lengths play a crucial role in supporting the industry reach new state of the art solutions and integrations with Large language models. The recent accomplishment from Tongyi Labs introducing Tongyi Deepresearch [@tongyi2025deepresearch] termed the 128K context length as insufficient! Often times using Claude Code, we run into  context limits - where the conversation is then "compacted" by the terminal agent. On the other hand, Gemini CLI has a massive 1M context length! While at longer context, the accuracy of retrieval reduces, there are techniques to suppress that and it is pretty handy to have larger context lengths.
 
-In this blog post, we'll examine the evolution of positional encodings - from the Transformer's sinusoidal functions (APE) to RoPE's rotational matrices, from Position Interpolation to Dynamic Scaling. We'll implement each technique, visualize the underlying mathematics, and understand the critical insight that models memorize positional patterns rather than learning generalizable representations.
+However, the improvement in context length didn't come from model architecture upgrades alone. In addition to the chosen attention mechanism, positional embeddings play a crucial role in long context modeling. [@yang2025ropenopeagainnew]
 
-This is a highly technical deep dive with working PyTorch code throughout. By the end, you'll understand exactly how modern LLMs can process entire books, why they catastrophically fail at position 1025, and how the community solved problems that seemed mathematically impossible.
+As part of this blog post, you and I are going to take a deep dive into techniques that have enabled context length improvements since the original Transformer architecture was introduced in 2017! For every technique, I have also included it's PyTorch implementation - either from Huggingface or the repository shared by the paper itself along with intuitive and practical explanations that I hope the reader finds easy to follow. 
+
+We kickstart the journey with absolute positional embeddings, and learn how each dimensions are oscillating at different frequencies allowing for unique fingerprints, or absolute position coordinates for tokens in a sequence. We follow this up with rotary embeddings (RoPE), and also get an intuitive understanding of simply thinking in complex number terms, helps embed position information into embedding vectors through rotation. RoPE encodes the absolute position with a rotation matrix and meanwhile incorporates the explicit relative position dependency in self-attention formulation. Finally, we look into three adaptions of RoPE - namely NTK aware RoPE, dynamic scaling and NTK by parts. Some of these innovations were in fact announced as Reddit posts! Lastly, we look at YaRN - "Yet Another rope extentioN" method which combines NTK by parts with an introduction of temperature parameter to the attention formulation. **Most modern LLMs today such as Qwen, DeepSeek, LLaMA, gpt-oss are finetuned using YaRN to enable context length expansion only utilising a small percentage of the pre-trained dataset.**
+
+With that being, let's get started!
 
 ## APE (Absolute positional embeddings) {#sec-ape}
 
@@ -1399,6 +1403,8 @@ $$\text{softmax}\left(\frac{\mathbf{q}_m^T \mathbf{k}_n}{t\sqrt{D}}\right)$$
 where $t = \sqrt{1/s} = 0.1\ln(s) + 1$ for scale factor $s$.
 
 The reparametrization of RoPE as 2D rotation matrices provides an elegant implementation. By scaling the complex RoPE embeddings by $\sqrt{1/t}$, YaRN effectively alters the attention mechanism without modifying its code. This "length scaling" trick scales both $\mathbf{q}_m$ and $\mathbf{k}_n$ by a constant factor, achieving the temperature effect with zero overhead during inference.
+
+This may seem counter-intuitive - a higher temperature actually *softens* the attention distribution, making the model pay attention to more tokens rather than focusing sharply. However, this is precisely why it works: position interpolation compresses positional information, which can create artifacts where certain keys get artificially inflated scores. By softening the softmax, YaRN prevents the model from over-relying on a single, potentially incorrect high-scoring key. Instead, it forces the model to consider a broader range of keys, making its decisions more robust to the slight loss of precision from position interpolation. It's a counter-intuitive but powerful idea - deliberately making attention "fuzzier" to handle compressed positions better.
 
 YaRN combines:
 1. **NTK-by-parts interpolation**: Frequency-aware scaling from the previous section
