@@ -5,8 +5,6 @@ description: |
     A comprehensive technical guide through the evolution of positional encodings in Large Language Models since GPT-2 that helped scale context length from 1,024 to 2,000,000+ tokens with minimal fine-tuning.
 categories:
   - Large Language Models
-  - Positional Encodings
-  - Context Extension
 author: Aman Arora
 date: "09/22/2025"
 toc: true
@@ -14,7 +12,6 @@ toc-location: left
 toc-depth: 3
 toc-title: "Contents"
 number-sections: true
-title-block-banner: true
 bibliography: ../references.bib
 reference-location: margin
 citation-location: margin
