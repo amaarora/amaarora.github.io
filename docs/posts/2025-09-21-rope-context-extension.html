@@ -8,9 +8,9 @@
 
 <meta name="author" content="Aman Arora">
 <meta name="dcterms.date" content="2025-09-22">
-<meta name="description" content="A comprehensive technical guide through the evolution of positional encodings in Large Language Models since GPT-2 that helped scale context length from 1,024 to 2,000,000+ tokens with minimal fine-tuning.">
+<meta name="description" content="A comprehensive technical guide through the evolution of positional encodings such as APE, RoPE, Position Interpolation, NTK-Aware Scaling, Dynamic Scaling, and YaRN in Large Language Models since the original Transformer that helped scale context length from 512 to 2,000,000+ tokens with minimal fine-tuning.">
 
-<title>How LLMs Scaled from 1K to 2M Context: A Technical Deep Dive</title>
+<title>How LLMs Scaled from 512 to 2M Context: A Technical Deep Dive</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -175,8 +175,8 @@ window.Quarto = {
 };
 </script>
 
-<meta name="twitter:title" content="How LLMs Scaled from 1K to 2M Context: A Technical Deep Dive">
-<meta name="twitter:description" content="A comprehensive technical guide through the evolution of positional encodings in Large Language Models since GPT-2 that helped scale context length from 1,024 to 2,000,000+ tokens with minimal fine-tuning.">
+<meta name="twitter:title" content="How LLMs Scaled from 512 to 2M Context: A Technical Deep Dive">
+<meta name="twitter:description" content="A comprehensive technical guide through the evolution of positional encodings such as APE, RoPE, Position Interpolation, NTK-Aware Scaling, Dynamic Scaling, and YaRN in Large Language Models since the original Transformer that helped scale context length from 512 to 2,000,000+ tokens with minimal fine-tuning.">
 <meta name="twitter:image" content="../images/rope-implementation.png">
 <meta name="twitter:card" content="summary_large_image">
 </head>
@@ -240,8 +240,8 @@ window.Quarto = {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">How LLMs Scaled from 1K to 2M Context: A Technical Deep Dive</h1>
-<p class="subtitle lead">Understanding APE, RoPE, Position Interpolation, NTK-Aware Scaling, Dynamic Scaling, and YaRN</p>
+<h1 class="title">How LLMs Scaled from 512 to 2M Context: A Technical Deep Dive</h1>
+<p class="subtitle lead">Understanding APE, RoPE, Position Interpolation, NTK-Aware Scaling, Dynamic Scaling, NTK-By-Parts, and YaRN</p>
   <div class="quarto-categories">
     <div class="quarto-category">Large Language Models</div>
   </div>
@@ -249,7 +249,7 @@ window.Quarto = {
 
 <div>
   <div class="description">
-    <p>A comprehensive technical guide through the evolution of positional encodings in Large Language Models since GPT-2 that helped scale context length from 1,024 to 2,000,000+ tokens with minimal fine-tuning.</p>
+    <p>A comprehensive technical guide through the evolution of positional encodings such as APE, RoPE, Position Interpolation, NTK-Aware Scaling, Dynamic Scaling, and YaRN in Large Language Models since the original Transformer that helped scale context length from 512 to 2,000,000+ tokens with minimal fine-tuning.</p>
   </div>
 </div>
 
@@ -323,7 +323,19 @@ window.Quarto = {
   <li><a href="#performance-comparison" id="toc-performance-comparison"><span class="header-section-number">7.4</span> Performance Comparison</a></li>
   <li><a href="#implementation-in-practice" id="toc-implementation-in-practice"><span class="header-section-number">7.5</span> Implementation in Practice</a></li>
   </ul></li>
-  <li><a href="#citation" id="toc-citation"><span class="header-section-number">8</span> Citation</a></li>
+  <li><a href="#advanced-ntk-by-parts---frequency-aware-interpolation" id="toc-advanced-ntk-by-parts---frequency-aware-interpolation"><span class="header-section-number">8</span> Advanced: NTK “By Parts” - Frequency-Aware Interpolation</a>
+  <ul>
+  <li><a href="#the-multi-scale-problem" id="toc-the-multi-scale-problem"><span class="header-section-number">8.1</span> The Multi-Scale Problem</a></li>
+  <li><a href="#implementation-combining-three-strategies" id="toc-implementation-combining-three-strategies"><span class="header-section-number">8.2</span> Implementation: Combining Three Strategies</a></li>
+  <li><a href="#how-it-works" id="toc-how-it-works"><span class="header-section-number">8.3</span> How It Works</a></li>
+  </ul></li>
+  <li><a href="#yarn-yet-another-rope-extension" id="toc-yarn-yet-another-rope-extension"><span class="header-section-number">9</span> YaRN: Yet Another RoPE Extension</a>
+  <ul>
+  <li><a href="#the-problem-with-pure-interpolation" id="toc-the-problem-with-pure-interpolation"><span class="header-section-number">9.1</span> The Problem with Pure Interpolation</a></li>
+  <li><a href="#attention-temperature-scaling" id="toc-attention-temperature-scaling"><span class="header-section-number">9.2</span> Attention Temperature Scaling</a></li>
+  <li><a href="#implementation-2" id="toc-implementation-2"><span class="header-section-number">9.3</span> Implementation</a></li>
+  </ul></li>
+  <li><a href="#citation" id="toc-citation"><span class="header-section-number">10</span> Citation</a></li>
   </ul>
 </nav>
 <style>
@@ -345,18 +357,14 @@ nav#TOC > ul > li > a {
 </style>
 <section id="introduction" class="level2 page-columns page-full" data-number="1">
 <h2 data-number="1" class="anchored" data-anchor-id="introduction"><span class="header-section-number">1</span> Introduction</h2>
-<p>When GPT-2 was released in 2019, it came with a context window of just 1,024 tokens. Fast forward to today, and we have model Grok-4-fast that was released with 2M context length! <span class="citation" data-cites="xai2025grok4fast">(<a href="#ref-xai2025grok4fast" role="doc-biblioref">xAI 2025</a>)</span></p>
+<p>When the original Transformer was introduced in 2017, it came with a context window of just 512 tokens. Fast forward to today, and we have model Grok-4-fast that was released with 2M context length! <span class="citation" data-cites="xai2025grok4fast">(<a href="#ref-xai2025grok4fast" role="doc-biblioref">xAI 2025</a>)</span> The Gemini series was the first to allow accepting 1 million tokens. <span class="citation" data-cites="google2025gemini">(<a href="#ref-google2025gemini" role="doc-biblioref">Google AI 2025</a>)</span></p>
 <div class="no-row-height column-margin column-container"><div id="ref-xai2025grok4fast" class="csl-entry" role="listitem">
 xAI. 2025. <span>“Introducing Grok-4-Fast.”</span> <a href="https://x.ai/news/grok-4-fast" class="uri">https://x.ai/news/grok-4-fast</a>.
 </div><div id="ref-google2025gemini" class="csl-entry" role="listitem">
 Google AI. 2025. <span>“Gemini API Long Context Documentation.”</span> <a href="https://ai.google.dev/gemini-api/docs/long-context" class="uri">https://ai.google.dev/gemini-api/docs/long-context</a>.
-</div></div><p>The Gemini series was the first to allow accepting 1 million tokens. <span class="citation" data-cites="google2025gemini">(<a href="#ref-google2025gemini" role="doc-biblioref">Google AI 2025</a>)</span></p>
-<p>As part of this blog post, I want to enlighten the readers with some of the techniques that have made this possible and the evolution of these techniques since the GPT-2 days back in 2019. This is a highly technical blog post suitable for readers who are looking to deep dive on the subject.</p>
-<p>Both model architecture and position embeddings have played a key role when it comes to long context inference. Traditionally, in the Transformer architecture released in 2017, the authors used Absolute Positional Embeddings or APE. These encode positional information into the attention mechanism through absolute positions which get added to the vector representations of the embeddings.</p>
-<p>A comprehensive survey of the techniques is available in YaRN <span class="citation" data-cites="yarn2023">(<a href="#ref-yarn2023" role="doc-biblioref">Peng et al. 2023</a>)</span>.</p>
-<div class="no-row-height column-margin column-container"><div id="ref-yarn2023" class="csl-entry" role="listitem">
-Peng, Bowen, Jeffrey Quesnelle, Honglu Fan, and Enrico Shippole. 2023. <span>“YaRN: Efficient Context Window Extension of Large Language Models.”</span> <a href="https://arxiv.org/abs/2309.00071">https://arxiv.org/abs/2309.00071</a>.
-</div></div><p>Let’s look at all of them with the help of their PyTorch implementations.</p>
+</div></div><p>This 4000x improvement didn’t come from training larger models or using more data - it came from fundamental advances in how models encode position. Many of these breakthroughs emerged from the open source community, with key discoveries documented in blog posts and forums before being formalized in academic papers.</p>
+<p>In this blog post, we’ll examine the evolution of positional encodings - from the Transformer’s sinusoidal functions (APE) to RoPE’s rotational matrices, from Position Interpolation to Dynamic Scaling. We’ll implement each technique, visualize the underlying mathematics, and understand the critical insight that models memorize positional patterns rather than learning generalizable representations.</p>
+<p>This is a highly technical deep dive with working PyTorch code throughout. By the end, you’ll understand exactly how modern LLMs can process entire books, why they catastrophically fail at position 1025, and how the community solved problems that seemed mathematically impossible.</p>
 </section>
 <section id="sec-ape" class="level2 page-columns page-full" data-number="2">
 <h2 data-number="2" class="anchored" data-anchor-id="sec-ape"><span class="header-section-number">2</span> APE (Absolute positional embeddings)</h2>
@@ -404,7 +412,7 @@ Vaswani, Ashish, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan 
 <section id="visualizing-positional-encoding-frequencies" class="level3" data-number="2.1">
 <h3 data-number="2.1" class="anchored" data-anchor-id="visualizing-positional-encoding-frequencies"><span class="header-section-number">2.1</span> Visualizing Positional Encoding Frequencies</h3>
 <p>Each dimension oscillates at a different frequency. As a result, each position gets a unique encoding - think of it like a fingerprint. Lower dimensions oscillate rapidly while higher dimensions change slowly:</p>
-<div id="89ad8179" class="cell" data-execution_count="1">
+<div id="6c0539df" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> warnings</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>warnings.filterwarnings(<span class="st">'ignore'</span>)</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -478,23 +486,23 @@ Vaswani, Ashish, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan 
 <div class="cell-output cell-output-display" data-execution_count="1">
 
 <style>
-  #altair-viz-1f55c162d07543a2a1f5fb73e86949e6.vega-embed {
+  #altair-viz-534a39e1f84e420982b08cbee18e4a52.vega-embed {
     width: 100%;
     display: flex;
   }
 
-  #altair-viz-1f55c162d07543a2a1f5fb73e86949e6.vega-embed details,
-  #altair-viz-1f55c162d07543a2a1f5fb73e86949e6.vega-embed details summary {
+  #altair-viz-534a39e1f84e420982b08cbee18e4a52.vega-embed details,
+  #altair-viz-534a39e1f84e420982b08cbee18e4a52.vega-embed details summary {
     position: relative;
   }
 </style>
-<div id="altair-viz-1f55c162d07543a2a1f5fb73e86949e6"></div>
+<div id="altair-viz-534a39e1f84e420982b08cbee18e4a52"></div>
 <script type="text/javascript">
   var VEGA_DEBUG = (typeof VEGA_DEBUG == "undefined") ? {} : VEGA_DEBUG;
   (function(spec, embedOpt){
     let outputDiv = document.currentScript.previousElementSibling;
-    if (outputDiv.id !== "altair-viz-1f55c162d07543a2a1f5fb73e86949e6") {
-      outputDiv = document.getElementById("altair-viz-1f55c162d07543a2a1f5fb73e86949e6");
+    if (outputDiv.id !== "altair-viz-534a39e1f84e420982b08cbee18e4a52") {
+      outputDiv = document.getElementById("altair-viz-534a39e1f84e420982b08cbee18e4a52");
     }
     const paths = {
       "vega": "https://cdn.jsdelivr.net/npm/vega@5?noext",
@@ -550,7 +558,7 @@ Vaswani, Ashish, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan 
 <section id="sec-position-fingerprints" class="level3" data-number="2.2">
 <h3 data-number="2.2" class="anchored" data-anchor-id="sec-position-fingerprints"><span class="header-section-number">2.2</span> Understanding Position Fingerprints</h3>
 <p>Let’s visualize how different positions create unique encodings and how the model learns proximity:</p>
-<div id="74456fe9" class="cell" data-execution_count="2">
+<div id="29a65c48" class="cell" data-execution_count="2">
 <details class="code-fold">
 <summary>Show code for position fingerprint visualization</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> warnings</span>
@@ -695,23 +703,23 @@ Vaswani, Ashish, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan 
 <div class="cell-output cell-output-display" data-execution_count="2">
 
 <style>
-  #altair-viz-be2873ca47a54f1994dd62c93a34a938.vega-embed {
+  #altair-viz-996bf601104147e0be4fce933f477ced.vega-embed {
     width: 100%;
     display: flex;
   }
 
-  #altair-viz-be2873ca47a54f1994dd62c93a34a938.vega-embed details,
-  #altair-viz-be2873ca47a54f1994dd62c93a34a938.vega-embed details summary {
+  #altair-viz-996bf601104147e0be4fce933f477ced.vega-embed details,
+  #altair-viz-996bf601104147e0be4fce933f477ced.vega-embed details summary {
     position: relative;
   }
 </style>
-<div id="altair-viz-be2873ca47a54f1994dd62c93a34a938"></div>
+<div id="altair-viz-996bf601104147e0be4fce933f477ced"></div>
 <script type="text/javascript">
   var VEGA_DEBUG = (typeof VEGA_DEBUG == "undefined") ? {} : VEGA_DEBUG;
   (function(spec, embedOpt){
     let outputDiv = document.currentScript.previousElementSibling;
-    if (outputDiv.id !== "altair-viz-be2873ca47a54f1994dd62c93a34a938") {
-      outputDiv = document.getElementById("altair-viz-be2873ca47a54f1994dd62c93a34a938");
+    if (outputDiv.id !== "altair-viz-996bf601104147e0be4fce933f477ced") {
+      outputDiv = document.getElementById("altair-viz-996bf601104147e0be4fce933f477ced");
     }
     const paths = {
       "vega": "https://cdn.jsdelivr.net/npm/vega@5?noext",
@@ -761,7 +769,7 @@ Vaswani, Ashish, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan 
 </script>
 </div>
 </div>
-<div id="6e1fcb52" class="cell" data-execution_count="3">
+<div id="51742f0f" class="cell" data-execution_count="3">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"🔍 Position Fingerprints (showing dims 4-7 only):</span><span class="ch">\n</span><span class="st">"</span>)</span>
@@ -837,7 +845,7 @@ What is the pass key? The pass key is ___</code></pre>
 <p>The model must retrieve the 5-digit passkey buried in thousands of tokens of repetitive text. If the model can’t find it, it means it cannot effectively use that portion of its context window.</p>
 </div>
 </div>
-<div id="e408b94a" class="cell" data-execution_count="4">
+<div id="3de141f8" class="cell" data-execution_count="4">
 <details class="code-fold">
 <summary>Show code for table generation</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
@@ -1295,7 +1303,7 @@ Figure&nbsp;1: Implementation of Rotary Position Embedding (RoPE)
 <p>Let’s look at a complete PyTorch implementation to understand how RoPE works in practice (adapted from HuggingFace Transformers <span class="citation" data-cites="wolf-etal-2020-transformers">(<a href="#ref-wolf-etal-2020-transformers" role="doc-biblioref">Wolf et al. 2020</a>)</span>):</p>
 <div class="no-row-height column-margin column-container"><div id="ref-wolf-etal-2020-transformers" class="csl-entry" role="listitem">
 Wolf, Thomas, Lysandre Debut, Victor Sanh, Julien Chaumond, Clement Delangue, Anthony Moi, Pierric Cistac, et al. 2020. <span>“Transformers: State-of-the-Art Natural Language Processing.”</span> In <em>Proceedings of the 2020 Conference on Empirical Methods in Natural Language Processing: System Demonstrations</em>, 38–45. Online: Association for Computational Linguistics. <a href="https://www.aclweb.org/anthology/2020.emnlp-demos.6">https://www.aclweb.org/anthology/2020.emnlp-demos.6</a>.
-</div></div><div id="42f6a214" class="cell" data-execution_count="5">
+</div></div><div id="7c659434" class="cell" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn <span class="im">as</span> nn</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -1434,7 +1442,7 @@ Dot product for positions (2,100) with distance=98: -0.8193</code></pre>
 <section id="long-term-decay-of-rope" class="level3" data-number="3.5">
 <h3 data-number="3.5" class="anchored" data-anchor-id="long-term-decay-of-rope"><span class="header-section-number">3.5</span> Long-term Decay of RoPE</h3>
 <p>Let’s recreate the long-term decay pattern of RoPE, showing how attention naturally decreases with relative distance:</p>
-<div id="abf9e755" class="cell" data-execution_count="6">
+<div id="3a307ca3" class="cell" data-execution_count="6">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
@@ -1640,7 +1648,7 @@ Figure&nbsp;3: Extrapolation versus interpolation. Left: A fitted attention scor
 <span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> inv_freq, attention_factor</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Note the clever implementation detail: instead of scaling position IDs directly, they scale the inverse frequencies by the same factor. Since the computation is <code>embs = inv_freq @ position_ids</code>, scaling inverse frequencies is mathematically equivalent but more efficient.</p>
 <p>Here’s a simplified implementation showing the core concept:</p>
-<div id="9160b599" class="cell" data-execution_count="7">
+<div id="ff24f92b" class="cell" data-execution_count="7">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> apply_positional_interpolation(position_ids, original_max_length, target_max_length):</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="co">    Scale position IDs to fit within the original training range.</span></span>
@@ -1684,7 +1692,7 @@ Key insight: Position 8191 maps to 2047.75 (within training range!)</code></pre>
 </section>
 <section id="ntk-aware-scaling-a-frequency-based-approach" class="level2 page-columns page-full" data-number="6">
 <h2 data-number="6" class="anchored" data-anchor-id="ntk-aware-scaling-a-frequency-based-approach"><span class="header-section-number">6</span> NTK-Aware Scaling: A Frequency-Based Approach</h2>
-<p>Shortly after Position Interpolation gained traction, Reddit user bloc97 discovered a critical limitation and proposed an elegant solution using Neural Tangent Kernel (NTK) theory <span class="citation" data-cites="bloc97_2023">(<a href="#ref-bloc97_2023" role="doc-biblioref">bloc97 2023</a>)</span>.</p>
+<p>Shortly after Position Interpolation gained traction, Reddit user bloc97 discovered a critical limitation and proposed an elegant solution using Neural Tangent Kernel (NTK) theory <span class="citation" data-cites="bloc97_2023">(<a href="#ref-bloc97_2023" role="doc-biblioref">bloc97 2023b</a>)</span>.</p>
 <div class="no-row-height column-margin column-container"></div><section id="the-problem-with-linear-interpolation" class="level3" data-number="6.1">
 <h3 data-number="6.1" class="anchored" data-anchor-id="the-problem-with-linear-interpolation"><span class="header-section-number">6.1</span> The Problem with Linear Interpolation</h3>
 <p>Position Interpolation has a fundamental issue: when you compress positions linearly, adjacent tokens become harder to distinguish. For example, with a 4x compression: - Original positions: 100, 101, 102, 103 - After interpolation: 25.0, 25.25, 25.5, 25.75</p>
@@ -1716,9 +1724,9 @@ Key insight: Position 8191 maps to 2047.75 (within training range!)</code></pre>
 </section>
 <section id="visualizing-the-performance-difference" class="level3 page-columns page-full" data-number="6.4">
 <h3 data-number="6.4" class="anchored" data-anchor-id="visualizing-the-performance-difference"><span class="header-section-number">6.4</span> Visualizing the Performance Difference</h3>
-<p>The following graph from the original Reddit post <span class="citation" data-cites="bloc97_2023">(<a href="#ref-bloc97_2023" role="doc-biblioref">bloc97 2023</a>)</span> shows the dramatic improvement of NTK-aware scaling over linear interpolation:</p>
+<p>The following graph from the original Reddit post <span class="citation" data-cites="bloc97_2023">(<a href="#ref-bloc97_2023" role="doc-biblioref">bloc97 2023b</a>)</span> shows the dramatic improvement of NTK-aware scaling over linear interpolation:</p>
 <div class="no-row-height column-margin column-container"><div id="ref-bloc97_2023" class="csl-entry" role="listitem">
-bloc97. 2023. <span>“NTK-Aware Scaled RoPE Allows LLaMA Models to Have Extended (8k+) Context Size Without Any Fine-Tuning and Minimal Perplexity Degradation.”</span> <a href="https://www.reddit.com/r/LocalLLaMA/comments/14lz7j5/ntkaware_scaled_rope_allows_llama_models_to_have/">https://www.reddit.com/r/LocalLLaMA/comments/14lz7j5/ntkaware_scaled_rope_allows_llama_models_to_have/</a>.
+———. 2023b. <span>“NTK-Aware Scaled RoPE Allows LLaMA Models to Have Extended (8k+) Context Size Without Any Fine-Tuning and Minimal Perplexity Degradation.”</span> <a href="https://www.reddit.com/r/LocalLLaMA/comments/14lz7j5/ntkaware_scaled_rope_allows_llama_models_to_have/">https://www.reddit.com/r/LocalLLaMA/comments/14lz7j5/ntkaware_scaled_rope_allows_llama_models_to_have/</a>.
 </div></div><div id="fig-ntk-aware" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-ntk-aware-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -1811,17 +1819,224 @@ Figure&nbsp;5: Perplexity comparison of dynamic scaling methods on LLaMA. Dynami
 Qwen Team. 2023. <span>“Qwen Technical Memo: Long Context Inference.”</span> <a href="https://github.com/QwenLM/Qwen/blob/main/tech_memo.md#long-context-inference">https://github.com/QwenLM/Qwen/blob/main/tech_memo.md#long-context-inference</a>.
 </div></div></section>
 </section>
-<section id="citation" class="level2" data-number="8">
-<h2 data-number="8" class="anchored" data-anchor-id="citation"><span class="header-section-number">8</span> Citation</h2>
+<section id="advanced-ntk-by-parts---frequency-aware-interpolation" class="level2 page-columns page-full" data-number="8">
+<h2 data-number="8" class="anchored" data-anchor-id="advanced-ntk-by-parts---frequency-aware-interpolation"><span class="header-section-number">8</span> Advanced: NTK “By Parts” - Frequency-Aware Interpolation</h2>
+<p>After the initial NTK-aware scaling, bloc97 discovered that different frequency components benefit from different scaling strategies. This led to the “by parts” correction - a more sophisticated approach that applies different interpolation methods to different parts of the frequency spectrum.</p>
+<section id="the-multi-scale-problem" class="level3" data-number="8.1">
+<h3 data-number="8.1" class="anchored" data-anchor-id="the-multi-scale-problem"><span class="header-section-number">8.1</span> The Multi-Scale Problem</h3>
+<p>The key insight: RoPE’s frequency components encode information at different scales:</p>
+<ul>
+<li><strong>High frequencies</strong> (low dimensions): Encode local, fine-grained relationships</li>
+<li><strong>Low frequencies</strong> (high dimensions): Encode global, long-range dependencies</li>
+</ul>
+<p>Applying the same scaling strategy to all frequencies is suboptimal. High frequencies should use linear interpolation to preserve local patterns, while low frequencies benefit from NTK scaling for long-range coherence.</p>
+</section>
+<section id="implementation-combining-three-strategies" class="level3 page-columns page-full" data-number="8.2">
+<h3 data-number="8.2" class="anchored" data-anchor-id="implementation-combining-three-strategies"><span class="header-section-number">8.2</span> Implementation: Combining Three Strategies</h3>
+<p>The corrected method intelligently blends three RoPE variants based on frequency <span class="citation" data-cites="bloc97_parts_2023">(<a href="#ref-bloc97_parts_2023" role="doc-biblioref">bloc97 2023a</a>)</span>:</p>
+<div class="no-row-height column-margin column-container"><div id="ref-bloc97_parts_2023" class="csl-entry" role="listitem">
+bloc97. 2023a. <span>“NTK-Aware Interpolation "by Parts" Correction.”</span> <a href="https://github.com/jquesnelle/scaled-rope/pull/1">https://github.com/jquesnelle/scaled-rope/pull/1</a>.
+</div></div><div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> math</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> find_correction_factor(num_rotations, dim, base<span class="op">=</span><span class="dv">10000</span>, max_position_embeddings<span class="op">=</span><span class="dv">2048</span>):</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Find dimension threshold for a target number of rotations."""</span></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (dim <span class="op">*</span> math.log(max_position_embeddings<span class="op">/</span>(num_rotations <span class="op">*</span> <span class="dv">2</span> <span class="op">*</span> math.pi)))<span class="op">/</span>(<span class="dv">2</span> <span class="op">*</span> math.log(base))</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> find_correction_range(low_rot, high_rot, dim, base<span class="op">=</span><span class="dv">10000</span>, max_position_embeddings<span class="op">=</span><span class="dv">2048</span>):</span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Find dimension range for smooth transition between methods."""</span></span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>    low <span class="op">=</span> math.floor(find_correction_factor(low_rot, dim, base, max_position_embeddings))</span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>    high <span class="op">=</span> math.ceil(find_correction_factor(high_rot, dim, base, max_position_embeddings))</span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">max</span>(low, <span class="dv">0</span>), <span class="bu">min</span>(high, dim<span class="op">-</span><span class="dv">1</span>)</span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> linear_ramp_mask(<span class="bu">min</span>, <span class="bu">max</span>, dim):</span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Create smooth transition mask between scaling methods."""</span></span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">min</span> <span class="op">==</span> <span class="bu">max</span>:</span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a>        <span class="bu">max</span> <span class="op">+=</span> <span class="fl">0.001</span>  <span class="co"># Prevent singularity</span></span>
+<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a>    linear_func <span class="op">=</span> (torch.arange(dim, dtype<span class="op">=</span>torch.float32) <span class="op">-</span> <span class="bu">min</span>) <span class="op">/</span> (<span class="bu">max</span> <span class="op">-</span> <span class="bu">min</span>)</span>
+<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a>    ramp_func <span class="op">=</span> torch.clamp(linear_func, <span class="dv">0</span>, <span class="dv">1</span>)</span>
+<span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> ramp_func</span>
+<span id="cb21-22"><a href="#cb21-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-23"><a href="#cb21-23" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> NTKByPartsRope(torch.nn.Module):</span>
+<span id="cb21-24"><a href="#cb21-24" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, dim, max_position_embeddings<span class="op">=</span><span class="dv">2048</span>, base<span class="op">=</span><span class="dv">10000</span>, scale<span class="op">=</span><span class="dv">1</span>,</span>
+<span id="cb21-25"><a href="#cb21-25" aria-hidden="true" tabindex="-1"></a>                 ntk_factor<span class="op">=</span><span class="dv">1</span>, extrapolation_factor<span class="op">=</span><span class="dv">1</span>, original_max_position_embeddings<span class="op">=</span><span class="dv">2048</span>):</span>
+<span id="cb21-26"><a href="#cb21-26" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb21-27"><a href="#cb21-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-28"><a href="#cb21-28" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Interpolation constants found experimentally for LLaMA</span></span>
+<span id="cb21-29"><a href="#cb21-29" aria-hidden="true" tabindex="-1"></a>        beta_0 <span class="op">=</span> <span class="fl">1.25</span>   <span class="co"># Start transition to NTK</span></span>
+<span id="cb21-30"><a href="#cb21-30" aria-hidden="true" tabindex="-1"></a>        beta_1 <span class="op">=</span> <span class="fl">0.75</span>   <span class="co"># End transition to NTK</span></span>
+<span id="cb21-31"><a href="#cb21-31" aria-hidden="true" tabindex="-1"></a>        gamma_0 <span class="op">=</span> <span class="dv">16</span>    <span class="co"># Start transition to extrapolation</span></span>
+<span id="cb21-32"><a href="#cb21-32" aria-hidden="true" tabindex="-1"></a>        gamma_1 <span class="op">=</span> <span class="dv">2</span>     <span class="co"># End transition to extrapolation</span></span>
+<span id="cb21-33"><a href="#cb21-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-34"><a href="#cb21-34" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Three different RoPE scaling strategies</span></span>
+<span id="cb21-35"><a href="#cb21-35" aria-hidden="true" tabindex="-1"></a>        inv_freq_base <span class="op">=</span> <span class="fl">1.0</span> <span class="op">/</span> (base <span class="op">**</span> (torch.arange(<span class="dv">0</span>, dim, <span class="dv">2</span>).<span class="bu">float</span>() <span class="op">/</span> dim))</span>
+<span id="cb21-36"><a href="#cb21-36" aria-hidden="true" tabindex="-1"></a>        inv_freq_linear <span class="op">=</span> <span class="fl">1.0</span> <span class="op">/</span> (scale <span class="op">*</span> (base <span class="op">**</span> (torch.arange(<span class="dv">0</span>, dim, <span class="dv">2</span>).<span class="bu">float</span>() <span class="op">/</span> dim)))</span>
+<span id="cb21-37"><a href="#cb21-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-38"><a href="#cb21-38" aria-hidden="true" tabindex="-1"></a>        <span class="co"># NTK scaling</span></span>
+<span id="cb21-39"><a href="#cb21-39" aria-hidden="true" tabindex="-1"></a>        ntk_base <span class="op">=</span> base <span class="op">*</span> scale <span class="op">**</span> (dim <span class="op">/</span> (dim<span class="op">-</span><span class="dv">2</span>))</span>
+<span id="cb21-40"><a href="#cb21-40" aria-hidden="true" tabindex="-1"></a>        inv_freq_ntk <span class="op">=</span> <span class="fl">1.0</span> <span class="op">/</span> (ntk_base <span class="op">**</span> (torch.arange(<span class="dv">0</span>, dim, <span class="dv">2</span>).<span class="bu">float</span>() <span class="op">/</span> dim))</span>
+<span id="cb21-41"><a href="#cb21-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-42"><a href="#cb21-42" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Blend Linear and NTK based on frequency</span></span>
+<span id="cb21-43"><a href="#cb21-43" aria-hidden="true" tabindex="-1"></a>        low, high <span class="op">=</span> find_correction_range(beta_0, beta_1, dim, base, original_max_position_embeddings)</span>
+<span id="cb21-44"><a href="#cb21-44" aria-hidden="true" tabindex="-1"></a>        inv_freq_mask <span class="op">=</span> (<span class="dv">1</span> <span class="op">-</span> linear_ramp_mask(low, high, dim <span class="op">//</span> <span class="dv">2</span>)) <span class="op">*</span> ntk_factor</span>
+<span id="cb21-45"><a href="#cb21-45" aria-hidden="true" tabindex="-1"></a>        inv_freq <span class="op">=</span> inv_freq_linear <span class="op">*</span> (<span class="dv">1</span> <span class="op">-</span> inv_freq_mask) <span class="op">+</span> inv_freq_ntk <span class="op">*</span> inv_freq_mask</span>
+<span id="cb21-46"><a href="#cb21-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-47"><a href="#cb21-47" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Blend with extrapolation for very low frequencies</span></span>
+<span id="cb21-48"><a href="#cb21-48" aria-hidden="true" tabindex="-1"></a>        low, high <span class="op">=</span> find_correction_range(gamma_0, gamma_1, dim, base, original_max_position_embeddings)</span>
+<span id="cb21-49"><a href="#cb21-49" aria-hidden="true" tabindex="-1"></a>        inv_freq_mask <span class="op">=</span> (<span class="dv">1</span> <span class="op">-</span> linear_ramp_mask(low, high, dim <span class="op">//</span> <span class="dv">2</span>)) <span class="op">*</span> extrapolation_factor</span>
+<span id="cb21-50"><a href="#cb21-50" aria-hidden="true" tabindex="-1"></a>        inv_freq <span class="op">=</span> inv_freq <span class="op">*</span> (<span class="dv">1</span> <span class="op">-</span> inv_freq_mask) <span class="op">+</span> inv_freq_base <span class="op">*</span> inv_freq_mask</span>
+<span id="cb21-51"><a href="#cb21-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-52"><a href="#cb21-52" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.register_buffer(<span class="st">"inv_freq"</span>, inv_freq)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="how-it-works" class="level3" data-number="8.3">
+<h3 data-number="8.3" class="anchored" data-anchor-id="how-it-works"><span class="header-section-number">8.3</span> How It Works</h3>
+<p>The method uses two transition zones to intelligently blend different scaling strategies. The <strong>beta zone</strong> (β₀ to β₁) transitions from linear interpolation to NTK scaling - high frequencies use linear interpolation while low frequencies use NTK scaling, with a smooth transition in between. The <strong>gamma zone</strong> (γ₀ to γ₁) transitions to pure extrapolation for very low frequencies, where ultra-low frequencies that barely rotate use original base frequencies to help maintain very long-range patterns.</p>
+<p>This frequency-aware approach eliminates catastrophic failures seen in pure NTK at certain context lengths while preserving both local and global patterns by treating frequencies appropriately. It unifies all methods - setting factors to 0 recovers linear interpolation - and improves perplexity across all context lengths without spikes. The “by parts” correction represents the culmination of community experimentation - a sophisticated solution that recognizes positional encoding isn’t one-size-fits-all, but requires frequency-specific strategies. This insight would later influence YaRN and other advanced methods.</p>
+</section>
+</section>
+<section id="yarn-yet-another-rope-extension" class="level2 page-columns page-full" data-number="9">
+<h2 data-number="9" class="anchored" data-anchor-id="yarn-yet-another-rope-extension"><span class="header-section-number">9</span> YaRN: Yet Another RoPE Extension</h2>
+<p>In 2023, researchers at Nous Research introduced YaRN (Yet another RoPE extensioN) <span class="citation" data-cites="yarn2023">(<a href="#ref-yarn2023" role="doc-biblioref">Peng et al. 2023</a>)</span>, combining the best of previous methods with a novel attention scaling mechanism. YaRN builds on the NTK-by-parts interpolation but adds a crucial innovation: <strong>attention temperature scaling</strong>.</p>
+<div class="no-row-height column-margin column-container"><div id="ref-yarn2023" class="csl-entry" role="listitem">
+Peng, Bowen, Jeffrey Quesnelle, Honglu Fan, and Enrico Shippole. 2023. <span>“YaRN: Efficient Context Window Extension of Large Language Models.”</span> <a href="https://arxiv.org/abs/2309.00071">https://arxiv.org/abs/2309.00071</a>.
+</div></div><section id="the-problem-with-pure-interpolation" class="level3" data-number="9.1">
+<h3 data-number="9.1" class="anchored" data-anchor-id="the-problem-with-pure-interpolation"><span class="header-section-number">9.1</span> The Problem with Pure Interpolation</h3>
+<p>While position interpolation and NTK scaling successfully extend context, they both share a limitation - they compress positional information, potentially degrading the model’s ability to distinguish between nearby tokens. YaRN addresses this by modifying not just the positional encodings, but also the attention computation itself.</p>
+</section>
+<section id="attention-temperature-scaling" class="level3" data-number="9.2">
+<h3 data-number="9.2" class="anchored" data-anchor-id="attention-temperature-scaling"><span class="header-section-number">9.2</span> Attention Temperature Scaling</h3>
+<p>YaRN introduces a temperature parameter <span class="math inline">\(t\)</span> on the logits before the attention softmax. Instead of the standard attention computation:</p>
+<p><span class="math display">\[\text{softmax}\left(\frac{\mathbf{q}_m^T \mathbf{k}_n}{\sqrt{D}}\right)\]</span></p>
+<p>YaRN modifies it to:</p>
+<p><span class="math display">\[\text{softmax}\left(\frac{\mathbf{q}_m^T \mathbf{k}_n}{t\sqrt{D}}\right)\]</span></p>
+<p>where <span class="math inline">\(t = \sqrt{1/s} = 0.1\ln(s) + 1\)</span> for scale factor <span class="math inline">\(s\)</span>.</p>
+<p>The reparametrization of RoPE as 2D rotation matrices provides an elegant implementation. By scaling the complex RoPE embeddings by <span class="math inline">\(\sqrt{1/t}\)</span>, YaRN effectively alters the attention mechanism without modifying its code. This “length scaling” trick scales both <span class="math inline">\(\mathbf{q}_m\)</span> and <span class="math inline">\(\mathbf{k}_n\)</span> by a constant factor, achieving the temperature effect with zero overhead during inference.</p>
+<p>YaRN combines: 1. <strong>NTK-by-parts interpolation</strong>: Frequency-aware scaling from the previous section 2. <strong>Attention temperature scaling</strong>: Preserves local token distinctions</p>
+<p>From the paper, this dual approach allows YaRN to:</p>
+<ul>
+<li>Extend context to 128K+ tokens with minimal perplexity degradation</li>
+<li>Maintain fine-grained positional discrimination</li>
+<li>Require only lightweight fine-tuning (often &lt;1% of pretraining compute)</li>
+</ul>
+</section>
+<section id="implementation-2" class="level3" data-number="9.3">
+<h3 data-number="9.3" class="anchored" data-anchor-id="implementation-2"><span class="header-section-number">9.3</span> Implementation</h3>
+<p>The complete YaRN implementation, as used in HuggingFace Transformers, carefully blends interpolation and extrapolation strategies:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> math</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> compute_yarn_parameters(dim, max_position_embeddings, base<span class="op">=</span><span class="dv">10000</span>,</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>                           scale_factor<span class="op">=</span><span class="dv">1</span>, original_max_position_embeddings<span class="op">=</span><span class="dv">2048</span>,</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>                           beta_fast<span class="op">=</span><span class="dv">32</span>, beta_slow<span class="op">=</span><span class="dv">1</span>, mscale<span class="op">=</span><span class="dv">1</span>):</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a><span class="co">    Compute YaRN inverse frequencies and attention factor.</span></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a><span class="co">    Based on HuggingFace Transformers implementation.</span></span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> get_mscale(scale, mscale<span class="op">=</span><span class="dv">1</span>):</span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Compute the attention temperature scaling."""</span></span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> scale <span class="op">&lt;=</span> <span class="dv">1</span>:</span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="fl">1.0</span></span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="fl">0.1</span> <span class="op">*</span> mscale <span class="op">*</span> math.log(scale) <span class="op">+</span> <span class="fl">1.0</span></span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Attention factor for temperature scaling</span></span>
+<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a>    attention_factor <span class="op">=</span> get_mscale(scale_factor, mscale)</span>
+<span id="cb22-20"><a href="#cb22-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-21"><a href="#cb22-21" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> find_correction_dim(num_rotations, dim, base, max_position_embeddings):</span>
+<span id="cb22-22"><a href="#cb22-22" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Find dimension where a certain number of rotations occur."""</span></span>
+<span id="cb22-23"><a href="#cb22-23" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> (dim <span class="op">*</span> math.log(max_position_embeddings <span class="op">/</span> (num_rotations <span class="op">*</span> <span class="dv">2</span> <span class="op">*</span> math.pi))) <span class="op">/</span> (<span class="dv">2</span> <span class="op">*</span> math.log(base))</span>
+<span id="cb22-24"><a href="#cb22-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-25"><a href="#cb22-25" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> find_correction_range(low_rot, high_rot, dim, base, max_position_embeddings):</span>
+<span id="cb22-26"><a href="#cb22-26" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Find dimension range for smooth transition between methods."""</span></span>
+<span id="cb22-27"><a href="#cb22-27" aria-hidden="true" tabindex="-1"></a>        low <span class="op">=</span> find_correction_dim(low_rot, dim, base, max_position_embeddings)</span>
+<span id="cb22-28"><a href="#cb22-28" aria-hidden="true" tabindex="-1"></a>        high <span class="op">=</span> find_correction_dim(high_rot, dim, base, max_position_embeddings)</span>
+<span id="cb22-29"><a href="#cb22-29" aria-hidden="true" tabindex="-1"></a>        low <span class="op">=</span> <span class="bu">max</span>(math.floor(low), <span class="dv">0</span>)</span>
+<span id="cb22-30"><a href="#cb22-30" aria-hidden="true" tabindex="-1"></a>        high <span class="op">=</span> <span class="bu">min</span>(math.ceil(high), dim <span class="op">-</span> <span class="dv">1</span>)</span>
+<span id="cb22-31"><a href="#cb22-31" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> low, high</span>
+<span id="cb22-32"><a href="#cb22-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-33"><a href="#cb22-33" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> linear_ramp_factor(min_val, max_val, dim):</span>
+<span id="cb22-34"><a href="#cb22-34" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Create smooth transition mask."""</span></span>
+<span id="cb22-35"><a href="#cb22-35" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> min_val <span class="op">==</span> max_val:</span>
+<span id="cb22-36"><a href="#cb22-36" aria-hidden="true" tabindex="-1"></a>            max_val <span class="op">+=</span> <span class="fl">0.001</span>  <span class="co"># Prevent singularity</span></span>
+<span id="cb22-37"><a href="#cb22-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-38"><a href="#cb22-38" aria-hidden="true" tabindex="-1"></a>        linear_func <span class="op">=</span> (torch.arange(dim, dtype<span class="op">=</span>torch.float32) <span class="op">-</span> min_val) <span class="op">/</span> (max_val <span class="op">-</span> min_val)</span>
+<span id="cb22-39"><a href="#cb22-39" aria-hidden="true" tabindex="-1"></a>        ramp_func <span class="op">=</span> torch.clamp(linear_func, <span class="dv">0</span>, <span class="dv">1</span>)</span>
+<span id="cb22-40"><a href="#cb22-40" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> ramp_func</span>
+<span id="cb22-41"><a href="#cb22-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-42"><a href="#cb22-42" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Base frequencies</span></span>
+<span id="cb22-43"><a href="#cb22-43" aria-hidden="true" tabindex="-1"></a>    pos_freqs <span class="op">=</span> base <span class="op">**</span> (torch.arange(<span class="dv">0</span>, dim, <span class="dv">2</span>).<span class="bu">float</span>() <span class="op">/</span> dim)</span>
+<span id="cb22-44"><a href="#cb22-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-45"><a href="#cb22-45" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Two strategies: interpolation (compressed) vs extrapolation (original)</span></span>
+<span id="cb22-46"><a href="#cb22-46" aria-hidden="true" tabindex="-1"></a>    inv_freq_extrapolation <span class="op">=</span> <span class="fl">1.0</span> <span class="op">/</span> pos_freqs</span>
+<span id="cb22-47"><a href="#cb22-47" aria-hidden="true" tabindex="-1"></a>    inv_freq_interpolation <span class="op">=</span> <span class="fl">1.0</span> <span class="op">/</span> (scale_factor <span class="op">*</span> pos_freqs)</span>
+<span id="cb22-48"><a href="#cb22-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-49"><a href="#cb22-49" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Find transition range based on beta parameters</span></span>
+<span id="cb22-50"><a href="#cb22-50" aria-hidden="true" tabindex="-1"></a>    <span class="co"># beta_fast=32, beta_slow=1 are the paper's recommended values</span></span>
+<span id="cb22-51"><a href="#cb22-51" aria-hidden="true" tabindex="-1"></a>    low, high <span class="op">=</span> find_correction_range(</span>
+<span id="cb22-52"><a href="#cb22-52" aria-hidden="true" tabindex="-1"></a>        beta_fast, beta_slow, dim, base, original_max_position_embeddings</span>
+<span id="cb22-53"><a href="#cb22-53" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb22-54"><a href="#cb22-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-55"><a href="#cb22-55" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Blend between interpolation and extrapolation</span></span>
+<span id="cb22-56"><a href="#cb22-56" aria-hidden="true" tabindex="-1"></a>    inv_freq_mask <span class="op">=</span> <span class="dv">1</span> <span class="op">-</span> linear_ramp_factor(low, high, dim <span class="op">//</span> <span class="dv">2</span>)</span>
+<span id="cb22-57"><a href="#cb22-57" aria-hidden="true" tabindex="-1"></a>    inv_freq <span class="op">=</span> (</span>
+<span id="cb22-58"><a href="#cb22-58" aria-hidden="true" tabindex="-1"></a>        inv_freq_interpolation <span class="op">*</span> (<span class="dv">1</span> <span class="op">-</span> inv_freq_mask) <span class="op">+</span></span>
+<span id="cb22-59"><a href="#cb22-59" aria-hidden="true" tabindex="-1"></a>        inv_freq_extrapolation <span class="op">*</span> inv_freq_mask</span>
+<span id="cb22-60"><a href="#cb22-60" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb22-61"><a href="#cb22-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-62"><a href="#cb22-62" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> inv_freq, attention_factor</span>
+<span id="cb22-63"><a href="#cb22-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-64"><a href="#cb22-64" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> YaRNRope(torch.nn.Module):</span>
+<span id="cb22-65"><a href="#cb22-65" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, dim, max_position_embeddings<span class="op">=</span><span class="dv">2048</span>, base<span class="op">=</span><span class="dv">10000</span>,</span>
+<span id="cb22-66"><a href="#cb22-66" aria-hidden="true" tabindex="-1"></a>                 scale_factor<span class="op">=</span><span class="dv">1</span>, original_max_position_embeddings<span class="op">=</span><span class="dv">2048</span>):</span>
+<span id="cb22-67"><a href="#cb22-67" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb22-68"><a href="#cb22-68" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-69"><a href="#cb22-69" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Compute YaRN parameters</span></span>
+<span id="cb22-70"><a href="#cb22-70" aria-hidden="true" tabindex="-1"></a>        inv_freq, attention_factor <span class="op">=</span> compute_yarn_parameters(</span>
+<span id="cb22-71"><a href="#cb22-71" aria-hidden="true" tabindex="-1"></a>            dim<span class="op">=</span>dim,</span>
+<span id="cb22-72"><a href="#cb22-72" aria-hidden="true" tabindex="-1"></a>            max_position_embeddings<span class="op">=</span>max_position_embeddings,</span>
+<span id="cb22-73"><a href="#cb22-73" aria-hidden="true" tabindex="-1"></a>            base<span class="op">=</span>base,</span>
+<span id="cb22-74"><a href="#cb22-74" aria-hidden="true" tabindex="-1"></a>            scale_factor<span class="op">=</span>scale_factor,</span>
+<span id="cb22-75"><a href="#cb22-75" aria-hidden="true" tabindex="-1"></a>            original_max_position_embeddings<span class="op">=</span>original_max_position_embeddings</span>
+<span id="cb22-76"><a href="#cb22-76" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb22-77"><a href="#cb22-77" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-78"><a href="#cb22-78" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.register_buffer(<span class="st">"inv_freq"</span>, inv_freq)</span>
+<span id="cb22-79"><a href="#cb22-79" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.attention_factor <span class="op">=</span> attention_factor</span>
+<span id="cb22-80"><a href="#cb22-80" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-81"><a href="#cb22-81" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x, seq_len<span class="op">=</span><span class="va">None</span>):</span>
+<span id="cb22-82"><a href="#cb22-82" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> seq_len <span class="kw">is</span> <span class="va">None</span>:</span>
+<span id="cb22-83"><a href="#cb22-83" aria-hidden="true" tabindex="-1"></a>            seq_len <span class="op">=</span> x.shape[<span class="op">-</span><span class="dv">2</span>]</span>
+<span id="cb22-84"><a href="#cb22-84" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-85"><a href="#cb22-85" aria-hidden="true" tabindex="-1"></a>        t <span class="op">=</span> torch.arange(seq_len, device<span class="op">=</span>x.device).type_as(<span class="va">self</span>.inv_freq)</span>
+<span id="cb22-86"><a href="#cb22-86" aria-hidden="true" tabindex="-1"></a>        freqs <span class="op">=</span> torch.einsum(<span class="st">"i,j-&gt;ij"</span>, t, <span class="va">self</span>.inv_freq)</span>
+<span id="cb22-87"><a href="#cb22-87" aria-hidden="true" tabindex="-1"></a>        emb <span class="op">=</span> torch.cat((freqs, freqs), dim<span class="op">=-</span><span class="dv">1</span>)</span>
+<span id="cb22-88"><a href="#cb22-88" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-89"><a href="#cb22-89" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Apply attention scaling through RoPE embeddings</span></span>
+<span id="cb22-90"><a href="#cb22-90" aria-hidden="true" tabindex="-1"></a>        cos <span class="op">=</span> emb.cos() <span class="op">*</span> <span class="va">self</span>.attention_factor</span>
+<span id="cb22-91"><a href="#cb22-91" aria-hidden="true" tabindex="-1"></a>        sin <span class="op">=</span> emb.sin() <span class="op">*</span> <span class="va">self</span>.attention_factor</span>
+<span id="cb22-92"><a href="#cb22-92" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-93"><a href="#cb22-93" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> cos, sin</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The key parameters in YaRN:</p>
+<ul>
+<li><strong>beta_fast</strong> (32): Controls high-frequency cutoff for interpolation</li>
+<li><strong>beta_slow</strong> (1): Controls low-frequency cutoff for extrapolation</li>
+<li><strong>mscale</strong>: Scaling factor for attention temperature (typically 1)</li>
+<li><strong>attention_factor</strong>: Temperature scaling applied to embeddings</li>
+</ul>
+<p>YaRN achieves state-of-the-art context extension with minimal computational overhead. Models using YaRN have successfully scaled to 128K+ context with less than 400 training steps - a fraction of the original pretraining cost.</p>
+</section>
+</section>
+<section id="citation" class="level2" data-number="10">
+<h2 data-number="10" class="anchored" data-anchor-id="citation"><span class="header-section-number">10</span> Citation</h2>
 <p>If you found this blog post helpful, please consider citing it:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode bibtex code-with-copy"><code class="sourceCode bibtex"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="va">@article</span>{<span class="ot">arora2025rope</span>,</span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">title</span>={From Absolute to Rotary: The Evolution of Positional Encodings in LLMs},</span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">author</span>={Arora, Aman},</span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">journal</span>={Personal Blog},</span>
-<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">year</span>={2025},</span>
-<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">month</span>={September},</span>
-<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">url</span>={https://amaarora.github.io/posts/2025-09-21-rope-context-extension.html}</span>
-<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode bibtex code-with-copy"><code class="sourceCode bibtex"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="va">@article</span>{<span class="ot">arora2025rope</span>,</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">title</span>={From Absolute to Rotary: The Evolution of Positional Encodings in LLMs},</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">author</span>={Arora, Aman},</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">journal</span>={Personal Blog},</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">year</span>={2025},</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">month</span>={September},</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">url</span>={https://amaarora.github.io/posts/2025-09-21-rope-context-extension.html}</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 
 
 

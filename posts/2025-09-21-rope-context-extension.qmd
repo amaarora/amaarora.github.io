@@ -1,8 +1,8 @@
 ---
-title: "How LLMs Scaled from 1K to 2M Context: A Technical Deep Dive"
-subtitle: "Understanding APE, RoPE, Position Interpolation, NTK-Aware Scaling, Dynamic Scaling, and YaRN"
+title: "How LLMs Scaled from 512 to 2M Context: A Technical Deep Dive"
+subtitle: "Understanding APE, RoPE, Position Interpolation, NTK-Aware Scaling, Dynamic Scaling, NTK-By-Parts, and YaRN"
 description: |
-    A comprehensive technical guide through the evolution of positional encodings in Large Language Models since GPT-2 that helped scale context length from 1,024 to 2,000,000+ tokens with minimal fine-tuning.
+    A comprehensive technical guide through the evolution of positional encodings such as APE, RoPE, Position Interpolation, NTK-Aware Scaling, Dynamic Scaling, and YaRN in Large Language Models since the original Transformer that helped scale context length from 512 to 2,000,000+ tokens with minimal fine-tuning.
 categories:
   - Large Language Models
 author: Aman Arora
@@ -37,17 +37,13 @@ nav#TOC > ul > li > a {
 
 ## Introduction
 
-When GPT-2 was released in 2019, it came with a context window of just 1,024 tokens. Fast forward to today, and we have model Grok-4-fast that was released with 2M context length! [@xai2025grok4fast]
+When the original Transformer was introduced in 2017, it came with a context window of just 512 tokens. Fast forward to today, and we have model Grok-4-fast that was released with 2M context length! [@xai2025grok4fast] The Gemini series was the first to allow accepting 1 million tokens. [@google2025gemini]
 
-The Gemini series was the first to allow accepting 1 million tokens. [@google2025gemini]
+This 4000x improvement didn't come from training larger models or using more data - it came from fundamental advances in how models encode position. Many of these breakthroughs emerged from the open source community, with key discoveries documented in blog posts and forums before being formalized in academic papers.
 
-As part of this blog post, I want to enlighten the readers with some of the techniques that have made this possible and the evolution of these techniques since the GPT-2 days back in 2019. This is a highly technical blog post suitable for readers who are looking to deep dive on the subject.
+In this blog post, we'll examine the evolution of positional encodings - from the Transformer's sinusoidal functions (APE) to RoPE's rotational matrices, from Position Interpolation to Dynamic Scaling. We'll implement each technique, visualize the underlying mathematics, and understand the critical insight that models memorize positional patterns rather than learning generalizable representations.
 
-Both model architecture and position embeddings have played a key role when it comes to long context inference. Traditionally, in the Transformer architecture released in 2017, the authors used Absolute Positional Embeddings or APE. These encode positional information into the attention mechanism through absolute positions which get added to the vector representations of the embeddings.
-
-A comprehensive survey of the techniques is available in YaRN [@yarn2023].
-
-Let's look at all of them with the help of their PyTorch implementations.
+This is a highly technical deep dive with working PyTorch code throughout. By the end, you'll understand exactly how modern LLMs can process entire books, why they catastrophically fail at position 1025, and how the community solved problems that seemed mathematically impossible.
 
 ## APE (Absolute positional embeddings) {#sec-ape}
 
@@ -1303,6 +1299,225 @@ class DynamicNTKScaledRoPE(nn.Module):
 ```
 
 The beauty of dynamic scaling is that it eliminates the need to choose between short and long sequence performance - the model automatically adapts to whatever it needs to process. In fact, this approach has been adopted in production: Qwen models use Dynamic NTK-aware scaling to achieve strong performance across context lengths [@qwen_tech_memo].
+
+## Advanced: NTK "By Parts" - Frequency-Aware Interpolation
+
+After the initial NTK-aware scaling, bloc97 discovered that different frequency components benefit from different scaling strategies. This led to the "by parts" correction - a more sophisticated approach that applies different interpolation methods to different parts of the frequency spectrum.
+
+### The Multi-Scale Problem
+
+The key insight: RoPE's frequency components encode information at different scales:
+
+- **High frequencies** (low dimensions): Encode local, fine-grained relationships
+- **Low frequencies** (high dimensions): Encode global, long-range dependencies
+
+Applying the same scaling strategy to all frequencies is suboptimal. High frequencies should use linear interpolation to preserve local patterns, while low frequencies benefit from NTK scaling for long-range coherence.
+
+### Implementation: Combining Three Strategies
+
+The corrected method intelligently blends three RoPE variants based on frequency [@bloc97_parts_2023]:
+
+```python
+import torch
+import math
+
+def find_correction_factor(num_rotations, dim, base=10000, max_position_embeddings=2048):
+    """Find dimension threshold for a target number of rotations."""
+    return (dim * math.log(max_position_embeddings/(num_rotations * 2 * math.pi)))/(2 * math.log(base))
+
+def find_correction_range(low_rot, high_rot, dim, base=10000, max_position_embeddings=2048):
+    """Find dimension range for smooth transition between methods."""
+    low = math.floor(find_correction_factor(low_rot, dim, base, max_position_embeddings))
+    high = math.ceil(find_correction_factor(high_rot, dim, base, max_position_embeddings))
+    return max(low, 0), min(high, dim-1)
+
+def linear_ramp_mask(min, max, dim):
+    """Create smooth transition mask between scaling methods."""
+    if min == max:
+        max += 0.001  # Prevent singularity
+
+    linear_func = (torch.arange(dim, dtype=torch.float32) - min) / (max - min)
+    ramp_func = torch.clamp(linear_func, 0, 1)
+    return ramp_func
+
+class NTKByPartsRope(torch.nn.Module):
+    def __init__(self, dim, max_position_embeddings=2048, base=10000, scale=1,
+                 ntk_factor=1, extrapolation_factor=1, original_max_position_embeddings=2048):
+        super().__init__()
+
+        # Interpolation constants found experimentally for LLaMA
+        beta_0 = 1.25   # Start transition to NTK
+        beta_1 = 0.75   # End transition to NTK
+        gamma_0 = 16    # Start transition to extrapolation
+        gamma_1 = 2     # End transition to extrapolation
+
+        # Three different RoPE scaling strategies
+        inv_freq_base = 1.0 / (base ** (torch.arange(0, dim, 2).float() / dim))
+        inv_freq_linear = 1.0 / (scale * (base ** (torch.arange(0, dim, 2).float() / dim)))
+
+        # NTK scaling
+        ntk_base = base * scale ** (dim / (dim-2))
+        inv_freq_ntk = 1.0 / (ntk_base ** (torch.arange(0, dim, 2).float() / dim))
+
+        # Blend Linear and NTK based on frequency
+        low, high = find_correction_range(beta_0, beta_1, dim, base, original_max_position_embeddings)
+        inv_freq_mask = (1 - linear_ramp_mask(low, high, dim // 2)) * ntk_factor
+        inv_freq = inv_freq_linear * (1 - inv_freq_mask) + inv_freq_ntk * inv_freq_mask
+
+        # Blend with extrapolation for very low frequencies
+        low, high = find_correction_range(gamma_0, gamma_1, dim, base, original_max_position_embeddings)
+        inv_freq_mask = (1 - linear_ramp_mask(low, high, dim // 2)) * extrapolation_factor
+        inv_freq = inv_freq * (1 - inv_freq_mask) + inv_freq_base * inv_freq_mask
+
+        self.register_buffer("inv_freq", inv_freq)
+```
+
+### How It Works
+
+The method uses two transition zones to intelligently blend different scaling strategies. The **beta zone** (β₀ to β₁) transitions from linear interpolation to NTK scaling - high frequencies use linear interpolation while low frequencies use NTK scaling, with a smooth transition in between. The **gamma zone** (γ₀ to γ₁) transitions to pure extrapolation for very low frequencies, where ultra-low frequencies that barely rotate use original base frequencies to help maintain very long-range patterns.
+
+This frequency-aware approach eliminates catastrophic failures seen in pure NTK at certain context lengths while preserving both local and global patterns by treating frequencies appropriately. It unifies all methods - setting factors to 0 recovers linear interpolation - and improves perplexity across all context lengths without spikes. The "by parts" correction represents the culmination of community experimentation - a sophisticated solution that recognizes positional encoding isn't one-size-fits-all, but requires frequency-specific strategies. This insight would later influence YaRN and other advanced methods.
+
+## YaRN: Yet Another RoPE Extension
+
+In 2023, researchers at Nous Research introduced YaRN (Yet another RoPE extensioN) [@yarn2023], combining the best of previous methods with a novel attention scaling mechanism. YaRN builds on the NTK-by-parts interpolation but adds a crucial innovation: **attention temperature scaling**.
+
+### The Problem with Pure Interpolation
+
+While position interpolation and NTK scaling successfully extend context, they both share a limitation - they compress positional information, potentially degrading the model's ability to distinguish between nearby tokens. YaRN addresses this by modifying not just the positional encodings, but also the attention computation itself.
+
+### Attention Temperature Scaling
+
+YaRN introduces a temperature parameter $t$ on the logits before the attention softmax. Instead of the standard attention computation:
+
+$$\text{softmax}\left(\frac{\mathbf{q}_m^T \mathbf{k}_n}{\sqrt{D}}\right)$$
+
+YaRN modifies it to:
+
+$$\text{softmax}\left(\frac{\mathbf{q}_m^T \mathbf{k}_n}{t\sqrt{D}}\right)$$
+
+where $t = \sqrt{1/s} = 0.1\ln(s) + 1$ for scale factor $s$.
+
+The reparametrization of RoPE as 2D rotation matrices provides an elegant implementation. By scaling the complex RoPE embeddings by $\sqrt{1/t}$, YaRN effectively alters the attention mechanism without modifying its code. This "length scaling" trick scales both $\mathbf{q}_m$ and $\mathbf{k}_n$ by a constant factor, achieving the temperature effect with zero overhead during inference.
+
+YaRN combines:
+1. **NTK-by-parts interpolation**: Frequency-aware scaling from the previous section
+2. **Attention temperature scaling**: Preserves local token distinctions
+
+From the paper, this dual approach allows YaRN to:
+
+- Extend context to 128K+ tokens with minimal perplexity degradation
+- Maintain fine-grained positional discrimination
+- Require only lightweight fine-tuning (often <1% of pretraining compute)
+
+### Implementation
+
+The complete YaRN implementation, as used in HuggingFace Transformers, carefully blends interpolation and extrapolation strategies:
+
+```python
+import torch
+import math
+
+def compute_yarn_parameters(dim, max_position_embeddings, base=10000,
+                           scale_factor=1, original_max_position_embeddings=2048,
+                           beta_fast=32, beta_slow=1, mscale=1):
+    """
+    Compute YaRN inverse frequencies and attention factor.
+    Based on HuggingFace Transformers implementation.
+    """
+
+    def get_mscale(scale, mscale=1):
+        """Compute the attention temperature scaling."""
+        if scale <= 1:
+            return 1.0
+        return 0.1 * mscale * math.log(scale) + 1.0
+
+    # Attention factor for temperature scaling
+    attention_factor = get_mscale(scale_factor, mscale)
+
+    def find_correction_dim(num_rotations, dim, base, max_position_embeddings):
+        """Find dimension where a certain number of rotations occur."""
+        return (dim * math.log(max_position_embeddings / (num_rotations * 2 * math.pi))) / (2 * math.log(base))
+
+    def find_correction_range(low_rot, high_rot, dim, base, max_position_embeddings):
+        """Find dimension range for smooth transition between methods."""
+        low = find_correction_dim(low_rot, dim, base, max_position_embeddings)
+        high = find_correction_dim(high_rot, dim, base, max_position_embeddings)
+        low = max(math.floor(low), 0)
+        high = min(math.ceil(high), dim - 1)
+        return low, high
+
+    def linear_ramp_factor(min_val, max_val, dim):
+        """Create smooth transition mask."""
+        if min_val == max_val:
+            max_val += 0.001  # Prevent singularity
+
+        linear_func = (torch.arange(dim, dtype=torch.float32) - min_val) / (max_val - min_val)
+        ramp_func = torch.clamp(linear_func, 0, 1)
+        return ramp_func
+
+    # Base frequencies
+    pos_freqs = base ** (torch.arange(0, dim, 2).float() / dim)
+
+    # Two strategies: interpolation (compressed) vs extrapolation (original)
+    inv_freq_extrapolation = 1.0 / pos_freqs
+    inv_freq_interpolation = 1.0 / (scale_factor * pos_freqs)
+
+    # Find transition range based on beta parameters
+    # beta_fast=32, beta_slow=1 are the paper's recommended values
+    low, high = find_correction_range(
+        beta_fast, beta_slow, dim, base, original_max_position_embeddings
+    )
+
+    # Blend between interpolation and extrapolation
+    inv_freq_mask = 1 - linear_ramp_factor(low, high, dim // 2)
+    inv_freq = (
+        inv_freq_interpolation * (1 - inv_freq_mask) +
+        inv_freq_extrapolation * inv_freq_mask
+    )
+
+    return inv_freq, attention_factor
+
+class YaRNRope(torch.nn.Module):
+    def __init__(self, dim, max_position_embeddings=2048, base=10000,
+                 scale_factor=1, original_max_position_embeddings=2048):
+        super().__init__()
+
+        # Compute YaRN parameters
+        inv_freq, attention_factor = compute_yarn_parameters(
+            dim=dim,
+            max_position_embeddings=max_position_embeddings,
+            base=base,
+            scale_factor=scale_factor,
+            original_max_position_embeddings=original_max_position_embeddings
+        )
+
+        self.register_buffer("inv_freq", inv_freq)
+        self.attention_factor = attention_factor
+
+    def forward(self, x, seq_len=None):
+        if seq_len is None:
+            seq_len = x.shape[-2]
+
+        t = torch.arange(seq_len, device=x.device).type_as(self.inv_freq)
+        freqs = torch.einsum("i,j->ij", t, self.inv_freq)
+        emb = torch.cat((freqs, freqs), dim=-1)
+
+        # Apply attention scaling through RoPE embeddings
+        cos = emb.cos() * self.attention_factor
+        sin = emb.sin() * self.attention_factor
+
+        return cos, sin
+```
+
+The key parameters in YaRN:
+
+- **beta_fast** (32): Controls high-frequency cutoff for interpolation
+- **beta_slow** (1): Controls low-frequency cutoff for extrapolation
+- **mscale**: Scaling factor for attention temperature (typically 1)
+- **attention_factor**: Temperature scaling applied to embeddings
+
+YaRN achieves state-of-the-art context extension with minimal computational overhead. Models using YaRN have successfully scaled to 128K+ context with less than 400 training steps - a fraction of the original pretraining cost.
 
 ## Citation
 
