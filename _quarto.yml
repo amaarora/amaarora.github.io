@@ -8,8 +8,9 @@ website:
   navbar:
     left:
     - text: "Aman Arora's Blog"
-      href: index.qmd   
+      href: index.qmd
     - about.qmd
+    - technical-writings.qmd
     right:
       - icon: github
         href: https://github.com/amaarora

@@ -130,3 +130,14 @@ $navbar-fg: #333333;
     box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
   }
 }
+
+/* Global link styling to match primary color */
+a {
+  color: $primary;
+  text-decoration: none;
+
+  &:hover {
+    color: darken($primary, 10%);
+    text-decoration: underline;
+  }
+}
