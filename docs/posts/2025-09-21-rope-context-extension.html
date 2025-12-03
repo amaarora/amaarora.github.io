@@ -99,7 +99,7 @@ div.csl-indent {
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-ea1d7ac60288e0f1efdbc993fd8432ae.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-6b963ac8a0f2f0ebd4f00788c766919e.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-2611609435c0170432e40b6b6097ea8a.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -422,7 +422,7 @@ Vaswani, Ashish, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan 
 <section id="visualizing-positional-encoding-frequencies" class="level3" data-number="2.1">
 <h3 data-number="2.1" class="anchored" data-anchor-id="visualizing-positional-encoding-frequencies"><span class="header-section-number">2.1</span> Visualizing Positional Encoding Frequencies</h3>
 <p>Each dimension oscillates at a different frequency. As a result, each position gets a unique encoding - think of it like a fingerprint. Lower dimensions oscillate rapidly while higher dimensions change slowly:</p>
-<div id="b72ee5e3" class="cell" data-execution_count="1">
+<div id="eab6ac42" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> warnings</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>warnings.filterwarnings(<span class="st">'ignore'</span>)</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -496,23 +496,23 @@ Vaswani, Ashish, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan 
 <div class="cell-output cell-output-display" data-execution_count="1">
 
 <style>
-  #altair-viz-834ce52cf63b458680f24519f373b93c.vega-embed {
+  #altair-viz-1a186ff89441442b9b2388cd11db5ec9.vega-embed {
     width: 100%;
     display: flex;
   }
 
-  #altair-viz-834ce52cf63b458680f24519f373b93c.vega-embed details,
-  #altair-viz-834ce52cf63b458680f24519f373b93c.vega-embed details summary {
+  #altair-viz-1a186ff89441442b9b2388cd11db5ec9.vega-embed details,
+  #altair-viz-1a186ff89441442b9b2388cd11db5ec9.vega-embed details summary {
     position: relative;
   }
 </style>
-<div id="altair-viz-834ce52cf63b458680f24519f373b93c"></div>
+<div id="altair-viz-1a186ff89441442b9b2388cd11db5ec9"></div>
 <script type="text/javascript">
   var VEGA_DEBUG = (typeof VEGA_DEBUG == "undefined") ? {} : VEGA_DEBUG;
   (function(spec, embedOpt){
     let outputDiv = document.currentScript.previousElementSibling;
-    if (outputDiv.id !== "altair-viz-834ce52cf63b458680f24519f373b93c") {
-      outputDiv = document.getElementById("altair-viz-834ce52cf63b458680f24519f373b93c");
+    if (outputDiv.id !== "altair-viz-1a186ff89441442b9b2388cd11db5ec9") {
+      outputDiv = document.getElementById("altair-viz-1a186ff89441442b9b2388cd11db5ec9");
     }
     const paths = {
       "vega": "https://cdn.jsdelivr.net/npm/vega@5?noext",
@@ -568,7 +568,7 @@ Vaswani, Ashish, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan 
 <section id="sec-position-fingerprints" class="level3" data-number="2.2">
 <h3 data-number="2.2" class="anchored" data-anchor-id="sec-position-fingerprints"><span class="header-section-number">2.2</span> Understanding Position Fingerprints</h3>
 <p>Let’s visualize how different positions create unique encodings and how the model learns proximity:</p>
-<div id="8c95be83" class="cell" data-execution_count="2">
+<div id="1b921cf8" class="cell" data-execution_count="2">
 <details class="code-fold">
 <summary>Show code for position fingerprint visualization</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> warnings</span>
@@ -713,23 +713,23 @@ Vaswani, Ashish, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan 
 <div class="cell-output cell-output-display" data-execution_count="2">
 
 <style>
-  #altair-viz-e3c0c436498e4eeba8e87f7607f379a8.vega-embed {
+  #altair-viz-2e1613754456461b80c522bf1b86cab7.vega-embed {
     width: 100%;
     display: flex;
   }
 
-  #altair-viz-e3c0c436498e4eeba8e87f7607f379a8.vega-embed details,
-  #altair-viz-e3c0c436498e4eeba8e87f7607f379a8.vega-embed details summary {
+  #altair-viz-2e1613754456461b80c522bf1b86cab7.vega-embed details,
+  #altair-viz-2e1613754456461b80c522bf1b86cab7.vega-embed details summary {
     position: relative;
   }
 </style>
-<div id="altair-viz-e3c0c436498e4eeba8e87f7607f379a8"></div>
+<div id="altair-viz-2e1613754456461b80c522bf1b86cab7"></div>
 <script type="text/javascript">
   var VEGA_DEBUG = (typeof VEGA_DEBUG == "undefined") ? {} : VEGA_DEBUG;
   (function(spec, embedOpt){
     let outputDiv = document.currentScript.previousElementSibling;
-    if (outputDiv.id !== "altair-viz-e3c0c436498e4eeba8e87f7607f379a8") {
-      outputDiv = document.getElementById("altair-viz-e3c0c436498e4eeba8e87f7607f379a8");
+    if (outputDiv.id !== "altair-viz-2e1613754456461b80c522bf1b86cab7") {
+      outputDiv = document.getElementById("altair-viz-2e1613754456461b80c522bf1b86cab7");
     }
     const paths = {
       "vega": "https://cdn.jsdelivr.net/npm/vega@5?noext",
@@ -779,7 +779,7 @@ Vaswani, Ashish, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan 
 </script>
 </div>
 </div>
-<div id="f128816c" class="cell" data-execution_count="3">
+<div id="9b605480" class="cell" data-execution_count="3">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"🔍 Position Fingerprints (showing dims 4-7 only):</span><span class="ch">\n</span><span class="st">"</span>)</span>
@@ -855,7 +855,7 @@ What is the pass key? The pass key is ___</code></pre>
 <p>The model must retrieve the 5-digit passkey buried in thousands of tokens of repetitive text. If the model can’t find it, it means it cannot effectively use that portion of its context window.</p>
 </div>
 </div>
-<div id="e20e4c37" class="cell" data-execution_count="4">
+<div id="ce074afa" class="cell" data-execution_count="4">
 <details class="code-fold">
 <summary>Show code for table generation</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
@@ -1313,7 +1313,7 @@ Figure&nbsp;1: Implementation of Rotary Position Embedding (RoPE)
 <p>Let’s look at a complete PyTorch implementation to understand how RoPE works in practice (adapted from HuggingFace Transformers <span class="citation" data-cites="wolf-etal-2020-transformers">(<a href="#ref-wolf-etal-2020-transformers" role="doc-biblioref">Wolf et al. 2020</a>)</span>):</p>
 <div class="no-row-height column-margin column-container"><div id="ref-wolf-etal-2020-transformers" class="csl-entry" role="listitem">
 Wolf, Thomas, Lysandre Debut, Victor Sanh, Julien Chaumond, Clement Delangue, Anthony Moi, Pierric Cistac, et al. 2020. <span>“Transformers: State-of-the-Art Natural Language Processing.”</span> In <em>Proceedings of the 2020 Conference on Empirical Methods in Natural Language Processing: System Demonstrations</em>, 38–45. Online: Association for Computational Linguistics. <a href="https://www.aclweb.org/anthology/2020.emnlp-demos.6">https://www.aclweb.org/anthology/2020.emnlp-demos.6</a>.
-</div></div><div id="4c299a12" class="cell" data-execution_count="5">
+</div></div><div id="01297715" class="cell" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn <span class="im">as</span> nn</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -1452,7 +1452,7 @@ Dot product for positions (2,100) with distance=98: -0.8193</code></pre>
 <section id="long-term-decay-of-rope" class="level3" data-number="3.5">
 <h3 data-number="3.5" class="anchored" data-anchor-id="long-term-decay-of-rope"><span class="header-section-number">3.5</span> Long-term Decay of RoPE</h3>
 <p>Let’s recreate the long-term decay pattern of RoPE, showing how attention naturally decreases with relative distance:</p>
-<div id="7dbf3e8f" class="cell" data-execution_count="6">
+<div id="443667d8" class="cell" data-execution_count="6">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
@@ -1658,7 +1658,7 @@ Figure&nbsp;3: Extrapolation versus interpolation. Left: A fitted attention scor
 <span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> inv_freq, attention_factor</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Note the clever implementation detail: instead of scaling position IDs directly, they scale the inverse frequencies by the same factor. Since the computation is <code>embs = inv_freq @ position_ids</code>, scaling inverse frequencies is mathematically equivalent but more efficient.</p>
 <p>Here’s a simplified implementation showing the core concept:</p>
-<div id="027a0708" class="cell" data-execution_count="7">
+<div id="375868c8" class="cell" data-execution_count="7">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> apply_positional_interpolation(position_ids, original_max_length, target_max_length):</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="co">    Scale position IDs to fit within the original training range.</span></span>

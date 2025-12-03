@@ -1,5 +1,5 @@
 ---
-title: The Annotated GPT-2
+title: "The Annotated GPT-2: Understanding Language Models with PyTorch"
 subtitle: Better language models and their implications
 description: | 
     This post presents an annotated version of the paper in the form of a line-by-line implementation in PyTorch. This document itself is a working notebook, and should be a completely usable implementation.

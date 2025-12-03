@@ -1,5 +1,5 @@
 ---
-title: EfficientNet
+title: "EfficientNet Explained: Compound Scaling and Neural Architecture Search"
 subtitle: Rethinking Model Scaling for Convolutional Neural Networks
 description: | 
     Look at the current SOTA, with top-1 accuracy of 88.5% on ImageNet.

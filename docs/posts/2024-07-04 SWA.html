@@ -10,7 +10,7 @@
 <meta name="dcterms.date" content="2024-07-04">
 <meta name="description" content="In this post, we take a deep dive into Sliding Window Attention that allowed transformers to have long context length. We do this with the help of animations and also implement it from scrath in PyTorch code.">
 
-<title>Sliding Window Attention</title>
+<title>Sliding Window Attention: Longformer Explained with Animations and PyTorch</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -99,7 +99,7 @@ div.csl-indent {
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-ea1d7ac60288e0f1efdbc993fd8432ae.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-6b963ac8a0f2f0ebd4f00788c766919e.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-2611609435c0170432e40b6b6097ea8a.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script src="../site_libs/quarto-contrib/videojs/video.min.js"></script>
 <link href="../site_libs/quarto-contrib/videojs/video-js.css" rel="stylesheet">
 <script id="quarto-search-options" type="application/json">{
@@ -174,7 +174,7 @@ window.Quarto = {
 };
 </script>
 
-<meta name="twitter:title" content="Sliding Window Attention">
+<meta name="twitter:title" content="Sliding Window Attention: Longformer Explained with Animations and PyTorch">
 <meta name="twitter:description" content="In this post, we take a deep dive into Sliding Window Attention that allowed transformers to have long context length. We do this with the help of animations and also implement it from scrath in PyTorch code.">
 <meta name="twitter:image" content="../images/swa.png">
 <meta name="twitter:card" content="summary_large_image">
@@ -236,7 +236,7 @@ window.Quarto = {
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">Sliding Window Attention</h1>
+      <h1 class="title">Sliding Window Attention: Longformer Explained with Animations and PyTorch</h1>
             <p class="subtitle lead">Longformer - The Long-Document Transformer</p>
                   <div>
         <div class="description">
@@ -292,7 +292,6 @@ window.Quarto = {
 
 
 
-<p>—title: Sliding Window Attentionsubtitle: Longformer - The Long-Document Transformer description: | In this post, we take a deep dive into Sliding Window Attention that allowed transformers to have long context length. We do this with the help of animations and also implement it from scrath in PyTorch code.categories: - Large Language Modelsauthor: Aman Aroradate: “07/04/2024”toc: truenumber-sections: truetitle-block-banner: truebibliography: ../references.bibreference-location: margincitation-location: margincode-fold: falseimage: ../images/swa.png—</p>
 <p>As part of this blog post, we will look take a deep dive into <strong>Sliding Window Attention (SWA)</strong> that was introduced as part of the Longformer architecture (<span class="citation" data-cites="longformer">Beltagy, Peters, and Cohan (<a href="#ref-longformer" role="doc-biblioref">2020</a>)</span>), and also understand how it’s implemented in PyTorch!</p>
 <div class="no-row-height column-margin column-container"></div><p>When I first started looking into sliding window attention, below tweet kind of summarises my journey. O thought it’s pretty complicated and hard to implement. But, as is usual with many things, the more time you spend on it, the easier it gets.</p>
 <blockquote class="twitter-tweet tw-align-center blockquote">

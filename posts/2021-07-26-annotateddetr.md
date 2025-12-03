@@ -1,6 +1,6 @@
 ---
-title: The Annotated DETR
-subtitle: End-to-End Object Detection with Transformers
+title: "The Annotated DETR: End-to-End Object Detection with Transformers"
+subtitle: A Line-by-Line PyTorch Implementation Guide
 description: | 
     DETR Model Architecture explained with PyTorch implementation line-by-line.
 categories:

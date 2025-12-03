@@ -1,6 +1,6 @@
 ---
-title: Adam and friends
-subtitle: Adam, SGD, RMSProp from scratch in PyTorch.
+title: "Understanding Optimizers: Adam, SGD, Momentum & RMSprop from Scratch"
+subtitle: Re-implementing Deep Learning Optimizers in PyTorch
 description: | 
     Basic optimizers from scratch in PyTorch with working notebook.
 categories:

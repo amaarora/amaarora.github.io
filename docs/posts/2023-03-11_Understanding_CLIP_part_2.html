@@ -10,7 +10,7 @@
 <meta name="dcterms.date" content="2023-03-11">
 <meta name="description" content="This post is part-2 of the two series blog posts on CLIP (for part-1, please refer to my previous blog post). In this blog, we present the PyTorch code behind CLIP for model building and training. This blog post is in itself a working Jupyter Notebook.">
 
-<title>The Annotated CLIP (Part-2)</title>
+<title>The Annotated CLIP (Part-2): PyTorch Implementation from Scratch</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -99,7 +99,7 @@ div.csl-indent {
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-ea1d7ac60288e0f1efdbc993fd8432ae.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-6b963ac8a0f2f0ebd4f00788c766919e.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-2611609435c0170432e40b6b6097ea8a.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -172,7 +172,7 @@ window.Quarto = {
 };
 </script>
 
-<meta name="twitter:title" content="The Annotated CLIP (Part-2)">
+<meta name="twitter:title" content="The Annotated CLIP (Part-2): PyTorch Implementation from Scratch">
 <meta name="twitter:description" content="This post is part-2 of the two series blog posts on CLIP (for part-1, please refer to my previous blog post). In this blog, we present the PyTorch code behind CLIP for model building and training. This blog post is in itself a working Jupyter Notebook.">
 <meta name="twitter:image" content="../images/clip.png">
 <meta name="twitter:card" content="summary_large_image">
@@ -234,7 +234,7 @@ window.Quarto = {
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">The Annotated CLIP (Part-2)</h1>
+      <h1 class="title">The Annotated CLIP (Part-2): PyTorch Implementation from Scratch</h1>
             <p class="subtitle lead">Learning Transferable Visual Models From Natural Language Supervision</p>
                   <div>
         <div class="description">
@@ -300,7 +300,6 @@ window.Quarto = {
 
 
 
-<p>—title: The Annotated CLIP (Part-2)subtitle: Learning Transferable Visual Models From Natural Language Supervisiondescription: | This post is part-2 of the two series blog posts on CLIP (for part-1, please refer to my previous blog post). In this blog, we present the PyTorch code behind CLIP for model building and training. This blog post is in itself a working Jupyter Notebook. categories: - Computer Vision - AIauthor: Aman Aroradate: “03/11/2023”toc: truenumber-sections: truetitle-block-banner: truebibliography: ../references.bibreference-location: margincitation-location: margincode-fold: trueimage: ../images/clip.pngtwitter-card: true—</p>
 <section id="sec-intro" class="level2" data-number="1">
 <h2 data-number="1" class="anchored" data-anchor-id="sec-intro"><span class="header-section-number">1</span> Introduction</h2>
 <p>As part of this blog post we will be uncovering the inner workings of CLIP - <a href="https://arxiv.org/abs/2103.00020">Learning Transferable Visual Models From Natural Language Supervision</a> by looking at it’s PyTorch implementation. For a gentle introduction to CLIP, please refer to <a href="https://amaarora.github.io/posts/2023-03-06_Understanding_CLIP.html">part-1</a> of the blog.</p>
@@ -394,7 +393,8 @@ Note
 Sharding file number 1 of 1 called /home/ubuntu/GIT_REPOS/data/img2dataset/tests/test_files/test_1000.parquet</code></pre>
 </div>
 <div class="cell-output cell-output-stderr">
-<pre><code>0it [00:00, ?it/s]</code></pre>
+<pre><code>
+0it [00:00, ?it/s]</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
 <pre><code>

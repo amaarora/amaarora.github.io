@@ -1,143 +1,203 @@
 /*-- scss:defaults --*/
 
-// Color variables
-$primary: #2563eb;
-$secondary: #667eea;
-$accent: #764ba2;
+// Color variables - Anthropic-inspired warm palette
+$primary: #191918;
+$link-color: #191918;
+$bg-warm: #FAF9F6;
+$code-bg: #f1f0eb; /* Slightly darker/warmer gray for contrast */
 
-// Override navbar color to be more subtle
-$navbar-bg: #f8f9fa;
-$navbar-fg: #333333;
+// Override navbar color
+$navbar-bg: $bg-warm;
+$navbar-fg: $primary;
 
 /*-- scss:rules --*/
 
-/* Custom navbar styling - more subtle */
+/* Warm background like Anthropic */
+body {
+  background-color: $bg-warm !important;
+  color: $primary;
+}
+
+/* Increase text contrast */
+body, p, li {
+  color: #111 !important; /* Darker text */
+}
+
+.quarto-listing {
+  background-color: $bg-warm;
+}
+
+/* Custom navbar styling */
 .navbar {
-  background-color: #ffffff !important;
-  border-bottom: 1px solid #e5e7eb;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  background-color: $bg-warm !important;
+  border-bottom: none;
 }
 
 .navbar-brand, .navbar-nav .nav-link {
-  color: #333333 !important;
+  color: $primary !important;
+  font-weight: 500;
 }
 
 .navbar-nav .nav-link:hover {
-  color: $primary !important;
+  opacity: 0.7;
 }
+
+/* Code block styling for better contrast */
+pre, code, .sourceCode {
+  background-color: $code-bg !important;
+  border-radius: 4px;
+}
+
+pre {
+  padding: 1rem;
+  border: 1px solid rgba(0,0,0,0.05);
+}
+
+code {
+  padding: 0.2em 0.4em;
+  font-size: 0.9em;
+}
+
+/* Make code syntax highlighting pop more */
+.sourceCode span {
+   /* Ensure key syntax elements are readable */
+   /* This relies on the theme's highlight classes but provides a darker base */
+   font-weight: 500; 
+}
+
 
 /* Custom styling for blog listing */
 
-/* Style featured posts */
+/* FEATURED POST STYLING (First Item) */
 .quarto-listing-default > div:first-child {
-  background: linear-gradient(135deg, #f6f9fc 0%, #f0f4f8 100%);
-  border-left: 4px solid $primary;
-  border-radius: 8px;
-  padding: 2rem !important;
-  margin-bottom: 2.5rem;
-  position: relative;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  transition: transform 0.2s, box-shadow 0.2s;
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  background: transparent;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  padding: 2rem 0 !important;
+  margin-bottom: 2rem;
+  
+  /* "Featured" label simulation */
+  &::before {
+    content: "Featured";
+    display: block;
+    font-family: system-ui, -apple-system, sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #191918;
+    margin-bottom: 0.75rem;
+    text-transform: none;
+    background: none;
+    padding: 0;
+    order: -1; /* Ensure it's first */
   }
 
-  &::before {
-    content: "FEATURED";
-    position: absolute;
-    top: -12px;
-    left: 20px;
-    background: $primary;
-    color: white;
-    padding: 6px 14px;
-    border-radius: 20px;
-    font-size: 0.7rem;
-    font-weight: 600;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
+  /* Content wrapper adjustment if needed */
+  .body {
+    width: 100%;
   }
 
   .listing-title {
-    font-size: 1.65rem !important;
-    font-weight: 700 !important;
-    margin-bottom: 0.75rem;
-  }
-}
-
-/* Style all listing items */
-.quarto-listing-default > div {
-  margin-bottom: 1.75rem;
-  padding-bottom: 1.75rem;
-  border-bottom: 1px solid #e2e8f0;
-}
-
-/* Title styling */
-.listing-title {
-  font-size: 1.35rem !important;
-  font-weight: 600 !important;
-  color: #1e293b !important;
-  margin-bottom: 0.5rem;
-  line-height: 1.4;
-
-  a {
-    color: inherit !important;
-    text-decoration: none !important;
-
-    &:hover {
-      color: $primary !important;
+    font-family: system-ui, -apple-system, sans-serif;
+    font-size: 3rem !important;
+    font-weight: 900 !important;
+    line-height: 1.05;
+    margin-bottom: 1rem;
+    letter-spacing: -0.03em;
+    order: 0;
+    color: #000 !important;
+    
+    a {
+      color: #000 !important;
+      font-weight: 900 !important;
     }
   }
-}
+  
+  .listing-description {
+    display: block;
+    font-family: "Georgia", serif; /* Serif for description like standard editorial */
+    font-size: 1.25rem;
+    line-height: 1.5;
+    color: #333 !important;
+    max-width: 800px;
+    order: 1;
+  }
 
-/* Description styling */
-.listing-description {
-  color: #4b5563 !important;
-  line-height: 1.6;
-  margin-top: 0.5rem;
-}
-
-/* Date styling */
-.listing-date {
-  color: #64748b !important;
-  font-size: 0.85rem !important;
-  font-weight: 500 !important;
-  margin-bottom: 0.5rem;
-  text-transform: uppercase;
-  letter-spacing: 0.025em;
-}
-
-/* Category tags */
-.listing-category {
-  display: inline-block !important;
-  padding: 0.3rem 0.8rem !important;
-  background: linear-gradient(135deg, #{$secondary}20 0%, #{$accent}20 100%) !important;
-  color: #5a67d8 !important;
-  border: 1px solid #{$secondary}40 !important;
-  border-radius: 20px !important;
-  font-size: 0.75rem !important;
-  font-weight: 500 !important;
-  margin-right: 0.4rem !important;
-  margin-bottom: 0.3rem !important;
-  text-decoration: none !important;
-  transition: all 0.2s;
-
-  &:hover {
-    background: linear-gradient(135deg, $secondary 0%, $accent 100%) !important;
-    color: white !important;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
+  .listing-date {
+    display: none; 
+  }
+  
+  .listing-category {
+    display: none !important;
   }
 }
 
-/* Global link styling to match primary color */
+/* STANDARD LIST STYLING (Items 2+) */
+.quarto-listing-default > div:not(:first-child) {
+  margin-bottom: 0;
+  padding: 1.75rem 0; /* Increased vertical padding */
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: row;
+  align-items: center; /* Center vertically */
+  justify-content: space-between;
+  gap: 3rem; /* Wider gap between title and date */
+}
+
+/* Title styling for list */
+.quarto-listing-default > div:not(:first-child) .listing-title {
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 1.35rem !important;
+  font-weight: 800 !important; /* Extra bold like Anthropic */
+  color: #000 !important; /* Pure black */
+  margin-bottom: 0;
+  line-height: 1.3;
+  letter-spacing: -0.02em;
+  flex: 1;
+  min-width: 0;
+}
+
+/* Ensure link inside title is also pure black */
+.quarto-listing-default > div:not(:first-child) .listing-title a {
+  color: #000 !important;
+  font-weight: 800 !important;
+}
+
+/* Hide description & categories for list items */
+.quarto-listing-default > div:not(:first-child) .listing-description,
+.quarto-listing-default > div:not(:first-child) .listing-category {
+  display: none !important;
+}
+
+/* Date styling for list */
+.quarto-listing-default > div:not(:first-child) .listing-date {
+  color: #191918 !important; /* Darker, near black date */
+  font-size: 0.8rem !important;
+  font-weight: 500 !important;
+  margin-bottom: 0;
+  text-transform: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+  text-align: right;
+  min-width: 120px; /* Ensure space */
+}
+
+/* Categories sidebar styling */
+#listing-categories {
+  .quarto-category-header {
+    font-weight: 600;
+    color: $primary;
+  }
+}
+
+/* Global link styling */
 a {
   color: $primary;
   text-decoration: none;
+  transition: opacity 0.2s;
 
   &:hover {
-    color: darken($primary, 10%);
-    text-decoration: underline;
+    opacity: 0.7;
   }
 }

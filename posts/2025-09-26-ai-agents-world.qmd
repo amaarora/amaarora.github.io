@@ -1,0 +1,51 @@
+---
+title: "Everything I know about this unusual world of AI agents that we live in"
+subtitle: ""
+description: |
+    
+categories:
+  - AI Agents
+author: Aman Arora
+date: "09/26/2025"
+draft: true
+toc: true
+toc-location: body
+toc-depth: 3
+number-sections: true
+bibliography: ../references.bib
+reference-location: margin
+citation-location: margin
+---
+
+## Introduction
+
+<!-- Write your introduction here -->
+
+## What are AI Agents?
+
+<!-- Write your content here -->
+
+## The Current Landscape
+
+<!-- Write your content here -->
+
+## Key Technologies and Frameworks
+
+<!-- Write your content here -->
+
+## Challenges and Limitations
+
+<!-- Write your content here -->
+
+## Real-World Applications
+
+<!-- Write your content here -->
+
+## The Future of AI Agents
+
+<!-- Write your content here -->
+
+## Conclusion
+
+<!-- Write your conclusion here -->
+

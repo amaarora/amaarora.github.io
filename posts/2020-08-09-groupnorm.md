@@ -1,5 +1,5 @@
 ---
-title: Group Normalization
+title: "Group Normalization: A Batch Normalization Alternative with PyTorch Implementation"
 description: | 
     In this blog post, we will look at [Group Normalization](https://arxiv.org/abs/1803.08494) research paper and also implement Group Normalization in PyTorch from scratch.
 categories:

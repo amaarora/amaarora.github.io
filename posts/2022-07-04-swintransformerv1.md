@@ -1,5 +1,5 @@
 ---
-title: Swin Transformer
+title: "Swin Transformer Explained: Architecture and PyTorch Implementation"
 subtitle:  Hierarchical Vision Transformer using Shifted Windows
 description: | 
     Swin Transformer Model Architecture explained with PyTorch implementation line-by-line.
