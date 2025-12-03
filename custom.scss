@@ -201,3 +201,28 @@ a {
     opacity: 0.7;
   }
 }
+
+/* Content area links - make them clearly clickable */
+.quarto-body main a,
+#quarto-content a,
+.content a,
+article a {
+  color: #000 !important;
+  font-weight: 600 !important;
+  text-decoration: underline;
+  text-decoration-color: rgba(0, 0, 0, 0.3);
+  text-underline-offset: 2px;
+  transition: text-decoration-color 0.2s;
+  
+  &:hover {
+    text-decoration-color: #000;
+    opacity: 1;
+  }
+}
+
+/* Navbar links should NOT have underline */
+.navbar a,
+.nav-link {
+  text-decoration: none !important;
+  font-weight: 500 !important;
+}
