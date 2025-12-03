@@ -230,3 +230,17 @@ a {
 #quarto-header a {
   text-decoration: none !important;
 }
+
+/* Custom TOC styling to make it look like links */
+#TOC ul > li > a,
+.quarto-title-meta-contents a {
+  color: #555 !important; /* Gray color */
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+#TOC ul > li > a:hover,
+.quarto-title-meta-contents a:hover {
+  color: #000 !important; /* Darker on hover */
+  text-decoration-color: #000;
+}

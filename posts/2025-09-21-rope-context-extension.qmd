@@ -21,13 +21,14 @@ citation-location: margin
 /* Custom TOC styling */
 .quarto-title-meta-contents a,
 nav#TOC a {
-    color: #2563eb !important; /* Professional blue */
-    text-decoration: none;
+    color: #555 !important; /* Gray color */
+    text-decoration: underline;
+    text-underline-offset: 2px;
 }
 
 nav#TOC a:hover {
-    color: #1d4ed8 !important; /* Darker blue on hover */
-    text-decoration: underline;
+    color: #000 !important; /* Darker on hover */
+    text-decoration-color: #000;
 }
 
 nav#TOC > ul > li > a {
