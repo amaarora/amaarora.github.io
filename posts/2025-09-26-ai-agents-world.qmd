@@ -1,13 +1,12 @@
 ---
-title: "Everything I know about this unusual world of AI agents that we live in"
+title: "2025: When AI Agents Went to Work"
 subtitle: ""
 description: |
-    
+    Was 2025 the year of AI agents? More importantly—are coding assistants making us better developers or just faster? An honest review of what changed and what it means.
 categories:
   - AI Agents
 author: Aman Arora
-date: "09/26/2025"
-draft: true
+date: "12/11/2025"
 toc: true
 toc-location: body
 toc-depth: 3
@@ -19,33 +18,142 @@ citation-location: margin
 
 ## Introduction
 
-<!-- Write your introduction here -->
+This year started with bold predictions. Sam Altman, in his January blog post "reflections," predicted 2025 would see the first AI agents join the workforce and materially change company output. As we come to a close of this year, the word "agent" has indeed become industry standard.
 
-## What are AI Agents?
+In this blog post, I want to provide a holistic review of the progress that has been made in the "agentic" space. I have spent the year building production-grade AI agent systems - including single and multi-agent systems via Orchestration. I have noticed a big difference in the tooling, mindset & approach to building AI agent systems since the start of the year to now.
 
-<!-- Write your content here -->
+In this post, I'm sharing raw thoughts on coding assistants, low-code agent platforms, evaluation, reliability, the decline of fine-tuning, and the rise of Agent Engineering as a new discipline. To be honest, this blog post might feel like spaghetti - I'm making sense of it myself as I continue to write it.
 
-## The Current Landscape
+But before, let's get started by looking at the latest trends from two recent surveys.
 
-<!-- Write your content here -->
+Below are some of the insights from a recent survey on AI agents in production which match my industry-wide observations [@pan2025measuringagentsproduction]:
 
-## Key Technologies and Frameworks
+- *72.7% of practitioners use agents for "increasing productivity"*. This refers to increasing speed of task completion over the previous non-agentic system. 63.6% for reducing human hours, and 50% for automating routine labour.
+- *Reliability remains the top development challenge.*
+- *Latency impacts only 15% of applications as a deployment blocker.*
+- *93% of AI agent systems serve humans, rather than other agents or systems.*
+- *70% of the practitioners use off-the-shelf models, relying on "Prompting" rather than fine-tuning for optimization!*
+- *Only 3 of the 20 deployed solutions use open-source models.*
 
-<!-- Write your content here -->
+:::: {.callout-note}
+These survey results closely mirror what I’ve seen in production.
 
-## Challenges and Limitations
+In my opinion, reliability as a challenge is directly proportional to the complexity of the AI agent system. In other words, the simpler the agent, the easier it is to reliably operate. More on ways of improving reliability later in this blog post.
 
-<!-- Write your content here -->
+My experience also aligns with the preference for proprietary models such as GPT-5 and Claude when building production-grade AI agents. Open-source models I've tested so far struggle to follow instructions with the same precision and often have difficulties with reliable tool calling.
 
-## Real-World Applications
+Regarding fine-tuning, I am noticing a steady decline in the requirement for fine-tuning models unless for some specialized use cases and industries. As a trend, proprietary models are becoming cheaper and better at instruction following. Thus, this aligns with my experience that 70% of practitioners rely on off-the-shelf models and not fine-tuned artifacts. 
+::::
 
-<!-- Write your content here -->
+Below, I share results from another report - the State of AI report from OpenRouter, [@openrouter2025stateofai]: 
 
-## The Future of AI Agents
+![OpenRouter token usage across OpenSource and ClosedSource models in 2025](../images/openrouter-token-usage.png)
 
-<!-- Write your content here -->
+The main highlights from this report that best relate with my experience are:
+
+- *Open-source to closed-source split has remained steady throughout the year with open-source adoption at around 20-30% for all inference calls.*
+- *Reasoning based models are becoming the default path for production workloads*
+- *50% of all OSS queries are for "roleplay"*
+- *Bulk of the coding queries (~80%) are handled via proprietary models and only ~20% via OSS.*
+- *As of Nov 2025, `claude-sonnet-4.5` is the most commonly used model with tool-call invocations (or as the report calls it, agentic inference)*
+- *Average token length has grown nearly 4X since early 2024 to date with programming (coding assistants) as the main driver behind token growth*
+- *50% of all requests are for programming (used to be 11% from a year ago). Anthropic has the dominant share at 60% of all coding requests.*
+
+:::: {.callout-note}
+OpenAI's `o1` series helped popularize a different way of doing inference: letting models spend extra “thinking” tokens on internal reasoning before answering. The industry went from explicit "Chain of Thought" to implicit "Chain of Thought" via thinking/reasoning tokens! APIs often provide thinking budgets as an option to users - low, medium & high. Generally speaking, "medium" is the sweet spot taking latency and response time into consideration.
+
+On tool call invocation, it is a bit surprising to me that `claude-sonnet-4.5` is the most widely used model with tool call invocation. In my experience, I have noticed `gpt-5` series to be far ahead at agentic applications that require tool calling.
+
+Average token length increase is not a surprise, as the industry moves towards more AI assisted development. With LLMs now accepting codebases as inputs and re-writing files from scratch - the token count is bound to go up on average!
+::::
+
+Looking at those numbers, one thing is clear: coding assistants are changing the way developers write code. Programming jumped from 11% to 50% of all AI requests in a year. But statistics don't capture what it actually feels like to code towards the end of 2025. Let me show you.
+
+## Coding Assistants / Terminal Agents
+
+A typical day in an engineer's role has completely changed in 2025! This year has brought about a BIG shift to the way engineers (including myself) write code! 
+
+See the below figure from [@openrouter2025stateofai]. 
+
+![Rise of AI-assisted development workflows in 2025](../images/coding-category.png)
+
+That's not it. A new category of coding assistants (SimonW called it "Terminal Agents" [@willison2025terminalagents]) has emerged such as Claude Code, Gemini CLI & Codex!
+
+Most of the developer time is spent on reviewing AI-generated code. Repetitive tasks have been offloaded. Entire test suites are now AI-generated. 
+
+> Personally, I am a Claude Code power user. I hardly have to write handwritten code anymore. Opus 4.5 combined with the Claude Code harness - it's like driving a Ferrari, which gets me to my destination faster. But, there's a catch!
+
+A question we should ask ourselves - are these coding assistants helping us to be better developers? **In the long run, are we really winning?**
+
+<blockquote class="twitter-tweet" align="center"><p lang="en" dir="ltr">My biggest worries about coding with AI:<br><br>1. Beginners not actually learning<br>2. Atrophy of skills<br><br>I’m seeing #1 happen and I don’t have a good answer yet. <br><br>Leveling up as an engineer requires grinding and it’s not always fun. If AI can solve most of the problems for you, when…</p>&mdash; Lee Robinson (@leerob) <a href="https://twitter.com/leerob/status/1996281383535382909?ref_src=twsrc%5Etfw">December 3, 2025</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+Above Lee Robinson raises two extremely valid points that are a concern to me too:
+
+1. Beginners not actually learning 
+2. Atrophy of Skills
+
+In the following sections of this blog post, I would like to deep dive into both of these topics. But first, why do I care so much about beginners not learning? Simple - at many tasks and technologies, I'm a beginner too!
+
+### Beginners not actually learning
+
+I was recently having a chat with a friend of mine, who is not a developer by profession. However, he is a brilliant & creative mind. The availability of coding assistants such as Claude Code/Codex and IDE's such as Cursor/Cline has allowed him to work on prototyping his ideas - and also releasing applications to the wider public! This can often lead to monetary outcome with real world consumers.
+
+Given he is not a developer, he often does not fully understand the code that is written by these coding assistants, at this point he is faced with two options:
+
+- Hard road: Actually invest the time to understand what the AI wrote and why it works (or doesn't)
+- Easy road: Trust the code works and keep shipping
+
+This might be a good moment to pause and reflect on which road would you take? 
+
+The answer varies on multiple factors:
+
+1. **Time** - If you need to ship fast, you'll probably keep "vibe-coding" - trusting the models to do their
+job and write quality code without questioning much.
+2. **Stakes** - Is this going to impact real users? How badly could things break? The higher the stakes, the
+more you need to actually understand what's being shipped before it hits production.
+3. **Motivation** - What truly drives you? Are you outcomes-focused, just trying to get things done? Or do you
+  value the learning journey over the final result? 
+
+My take? If your goal is to get better at your craft, don't use coding assistants while learning. And if you do, understand every single line of code.
+
+I put this to the test this year. When learning a new programming language, I did not rely on coding assistants at all - just used tab completion sometimes. I deliberately picked the hard road. It was frustrating and slow, but I actually learned the language instead of just shipping code I didn't understand. Worth it. 
+
+![The Vibe-Coding Trap: Without understanding the AI's code, you're stuck in an endless debug loop](../images/endless-loop.png)
+
+::: {.callout-note}
+Notice the pattern? Without understanding the generated code, you're not debugging - you're just prompting again and hoping for better results. Each iteration keeps you dependent rather than building your skills..
+:::
+
+Now, let's look at the other side of the coin - at experienced developers who have been writing code and software for a while.
+
+### Atrophy of Skills
+
+The more I depend on Claude Code, the less I code from scratch. What happens to my skills in the long run?
+
+My workflow has changed dramatically. I no longer search Stack Overflow for answers. Instead, after careful planning, I rely on my coding assistant to complete tasks, review its code, provide feedback, and iterate until I'm happy with the result. 
+
+A year ago, I was writing 80-90% of code from scratch, besides tab-completions. Now? Maybe 10-20%. Does this make me a better coder or worse?
+
+Quoting [Lee's Tweet](https://x.com/leerob/status/1996281383535382909) again:
+
+> For #2, I’m definitely paranoid about this for myself. What will it feel like to build software in 5 years? Will I have forgotten someone of the skills I used to rely on? Maybe that won’t even matter because we will truly be operating at a higher level of abstraction. Even if that pans out, it’s always been important to deeply understand the systems/dependencies you’re building on.
+
+The skepticism: speed and productivity come at the cost of deep understanding. 
+
+I disagree. Just this year, I've grown tremendously as a software developer while having more time to read research papers. Not having to write every line from scratch has freed me to focus on system design, understand design patterns in different libraries, and contribute to product in programming languages I hadn't used before.
+
+I believe I will continue to have a deep understanding because I review every line of AI-generated code, understand the tradeoff and make architectural decisions. That's where the deep understanding lives. Will this hold true in 5 years? I don't know. But right now, I'm confident I'm becoming a better developer because of how I'm using these tools, not despite them.
+
+## The rise of "Low Code" Agent Builder Platforms
+
+## Evaluation of open-ended AI Agents
+
+## On Reliability of AI Agents in Production
+
+## The Slow Death of Fine-Tuning and the increased dependence on Model APIs
+
+## On the rise of Agent Engineering: A New Discipline
+
+## What to expect in 2026?
 
 ## Conclusion
-
-<!-- Write your conclusion here -->
-
