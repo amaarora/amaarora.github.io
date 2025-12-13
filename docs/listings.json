@@ -2,7 +2,6 @@
   {
     "listing": "/index.html",
     "items": [
-      "/posts/2025-09-26-ai-agents-world.html",
       "/posts/2025-09-25-qwen3guard-guardrails.html",
       "/posts/2025-09-21-rope-context-extension.html",
       "/posts/2025-09-14-llms-agentic.html",
