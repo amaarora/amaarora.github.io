@@ -2,7 +2,7 @@
 title: "2025: When AI Agents Went to Work"
 subtitle: ""
 description: |
-    Was 2025 the year of AI agents? More importantly—are coding assistants making us better developers or just faster? An honest review of what changed and what it means.
+    Was 2025 the year of AI agents? More importantly, are coding assistants making us better developers or just faster? An honest review of what changed and what it means.
 categories:
   - AI Agents
 author: Aman Arora
@@ -20,13 +20,15 @@ citation-location: margin
 
 This year started with bold predictions. Sam Altman, in his January blog post "reflections," predicted 2025 would see the first AI agents join the workforce and materially change company output. As we come to a close of this year, the word "agent" has indeed become industry standard.
 
-In this blog post, I want to provide a holistic review of the progress that has been made in the "agentic" space. I have spent the year building production-grade AI agent systems - including single and multi-agent systems via Orchestration. I have noticed a big difference in the tooling, mindset & approach to building AI agent systems since the start of the year to now.
+In this blog post, I want to provide a holistic review of the progress that has been made in the "agentic" space and also share my personal experience on how it's like in this changing industry. I have spent the year building production-grade AI agent systems - including single and multi-agent systems via Orchestration. I have noticed a big difference in the tooling, mindset & approach to building AI agent systems since the start of the year to now.
 
-In this post, I'm sharing raw thoughts on coding assistants, low-code agent platforms, evaluation, reliability, the decline of fine-tuning, and the rise of Agent Engineering as a new discipline. To be honest, this blog post might feel like spaghetti - I'm making sense of it myself as I continue to write it.
+**2025 was the year AI agents went mainstream.** Not as a buzzword, but as actual production systems generating positive ROI. Coding has been the first practice to change. We went from tab-completions to fully dedicated coding assistants.
 
-But before, let's get started by looking at the latest trends from two recent surveys.
+In this post, I'm sharing what I've learned this year: the seismic shift in how developers have adopted coding assistants, the rise of agent engineering as a discipline, the hard truth about reliability, and why fine-tuning matters more than we thought. 
 
-Below are some of the insights from a recent survey on AI agents in production which match my industry-wide observations [@pan2025measuringagentsproduction]:
+Below, I'm sharing insights and data from two very recent surveys that substantiate this shift we're seeing in 2025:
+
+Some of the key insights from a recent survey on the **use of AI agents in production** [@pan2025measuringagentsproduction]:
 
 - *72.7% of practitioners use agents for "increasing productivity"*. This refers to increasing speed of task completion over the previous non-agentic system. 63.6% for reducing human hours, and 50% for automating routine labour.
 - *Reliability remains the top development challenge.*
@@ -36,18 +38,18 @@ Below are some of the insights from a recent survey on AI agents in production w
 - *Only 3 of the 20 deployed solutions use open-source models.*
 
 :::: {.callout-note}
-These survey results closely mirror what I’ve seen in production.
+These survey results closely mirror what I’ve seen in production. Reliability is definitely a challenge but not impossible to get especially now with the models getting better & better at instruction following.
 
-In my opinion, reliability as a challenge is directly proportional to the complexity of the AI agent system. In other words, the simpler the agent, the easier it is to reliably operate. More on ways of improving reliability later in this blog post.
+As a rule of thumb, I believe that reliability as a challenge is directly proportional to the complexity of the AI agent system. In other words, the simpler the agent, the easier it is to reliably operate. More on ways of improving reliability later in this blog post.
 
-My experience also aligns with the preference for proprietary models such as GPT-5 and Claude when building production-grade AI agents. Open-source models I've tested so far struggle to follow instructions with the same precision and often have difficulties with reliable tool calling.
+Aside, my experience also aligns with the preference for proprietary models such as GPT-5 and Claude when building production-grade AI agents. Open-source models like DeepSeek v3.2 [@deepseekai2025deepseekv32] have made strides, but I've found they still struggle to follow instructions with the same precision and often have difficulties with reliable tool calling compared to their proprietary counterparts especially over longer conversations.
 
-Regarding fine-tuning, I am noticing a steady decline in the requirement for fine-tuning models unless for some specialized use cases and industries. As a trend, proprietary models are becoming cheaper and better at instruction following. Thus, this aligns with my experience that 70% of practitioners rely on off-the-shelf models and not fine-tuned artifacts. 
+On fine-tuning: the 70% stat doesn't tell the full story. Yes, off-the-shelf models work great for general-purpose agent tasks. I haven't needed to fine-tune for my work. But fine-tuning becomes essential when you're building a product with vertical appetite: solving a specific domain problem or serving a niche market. Companies like Checkr, Shopify, and Vercel have proven that specialized fine-tuning delivers 10-15x better results at a fraction of the cost of general models. Fine-tuning isn't declining; it's moving upstream to product-specific layers.
 ::::
 
-Below, I share results from another report - the State of AI report from OpenRouter, [@openrouter2025stateofai]: 
+Next, below, I share results and trends from another report - the State of AI report from OpenRouter, [@openrouter2025stateofai]: 
 
-![OpenRouter token usage across OpenSource and ClosedSource models in 2025](../images/openrouter-token-usage.png)
+![OpenRouter token usage across OpenSource and ClosedSource models in 2025](../images/openrouter-token-usage.png){#fig-2}
 
 The main highlights from this report that best relate with my experience are:
 
@@ -57,25 +59,33 @@ The main highlights from this report that best relate with my experience are:
 - *Bulk of the coding queries (~80%) are handled via proprietary models and only ~20% via OSS.*
 - *As of Nov 2025, `claude-sonnet-4.5` is the most commonly used model with tool-call invocations (or as the report calls it, agentic inference)*
 - *Average token length has grown nearly 4X since early 2024 to date with programming (coding assistants) as the main driver behind token growth*
-- *50% of all requests are for programming (used to be 11% from a year ago). Anthropic has the dominant share at 60% of all coding requests.*
+- ***50% of all requests are for programming** (used to be 11% from a year ago). Anthropic has the dominant share at 60% of all coding requests.*
+
+:::: {.callout-note}
+> **50% of all requests are for programming**
+
+This is a crucial shift in daily developer workflows. I dive deeper into @sec-coding-assistants with my perspective on these changes and their impact on how we work.
+::::
 
 :::: {.callout-note}
 OpenAI's `o1` series helped popularize a different way of doing inference: letting models spend extra “thinking” tokens on internal reasoning before answering. The industry went from explicit "Chain of Thought" to implicit "Chain of Thought" via thinking/reasoning tokens! APIs often provide thinking budgets as an option to users - low, medium & high. Generally speaking, "medium" is the sweet spot taking latency and response time into consideration.
 
 On tool call invocation, it is a bit surprising to me that `claude-sonnet-4.5` is the most widely used model with tool call invocation. In my experience, I have noticed `gpt-5` series to be far ahead at agentic applications that require tool calling.
 
-Average token length increase is not a surprise, as the industry moves towards more AI assisted development. With LLMs now accepting codebases as inputs and re-writing files from scratch - the token count is bound to go up on average!
+Also, average token length increase is not a surprise, as the industry moves towards more AI-assisted development. With LLMs now accepting complete files from codebases as inputs and rewriting files from scratch, the token count increase makes sense!
 ::::
 
-Looking at those numbers, one thing is clear: coding assistants are changing the way developers write code. Programming jumped from 11% to 50% of all AI requests in a year. But statistics don't capture what it actually feels like to code towards the end of 2025. Let me show you.
+The statistics tell one story. But they don't capture what it actually feels like to code in 2025. Let me show you what's really changed.
 
-## Coding Assistants / Terminal Agents
+## Coding Assistants / Terminal Agents {#sec-coding-assistants}
 
 A typical day in an engineer's role has completely changed in 2025! This year has brought about a BIG shift to the way engineers (including myself) write code! 
 
 See the below figure from [@openrouter2025stateofai]. 
 
-![Rise of AI-assisted development workflows in 2025](../images/coding-category.png)
+![Rise of AI-assisted development workflows in 2025](../images/coding-category.png){#fig-1}
+
+As is notable from @fig-1, programming has surged from 11% to 50% of all AI requests throughout the year.
 
 That's not it. A new category of coding assistants (SimonW called it "Terminal Agents" [@willison2025terminalagents]) has emerged such as Claude Code, Gemini CLI & Codex!
 
@@ -118,10 +128,10 @@ My take? If your goal is to get better at your craft, don't use coding assistant
 
 I put this to the test this year. When learning a new programming language, I did not rely on coding assistants at all - just used tab completion sometimes. I deliberately picked the hard road. It was frustrating and slow, but I actually learned the language instead of just shipping code I didn't understand. Worth it. 
 
-![The Vibe-Coding Trap: Without understanding the AI's code, you're stuck in an endless debug loop](../images/endless-loop.png)
+![The Vibe-Coding Trap: Without understanding the AI's code, you're stuck in an endless debug loop](../images/endless-loop.png){#fig-3}
 
 ::: {.callout-note}
-Notice the pattern? Without understanding the generated code, you're not debugging - you're just prompting again and hoping for better results. Each iteration keeps you dependent rather than building your skills..
+Notice the pattern? Without understanding the generated code, you're not debugging - you're just prompting again and hoping for better results. Each iteration keeps you dependent rather than building your skills.
 :::
 
 Now, let's look at the other side of the coin - at experienced developers who have been writing code and software for a while.
@@ -130,7 +140,7 @@ Now, let's look at the other side of the coin - at experienced developers who ha
 
 The more I depend on Claude Code, the less I code from scratch. What happens to my skills in the long run?
 
-My workflow has changed dramatically. I no longer search Stack Overflow for answers. Instead, after careful planning, I rely on my coding assistant to complete tasks, review its code, provide feedback, and iterate until I'm happy with the result. 
+My workflow has changed dramatically. I no longer search [Stack Overflow](https://stackoverflow.com/questions) for answers. Instead, after careful planning, I rely on my coding assistant to complete tasks, review its code, provide feedback, and iterate until I'm happy with the result. 
 
 A year ago, I was writing 80-90% of code from scratch, besides tab-completions. Now? Maybe 10-20%. Does this make me a better coder or worse?
 
@@ -138,22 +148,62 @@ Quoting [Lee's Tweet](https://x.com/leerob/status/1996281383535382909) again:
 
 > For #2, I’m definitely paranoid about this for myself. What will it feel like to build software in 5 years? Will I have forgotten someone of the skills I used to rely on? Maybe that won’t even matter because we will truly be operating at a higher level of abstraction. Even if that pans out, it’s always been important to deeply understand the systems/dependencies you’re building on.
 
-The skepticism: speed and productivity come at the cost of deep understanding. 
+I believe the skepticism that has been mentioned is this: speed and productivity come at the cost of deep understanding. 
 
-I disagree. Just this year, I've grown tremendously as a software developer while having more time to read research papers. Not having to write every line from scratch has freed me to focus on system design, understand design patterns in different libraries, and contribute to product in programming languages I hadn't used before.
+With this, I disagree. Just this year, I've grown tremendously as a software developer while having more time to read research papers. Not having to write every line from scratch has freed me to focus on system design, understand design patterns in different libraries, and contribute to product in programming languages I hadn't used before.
 
-I believe I will continue to have a deep understanding because I review every line of AI-generated code, understand the tradeoff and make architectural decisions. That's where the deep understanding lives. Will this hold true in 5 years? I don't know. But right now, I'm confident I'm becoming a better developer because of how I'm using these tools, not despite them.
+I believe, in future as well, I will continue to have a deep understanding because I review every line of AI-generated code, understand the tradeoff and make architectural decisions. That's where the deep understanding lives. 
 
-## The rise of "Low Code" Agent Builder Platforms
+This tooling represents another layer of abstraction that we as developers will be operating it, but is still upto the developer to go as deep as they'd like.
 
-## Evaluation of open-ended AI Agents
-
-## On Reliability of AI Agents in Production
-
-## The Slow Death of Fine-Tuning and the increased dependence on Model APIs
+#POINTER: Fix grammar "we as developers will be operating it" → "we as developers will be operating on it" or rephrase for clarity (e.g., "will operate within" or "will interact with").
 
 ## On the rise of Agent Engineering: A New Discipline
 
-## What to expect in 2026?
+2025 has given rise to a new kind of discipline - Agent Engineering. [@langchain2025agentengineering].
+
+To me agent engineering is the subtle art of building production grade AI Agents. The success of any "agent" hinges on following levers:
+
+1. **System Prompt:** The agent's guide/playbook on exactly how to respond in various situations. To me this has to be one of the biggest differentiators in agents that work, and agents that don't.
+2. **Model:** Generally speaking, for more complex agents, proprietary models such as `gpt-5` and `claude-sonnet-4.5` work better and score higher on evaluation metrics.
+3. **Tool calling (& Latency):** How well defined are your tools? Remember, any LLM API only sees the JSON schema of the tool, so having high quality definitions and sometimes even a "how to use" section in the tool description makes a big difference. In terms of latency, this is more for User Experience - if a tool is taking too long, can it be broken down into multiple tools?
+4. **Error Handling:** As an agent engineer, you should be very careful with what errors get raised and the retry logic on the AI Agent. Raising smart error messages with carefully engineered try-except blocks will allow the agent to self-heal and self-correct its path if it has happened to go down the wrong road. 
+5. **Agent Architecture (Tool schemas, Agent Interface):** This matters a lot as you scale. A good example of a nicely architected agent would be Manus. Rather than building a multi-agent system, Manus architected the agent as a single agent system with multiple tools. [@ji2025contextengineeringmanus]
+6. **Agent Context/History (or now more commonly referred to as "Context Engineering"):** Context engineering matters especially when conversation history lengths explode. When working with multiple tools or subagents, it is critical as what goes on and what goes out to the LLM API (that powers the agent). Being too verbose could mean that the agent could be distracted, being too succinct, could lead to diminishing quality outputs.
+7. **Evaluation & real-time Monitoring:** As you build the agent, it is important and critical to first test it on multiple use-cases and also monitor its performance as it is being used by customers. Measuring high quality "domain metrics" that directly align with the product's success would often lead to a good sense of direction for future versions of the agent and no surprises when a customer says "X feature is not working".
+
+## On Reliability of AI Agents in Production
+
+What about reliability? How do you know the agents have been working well in production. I refer to this as realtime performance monitoring. Speaking from experience, there are multiple ways to go about achieving this:
+
+1. **Have dedicated dashboard for tool call accuracy:** Mostly, tools also involve API calls to other APIs. What if those APIs are down? In that case the tool fails, and the agent moves on to try another tool - affecting the overall reliability of the agent. This is a silent failure as opposed to the error in agent runtime. Having dashboards and metrics on success rates of each tool helps in maintenance and observability of ongoing agent performance.
+2. **Raise alerts in appropriate slack channels:**  Raising errors in Slack is often better for visibility than searching logs. Having dedicated channels helps in this endeavour and towards long term monitoring of agent performance.
+3. **Use policy models such as `gpt-oss-safeguard` to log metrics on policy breaches:** So far, we have only monitored quantity via success metrics. But what about cases when the model fails to follow its guidelines? What if we, as developers, wish for the agent to perform a task, but it does completely the opposite? In this case, having policy models review agent actions and raising alerts on violations is a really healthy practice. This practice can also be coupled with guardrails - which is more commonly for realtime monitoring of agent responses for PII, NSFW content.
+4. **Dedicated list of domain specific test cases that run as part of CI/CD every day or every few hours to monitor for regression:** This goes back to the idea of integration tests. Having dedicated tests that run as part of CI/CD on a daily basis and a quick glance on the results help with sanity check and making sure the agent performance is not regressing. 
+5. **Well planned A/B tests:** Rolling out newer system prompts feature flagged via a service helps perform A/B tests and measure change in metrics prior to rolling out to all users. This is especially useful when changing API vendors, system prompt updates or in general before changing the agent architecture of production agents.
+6. **Continue to monitor production metrics that matter such as DAUs (daily active users), retention rates:** We should continue to monitor real business metrics to be able to measure ROI on AI agent development and deployment. Every agent running in production incurs costs, and business metrics are a great way to see if the "costs are worth it". As an example: After deployment of a customer support agent, has my NPS improved and by how much?
+7. **Well placed try-except blocks with intelligent error messages for implicit self-healing capabilities of Models:** Having more intelligible error responses with call to action on how to self-heal allows the agent to recover quickly and try a different path as per the error instructions. Example, if SerpAPI for google search is down, maybe you can raise an error for the agent to try Exa instead.
+
+## When Fine-Tuning Matters: Building Vertical-Specific Products
+
+Fine-tuning matters when your product has an appetite for it: when you're solving a vertical problem or serving a niche market.
+
+1. **Q Programming Language** [@qprogramminglanguage2025]: Fine-tuned 1.5B model outperforms Claude Opus by 29.5% on Q tasks. Domain-specific pretraining + SFT + RL overcomes lack of internet data for niche language.
+
+2. **Vercel v0** [@vercel2025v0composite]: Fine-tuned models achieve 93.87% error-free code generation vs Claude Opus at 78.43% and Sonnet at 64.71%. Custom `vercel-autofixer-01` handles error-correction during streaming via RL fine-tuning, isolating concerns while allowing base model upgrades independently.
+
+3. **Shopify** [@shopify2025multimodal]: Fine-tuned open-source multimodal models (LLaVA, LLaMA, Qwen2VL) for product categorization. Multi-task training + selective field extraction reduced latency from 2s to 500ms, processing 40M daily inferences.
+
+4. **Checkr** [@checkr2025finetuning]: Fine-tuned LLaMA 2-7B achieved 97.2% accuracy at <$800/month vs GPT-4 at $12,000/month for complex categorization.
+
+5. **Datadog** [@datadog2025nlqueries]: Built natural language querying features (text-to-SQL variant) using fine-tuned models, replacing prompted OpenAI models. Fine-tuning enabled <500ms latency and cost efficiency by running on their own pay-per-hour GPUs, delivering tab-completion-like UX.
+
+What these case studies have in common: each company had a specific problem, deep domain expertise, and the infrastructure to support fine-tuning at scale. Vercel didn't fine-tune because it was trendy. They fine-tuned because generating error-free code at scale required it. Checkr didn't invest in fine-tuning for general purpose tasks; they did it because background check categorization had clear success metrics and massive volume. This is the pattern. Fine-tuning works when you're not solving generic problems but rather building products with an appetite for it.
 
 ## Conclusion
+
+2025 was unmistakably the year AI agents moved from POCs to real world products. Not as a hypothesis to test, but as working infrastructure generating measurable ROI. The shift was so comprehensive that it touched every aspect of how we build software.
+
+If I had to summarize what I've learned this year: **AI systems that work in production are systems that are carefully engineered, closely monitored, and built for their specific use case.** The magic isn't in the model. It's in everything else.
+
+2026 will bring better models & cheaper compute. But the fundamentals won't change. Build good systems. Measure what matters. Fix what breaks.
