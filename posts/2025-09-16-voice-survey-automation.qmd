@@ -10,7 +10,6 @@ description: "The step-by-step story of building a voice AI agent that conducts 
 bibliography: ../references.bib
 image: ../images/voice-survey-agent.png
 code-fold: true
-draft: true
 ---
 
 ## Listen First: An AI Conducting a Real Survey
