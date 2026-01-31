@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.8.21">
+<meta name="generator" content="quarto-1.8.27">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -96,7 +96,7 @@ div.csl-indent {
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-ea1d7ac60288e0f1efdbc993fd8432ae.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="../site_libs/bootstrap/bootstrap-aa0b4a074e937aed09d324d59456e594.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
@@ -155,10 +155,6 @@ ga('send', {
   <header id="quarto-header" class="headroom fixed-top">
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
-      <div class="navbar-brand-container mx-auto">
-    <a href="../index.html" class="navbar-brand navbar-brand-logo">
-    </a>
-  </div>
             <div id="quarto-search" class="" title="Search"></div>
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
   <span class="navbar-toggler-icon"></span>
@@ -320,7 +316,7 @@ Figure&nbsp;3: Taking a peek under the hood of Claude’s new file analysis capa
 <section id="data-analysis-with-python" class="level3" data-number="1.1">
 <h3 data-number="1.1" class="anchored" data-anchor-id="data-analysis-with-python"><span class="header-section-number">1.1</span> Data Analysis with Python</h3>
 <p>Here is the Python script Claude generated for analysis (<a href="https://gist.github.com/amaarora/5be79c36ae75c326d63ab9db2854e0d0#file-analyze_nsw_property_data-py">view full script on GitHub</a>):</p>
-<div id="3b2ec532" class="cell" data-execution_count="1">
+<div id="083257d6" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Data processing logic</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Key excerpt: How Claude parses the .dat files</span></span>
@@ -359,7 +355,7 @@ Figure&nbsp;3: Taking a peek under the hood of Claude’s new file analysis capa
 <span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> pd.DataFrame(all_sales)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
-<div id="4f667d1f" class="cell" data-execution_count="2">
+<div id="1d13573e" class="cell" data-execution_count="2">
 <details class="code-fold">
 <summary>Growth analysis calculation</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Key excerpt: How Claude calculates growth rates</span></span>
@@ -388,7 +384,7 @@ Figure&nbsp;3: Taking a peek under the hood of Claude’s new file analysis capa
 <span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> pd.DataFrame(growth_analysis)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
-<div id="b1db3cd0" class="cell" data-execution_count="3">
+<div id="f3832afb" class="cell" data-execution_count="3">
 <details class="code-fold">
 <summary>Visualization generation</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Key excerpt: How Claude creates the visualizations</span></span>
@@ -424,7 +420,7 @@ Figure&nbsp;3: Taking a peek under the hood of Claude’s new file analysis capa
 <section id="document-generation-with-node.js" class="level3" data-number="1.2">
 <h3 data-number="1.2" class="anchored" data-anchor-id="document-generation-with-node.js"><span class="header-section-number">1.2</span> Document Generation with Node.js</h3>
 <p>For document generation, Claude leveraged Node.js with the <code>docx</code> package (<a href="https://gist.github.com/amaarora/5be79c36ae75c326d63ab9db2854e0d0#file-create_simple_report-js">view full script on GitHub</a>):</p>
-<div id="5a8f7030" class="cell" data-execution_count="4">
+<div id="995c7973" class="cell" data-execution_count="4">
 <details class="code-fold">
 <summary>Document structure setup</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="op">//</span> Key excerpt: How Claude sets up the Word document structure</span>
@@ -480,7 +476,7 @@ Figure&nbsp;3: Taking a peek under the hood of Claude’s new file analysis capa
 <span id="cb4-51"><a href="#cb4-51" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
-<div id="088960ea" class="cell" data-execution_count="5">
+<div id="452ea6b1" class="cell" data-execution_count="5">
 <details class="code-fold">
 <summary>Table generation with formatting</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="op">//</span> Key excerpt: How Claude creates formatted tables <span class="cf">with</span> data</span>
@@ -532,7 +528,7 @@ Figure&nbsp;3: Taking a peek under the hood of Claude’s new file analysis capa
 <span id="cb5-47"><a href="#cb5-47" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
-<div id="68c86adc" class="cell" data-execution_count="6">
+<div id="beff3483" class="cell" data-execution_count="6">
 <details class="code-fold">
 <summary>Report content generation</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="op">//</span> Key excerpt: How Claude structures the report content</span>
@@ -702,13 +698,14 @@ NSW Valuer General. 2025. <span>“Property Sales Information.”</span> <a href
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-        const codeEl = trigger.previousElementSibling.cloneNode(true);
-        for (const childEl of codeEl.children) {
-          if (isCodeAnnotation(childEl)) {
-            childEl.remove();
-          }
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
         }
-        return codeEl.innerText;
+      }
+      return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy

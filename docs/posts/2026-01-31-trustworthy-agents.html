@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.27">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Aman Arora">
+<meta name="dcterms.date" content="2026-01-31">
+<meta name="description" content="How to take an AI agent from demo to production: a six-stage guide covering idea validation, POC development, agent evaluation (open-ended vs closed-ended), prompt iteration, API design, and deployment. Includes practical examples with Promptfoo, LLM-as-a-judge evaluation, and real-world lessons from shipping multiple agent systems.">
+
+<title>AI Agents: Beyond a demo</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href=".././images/logo.png" rel="icon" type="image/png">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-aa0b4a074e937aed09d324d59456e594.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+<script type="text/javascript">
+
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+ga('create', 'UA-158677010-1', 'auto');
+
+ga('send', {
+  hitType: 'pageview',
+  'anonymizeIp': true,
+});
+</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<meta name="twitter:title" content="AI Agents: Beyond a demo">
+<meta name="twitter:description" content="How to take an AI agent from demo to production: a six-stage guide covering idea validation, POC development, agent evaluation (open-ended vs closed-ended), prompt iteration, API design, and deployment. Includes practical examples with Promptfoo, LLM-as-a-judge evaluation, and real-world lessons from shipping multiple agent systems.">
+<meta name="twitter:image" content="../images/agents-intro-01.png">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+
+<body class="nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html"> 
+<span class="menu-text">Aman Arora’s Blog</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../about.html"> 
+<span class="menu-text">Aman Arora</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../technical-writings.html"> 
+<span class="menu-text">Technical Writings</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/amaarora"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com/amaarora"> <i class="bi bi-twitter" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://www.linkedin.com/in/aroraaman/"> <i class="bi bi-linkedin" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+    </div>
+<!-- main -->
+<main class="content page-columns page-full" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">AI Agents: Beyond a demo</h1>
+<p class="subtitle lead">A series of systematic steps to take your AI agent system beyond a demo and into production, which can be used in a foolproof and safe manner.</p>
+  <div class="quarto-categories">
+    <div class="quarto-category">AI Agents</div>
+  </div>
+  </div>
+
+<div>
+  <div class="description">
+    <p>How to take an AI agent from demo to production: a six-stage guide covering idea validation, POC development, agent evaluation (open-ended vs closed-ended), prompt iteration, API design, and deployment. Includes practical examples with Promptfoo, LLM-as-a-judge evaluation, and real-world lessons from shipping multiple agent systems.</p>
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Aman Arora </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">January 31, 2026</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+<nav id="TOC" role="doc-toc">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction"><span class="header-section-number">1</span> Introduction</a></li>
+  <li><a href="#idea-validation" id="toc-idea-validation"><span class="header-section-number">2</span> Idea &amp; Validation</a>
+  <ul>
+  <li><a href="#technical-validation" id="toc-technical-validation"><span class="header-section-number">2.1</span> Technical Validation</a></li>
+  <li><a href="#business-validation" id="toc-business-validation"><span class="header-section-number">2.2</span> Business Validation</a></li>
+  </ul></li>
+  <li><a href="#building-a-poc" id="toc-building-a-poc"><span class="header-section-number">3</span> Building a POC</a>
+  <ul>
+  <li><a href="#what-not-to-focus-on-during-a-poc" id="toc-what-not-to-focus-on-during-a-poc"><span class="header-section-number">3.1</span> What NOT to focus on during a POC</a></li>
+  </ul></li>
+  <li><a href="#sec-evaluation" id="toc-sec-evaluation"><span class="header-section-number">4</span> Evaluation</a>
+  <ul>
+  <li><a href="#evaluating-open-ended-agents" id="toc-evaluating-open-ended-agents"><span class="header-section-number">4.1</span> Evaluating open-ended agents</a></li>
+  <li><a href="#evaluating-closed-ended-agents" id="toc-evaluating-closed-ended-agents"><span class="header-section-number">4.2</span> Evaluating closed-ended agents</a></li>
+  <li><a href="#track-business-metrics" id="toc-track-business-metrics"><span class="header-section-number">4.3</span> Track business metrics</a></li>
+  </ul></li>
+  <li><a href="#iteration" id="toc-iteration"><span class="header-section-number">5</span> Iteration</a>
+  <ul>
+  <li><a href="#prompt-optimization" id="toc-prompt-optimization"><span class="header-section-number">5.1</span> Prompt optimization</a></li>
+  <li><a href="#tool-optimization" id="toc-tool-optimization"><span class="header-section-number">5.2</span> Tool optimization</a></li>
+  <li><a href="#agent-architecture-optimization" id="toc-agent-architecture-optimization"><span class="header-section-number">5.3</span> Agent architecture optimization</a></li>
+  <li><a href="#model-selection" id="toc-model-selection"><span class="header-section-number">5.4</span> Model selection</a></li>
+  </ul></li>
+  <li><a href="#api-design" id="toc-api-design"><span class="header-section-number">6</span> API design</a>
+  <ul>
+  <li><a href="#stateless-by-design" id="toc-stateless-by-design"><span class="header-section-number">6.1</span> Stateless by design</a></li>
+  <li><a href="#error-handling-and-self-healing" id="toc-error-handling-and-self-healing"><span class="header-section-number">6.2</span> Error handling and self-healing</a></li>
+  <li><a href="#session-management" id="toc-session-management"><span class="header-section-number">6.3</span> Session management</a></li>
+  <li><a href="#rate-limiting" id="toc-rate-limiting"><span class="header-section-number">6.4</span> Rate limiting</a></li>
+  <li><a href="#agents-as-a-service" id="toc-agents-as-a-service"><span class="header-section-number">6.5</span> Agents as a service</a></li>
+  </ul></li>
+  <li><a href="#deployment-monitoring" id="toc-deployment-monitoring"><span class="header-section-number">7</span> Deployment &amp; Monitoring</a>
+  <ul>
+  <li><a href="#logging-the-full-conversation-trace" id="toc-logging-the-full-conversation-trace"><span class="header-section-number">7.1</span> Logging the full conversation trace</a></li>
+  <li><a href="#guardrails" id="toc-guardrails"><span class="header-section-number">7.2</span> Guardrails</a></li>
+  <li><a href="#alerts" id="toc-alerts"><span class="header-section-number">7.3</span> Alerts</a></li>
+  <li><a href="#the-feedback-loop" id="toc-the-feedback-loop"><span class="header-section-number">7.4</span> The feedback loop</a></li>
+  </ul></li>
+  <li><a href="#conclusion" id="toc-conclusion"><span class="header-section-number">8</span> Conclusion</a></li>
+  </ul>
+</nav>
+<section id="introduction" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="introduction"><span class="header-section-number">1</span> Introduction</h2>
+<p>I would like to start this blog post with a simple question - <strong>“You just built an agent demo, now what?”</strong> The agent worked for the use case shown in the demo, and now you’ve been asked by your Senior Leadership to take it to production. What does that path to production really look like?</p>
+<p>In the past year, I have built and shipped multiple AI agent systems to production. Every single time, the same pattern emerged - six stages between a working demo and a real product.</p>
+<p>Here’s my <strong>TLDR:</strong></p>
+<blockquote class="blockquote">
+<p>The road from demo to production has six stages: (1) Idea &amp; validation, (2) Building a POC, (3) Evaluation, (4) Iteration, (5) API design, and (6) Deployment &amp; monitoring. You want to spend the most time in step 3 and step 4 - this is where your agent goes from a working demo to a world class product.</p>
+</blockquote>
+<p>Here’s what each stage involves:</p>
+<ol type="1">
+<li><strong>Idea &amp; Validation</strong> - Validate the idea technically and from a business perspective before writing any code</li>
+<li><strong>Building a POC</strong> - Build a fast, end-to-end prototype to prove the concept works</li>
+<li><strong>Evaluation</strong> - Define fine-grained, business-specific metrics and build a test suite</li>
+<li><strong>Iteration</strong> - Optimize prompts, tools, models, and architecture against your metrics</li>
+<li><strong>API Design</strong> - Package the agent as a stateless microservice with error handling and self-healing</li>
+<li><strong>Deployment &amp; Monitoring</strong> - Ship to infrastructure with guardrails, alerts, and dashboards</li>
+</ol>
+<div id="fig-1" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/agents-intro-01.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:60.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: The six stages from demo to production
+</figcaption>
+</figure>
+</div>
+<p>Let’s start with the first stage.</p>
+</section>
+<section id="idea-validation" class="level2 page-columns page-full" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="idea-validation"><span class="header-section-number">2</span> Idea &amp; Validation</h2>
+<p>You have an idea for where an AI agent can solve a real problem - either for your customers or internally for your team. Before writing a single line of code, you need to validate this idea on two fronts: <strong>technical feasibility</strong> and <strong>business value</strong>. Think of these as the two pillars your agent system stands on - you cannot skip either. Remove one, and the whole thing falls.</p>
+<div id="fig-2" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/tech-feasability.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:60.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: Technical feasibility and business value - the two pillars your agent system stands on
+</figcaption>
+</figure>
+</div>
+<section id="technical-validation" class="level3 page-columns page-full" data-number="2.1">
+<h3 data-number="2.1" class="anchored" data-anchor-id="technical-validation"><span class="header-section-number">2.1</span> Technical Validation</h3>
+<p>It is critical to know what agents can and cannot do today. Without this knowledge, you risk committing to building something that the technology simply cannot deliver yet.</p>
+<p>Take <strong>podcast generation</strong> as an example. Today, industry standard voice APIs cannot generate <a href="https://elevenlabs.io/docs/overview/models#character-limits">more than five minutes</a> of quality continuous audio in a single request. Let’s say your grand idea is to automate the podcast creation process - you do the research, but you offload the audio creation to a voice AI API such as ElevenLabs. Today, we are just not there yet. The process is extremely cumbersome and it will cost you more time than it saves.</p>
+<p>Or take <strong>video generation</strong> as another example. The maximum length of video that Google’s Veo 3.1 <span class="citation" data-cites="veo31">(<a href="#ref-veo31" role="doc-biblioref">Google 2025b</a>)</span> can generate today is 8 seconds. If your agent needs to produce longer videos, you already know you will need to stitch multiple generations together - and that introduces its own set of challenges around consistency and continuity.</p>
+<div class="no-row-height column-margin column-container"><div id="ref-veo31" class="csl-entry" role="listitem">
+———. 2025b. <span>“Veo Updates and Flow.”</span> 2025. <a href="https://blog.google/innovation-and-ai/products/veo-updates-flow/">https://blog.google/innovation-and-ai/products/veo-updates-flow/</a>.
+</div></div><p>On the other hand, there are areas where agents genuinely excel today:</p>
+<ul>
+<li><strong>Code generation</strong> - this is where LLMs truly shine. Products like <a href="https://lovable.dev/">Lovable</a> and <a href="https://v0.dev/">V0</a> would not exist without LLMs that can write production-quality code</li>
+<li><strong>RAG</strong> (Retrieval-Augmented Generation) - grounding agent responses in your own data. I have seen RAG fail at many companies because they only relied on vector embedding search. Combining keyword search with vector embeddings through hybrid search significantly enhances retrieval quality - and good retrieval is what guarantees a good response</li>
+<li><strong>Research automation</strong> - gathering, synthesizing, and summarizing information from multiple sources including web search and crawling. Products like Gemini Deep Research <span class="citation" data-cites="geminiDeepResearch">(<a href="#ref-geminiDeepResearch" role="doc-biblioref">Google 2025a</a>)</span> and OpenAI Deep Research <span class="citation" data-cites="openaiDeepResearch">(<a href="#ref-openaiDeepResearch" role="doc-biblioref">OpenAI 2025</a>)</span> are already proving this at scale</li>
+<li><strong>Slide and website generation</strong> - turning structured content into polished presentations or landing pages. Since the output is mostly HTML or formatted code, LLMs can do a very decent job here</li>
+<li><strong>Voice calling with custom scripts</strong> - agents that can make outbound calls and follow a conversation flow. Products like <a href="https://vapi.ai/">Vapi</a> are leading this space</li>
+</ul>
+<div class="no-row-height column-margin column-container"><div id="ref-openaiDeepResearch" class="csl-entry" role="listitem">
+OpenAI. 2025. <span>“Introducing Deep Research.”</span> 2025. <a href="https://openai.com/index/introducing-deep-research/">https://openai.com/index/introducing-deep-research/</a>.
+</div></div><p>The goal of technical validation is simple - make sure that what you want to build is actually possible with today’s technology before you invest any real time or money into it. If you do not have this expertise in-house, work closely with someone who does - an AI engineer or consultant who is hands-on with the latest models and tools and has experience shipping agents to production.</p>
+</section>
+<section id="business-validation" class="level3" data-number="2.2">
+<h3 data-number="2.2" class="anchored" data-anchor-id="business-validation"><span class="header-section-number">2.2</span> Business Validation</h3>
+<p>Technical feasibility alone is not enough. You also need to validate that the idea has real business value. In my experience, the strongest business cases for agents come down to: <strong>reducing costs</strong>, <strong>saving time</strong>, <strong>generating new revenue</strong>, or <strong>enhancing your product</strong> - maybe it drives weekly active users up or increases retention rates. If your agent does not clearly do one of these, question whether it is worth building. Building an agent simply because “AI is the future” or because someone in leadership said so is not a strong enough reason.</p>
+<p>At this point, you need to work closely with your product owner and answer some fundamental questions before writing any code:</p>
+<ul>
+<li>How is this agent going to integrate with the existing product?</li>
+<li>Where does the landing page sit? What is the entry point for the user?</li>
+<li>How is the user going to interact with this agent, and what is the expected outcome?</li>
+<li>Is it going to save the user time, reduce costs, help with onboarding, or direct them in the right way?</li>
+<li>What is the core problem this agent solves?</li>
+</ul>
+<p>As a technical person, you might be able to answer some of these yourself - but most of the time, there is real value in working closely with someone who has strong domain expertise and understands product design well. Someone who has been in the field for five to ten years, who knows exactly what users need, and who has built successful products before.</p>
+<p>Talk to your users. Validate the idea with them before going into the build phase. Understand what they actually need, not what you think they need. You want to mitigate risk early - not spend months building something only to realize the idea was never going to work.</p>
+</section>
+</section>
+<section id="building-a-poc" class="level2 page-columns page-full" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="building-a-poc"><span class="header-section-number">3</span> Building a POC</h2>
+<div id="fig-3" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/how-to-poc.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:80.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: Building a POC - key principles
+</figcaption>
+</figure>
+</div>
+<p>So by now you have validated the idea - both technically and from a business perspective. Now you want to build a proof of concept as fast as possible to see whether your agent can actually solve the task you set out to solve.</p>
+<p>The key principle here, and I cannot stress this enough:</p>
+<blockquote class="blockquote">
+<p><strong>Build end-to-end first, optimize later.</strong></p>
+</blockquote>
+<p>You want a working flow from the first user message to the final agent response. It does not need to be pretty. Your code does not need to be perfectly structured. Your system prompt does not need to cover every edge case. You might have ten tools defined when you only need seven - that is fine. You are in the POC phase, and refinement comes later.</p>
+<p>What does a POC look like in practice? At a minimum, you need:</p>
+<ul>
+<li>A <strong>system prompt</strong> that gives the agent its core instructions</li>
+<li>A set of <strong>tools</strong> that the agent can call to complete its task</li>
+<li>An <strong>end-to-end flow</strong> - from user input to agent output - that works for the primary use case</li>
+</ul>
+<p>Whether you are building a research report generator, a text-to-SQL agent that runs BigQuery queries, a slides builder, or a general purpose agent like <a href="https://manus.im/">Manus</a> - the goal is the same. Get to a working version that handles the happy path. If this agent went in front of a customer right now, it should work for roughly 80% of users. It will start failing on edge cases, and that is expected. <strong>Edge cases are what the evaluation and iteration phases are for.</strong></p>
+<p>Move fast in this phase. Use coding assistants to speed things up - there is no need to write every line of code by hand. Most popular libraries and APIs today support <a href="https://llmstxt.org/">llms.txt</a> <span class="citation" data-cites="llmstxt">(<a href="#ref-llmstxt" role="doc-biblioref">Howard 2024</a>)</span>, which makes it easy for any coding assistant to understand and implement against their documentation.</p>
+<div class="no-row-height column-margin column-container"></div><div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>What is llms.txt?
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>llms.txt <span class="citation" data-cites="llmstxt">(<a href="#ref-llmstxt" role="doc-biblioref">Howard 2024</a>)</span> is a proposed standard by Jeremy Howard for exposing a website’s documentation in a format that LLMs can easily consume at inference time. Take <a href="https://langchain-ai.github.io/langgraph/llms-full.txt">LangGraph’s llms.txt</a> for example - it has all the documentation and code examples in one place so a coding assistant can read this single file and help you get started with the library immediately. It is faster onboarding and faster POC creation. I am not saying you should build your entire POC using coding assistants - but using them alongside llms.txt is a great way to speed things up.</p>
+</div>
+</div>
+<div class="no-row-height column-margin column-container"><div id="ref-llmstxt" class="csl-entry" role="listitem">
+Howard, Jeremy. 2024. <span>“The /Llms.txt File.”</span> 2024. <a href="https://llmstxt.org/">https://llmstxt.org/</a>.
+</div></div><section id="what-not-to-focus-on-during-a-poc" class="level3" data-number="3.1">
+<h3 data-number="3.1" class="anchored" data-anchor-id="what-not-to-focus-on-during-a-poc"><span class="header-section-number">3.1</span> What NOT to focus on during a POC</h3>
+<p>It is tempting to want to get everything right from the start. Resist that urge. In the POC phase, do not focus on:</p>
+<ul>
+<li><strong>Perfecting your system prompt</strong> - it will evolve significantly during evaluation and iteration</li>
+<li><strong>Covering edge cases</strong> - that is the job of the next two phases</li>
+<li><strong>Context window limits or compaction strategies</strong> - premature optimization at this stage</li>
+<li><strong>Perfect code structure or architecture</strong> - clean code matters later, working code matters now</li>
+<li><strong>Cost optimization</strong> - you are validating the idea, not optimizing the bill</li>
+</ul>
+<p>The reason you can afford to be quick here is that the evaluation and iteration phases exist specifically to refine everything you skip now. This is where the business will appreciate you - you have built a working POC quickly and demonstrated value in the idea. That buys you the time and trust to do the hard work of refinement in the next stages.</p>
+</section>
+</section>
+<section id="sec-evaluation" class="level2 page-columns page-full" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="sec-evaluation"><span class="header-section-number">4</span> Evaluation</h2>
+<div id="fig-eval-framework" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-eval-framework-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/agent-evaluation-framework.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:80.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-eval-framework-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4: Evaluation framework - open-ended vs closed-ended agents
+</figcaption>
+</figure>
+</div>
+<p>So by now you have a working POC. The agent handles the happy path and works for roughly 80% of users. Now you need to figure out how to measure whether it is actually good enough - and what “good enough” even means for your specific use case.</p>
+<p>A framework I have found useful is to split agents into two categories - <strong>open-ended</strong> and <strong>closed-ended</strong> - because the evaluation approach is fundamentally different for each.</p>
+<p>An <strong>open-ended</strong> agent produces outputs where there is no single correct answer - think of a research report builder, or something like Gemini Deep Research <span class="citation" data-cites="geminiDeepResearch">(<a href="#ref-geminiDeepResearch" role="doc-biblioref">Google 2025a</a>)</span>. There are multiple valid ways to write the same report, with differences in tone, depth, structure, and information. A <strong>closed-ended</strong> agent, on the other hand, has outputs you can measure precisely - like a nutrition analyzer that returns macronutrient values, or a RAG agent where you can check whether the right chunks were retrieved.</p>
+<div class="no-row-height column-margin column-container"><div id="ref-geminiDeepResearch" class="csl-entry" role="listitem">
+Google. 2025a. <span>“Gemini Deep Research.”</span> 2025. <a href="https://gemini.google/overview/deep-research/">https://gemini.google/overview/deep-research/</a>.
+</div></div><section id="evaluating-open-ended-agents" class="level3" data-number="4.1">
+<h3 data-number="4.1" class="anchored" data-anchor-id="evaluating-open-ended-agents"><span class="header-section-number">4.1</span> Evaluating open-ended agents</h3>
+<p>With open-ended agents, correctness is table stakes - the real challenge is <strong>taste</strong>. Think of a research report builder - a report on gold and silver prices over the past six months can be written in many valid ways. Different structure, different depth, different tone. The information needs to be accurate, sure, but what makes one report better than another comes down to taste - and that is much harder to measure.</p>
+<p>Ideally, you want both <strong>LLM-as-a-judge</strong> and <strong>human evaluation</strong>. With LLM-as-a-judge, you can track quality scores (I have found scores between 0 and 1 through a custom evaluation prompt to work well) and see them go up or down with every change. Until you have that set up, human evaluation on its own is a perfectly good starting point. Either way, the core framework is simple:</p>
+<blockquote class="blockquote">
+<p><strong>Maintain a set of predefined test cases, rerun your agent before and after every change, and compare.</strong></p>
+</blockquote>
+<p>With LLM-as-a-judge, you can see scores change quantitatively. With human evaluation, you manually inspect the difference in outputs. Both give you signal - the predefined test cases are what matter most.</p>
+<section id="but-how-do-you-define-these-test-cases" class="level4" data-number="4.1.1">
+<h4 data-number="4.1.1" class="anchored" data-anchor-id="but-how-do-you-define-these-test-cases"><span class="header-section-number">4.1.1</span> But how do you define these test cases?</h4>
+<p>So you know you need predefined test cases to rerun your agent before and after every change - but where do these test cases come from? This is critical, and getting it wrong can give you a false sense of confidence.</p>
+<p>The test cases need to come from <strong>real user behavior</strong>, not from your imagination. In data science terms - your validation set must represent your test set. If your users are constantly researching commodity prices, then generating a report on gold and silver prices is a valid test case. If your users are researching medical literature, that is a completely different test case with different quality criteria. Use real queries from real users wherever possible.</p>
+<p>A good starting point is to look at your early adopters or beta users - what are they actually asking the agent to do? Those are your first test cases. As your user base grows, you keep adding to this set.</p>
+</section>
+<section id="custom-llm-as-a-judge" class="level4" data-number="4.1.2">
+<h4 data-number="4.1.2" class="anchored" data-anchor-id="custom-llm-as-a-judge"><span class="header-section-number">4.1.2</span> Custom LLM-as-a-judge</h4>
+<p>Your LLM-as-a-judge should be custom-built for your product. Write scoring prompts that check for the specific formats, depth, and quality standards that matter for your use case - not generic metrics like “fluency” or “coherence”. Those sound nice on paper, but they do not tell you whether the output is actually useful to your users or whether it drives better product decisions.</p>
+</section>
+</section>
+<section id="evaluating-closed-ended-agents" class="level3" data-number="4.2">
+<h3 data-number="4.2" class="anchored" data-anchor-id="evaluating-closed-ended-agents"><span class="header-section-number">4.2</span> Evaluating closed-ended agents</h3>
+<p>Closed-ended agents are much more straightforward to evaluate because you can define mathematically driven metrics.</p>
+<p>Take the nutrition analyzer example. Given an image of a meal, the agent returns estimated macronutrients - calories, protein, carbs, and fats - along with a title and description.</p>
+<div id="fig-nutrition5k" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-nutrition5k-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/nutrition5k-image.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:60.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-nutrition5k-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5: Example from the Nutrition5k dataset - the ground truth data gives you exact numbers to evaluate against
+</figcaption>
+</figure>
+</div>
+<p>Because you have ground truth values, you can calculate an <strong>absolute percentage error (APE)</strong> for each macronutrient:</p>
+<p><span class="math display">\[APE = \frac{|y_{true} - y_{pred}|}{y_{true}}\]</span></p>
+<p>Calculate this for each of the four macronutrients - calories, protein, carbs, and fats - and then average them to get a <strong>macro absolute percentage error</strong> across all nutrients. This single number tells you how far off your agent is on average, and you can track it over time as you iterate on prompts and models.</p>
+<p>For the title and description, you might use a similarity metric against the ground truth. You would need 50 to 100 test cases covering different food types, angles, and lighting conditions to get a reliable picture of how your agent performs.</p>
+<p>For RAG-specific agents, this might look like <strong>retrieval accuracy</strong> - checking whether the chunks you expect for a given query are actually present in the retrieved results. The metrics are different, but the principle is the same: define exactly what a correct output looks like, and measure the distance from it.</p>
+<p><a href="https://www.promptfoo.dev/">Promptfoo</a> is a great tool for running these kinds of evaluations - it makes it easy to define test cases, run them against your agent, and track results over time.</p>
+<div id="fig-promptfoo" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-promptfoo-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/example-promptfoo-dashboard-nuntrition5k.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:100.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-promptfoo-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6: Promptfoo dashboard for the nutrition analyzer - comparing APE scores across GPT-4o-mini, GPT-4.1-mini, GPT-4o, GPT-4.1, and GPT-5-mini side by side. Note: all models show the same pass rate as this is dummy data for illustration purposes.
+</figcaption>
+</figure>
+</div>
+<p>In the example above, I am comparing multiple models side by side - you can see their latencies, costs, and APE scores per test case. In a real scenario, you would also iterate on prompts and compare different prompt versions against the same test suite. The key point is that measuring absolute percentage error and macro average percentage error gives you a concrete, quantitative way to track progress for closed-ended agents.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Evaluation deserves its own blog post
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>There is a lot more to agent evaluation than what I have covered here. How do you write effective LLM-as-a-judge prompts? How do you decide on acceptable thresholds - is 10% APE good enough, or do you need 5%? How do you bootstrap a test suite when you have no real user data yet? How do you handle regression testing as your agent evolves? These are all questions that deserve dedicated treatment, and I plan to cover them in a future post.</p>
+</div>
+</div>
+</section>
+<section id="track-business-metrics" class="level3" data-number="4.3">
+<h3 data-number="4.3" class="anchored" data-anchor-id="track-business-metrics"><span class="header-section-number">4.3</span> Track business metrics</h3>
+<p>Beyond agent-specific metrics, you also want to track whether the agent is contributing to your broader business goals. Remember the business case you validated in the first stage? Now is the time to measure it. Some metrics to consider:</p>
+<ul>
+<li><strong>Weekly/monthly active users</strong> - is adoption growing? Are users coming back?</li>
+<li><strong>Retention rates</strong> - are users still engaging with the agent after their first week, first month?</li>
+<li><strong>Revenue impact</strong> - is the agent driving new subscriptions, upsells, or conversions?</li>
+<li><strong>Cost savings</strong> - is the agent reducing operational costs compared to the manual process it replaced?</li>
+<li><strong>Time saved per task</strong> - how much faster are users completing their work with the agent?</li>
+</ul>
+<p>This is an iterative process - you will continue to evaluate and make changes based on the results. But the point is that every change you make is driven by data.</p>
+<blockquote class="blockquote">
+<p><strong>You are making informed decisions rather than qualitative, vibe-based ones.</strong></p>
+</blockquote>
+</section>
+</section>
+<section id="iteration" class="level2 page-columns page-full" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="iteration"><span class="header-section-number">5</span> Iteration</h2>
+<div id="fig-iteration" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-iteration-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/iteration-cycle.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:80.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-iteration-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7: The iteration cycle - optimizing across four dimensions
+</figcaption>
+</figure>
+</div>
+<p>You have an MVP, you have metrics, and you have a dashboard to track them. Now the real work begins! Every change you make from here is informed by data, not gut feeling or vibes. You are optimizing across four dimensions:</p>
+<ul>
+<li><strong>Prompts</strong> - your system prompt and every instruction that drives your agent’s behavior</li>
+<li><strong>Tools</strong> - tool names, descriptions, input/output structure, and the number of tools your agent has access to</li>
+<li><strong>Agent architecture</strong> - single agent with many tools vs multi-agent with specialized sub-agents</li>
+<li><strong>Model selection</strong> - which LLM powers each part of your system. A tool that makes its own LLM API call might need a different model than the one powering your main agent</li>
+</ul>
+<section id="prompt-optimization" class="level3 page-columns page-full" data-number="5.1">
+<h3 data-number="5.1" class="anchored" data-anchor-id="prompt-optimization"><span class="header-section-number">5.1</span> Prompt optimization</h3>
+<p>In my experience, most of the quality gains come from prompt optimization. Different models must be prompting differently and usually come with their own prompting guides. <em>This attention to detail, is what really enhances the quality of responses and product overall.</em></p>
+<p>You are reviewing every prompt in your system and making sure it is delivering value and is easy for the agent to follow. How are you formatting your prompts - XML tags, markdown headers, numbered lists? Are you using structured outputs or free-form text? Should the agent return JSON? Are your instructions clear enough that the agent consistently follows them? These details matter, and they compound.</p>
+<p>There are three approaches to prompt optimization:</p>
+<ol type="1">
+<li><p><strong>Manual prompt optimization</strong> is hands-on work. You rewrite, test, compare against your metrics, and repeat. This is where most teams spend the majority of their iteration time.</p></li>
+<li><p><strong>Meta prompting</strong>: This is another way, where you are relying on coding assistants such as Claude Code, Codex or Cursor to write the prompt for you <span class="citation" data-cites="willison2025modelsprompt">(<a href="#ref-willison2025modelsprompt" role="doc-biblioref">Willison 2025</a>)</span>. Usually, I would use LLMs to write a first pass and iterate on it manually.</p></li>
+<li><p><strong>Automated prompt optimization</strong> uses tools like DSPy <span class="citation" data-cites="dspy2023">(<a href="#ref-dspy2023" role="doc-biblioref">Khattab et al. 2023</a>)</span> or GEPA <span class="citation" data-cites="gepa2025">(<a href="#ref-gepa2025" role="doc-biblioref">Agrawal et al. 2025</a>)</span> to programmatically optimize your prompts against your evaluation metrics. You define what “good” looks like and let the optimizer search for better prompt variations. It can be time consuming and depends on the use case, but if you have strong validation metrics defined, the results can be pretty good.</p></li>
+</ol>
+<div class="no-row-height column-margin column-container"><div id="ref-willison2025modelsprompt" class="csl-entry" role="listitem">
+Willison, Simon. 2025. <span>“Models Can Prompt Themselves.”</span> 2025. <a href="https://simonwillison.net/2025/Sep/14/models-can-prompt/">https://simonwillison.net/2025/Sep/14/models-can-prompt/</a>.
+</div><div id="ref-dspy2023" class="csl-entry" role="listitem">
+Khattab, Omar, Arnav Singhvi, Paridhi Maheshwari, Zhiyuan Zhang, Keshav Santhanam, Sri Vardhamanan, Saiful Haq, et al. 2023. <span>“DSPy: Compiling Declarative Language Model Calls into Self-Improving Pipelines.”</span> <a href="https://arxiv.org/abs/2310.03714">https://arxiv.org/abs/2310.03714</a>.
+</div><div id="ref-gepa2025" class="csl-entry" role="listitem">
+Agrawal, Lakshya A, Shangyin Tan, Dilara Soylu, Noah Ziems, Rishi Khare, Krista Opsahl-Ong, Arnav Singhvi, et al. 2025. <span>“GEPA: Reflective Prompt Evolution Can Outperform Reinforcement Learning.”</span> <a href="https://arxiv.org/abs/2507.19457">https://arxiv.org/abs/2507.19457</a>.
+</div></div></section>
+<section id="tool-optimization" class="level3 page-columns page-full" data-number="5.2">
+<h3 data-number="5.2" class="anchored" data-anchor-id="tool-optimization"><span class="header-section-number">5.2</span> Tool optimization</h3>
+<p>In the POC phase, you probably defined more tools than you needed. Remember, tools get added to the system prompt <span class="citation" data-cites="arora2025llmsagentic">(<a href="#ref-arora2025llmsagentic" role="doc-biblioref">Arora 2025</a>)</span>, and therefore take up space.</p>
+<div class="no-row-height column-margin column-container"><div id="ref-arora2025llmsagentic" class="csl-entry" role="listitem">
+Arora, Aman. 2025. <span>“What Makes LLMs Agentic?”</span> 2025. <a href="https://amaarora.github.io/posts/2025-09-14-llms-agentic.html">https://amaarora.github.io/posts/2025-09-14-llms-agentic.html</a>.
+</div></div><p>Now is the time to refine them. Every extra tool is more context for the agent to process, which means more overhead and more room for the agent to make mistakes.</p>
+<p>Ask yourself: can you merge two tools into one? Can you remove tools that the agent rarely calls? What should the input and output structure of each tool look like? Are your tool names and descriptions clear enough that the agent knows when to call which tool? A vague tool description can cause the agent to pick the wrong tool entirely - and that is a subtle bug that is hard to catch without good evaluation.</p>
+<p>The output structure matters more than you might think - because it feeds directly into the user experience. For example, if you want the frontend to display a step-by-step plan of what the agent is doing, you might design a planning tool that returns a list of steps. The frontend can then render these as a progress indicator.</p>
+<blockquote class="blockquote">
+<p><strong>The tool design is not just about the agent - it is about how the whole product comes together.</strong></p>
+</blockquote>
+</section>
+<section id="agent-architecture-optimization" class="level3" data-number="5.3">
+<h3 data-number="5.3" class="anchored" data-anchor-id="agent-architecture-optimization"><span class="header-section-number">5.3</span> Agent architecture optimization</h3>
+<p>This is where you decide whether your agent should be a <strong>single agent with many tools</strong> or a <strong>multi-agent system with specialized sub-agents</strong>.</p>
+<p>There is no one right answer. <a href="https://manus.im/">Manus</a>, a very successful general-purpose agent, uses a single agent architecture with multiple tools. <a href="https://docs.anthropic.com/en/docs/claude-code">Claude Code</a>, on the other hand, uses a multi-agent architecture with sub-agents for exploration, planning, and different types of tasks. Both are highly effective products - the right choice depends on your use case and complexity.</p>
+</section>
+<section id="model-selection" class="level3" data-number="5.4">
+<h3 data-number="5.4" class="anchored" data-anchor-id="model-selection"><span class="header-section-number">5.4</span> Model selection</h3>
+<p>Model selection is driven by two things: <strong>latency</strong> and <strong>performance</strong>. Different parts of your system may benefit from different models. Maybe one part uses GPT-4.1 Mini because it is fast and cheap, another part uses GPT-5 because it needs stronger reasoning, and the final output goes through Gemini 2.5 Flash because of its larger context window. The tradeoff between latency and performance is constant - a faster model that gives worse results is not a win, and a perfect model that takes ten seconds per call might not be acceptable either.</p>
+<blockquote class="blockquote">
+<p><strong>You are the architect - mix and match based on what your metrics tell you.</strong></p>
+</blockquote>
+<p>The goal across all four dimensions is the same: with every iteration, your metrics should be trending in the right direction. Whether you reach a threshold and ship to production, or continue iterating while the system is live - that is a business decision.</p>
+<blockquote class="blockquote">
+<p><strong>You are never guessing. You are always measuring.</strong></p>
+</blockquote>
+</section>
+</section>
+<section id="api-design" class="level2 page-columns page-full" data-number="6">
+<h2 data-number="6" class="anchored" data-anchor-id="api-design"><span class="header-section-number">6</span> API design</h2>
+<p>By now your agent is working well - your metrics are trending in the right direction, and you are ready to package it into something that can serve real users. This means building/scaling an API. For a great general resource on API scaling strategies, see <span class="citation" data-cites="bytebytego2026scaleapi">(<a href="#ref-bytebytego2026scaleapi" role="doc-biblioref">Xu 2026</a>)</span>.</p>
+<div class="no-row-height column-margin column-container"><div id="ref-bytebytego2026scaleapi" class="csl-entry" role="listitem">
+Xu, Alex. 2026. <span>“How to Scale an API.”</span> 2026. <a href="https://blog.bytebytego.com/p/how-to-scale-an-api">https://blog.bytebytego.com/p/how-to-scale-an-api</a>.
+</div></div><section id="stateless-by-design" class="level3" data-number="6.1">
+<h3 data-number="6.1" class="anchored" data-anchor-id="stateless-by-design"><span class="header-section-number">6.1</span> Stateless by design</h3>
+<p>I strongly recommend designing your agent API as a <strong>stateless microservice</strong>. Stateless means that each request coming into the API contains all the information needed to fulfill that request. No dependency on server-side state, no session data living in memory on a specific instance.</p>
+<p>Why does this matter? Because stateless services are easy to scale horizontally. When traffic increases, you spin up more instances - and since no instance holds unique state, any instance can handle any request. This is a natural fit for AI agents, where each request is essentially: “here is the conversation history, here are the tools, go.”</p>
+</section>
+<section id="error-handling-and-self-healing" class="level3" data-number="6.2">
+<h3 data-number="6.2" class="anchored" data-anchor-id="error-handling-and-self-healing"><span class="header-section-number">6.2</span> Error handling and self-healing</h3>
+<p>This is one of the most important patterns I have learned building agent systems: <strong>if you return meaningful error messages, the agent can often heal itself.</strong></p>
+<p>Make sure every tool has proper error handling that returns descriptive, actionable messages - not just a generic stack trace. The reason is simple: the error message goes back to the agent as context, and a well-instructed agent can use that information to recover.</p>
+<p>For example, say your Firecrawl API key runs out of credits mid-session. If the error message says “Firecrawl API rate limit exceeded”, the agent can fall back to a secondary scraping tool. Or maybe the agent has access to a tool that can request a new API key. How you solve the problem is up to you - what matters is that the agent has enough information to try.</p>
+<blockquote class="blockquote">
+<p><strong>Design your error messages for the agent to read, not just for you to debug.</strong></p>
+</blockquote>
+<p>When you design the system this way, self-healing becomes a natural capability rather than something you bolt on later.</p>
+</section>
+<section id="session-management" class="level3" data-number="6.3">
+<h3 data-number="6.3" class="anchored" data-anchor-id="session-management"><span class="header-section-number">6.3</span> Session management</h3>
+<p>You also need to decide how conversations work. Can users come back and continue a previous chat, or do they start fresh every time? If users can continue, you need to store the conversation history - all the messages, tool calls, and responses - and pass them back to the agent API when the user returns. This ties directly into your stateless design: the conversation history comes in with the request, the API does not need to remember anything between calls.</p>
+</section>
+<section id="rate-limiting" class="level3" data-number="6.4">
+<h3 data-number="6.4" class="anchored" data-anchor-id="rate-limiting"><span class="header-section-number">6.4</span> Rate limiting</h3>
+<p>Agent API calls are expensive - every request can trigger multiple LLM calls, tool executions, and retries. Without rate limiting, a single misbehaving client or a runaway integration can burn through your API budget in minutes. Set limits on requests per user, per API key, or per IP address, and return clear <code>429 Too Many Requests</code> responses so clients know when to back off. This is especially important for agent APIs because the cost per request is orders of magnitude higher than a traditional REST endpoint.</p>
+</section>
+<section id="agents-as-a-service" class="level3" data-number="6.5">
+<h3 data-number="6.5" class="anchored" data-anchor-id="agents-as-a-service"><span class="header-section-number">6.5</span> Agents as a service</h3>
+<p>Once you have a solid agent API design, you do not need to rebuild it for every new agent. You are essentially building agents as a service - the same infrastructure, the same API patterns, the same error handling. When the next agent comes along, you plug it into the existing system. Build it right once, and it becomes a foundation that scales with your team.</p>
+</section>
+</section>
+<section id="deployment-monitoring" class="level2" data-number="7">
+<h2 data-number="7" class="anchored" data-anchor-id="deployment-monitoring"><span class="header-section-number">7</span> Deployment &amp; Monitoring</h2>
+<p>Your API is working locally - now you need to deploy it and keep it running reliably. I will not go deep into infrastructure specifics here since that depends heavily on your cloud provider and existing setup. Two patterns I have seen work well are <strong><a href="https://aws.amazon.com/fargate/">AWS Fargate</a></strong> (serverless containers - no cluster management, scales automatically) and <strong><a href="https://aws.amazon.com/eks/">EKS</a></strong> (Kubernetes - more control, better for complex multi-agent deployments). Both handle auto-scaling well. If your agent writes assets (files, reports, images), make sure it has access to storage like S3.</p>
+<p>What I do want to focus on are the agent-specific concerns that most infrastructure guides do not cover.</p>
+<section id="logging-the-full-conversation-trace" class="level3" data-number="7.1">
+<h3 data-number="7.1" class="anchored" data-anchor-id="logging-the-full-conversation-trace"><span class="header-section-number">7.1</span> Logging the full conversation trace</h3>
+<p>Agent logging is different from regular API logging. You do not just want request and response - you want the <strong>full conversation trace</strong>: every message, every tool call, every tool response, which model was used, token counts, and latency per step. This is what allows you to debug issues when something goes wrong in production.</p>
+<p>Tools like <a href="https://langfuse.com/">LangFuse</a> or <a href="https://www.braintrust.dev/">Braintrust</a> are built specifically for this. They give you visibility into the agent’s decision-making process, not just the final output. If compliance is a concern, make sure your logs are stored in the right region and that your customer contracts are respected.</p>
+</section>
+<section id="guardrails" class="level3" data-number="7.2">
+<h3 data-number="7.2" class="anchored" data-anchor-id="guardrails"><span class="header-section-number">7.2</span> Guardrails</h3>
+<p>Guardrails are real-time checks that ensure your agent is behaving the way you want it to. Is it leaking the system prompt? Is it exposing PII? Are malicious users trying to jailbreak it?</p>
+<p>I have <a href="https://amaarora.github.io/posts/2025-09-25-qwen3guard-guardrails.html">previously written about guardrails using Qwen3Guard</a> - deploying it on Modal, testing latency across model sizes, and analyzing the benchmark results. The latency was not great for production use. Since then, I have found that using <a href="https://groq.com/">Groq’s</a> inference for guardrail models is significantly faster and more practical for real-time use.</p>
+<p>Whether you need guardrails depends on your use case. If you are working with sensitive data or have compliance requirements, they are essential. For many other use cases, modern instruction-tuned models already have robust safety measures built in - so guardrails may be adding latency without much benefit. Evaluate based on your specific risk profile.</p>
+</section>
+<section id="alerts" class="level3" data-number="7.3">
+<h3 data-number="7.3" class="anchored" data-anchor-id="alerts"><span class="header-section-number">7.3</span> Alerts</h3>
+<p>When things fail - and they will - you want to know immediately. Set up alerts for tool failures, repeated error patterns, and any anomalies in your agent’s behavior. Route these to the right channels, whether that is Slack, Discord, PagerDuty, or any other tool that your team prefers. The faster you know about a failure, the faster you can fix it.</p>
+</section>
+<section id="the-feedback-loop" class="level3" data-number="7.4">
+<h3 data-number="7.4" class="anchored" data-anchor-id="the-feedback-loop"><span class="header-section-number">7.4</span> The feedback loop</h3>
+<p>This is where the whole framework comes full circle. Every failure you catch in production, every edge case a user hits, every anomaly your monitoring surfaces - these all become <strong>new test cases in your evaluation suite</strong>. You add them, rerun your evaluation, iterate, and deploy again.</p>
+<p>The six stages are not a straight line you walk once. They are a cycle.</p>
+<blockquote class="blockquote">
+<p><strong>Your agent keeps getting better because your evaluation keeps getting more comprehensive, and your iterations keep getting more targeted.</strong></p>
+</blockquote>
+</section>
+</section>
+<section id="conclusion" class="level2" data-number="8">
+<h2 data-number="8" class="anchored" data-anchor-id="conclusion"><span class="header-section-number">8</span> Conclusion</h2>
+<p>Taking an AI agent from demo to production is not magic - it is engineering. The six stages I have walked you through - idea validation, building a POC, evaluation, iteration, API design, and deployment - are the same pattern I have followed every single time I have shipped an agent system to production.</p>
+<p>If I had to distill this entire post into one takeaway: <strong>spend the most time on evaluation and iteration.</strong> That is where a demo becomes a product. The POC proves the idea works. Evaluation and iteration prove it works reliably, at scale, for real users.</p>
+<p>The models will keep getting better, the tooling will keep improving, and new frameworks will come and go. But the fundamentals will not change. Validate before you build. Build end-to-end first. Measure what matters. Iterate with data. And design your systems to heal themselves.</p>
+<p>I hope this post gives you a practical framework to follow. If you are in the process of taking an agent to production and want to work with someone who has done this before, please feel free to <a href="https://www.linkedin.com/in/aroraaman/">reach out</a>.</p>
+
+
+
+</section>
+
+<link href="//cdn-images.mailchimp.com/embedcode/classic-071822.css" rel="stylesheet" type="text/css"><div id="mc_embed_signup">
+    <form action="https://github.us4.list-manage.com/subscribe/post?u=e847230346a7c78d4745ae796&amp;id=7a63b2b273&amp;f_id=005f58e8f0" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate="">
+        <div id="mc_embed_signup_scroll">
+        <h2 class="anchored">Subscribe to Aman Arora's blog:</h2>
+        <div class="indicates-required"><span class="asterisk">*</span> indicates required</div>
+<div class="mc-field-group">
+    <label for="mce-EMAIL">Email Address  <span class="asterisk">*</span>
+</label>
+    <input type="email" value="" name="EMAIL" class="required email" id="mce-EMAIL" required="">
+    <span id="mce-EMAIL-HELPERTEXT" class="helper_text"></span>
+</div>
+<div hidden="true"><input type="hidden" name="tags" value="7232948"></div>
+    <div id="mce-responses" class="clear foot">
+        <div class="response" id="mce-error-response" style="display:none"></div>
+        <div class="response" id="mce-success-response" style="display:none"></div>
+    </div>    <!-- real people should not fill this in and expect good things - do not remove this or risk form bot signups-->
+    <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_e847230346a7c78d4745ae796_7a63b2b273" tabindex="-1" value=""></div>
+        <div class="optionalParent">
+            <div class="clear foot">
+                <input type="submit" value="Subscribe" name="subscribe" id="mc-embedded-subscribe" class="button">
+                <p class="brandingLogo"><a href="http://eepurl.com/il3baM" title="Mailchimp - email marketing made easy and fun"><img src="https://eep.io/mc-cdn-images/template_images/branding_logo_text_dark_dtp.svg"></a></p>
+            </div>
+        </div>
+    </div>
+</form>
+</div><script type="text/javascript">(function($) {window.fnames = new Array(); window.ftypes = new Array();fnames[0]='EMAIL';ftypes[0]='email';fnames[1]='FNAME';ftypes[1]='text';fnames[2]='LNAME';ftypes[2]='text';fnames[3]='ADDRESS';ftypes[3]='address';fnames[4]='PHONE';ftypes[4]='phone';fnames[5]='BIRTHDAY';ftypes[5]='birthday';}(jQuery));var $mcj = jQuery.noConflict(true);</script></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

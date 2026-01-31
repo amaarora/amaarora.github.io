@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.8.21">
+<meta name="generator" content="quarto-1.8.27">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -76,7 +76,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-ea1d7ac60288e0f1efdbc993fd8432ae.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="../site_libs/bootstrap/bootstrap-aa0b4a074e937aed09d324d59456e594.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
@@ -138,10 +138,6 @@ ga('send', {
   <header id="quarto-header" class="headroom fixed-top">
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
-      <div class="navbar-brand-container mx-auto">
-    <a href="../index.html" class="navbar-brand navbar-brand-logo">
-    </a>
-  </div>
             <div id="quarto-search" class="" title="Search"></div>
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
   <span class="navbar-toggler-icon"></span>
@@ -315,7 +311,7 @@ ga('send', {
 <section id="the-secret-sauce-making-ai-sound-human" class="level2" data-number="4">
 <h2 data-number="4" class="anchored" data-anchor-id="the-secret-sauce-making-ai-sound-human"><span class="header-section-number">4</span> The Secret Sauce: Making AI Sound Human</h2>
 <p>Here’s where things got interesting. The difference between a robotic survey bot and a natural conversationalist? It all comes down to the prompt.</p>
-<div id="845adf4c" class="cell" data-execution_count="1">
+<div id="44bf2734" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Riley’s personality prompt (click to expand)</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>PROMPT <span class="op">=</span> <span class="st">"""</span></span>
@@ -385,7 +381,7 @@ ga('send', {
 <section id="the-surprisingly-simple-implementation" class="level2" data-number="5">
 <h2 data-number="5" class="anchored" data-anchor-id="the-surprisingly-simple-implementation"><span class="header-section-number">5</span> The Surprisingly Simple Implementation</h2>
 <p>About a year ago, an automation like this would take a year. Over the weekend, it took 3 hours from research to implementation. Here’s the entire implementation:</p>
-<div id="47ece86b" class="cell" data-execution_count="2">
+<div id="433e74d8" class="cell" data-execution_count="2">
 <details class="code-fold">
 <summary>Complete implementation (40 lines that changed everything)</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> vapi <span class="im">import</span> Vapi</span>
@@ -491,7 +487,7 @@ ga('send', {
 <section id="survey-results-and-analysis" class="level2" data-number="7">
 <h2 data-number="7" class="anchored" data-anchor-id="survey-results-and-analysis"><span class="header-section-number">7</span> Survey Results and Analysis</h2>
 <p>The automated survey captured both quantitative metrics and qualitative feedback:</p>
-<div id="0f186959" class="cell" data-execution_count="3">
+<div id="c9bba5b3" class="cell" data-execution_count="3">
 <details class="code-fold">
 <summary>Survey results that revealed the real issues</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>survey_responses <span class="op">=</span> {</span>
@@ -516,7 +512,7 @@ ga('send', {
 <section id="performance-metrics" class="level2" data-number="8">
 <h2 data-number="8" class="anchored" data-anchor-id="performance-metrics"><span class="header-section-number">8</span> Performance Metrics</h2>
 <p>Analysis of the conversation data showed the following performance characteristics:</p>
-<div id="4b41a291" class="cell" data-execution_count="4">
+<div id="6fa270a9" class="cell" data-execution_count="4">
 <details class="code-fold">
 <summary>Performance metrics from the live call</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>conversation_metrics <span class="op">=</span> {</span>
@@ -650,13 +646,14 @@ ga('send', {
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-        const codeEl = trigger.previousElementSibling.cloneNode(true);
-        for (const childEl of codeEl.children) {
-          if (isCodeAnnotation(childEl)) {
-            childEl.remove();
-          }
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
         }
-        return codeEl.innerText;
+      }
+      return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy

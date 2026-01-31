@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.8.21">
+<meta name="generator" content="quarto-1.8.27">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -96,7 +96,7 @@ div.csl-indent {
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-ea1d7ac60288e0f1efdbc993fd8432ae.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="../site_libs/bootstrap/bootstrap-aa0b4a074e937aed09d324d59456e594.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
@@ -187,10 +187,6 @@ window.Quarto = {
   <header id="quarto-header" class="headroom fixed-top">
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
-      <div class="navbar-brand-container mx-auto">
-    <a href="../index.html" class="navbar-brand navbar-brand-logo">
-    </a>
-  </div>
             <div id="quarto-search" class="" title="Search"></div>
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
   <span class="navbar-toggler-icon"></span>
@@ -353,7 +349,7 @@ Figure&nbsp;3: GDPVal win rate with Opus4.1 as the strongest performing model
 <section id="task-1-anti-financial-crime-risk-audit-accountants-auditors" class="level3" data-number="2.1">
 <h3 data-number="2.1" class="anchored" data-anchor-id="task-1-anti-financial-crime-risk-audit-accountants-auditors"><span class="header-section-number">2.1</span> Task 1: Anti-Financial Crime Risk Audit (Accountants &amp; Auditors)</h3>
 <p>To further understand the dataset, let’s deep dive into the first task.</p>
-<div id="4aca059b" class="cell" data-execution_count="1">
+<div id="b8df06d9" class="cell" data-execution_count="1">
 <details class="code-fold">
 <summary>Read tasks dataset</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
@@ -363,23 +359,23 @@ Figure&nbsp;3: GDPVal win rate with Opus4.1 as the strongest performing model
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_parquet(DATA_DIR <span class="op">+</span> <span class="st">"/data/train-00000-of-00001.parquet"</span>)</span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>df.shape</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="489">
+<div class="cell-output cell-output-display" data-execution_count="1">
 <pre><code>(220, 7)</code></pre>
 </div>
 </div>
 <p>Now, having read the tasks dataset, let’s start exploring the first task. We will start by looking at the sector and occupation that this task is from.</p>
-<div id="4b087a90" class="cell" data-execution_count="2">
+<div id="8f09cf48" class="cell" data-execution_count="2">
 <details class="code-fold">
 <summary>Exploring first task’s sector and occupation</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>df.sector[<span class="dv">0</span>], df.occupation[<span class="dv">0</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="490">
+<div class="cell-output cell-output-display" data-execution_count="2">
 <pre><code>('Professional, Scientific, and Technical Services',
  'Accountants and Auditors')</code></pre>
 </div>
 </div>
 <p>Ok, so now we know the task is from sector - <strong>‘Professional, Scientific, and Technical Services’</strong> belonging to <strong>‘Accountants and Auditors’</strong> occupation. Let’s also read the accompanying prompt and reference files available.</p>
-<div id="b0de69bf" class="cell" data-execution_count="3">
+<div id="035a80a2" class="cell" data-execution_count="3">
 <details class="code-fold">
 <summary>Read first task’s prompt and its reference files</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df.prompt[<span class="dv">0</span>]) </span>
@@ -414,14 +410,14 @@ Using the data in the ‘Population’ spreadsheet, complete the following:
 - Tab 1: Selected sample, copied from the original ‘Population’ sheet, with selected rows marked in column K.
 - Tab 2: Workings for sample size calculation.</code></pre>
 </div>
-<div class="cell-output cell-output-display" data-execution_count="491">
+<div class="cell-output cell-output-display" data-execution_count="3">
 <pre><code>array(['reference_files/b4b6f98cfda65510720c346302e148f4/Population (4).xlsx'],
       dtype=object)</code></pre>
 </div>
 </div>
 <p>So the task requires an auditor to analyze Anti-Financial Crime Risk Metrics, select a representative sample based on specific risk criteria, and deliver the results in a new spreadsheet titled ‘Sample’ with supporting workings. The key question that GDPVal benchmark tries to answer: <strong>“Can this task be automated and to what accuracy?”</strong></p>
 <p>Let’s dig a bit deeper into the provided spreadsheet as well.</p>
-<div id="85bca82c" class="cell" data-execution_count="4">
+<div id="e46a4bd5" class="cell" data-execution_count="4">
 <details class="code-fold">
 <summary>Preview first task’s reference file</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
@@ -430,7 +426,7 @@ Using the data in the ‘Population’ spreadsheet, complete the following:
 <span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>reference_df <span class="op">=</span> pd.read_excel(reference_fpath)</span>
 <span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>reference_df.head()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="492">
+<div class="cell-output cell-output-display" data-execution_count="4">
 <div>
 
 
@@ -530,18 +526,18 @@ Using the data in the ‘Population’ spreadsheet, complete the following:
 <section id="task-2-iem-system-design-audio-video-technicians" class="level3" data-number="2.2">
 <h3 data-number="2.2" class="anchored" data-anchor-id="task-2-iem-system-design-audio-video-technicians"><span class="header-section-number">2.2</span> Task 2: IEM System Design (Audio &amp; Video Technicians)</h3>
 <p>Let’s also look at the another task in the same detail as we did with the first one. We start with the sector and occupation. I chose arbitrary index as 10.</p>
-<div id="d41f4234" class="cell" data-execution_count="5">
+<div id="5efdbd6e" class="cell" data-execution_count="5">
 <details class="code-fold">
 <summary>Exploring second task’s sector and occupation</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>df.sector[<span class="dv">10</span>], df.occupation[<span class="dv">10</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="493">
+<div class="cell-output cell-output-display" data-execution_count="5">
 <pre><code>('Information', 'Audio and Video Technicians')</code></pre>
 </div>
 </div>
 <p>This time, we have the sector as ‘Information’ and the occupation as ‘Audio and Video Technicians’.</p>
 <p>Let’s look at the prompt &amp; reference files.</p>
-<div id="91db1190" class="cell" data-execution_count="6">
+<div id="7395ae6d" class="cell" data-execution_count="6">
 <details class="code-fold">
 <summary>Read second task’s prompt and its reference files</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df.prompt[<span class="dv">10</span>])</span>
@@ -560,7 +556,7 @@ The document should outline the most suitable mobile IEM setup that is mobile an
 
 Ultimate goal of the document is to provide the band with a one-stop summary and cost review for an all-inclusive, portable, independent IEM mix rig that allows for quick setup for the IEM engineer and singers on-stage in a wide variety of locations within multiple venues with various layouts for under $3,000.</code></pre>
 </div>
-<div class="cell-output cell-output-display" data-execution_count="494">
+<div class="cell-output cell-output-display" data-execution_count="6">
 <pre><code>array([], dtype=object)</code></pre>
 </div>
 </div>
@@ -574,18 +570,18 @@ Ultimate goal of the document is to provide the band with a one-stop summary and
 <blockquote class="blockquote">
 <p>Ideally, I should have just written a simple “explore_task” function that accepts an index and returns occupation, sector, prompt and so on. But as part of this blog post, I think its okay to focus on each task and add commentary and not focus on writing efficient code.</p>
 </blockquote>
-<div id="7cedc05e" class="cell" data-execution_count="7">
+<div id="44e31d3f" class="cell" data-execution_count="7">
 <details class="code-fold">
 <summary>Exploring third task’s sector and occupation</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>df.sector[<span class="dv">21</span>], df.occupation[<span class="dv">21</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="495">
+<div class="cell-output cell-output-display" data-execution_count="7">
 <pre><code>('Government', 'Child, Family, and School Social Workers')</code></pre>
 </div>
 </div>
 <p>Interesting, we are now looking at a task from sector - ‘Government’ with occupation ‘Child, Family, and School Social Workers’.</p>
 <p>Let’s look at the prompt and reference files provided (if any).</p>
-<div id="dfd2c87e" class="cell" data-execution_count="8">
+<div id="988f5e00" class="cell" data-execution_count="8">
 <details class="code-fold">
 <summary>Read third task’s prompt and its reference files</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df.prompt[<span class="dv">21</span>])</span>
@@ -610,7 +606,7 @@ Each presentation should include the following: a title slide, an icebreaker, ke
 Please create two visually engaging PowerPoint presentations, using accessible language and a design of your choice using neutral images. 
 </code></pre>
 </div>
-<div class="cell-output cell-output-display" data-execution_count="496">
+<div class="cell-output cell-output-display" data-execution_count="8">
 <pre><code>array([], dtype=object)</code></pre>
 </div>
 </div>
@@ -620,18 +616,18 @@ Please create two visually engaging PowerPoint presentations, using accessible l
 <section id="task-4-robot-fleet-data-management-api-software-developers" class="level3" data-number="2.4">
 <h3 data-number="2.4" class="anchored" data-anchor-id="task-4-robot-fleet-data-management-api-software-developers"><span class="header-section-number">2.4</span> Task 4: Robot Fleet Data Management API (Software Developers)</h3>
 <p>Let’s look at another task in detail, and this one will be the last one as part of our exploration. Taking index 219 (or the last task) as the random task to explore.</p>
-<div id="f0e45be7" class="cell" data-execution_count="9">
+<div id="f2687f56" class="cell" data-execution_count="9">
 <details class="code-fold">
 <summary>Exploring fourth task’s sector and occupation</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>df.sector[<span class="dv">219</span>], df.occupation[<span class="dv">219</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="497">
+<div class="cell-output cell-output-display" data-execution_count="9">
 <pre><code>('Professional, Scientific, and Technical Services', 'Software Developers')</code></pre>
 </div>
 </div>
 <p>We are now in a sector similar to mine - ‘Professional, Scientific, and Technical Services’ and the occupation - ‘Software Developers’. Without looking at the prompt, my prediction is that most models are able to write good quality code.</p>
 <p>Let’s explore the prompt and reference files now.</p>
-<div id="a14fdfd8" class="cell" data-execution_count="10">
+<div id="9d0cd41d" class="cell" data-execution_count="10">
 <details class="code-fold">
 <summary>Read fourth task’s prompt and its reference files</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df.prompt[<span class="dv">219</span>])</span>
@@ -670,14 +666,14 @@ S3 will be used for storing the data.
 
 Deliver an OpenAPI 3.0+ specification in YAML format. Also, include a text file called data_flow.txt that describes the expected data flow and how robots will use them.</code></pre>
 </div>
-<div class="cell-output cell-output-display" data-execution_count="498">
+<div class="cell-output cell-output-display" data-execution_count="10">
 <pre><code>array(['reference_files/d296004f0952898fd5d3c6304fcfcee7/global-data-pipeline-architecture.png'],
       dtype=object)</code></pre>
 </div>
 </div>
 <p>The task requires a Software Developer to design a scalable API and data pipeline for managing robot fleet data uploads, prioritizing real-time customer-facing insight data while handling resumable transfers, variable sensor configurations, and efficient cloud processing.</p>
 <p>There is also one reference file, and it looks like an architecture diagram. Let’s preview it.</p>
-<div id="dfb662c3" class="cell" data-execution_count="11">
+<div id="1da4443f" class="cell" data-execution_count="11">
 <details class="code-fold">
 <summary>Preview fourth task’s reference file</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> PIL <span class="im">import</span> Image</span>
@@ -685,7 +681,7 @@ Deliver an OpenAPI 3.0+ specification in YAML format. Also, include a text file 
 <span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>reference_fpath <span class="op">=</span> (DATA_DIR <span class="op">+</span> <span class="st">"/"</span> <span class="op">+</span> df.reference_files[<span class="dv">219</span>][<span class="dv">0</span>])</span>
 <span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>Image.<span class="bu">open</span>(reference_fpath)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="499">
+<div class="cell-output cell-output-display" data-execution_count="11">
 <div>
 <figure class="figure">
 <p><img src="2025-12-15-gdpval-review_files/figure-html/cell-12-output-1.png" class="img-fluid figure-img"></p>
@@ -807,19 +803,19 @@ Note
 <section id="task-results-elder-financial-exploitation-training-customer-service-representatives" class="level3" data-number="5.1">
 <h3 data-number="5.1" class="anchored" data-anchor-id="task-results-elder-financial-exploitation-training-customer-service-representatives"><span class="header-section-number">5.1</span> Task Results: Elder Financial Exploitation Training (Customer Service Representatives)</h3>
 <p>We will focusing on the first task in the sample set.</p>
-<div id="b2489506" class="cell" data-execution_count="12">
+<div id="981c02aa" class="cell" data-execution_count="12">
 <details class="code-fold">
 <summary>Load sample task data</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>sample_fpath <span class="op">=</span> (DATA_DIR <span class="op">+</span> <span class="st">"/data/task_data.parquet"</span>)</span>
 <span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_parquet(sample_fpath)</span>
 <span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>df.shape</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
-<div class="cell-output cell-output-display" data-execution_count="500">
+<div class="cell-output cell-output-display" data-execution_count="12">
 <pre><code>(25, 8)</code></pre>
 </div>
 </div>
 <p>Let’s read the prompt and task data to understand more before we look at the results from various models.</p>
-<div id="df8159bc" class="cell" data-execution_count="13">
+<div id="7f54f472" class="cell" data-execution_count="13">
 <details class="code-fold">
 <summary>Read elder exploitation task details</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df.prompt[<span class="dv">0</span>])</span>
@@ -838,7 +834,7 @@ You’ll also need to put together a second PDF that includes three fictional mu
 
 Keep your tone down-to-earth and focused. Don’t make it feel corporate or cold. Add color or visual structure where it helps—the goal is to keep it engaging. You’re not writing a manual—you’re building a tool your team will remember and rely on when it really counts.</code></pre>
 </div>
-<div class="cell-output cell-output-display" data-execution_count="501">
+<div class="cell-output cell-output-display" data-execution_count="13">
 <pre><code>('61717508-4df7-41be-bf97-318dfb2475c0',
  array([], dtype=object),
  'Finance and Insurance',
@@ -853,7 +849,7 @@ Keep your tone down-to-earth and focused. Don’t make it feel corporate or cold
 <h4 data-number="5.1.1" class="anchored" data-anchor-id="model-outputs-comparison"><span class="header-section-number">5.1.1</span> Model Outputs Comparison</h4>
 <p>Now let’s compare how different models performed on this task. Below are the outputs from Claude Code, Claude Haiku 4.5, GPT-5 Mini, GPT-5.2, and Qwen-3-Next-80B.</p>
 <div class="tabset-margin-container"></div><div class="panel-tabset">
-<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-1-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-1" role="tab" aria-controls="tabset-1-1" aria-selected="true">Claude Code</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-2" role="tab" aria-controls="tabset-1-2" aria-selected="false">Claude Haiku 4.5</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-3" role="tab" aria-controls="tabset-1-3" aria-selected="false">GPT-5 Mini</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-4-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-4" role="tab" aria-controls="tabset-1-4" aria-selected="false">GPT-5.2</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-5-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-5" role="tab" aria-controls="tabset-1-5" aria-selected="false">Qwen-3-Next-80B</a></li></ul>
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-1-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-1" role="tab" aria-controls="tabset-1-1" aria-selected="true" href="">Claude Code</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-2" role="tab" aria-controls="tabset-1-2" aria-selected="false" href="">Claude Haiku 4.5</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-3" role="tab" aria-controls="tabset-1-3" aria-selected="false" href="">GPT-5 Mini</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-4-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-4" role="tab" aria-controls="tabset-1-4" aria-selected="false" href="">GPT-5.2</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-5-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-5" role="tab" aria-controls="tabset-1-5" aria-selected="false" href="">Qwen-3-Next-80B</a></li></ul>
 <div class="tab-content">
 <div id="tabset-1-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-1-1-tab">
 <iframe src="../outputs/claude-code-elder-abuse.pdf" width="100%" height="800px" style="border: 1px solid #ccc;">
@@ -883,7 +879,7 @@ Keep your tone down-to-earth and focused. Don’t make it feel corporate or cold
 <section id="task-results-property-manager-weekly-schedule-property-managers" class="level3" data-number="5.2">
 <h3 data-number="5.2" class="anchored" data-anchor-id="task-results-property-manager-weekly-schedule-property-managers"><span class="header-section-number">5.2</span> Task Results: Property Manager Weekly Schedule (Property Managers)</h3>
 <p>Let’s look at the second task in the sample set and compare model outputs.</p>
-<div id="105c4bee" class="cell" data-execution_count="14">
+<div id="8f3b8470" class="cell" data-execution_count="14">
 <details class="code-fold">
 <summary>Preview second task details</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df.prompt[<span class="dv">1</span>])</span>
@@ -894,7 +890,7 @@ Keep your tone down-to-earth and focused. Don’t make it feel corporate or cold
 
 Please refer to the attached PM duties. </code></pre>
 </div>
-<div class="cell-output cell-output-display" data-execution_count="502">
+<div class="cell-output cell-output-display" data-execution_count="14">
 <pre><code>('1e5a1d7f-12c1-48c6-afd9-82257b3f2409',
  array(['reference_files/9633ae95869c5e80584dfc63d719714e/PM Duties (1).pdf'],
        dtype=object),
@@ -1019,13 +1015,14 @@ Patwardhan, Tejal, Rachel Dias, Elizabeth Proehl, Grace Kim, et al. 2025. <span>
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-        const codeEl = trigger.previousElementSibling.cloneNode(true);
-        for (const childEl of codeEl.children) {
-          if (isCodeAnnotation(childEl)) {
-            childEl.remove();
-          }
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
         }
-        return codeEl.innerText;
+      }
+      return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy
