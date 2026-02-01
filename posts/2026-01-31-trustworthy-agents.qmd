@@ -1,6 +1,6 @@
 ---
-title: "AI Agents: Beyond a Demo - A Six-Stage Production Playbook"
-subtitle: ""
+title: "AI Agents: Beyond a Demo"
+subtitle: "A Six-Stage Production Playbook"
 description: |
     How to take an AI agent from demo to production: a six-stage guide covering idea validation, POC development, agent evaluation (open-ended vs closed-ended), prompt iteration, API design, and deployment. Includes practical examples with Promptfoo, LLM-as-a-judge evaluation, and real-world lessons from shipping multiple agent systems.
 categories:
@@ -209,7 +209,7 @@ You have an MVP, you have metrics, and you have a dashboard to track them. Now t
 
 ### Prompt optimization
 
-In my experience, most of the quality gains come from prompt optimization. Different models must be prompting differently and usually come with their own prompting guides. *This attention to detail, is what really enhances the quality of responses and product overall.*
+In my experience, most of the quality gains come from prompt optimization. Different models must be prompted differently and usually come with their own prompting guides. *This attention to detail is what really enhances the quality of responses and product overall.*
 
 You are reviewing every prompt in your system and making sure it is delivering value and is easy for the agent to follow. How are you formatting your prompts - XML tags, markdown headers, numbered lists? Are you using structured outputs or free-form text? Should the agent return JSON? Are your instructions clear enough that the agent consistently follows them? These details matter, and they compound.
 
@@ -219,14 +219,11 @@ There are three approaches to prompt optimization:
 
 2. **Meta prompting**: This is another way, where you are relying on coding assistants such as Claude Code, Codex or Cursor to write the prompt for you [@willison2025modelsprompt]. Usually, I would use LLMs to write a first pass and iterate on it manually.
 
-2. **Automated prompt optimization** uses tools like DSPy [@dspy2023] or GEPA [@gepa2025] to programmatically optimize your prompts against your evaluation metrics. You define what "good" looks like and let the optimizer search for better prompt variations. It can be time consuming and depends on the use case, but if you have strong validation metrics defined, the results can be pretty good.
+3. **Automated prompt optimization** uses tools like DSPy [@dspy2023] or GEPA [@gepa2025] to programmatically optimize your prompts against your evaluation metrics. You define what "good" looks like and let the optimizer search for better prompt variations. It can be time consuming and depends on the use case, but if you have strong validation metrics defined, the results can be pretty good.
 
 ### Tool optimization
 
 In the POC phase, you probably defined more tools than you needed. Remember, tools get added to the system prompt [@arora2025llmsagentic], and therefore take up space.
-
-
-
 
 Now is the time to refine them. Every extra tool is more context for the agent to process, which means more overhead and more room for the agent to make mistakes.
 

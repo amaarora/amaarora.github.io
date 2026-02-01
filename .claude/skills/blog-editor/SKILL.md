@@ -26,6 +26,11 @@ Before making any edits, read the introductions of at least 3-5 recent posts in 
 - **Product references with links** - when mentioning tools/products, link to them (e.g., [Lovable](https://lovable.dev/), [Vapi](https://vapi.ai/))
 - **Avoid words Aman dislikes** - "commercially" (use "from a business perspective" instead). No em dashes.
 - **Generic examples are fine** - referencing "a slides builder" or "a text-to-SQL agent" is generic enough that it doesn't reveal employer details
+- **Voice variety** - avoid monotonic writing (uniform sentence length). Mix questions as hooks, short punchy fragments, and longer explanatory sentences for rhythm. Re-read previous posts if the writing starts feeling flat.
+- **No dramatic closing statements** - keep conclusions grounded and practical. Aman won't say things like "Production is not the finish line. It is where the next iteration begins." Prefer concrete, experience-backed takeaways.
+- **Prefer `references.bib` citations** - use BibTeX entries and `[@citationKey]` over inline markdown links for external resources. Reserve inline links for product references and Aman's own posts.
+- **Aman's own frameworks** - when Aman introduces his own terminology or frameworks (e.g., open-ended vs closed-ended evaluation), be explicit that it's his framework, not an industry standard.
+- **Never sound condescending toward the reader** - avoid phrases like "lacks expertise" or anything that implies the reader is deficient. Frame positively instead (e.g., "human evaluation is a good starting point").
 
 ### Step 2: Work Section by Section
 
