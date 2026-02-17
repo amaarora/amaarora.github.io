@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.27">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Aman Arora">
+<meta name="dcterms.date" content="2026-02-12">
+<meta name="description" content="Andrej Karpathy released a single Python file that trains and runs a GPT from scratch — no PyTorch, no NumPy, just os, math, and random. This post walks through every section of the code, from tokenizer to autograd to attention to Adam, explaining what each piece does and why it’s there. Everything else in deep learning is just efficiency.">
+
+<title>GPT in 243 Lines of Pure Python</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href=".././images/logo.png" rel="icon" type="image/png">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-aa0b4a074e937aed09d324d59456e594.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+<script type="text/javascript">
+
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+ga('create', 'UA-158677010-1', 'auto');
+
+ga('send', {
+  hitType: 'pageview',
+  'anonymizeIp': true,
+});
+</script>
+
+
+<meta name="twitter:title" content="GPT in 243 Lines of Pure Python">
+<meta name="twitter:description" content="Andrej Karpathy released a single Python file that trains and runs a GPT from scratch — no PyTorch, no NumPy, just os, math, and random. This post walks through every section of the code, from tokenizer to autograd to attention to Adam, explaining what each piece does and why it’s there. Everything else in deep learning is just efficiency.">
+<meta name="twitter:card" content="summary">
+</head>
+
+<body class="nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html"> 
+<span class="menu-text">Aman Arora’s Blog</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../about.html"> 
+<span class="menu-text">Aman Arora</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../technical-writings.html"> 
+<span class="menu-text">Technical Writings</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/amaarora"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com/amaarora"> <i class="bi bi-twitter" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://www.linkedin.com/in/aroraaman/"> <i class="bi bi-linkedin" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">GPT in 243 Lines of Pure Python</h1>
+<p class="subtitle lead">Understanding Karpathy’s gpt3_micro.py — the complete algorithm, nothing else</p>
+  <div class="quarto-categories">
+    <div class="quarto-category">Large Language Models</div>
+  </div>
+  </div>
+
+<div>
+  <div class="description">
+    <p>Andrej Karpathy released a single Python file that trains and runs a GPT from scratch — no PyTorch, no NumPy, just <code>os</code>, <code>math</code>, and <code>random</code>. This post walks through every section of the code, from tokenizer to autograd to attention to Adam, explaining what each piece does and why it’s there. Everything else in deep learning is just efficiency.</p>
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Aman Arora </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">February 12, 2026</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+<nav id="TOC" role="doc-toc">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction"><span class="header-section-number">1</span> Introduction</a></li>
+  <li><a href="#the-dataset" id="toc-the-dataset"><span class="header-section-number">2</span> The Dataset</a></li>
+  <li><a href="#the-tokenizer" id="toc-the-tokenizer"><span class="header-section-number">3</span> The Tokenizer</a></li>
+  <li><a href="#the-operations" id="toc-the-operations"><span class="header-section-number">4</span> The Operations</a>
+  <ul>
+  <li><a href="#linear-matrix-vector-multiply" id="toc-linear-matrix-vector-multiply"><span class="header-section-number">4.1</span> Linear (Matrix-Vector Multiply)</a></li>
+  <li><a href="#softmax" id="toc-softmax"><span class="header-section-number">4.2</span> Softmax</a></li>
+  <li><a href="#rmsnorm" id="toc-rmsnorm"><span class="header-section-number">4.3</span> RMSNorm</a></li>
+  </ul></li>
+  <li><a href="#parameter-initialization" id="toc-parameter-initialization"><span class="header-section-number">5</span> Parameter Initialization</a></li>
+  <li><a href="#the-gpt-forward-pass" id="toc-the-gpt-forward-pass"><span class="header-section-number">6</span> The GPT Forward Pass</a>
+  <ul>
+  <li><a href="#step-1-embedding" id="toc-step-1-embedding"><span class="header-section-number">6.1</span> Step 1: Embedding</a></li>
+  <li><a href="#step-2-attention" id="toc-step-2-attention"><span class="header-section-number">6.2</span> Step 2: Attention</a></li>
+  <li><a href="#step-3-multi-head-attention" id="toc-step-3-multi-head-attention"><span class="header-section-number">6.3</span> Step 3: Multi-Head Attention</a></li>
+  <li><a href="#step-4-mlp-block" id="toc-step-4-mlp-block"><span class="header-section-number">6.4</span> Step 4: MLP Block</a></li>
+  <li><a href="#step-5-output" id="toc-step-5-output"><span class="header-section-number">6.5</span> Step 5: Output</a></li>
+  <li><a href="#shape-trace-summary" id="toc-shape-trace-summary"><span class="header-section-number">6.6</span> Shape Trace Summary</a></li>
+  </ul></li>
+  <li><a href="#training" id="toc-training"><span class="header-section-number">7</span> Training</a>
+  <ul>
+  <li><a href="#the-loss-function" id="toc-the-loss-function"><span class="header-section-number">7.1</span> The Loss Function</a></li>
+  <li><a href="#backward-pass" id="toc-backward-pass"><span class="header-section-number">7.2</span> Backward Pass</a></li>
+  <li><a href="#adam-optimizer" id="toc-adam-optimizer"><span class="header-section-number">7.3</span> Adam Optimizer</a></li>
+  </ul></li>
+  <li><a href="#inference" id="toc-inference"><span class="header-section-number">8</span> Inference</a></li>
+  <li><a href="#the-autograd-engine-value-class" id="toc-the-autograd-engine-value-class"><span class="header-section-number">9</span> The Autograd Engine (Value Class)</a></li>
+  <li><a href="#conclusion" id="toc-conclusion"><span class="header-section-number">10</span> Conclusion</a></li>
+  </ul>
+</nav>
+<section id="introduction" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="introduction"><span class="header-section-number">1</span> Introduction</h2>
+<p>Andrej Karpathy just released a single Python file — <a href="https://github.com/karpathy/gpt3_micro">gpt3_micro.py</a> — that trains and inferences a GPT in <strong>243 lines of pure, dependency-free Python</strong>. No PyTorch, no NumPy, no CUDA. Just three standard library imports:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os       <span class="co"># os.path.exists</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> math     <span class="co"># math.log, math.exp</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> random   <span class="co"># random.seed, random.choices, random.gauss, random.shuffle</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The claim at the top of the file is bold:</p>
+<blockquote class="blockquote">
+<p><em>“This file is the complete algorithm. Everything else is just efficiency.”</em></p>
+</blockquote>
+<p>That’s a profound pedagogical statement. What Karpathy is saying is that <strong>everything</strong> PyTorch, CUDA, FlashAttention, mixed precision training, and distributed computing do is make <em>this same algorithm</em> run faster. The algorithm itself fits in 243 lines.</p>
+<p>I wanted to understand every single line. So I broke the file apart, traced through each section, and wrote this post. Let’s go.</p>
+</section>
+<section id="the-dataset" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="the-dataset"><span class="header-section-number">2</span> The Dataset</h2>
+<p>The file downloads a dataset of ~32,000 baby names and loads them as a list of strings:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="kw">not</span> os.path.exists(<span class="st">'input.txt'</span>):</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="im">import</span> urllib.request</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    urllib.request.urlretrieve(</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>        <span class="st">'https://raw.githubusercontent.com/karpathy/makemore/refs/heads/master/names.txt'</span>,</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">'input.txt'</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>docs <span class="op">=</span> [l.strip() <span class="cf">for</span> l <span class="kw">in</span> <span class="bu">open</span>(<span class="st">'input.txt'</span>).read().strip().split(<span class="st">'</span><span class="ch">\n</span><span class="st">'</span>) <span class="cf">if</span> l.strip()]</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>random.shuffle(docs)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre><code>num docs: 32033
+first 10 docs: ['yuheng', 'diondre', 'xavien', 'jori', 'juanluis', ...]</code></pre>
+<p>Each name is a “document.” The model will learn to generate new names character by character.</p>
+</section>
+<section id="the-tokenizer" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="the-tokenizer"><span class="header-section-number">3</span> The Tokenizer</h2>
+<p>The tokenizer is the simplest possible kind — <strong>character-level</strong>. Each unique character becomes a token, plus one special <code>&lt;BOS&gt;</code> (Beginning of Sequence) token:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>chars <span class="op">=</span> [<span class="st">'&lt;BOS&gt;'</span>] <span class="op">+</span> <span class="bu">sorted</span>(<span class="bu">set</span>(<span class="st">''</span>.join(docs)))</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>vocab_size <span class="op">=</span> <span class="bu">len</span>(chars)  <span class="co"># 27</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>stoi <span class="op">=</span> {ch: i <span class="cf">for</span> i, ch <span class="kw">in</span> <span class="bu">enumerate</span>(chars)}  <span class="co"># string -&gt; integer</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>itos <span class="op">=</span> {i: ch <span class="cf">for</span> i, ch <span class="kw">in</span> <span class="bu">enumerate</span>(chars)}  <span class="co"># integer -&gt; string</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>BOS <span class="op">=</span> stoi[<span class="st">'&lt;BOS&gt;'</span>]  <span class="co"># = 0</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre><code>chars: ['&lt;BOS&gt;', 'a', 'b', 'c', ..., 'z']
+stoi: {'&lt;BOS&gt;': 0, 'a': 1, 'b': 2, 'c': 3, 'd': 4, ...}
+itos: {0: '&lt;BOS&gt;', 1: 'a', 2: 'b', 3: 'c', 4: 'd', ...}</code></pre>
+<p>That’s all a tokenizer is — <strong>two lookup dictionaries</strong>. One to encode strings into integers, one to decode integers back to strings. Modern LLMs use BPE (Byte-Pair Encoding) with vocabularies of 50k-200k tokens, but the principle is identical.</p>
+</section>
+<section id="the-operations" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="the-operations"><span class="header-section-number">4</span> The Operations</h2>
+<p>Before we look at the model itself, let’s understand the three mathematical building blocks it uses.</p>
+<section id="linear-matrix-vector-multiply" class="level3" data-number="4.1">
+<h3 data-number="4.1" class="anchored" data-anchor-id="linear-matrix-vector-multiply"><span class="header-section-number">4.1</span> Linear (Matrix-Vector Multiply)</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> linear(x, w):</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> [<span class="bu">sum</span>(wi <span class="op">*</span> xi <span class="cf">for</span> wi, xi <span class="kw">in</span> <span class="bu">zip</span>(wo, x)) <span class="cf">for</span> wo <span class="kw">in</span> w]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This is just <code>W @ x</code> — matrix multiplication. <code>w</code> is a matrix (list of lists) with shape <code>[nout][nin]</code>, <code>x</code> is a vector of length <code>nin</code>, and the output is a vector of length <code>nout</code>. For each row in <code>w</code>, compute the dot product with <code>x</code>. This is the core building block of neural networks — a <strong>learned linear transformation</strong>.</p>
+</section>
+<section id="softmax" class="level3" data-number="4.2">
+<h3 data-number="4.2" class="anchored" data-anchor-id="softmax"><span class="header-section-number">4.2</span> Softmax</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> softmax(logits):</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    max_val <span class="op">=</span> <span class="bu">max</span>(val.data <span class="cf">for</span> val <span class="kw">in</span> logits)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    exps <span class="op">=</span> [(val <span class="op">-</span> max_val).exp() <span class="cf">for</span> val <span class="kw">in</span> logits]</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    total <span class="op">=</span> <span class="bu">sum</span>(exps)</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> [e <span class="op">/</span> total <span class="cf">for</span> e <span class="kw">in</span> exps]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Softmax takes arbitrary numbers (logits) and converts them into a <strong>probability distribution</strong> — all values between 0 and 1, summing to 1. The higher the input, the higher the probability. The subtraction of <code>max_val</code> is a numerical stability trick that doesn’t change the output (the ratios stay the same), but prevents <code>exp(huge_number)</code> from overflowing.</p>
+<p>For example, logits <code>[2, 5, 1]</code> with max = 5:</p>
+<ul>
+<li><code>exp(2-5) = exp(-3) = 0.05</code></li>
+<li><code>exp(5-5) = exp(0) = 1.0</code> — the biggest input gets the biggest probability</li>
+<li><code>exp(1-5) = exp(-4) = 0.02</code></li>
+<li>After normalizing: <code>[0.05, 0.93, 0.02]</code></li>
+</ul>
+</section>
+<section id="rmsnorm" class="level3" data-number="4.3">
+<h3 data-number="4.3" class="anchored" data-anchor-id="rmsnorm"><span class="header-section-number">4.3</span> RMSNorm</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> rmsnorm(x):</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    ms <span class="op">=</span> <span class="bu">sum</span>(xi <span class="op">*</span> xi <span class="cf">for</span> xi <span class="kw">in</span> x) <span class="op">/</span> <span class="bu">len</span>(x)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    scale <span class="op">=</span> (ms <span class="op">+</span> <span class="fl">1e-5</span>) <span class="op">**</span> <span class="op">-</span><span class="fl">0.5</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> [xi <span class="op">*</span> scale <span class="cf">for</span> xi <span class="kw">in</span> x]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Root Mean Square Normalization. It divides every element by the RMS (root mean square) of the vector, keeping values roughly in <code>[-1, 1]</code>. This prevents numbers from exploding or vanishing as they flow through layers. It’s a simpler alternative to LayerNorm — just scaling, no mean subtraction.</p>
+</section>
+</section>
+<section id="parameter-initialization" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="parameter-initialization"><span class="header-section-number">5</span> Parameter Initialization</h2>
+<p>Before the model can do anything, we need to create its <strong>weight matrices</strong> — these are the learnable parameters that start as random numbers and get adjusted during training.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>n_embd <span class="op">=</span> <span class="dv">16</span>      <span class="co"># embedding dimension</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>n_head <span class="op">=</span> <span class="dv">4</span>       <span class="co"># number of attention heads</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>n_layer <span class="op">=</span> <span class="dv">1</span>      <span class="co"># number of transformer layers</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>block_size <span class="op">=</span> <span class="dv">8</span>   <span class="co"># maximum sequence length (context window)</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>head_dim <span class="op">=</span> n_embd <span class="op">//</span> n_head  <span class="co"># = 4</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>matrix <span class="op">=</span> <span class="kw">lambda</span> nout, nin, std<span class="op">=</span><span class="fl">0.02</span>: [</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    [Value(random.gauss(<span class="dv">0</span>, std)) <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(nin)]</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(nout)</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>matrix(nout, nin)</code> creates a list-of-lists with <code>nout</code> rows and <code>nin</code> columns, filled with small random numbers (Gaussian, mean=0, std=0.02). Each number is wrapped in a <code>Value</code> object for autograd (more on that later).</p>
+<p>The <strong>state dict</strong> holds every weight matrix in the model:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>state_dict <span class="op">=</span> {</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">'wte'</span>:     matrix(vocab_size, n_embd),   <span class="co"># [27][16]  Token embeddings</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">'wpe'</span>:     matrix(block_size, n_embd),   <span class="co"># [8][16]   Position embeddings</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">'lm_head'</span>: matrix(vocab_size, n_embd),   <span class="co"># [27][16]  Final output layer</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Plus per-layer attention and MLP weights:</p>
+<pre><code>layer0.attn_wq            -&gt; [16][16]   Query projection
+layer0.attn_wk            -&gt; [16][16]   Key projection
+layer0.attn_wv            -&gt; [16][16]   Value projection
+layer0.attn_wo            -&gt; [16][16]   Output projection (init to zero!)
+layer0.mlp_fc1            -&gt; [64][16]   MLP expand:   16 → 64
+layer0.mlp_fc2            -&gt; [16][64]   MLP compress: 64 → 16 (init to zero!)
+
+Total parameters: 4,064</code></pre>
+<p>Notice <code>attn_wo</code> and <code>mlp_fc2</code> are initialized to <strong>zero</strong> (<code>std=0</code>). This is intentional — at the start of training, these zero matrices mean the attention and MLP blocks output nothing, so the residual connections just pass the input through unchanged. The model starts as essentially an identity function and gradually learns to do useful transformations.</p>
+</section>
+<section id="the-gpt-forward-pass" class="level2" data-number="6">
+<h2 data-number="6" class="anchored" data-anchor-id="the-gpt-forward-pass"><span class="header-section-number">6</span> The GPT Forward Pass</h2>
+<p>This is the heart of the file. The <code>gpt()</code> function processes <strong>one token at a time</strong> and returns logits (scores) for what comes next.</p>
+<section id="step-1-embedding" class="level3" data-number="6.1">
+<h3 data-number="6.1" class="anchored" data-anchor-id="step-1-embedding"><span class="header-section-number">6.1</span> Step 1: Embedding</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> gpt(token_id, pos_id, keys, values):</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    tok_emb <span class="op">=</span> state_dict[<span class="st">'wte'</span>][token_id]  <span class="co"># look up token embedding → [16]</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    pos_emb <span class="op">=</span> state_dict[<span class="st">'wpe'</span>][pos_id]    <span class="co"># look up position embedding → [16]</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> [t <span class="op">+</span> p <span class="cf">for</span> t, p <span class="kw">in</span> <span class="bu">zip</span>(tok_emb, pos_emb)]  <span class="co"># add them → [16]</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> rmsnorm(x)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Each token becomes a 16-dimensional vector that encodes <strong>both</strong> what the token is and where it is in the sequence. The token embedding (<code>wte</code>) captures identity (“this is the letter ‘a’”), the position embedding (<code>wpe</code>) captures location (“this is position 3”).</p>
+</section>
+<section id="step-2-attention" class="level3" data-number="6.2">
+<h3 data-number="6.2" class="anchored" data-anchor-id="step-2-attention"><span class="header-section-number">6.2</span> Step 2: Attention</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> li <span class="kw">in</span> <span class="bu">range</span>(n_layer):</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>        x_residual <span class="op">=</span> x</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> rmsnorm(x)</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>        q <span class="op">=</span> linear(x, state_dict[<span class="ss">f'layer</span><span class="sc">{</span>li<span class="sc">}</span><span class="ss">.attn_wq'</span>])  <span class="co"># query</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>        k <span class="op">=</span> linear(x, state_dict[<span class="ss">f'layer</span><span class="sc">{</span>li<span class="sc">}</span><span class="ss">.attn_wk'</span>])  <span class="co"># key</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>        v <span class="op">=</span> linear(x, state_dict[<span class="ss">f'layer</span><span class="sc">{</span>li<span class="sc">}</span><span class="ss">.attn_wv'</span>])  <span class="co"># value</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>        keys[li].append(k)</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>        values[li].append(v)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The input <code>x</code> gets projected into three vectors: <strong>Query</strong> (“what am I looking for?”), <strong>Key</strong> (“what do I contain?”), and <strong>Value</strong> (“what information do I offer?”).</p>
+<p>The K and V vectors get <strong>cached</strong>. This is the <strong>KV cache</strong> — and understanding it is key to understanding autoregressive generation. Let me trace through processing the name “cat”:</p>
+<pre><code>Processing BOS (pos 0):  cache = [K_bos]                    → attends to 1 token
+Processing 'c' (pos 1):  cache = [K_bos, K_c]               → attends to 2 tokens
+Processing 'a' (pos 2):  cache = [K_bos, K_c, K_a]          → attends to 3 tokens
+Processing 't' (pos 3):  cache = [K_bos, K_c, K_a, K_t]     → attends to 4 tokens</code></pre>
+<p>Each token can only look <strong>backward</strong> (including itself). Never forward. This is what makes it autoregressive — each token predicts the next one based only on what came before.</p>
+<p><strong>Why cache K and V but not Q?</strong> Because Q is only used by the current token. But K and V are needed by every <em>future</em> token that wants to attend to this position. Caching avoids recomputing them.</p>
+</section>
+<section id="step-3-multi-head-attention" class="level3" data-number="6.3">
+<h3 data-number="6.3" class="anchored" data-anchor-id="step-3-multi-head-attention"><span class="header-section-number">6.3</span> Step 3: Multi-Head Attention</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>        x_attn <span class="op">=</span> []</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> h <span class="kw">in</span> <span class="bu">range</span>(n_head):</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>            hs <span class="op">=</span> h <span class="op">*</span> head_dim</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>            q_h <span class="op">=</span> q[hs:hs<span class="op">+</span>head_dim]</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>            k_h <span class="op">=</span> [ki[hs:hs<span class="op">+</span>head_dim] <span class="cf">for</span> ki <span class="kw">in</span> keys[li]]</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>            v_h <span class="op">=</span> [vi[hs:hs<span class="op">+</span>head_dim] <span class="cf">for</span> vi <span class="kw">in</span> values[li]]</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>            attn_logits <span class="op">=</span> [<span class="bu">sum</span>(q_h[j] <span class="op">*</span> k_h[t][j] <span class="cf">for</span> j <span class="kw">in</span> <span class="bu">range</span>(head_dim)) <span class="op">/</span> head_dim<span class="op">**</span><span class="fl">0.5</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>                           <span class="cf">for</span> t <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(k_h))]</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>            attn_weights <span class="op">=</span> softmax(attn_logits)</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>            head_out <span class="op">=</span> [<span class="bu">sum</span>(attn_weights[t] <span class="op">*</span> v_h[t][j] <span class="cf">for</span> t <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(v_h)))</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>                        <span class="cf">for</span> j <span class="kw">in</span> <span class="bu">range</span>(head_dim)]</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>            x_attn.extend(head_out)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The 16-dim Q, K, V get split into <strong>4 heads of 4 dimensions each</strong>. Each head independently:</p>
+<ol type="1">
+<li>Computes dot products between its Q and all cached K’s (scaled by <code>1/√head_dim</code>)</li>
+<li>Applies softmax to get attention weights (probabilities over positions)</li>
+<li>Takes a weighted sum of the V’s using those weights</li>
+</ol>
+<p>The 4 head outputs get concatenated back to [16], projected through <code>attn_wo</code>, and added to the residual:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> linear(x_attn, state_dict[<span class="ss">f'layer</span><span class="sc">{</span>li<span class="sc">}</span><span class="ss">.attn_wo'</span>])</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> [a <span class="op">+</span> b <span class="cf">for</span> a, b <span class="kw">in</span> <span class="bu">zip</span>(x, x_residual)]  <span class="co"># residual connection</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="step-4-mlp-block" class="level3" data-number="6.4">
+<h3 data-number="6.4" class="anchored" data-anchor-id="step-4-mlp-block"><span class="header-section-number">6.4</span> Step 4: MLP Block</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>        x_residual <span class="op">=</span> x</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> rmsnorm(x)</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> linear(x, state_dict[<span class="ss">f'layer</span><span class="sc">{</span>li<span class="sc">}</span><span class="ss">.mlp_fc1'</span>])  <span class="co"># [16] → [64]</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> [xi.relu() <span class="op">**</span> <span class="dv">2</span> <span class="cf">for</span> xi <span class="kw">in</span> x]                  <span class="co"># ReLU² activation</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> linear(x, state_dict[<span class="ss">f'layer</span><span class="sc">{</span>li<span class="sc">}</span><span class="ss">.mlp_fc2'</span>])  <span class="co"># [64] → [16]</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> [a <span class="op">+</span> b <span class="cf">for</span> a, b <span class="kw">in</span> <span class="bu">zip</span>(x, x_residual)]        <span class="co"># residual connection</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The MLP expands from 16 to 64 dimensions (4x), applies a nonlinearity (ReLU²), then compresses back to 16. The wider hidden layer gives the network more room to transform features. The residual connection adds the output back to the input.</p>
+</section>
+<section id="step-5-output" class="level3" data-number="6.5">
+<h3 data-number="6.5" class="anchored" data-anchor-id="step-5-output"><span class="header-section-number">6.5</span> Step 5: Output</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>    logits <span class="op">=</span> linear(x, state_dict[<span class="st">'lm_head'</span>])  <span class="co"># [16] → [27]</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> logits</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The final linear layer projects from embedding space (16) back to vocabulary size (27), giving one score per possible next token.</p>
+</section>
+<section id="shape-trace-summary" class="level3" data-number="6.6">
+<h3 data-number="6.6" class="anchored" data-anchor-id="shape-trace-summary"><span class="header-section-number">6.6</span> Shape Trace Summary</h3>
+<pre><code>Input:    token_id (scalar)
+Embed:    tok_emb[16] + pos_emb[16] → x[16]
+Norm:     rmsnorm → x[16]
+Attn:     Q[16], K[16], V[16] → 4 heads of [4] → concat [16] → attn_wo → [16] + residual
+MLP:      [16] → fc1 → [64] → ReLU² → fc2 → [16] + residual
+Output:   lm_head → logits[27]</code></pre>
+</section>
+</section>
+<section id="training" class="level2" data-number="7">
+<h2 data-number="7" class="anchored" data-anchor-id="training"><span class="header-section-number">7</span> Training</h2>
+<section id="the-loss-function" class="level3" data-number="7.1">
+<h3 data-number="7.1" class="anchored" data-anchor-id="the-loss-function"><span class="header-section-number">7.1</span> The Loss Function</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> step <span class="kw">in</span> <span class="bu">range</span>(num_steps):</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    doc <span class="op">=</span> docs[step <span class="op">%</span> <span class="bu">len</span>(docs)]</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    tokens <span class="op">=</span> [BOS] <span class="op">+</span> [stoi[ch] <span class="cf">for</span> ch <span class="kw">in</span> doc] <span class="op">+</span> [BOS]</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>    n <span class="op">=</span> <span class="bu">min</span>(block_size, <span class="bu">len</span>(tokens) <span class="op">-</span> <span class="dv">1</span>)</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>    keys, values <span class="op">=</span> [[] <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(n_layer)], [[] <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(n_layer)]</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>    losses <span class="op">=</span> []</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> pos_id <span class="kw">in</span> <span class="bu">range</span>(n):</span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>        token_id, target_id <span class="op">=</span> tokens[pos_id], tokens[pos_id <span class="op">+</span> <span class="dv">1</span>]</span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>        logits <span class="op">=</span> gpt(token_id, pos_id, keys, values)</span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>        probs <span class="op">=</span> softmax(logits)</span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>        loss_t <span class="op">=</span> <span class="op">-</span>probs[target_id].log()</span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>        losses.append(loss_t)</span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>    loss <span class="op">=</span> (<span class="dv">1</span> <span class="op">/</span> n) <span class="op">*</span> <span class="bu">sum</span>(losses)  <span class="co"># May yours be low.</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Each training step picks one name, wraps it in <code>BOS</code> tokens on both sides, and processes it token by token. At each position, the model predicts the next token, and the loss is the <strong>negative log probability</strong> of the correct answer. If the model assigns probability 1.0 to the right token, the loss is 0. If it assigns probability close to 0, the loss is huge.</p>
+<p>The initial loss is ~3.30, which is <code>log(27)</code> — the loss you get from uniform random guessing across 27 tokens.</p>
+</section>
+<section id="backward-pass" class="level3" data-number="7.2">
+<h3 data-number="7.2" class="anchored" data-anchor-id="backward-pass"><span class="header-section-number">7.2</span> Backward Pass</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>    loss.backward()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>One line. But this is where the autograd engine does its magic — it walks the entire computation graph backward, applying the chain rule at every node, and fills in <code>.grad</code> for every parameter. We’ll cover the <code>Value</code> class that makes this work in detail below.</p>
+</section>
+<section id="adam-optimizer" class="level3" data-number="7.3">
+<h3 data-number="7.3" class="anchored" data-anchor-id="adam-optimizer"><span class="header-section-number">7.3</span> Adam Optimizer</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>    lr_t <span class="op">=</span> learning_rate <span class="op">*</span> (<span class="dv">1</span> <span class="op">-</span> step <span class="op">/</span> num_steps)</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i, p <span class="kw">in</span> <span class="bu">enumerate</span>(params):</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>        m[i] <span class="op">=</span> beta1 <span class="op">*</span> m[i] <span class="op">+</span> (<span class="dv">1</span> <span class="op">-</span> beta1) <span class="op">*</span> p.grad</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>        v[i] <span class="op">=</span> beta2 <span class="op">*</span> v[i] <span class="op">+</span> (<span class="dv">1</span> <span class="op">-</span> beta2) <span class="op">*</span> p.grad <span class="op">**</span> <span class="dv">2</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>        m_hat <span class="op">=</span> m[i] <span class="op">/</span> (<span class="dv">1</span> <span class="op">-</span> beta1 <span class="op">**</span> (step <span class="op">+</span> <span class="dv">1</span>))</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>        v_hat <span class="op">=</span> v[i] <span class="op">/</span> (<span class="dv">1</span> <span class="op">-</span> beta2 <span class="op">**</span> (step <span class="op">+</span> <span class="dv">1</span>))</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>        p.data <span class="op">-=</span> lr_t <span class="op">*</span> m_hat <span class="op">/</span> (v_hat <span class="op">**</span> <span class="fl">0.5</span> <span class="op">+</span> eps_adam)</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>        p.grad <span class="op">=</span> <span class="dv">0</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Adam maintains two buffers per parameter:</p>
+<ul>
+<li><strong><code>m</code></strong> — running average of gradients (momentum, first moment)</li>
+<li><strong><code>v</code></strong> — running average of squared gradients (velocity, second moment)</li>
+</ul>
+<p>The bias correction (<code>m_hat</code>, <code>v_hat</code>) compensates for the fact that <code>m</code> and <code>v</code> start at zero. The actual update divides momentum by the square root of velocity — parameters with consistent gradients take bigger steps, parameters with noisy gradients take smaller steps. The learning rate decays linearly from <code>1e-2</code> to 0 over training.</p>
+<p>After 500 steps, the loss drops from <strong>~3.30 → ~2.05</strong> — meaningfully better than random.</p>
+</section>
+</section>
+<section id="inference" class="level2" data-number="8">
+<h2 data-number="8" class="anchored" data-anchor-id="inference"><span class="header-section-number">8</span> Inference</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>temperature <span class="op">=</span> <span class="fl">0.6</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> sample_idx <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">20</span>):</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>    keys, values <span class="op">=</span> [[] <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(n_layer)], [[] <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(n_layer)]</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>    token_id <span class="op">=</span> BOS</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> pos_id <span class="kw">in</span> <span class="bu">range</span>(block_size):</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>        logits <span class="op">=</span> gpt(token_id, pos_id, keys, values)</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>        probs <span class="op">=</span> softmax([l <span class="op">/</span> temperature <span class="cf">for</span> l <span class="kw">in</span> logits])</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>        token_id <span class="op">=</span> random.choices(<span class="bu">range</span>(vocab_size), weights<span class="op">=</span>[p.data <span class="cf">for</span> p <span class="kw">in</span> probs])[<span class="dv">0</span>]</span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> token_id <span class="op">==</span> BOS:</span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>            <span class="cf">break</span></span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(itos[token_id], end<span class="op">=</span><span class="st">""</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Generation starts with <code>BOS</code>, feeds each predicted token back as the next input, and stops when the model predicts <code>BOS</code> again (end of name). <strong>Temperature</strong> controls creativity — dividing logits by a small temperature (0.6) makes the distribution sharper (more confident picks), while temperature 1.0 gives the raw probabilities.</p>
+<p>After training for 500 steps, the model generates:</p>
+<pre><code>hannh, tadas, akabho, kentie, anma, kela, azihei, madari,
+tanas, caedan, torinn, meylee, adeyn, don, nadin, selran,
+selin, alia, silin</code></pre>
+<p>Some of these genuinely pass as real names — “alia”, “selin”, “nadin”, “don”. Others are plausible but invented — “meylee”, “torinn”, “caedan”. Not bad for 4,064 parameters and 500 steps of pure scalar Python.</p>
+</section>
+<section id="the-autograd-engine-value-class" class="level2" data-number="9">
+<h2 data-number="9" class="anchored" data-anchor-id="the-autograd-engine-value-class"><span class="header-section-number">9</span> The Autograd Engine (Value Class)</h2>
+<p><em>Coming soon — this is the deepest piece, where we’ll trace how <code>loss.backward()</code> actually computes gradients through the entire computation graph using nothing but the chain rule.</em></p>
+</section>
+<section id="conclusion" class="level2" data-number="10">
+<h2 data-number="10" class="anchored" data-anchor-id="conclusion"><span class="header-section-number">10</span> Conclusion</h2>
+<p>What makes this file remarkable isn’t just that it’s small — it’s that <strong>nothing is missing</strong>. This is the complete algorithm behind GPT. Every other piece of infrastructure in modern LLM training — PyTorch, CUDA kernels, FlashAttention, distributed training, mixed precision, gradient checkpointing — exists to make this exact algorithm run faster on bigger data with more parameters.</p>
+<p>Karpathy’s gift is making that visible. When you strip away all the efficiency machinery, what remains is:</p>
+<ol type="1">
+<li>A <strong>tokenizer</strong> (two dictionaries)</li>
+<li>An <strong>autograd engine</strong> (the chain rule, applied recursively)</li>
+<li>A <strong>transformer</strong> (attention + MLP with residual connections)</li>
+<li>An <strong>optimizer</strong> (Adam, four lines)</li>
+<li>A <strong>sampling loop</strong> (temperature-scaled softmax)</li>
+</ol>
+<p>That’s it. That’s the whole thing.</p>
+
+
+</section>
+
+<link href="//cdn-images.mailchimp.com/embedcode/classic-071822.css" rel="stylesheet" type="text/css"><div id="mc_embed_signup">
+    <form action="https://github.us4.list-manage.com/subscribe/post?u=e847230346a7c78d4745ae796&amp;id=7a63b2b273&amp;f_id=005f58e8f0" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="validate" target="_blank" novalidate="">
+        <div id="mc_embed_signup_scroll">
+        <h2 class="anchored">Subscribe to Aman Arora's blog:</h2>
+        <div class="indicates-required"><span class="asterisk">*</span> indicates required</div>
+<div class="mc-field-group">
+    <label for="mce-EMAIL">Email Address  <span class="asterisk">*</span>
+</label>
+    <input type="email" value="" name="EMAIL" class="required email" id="mce-EMAIL" required="">
+    <span id="mce-EMAIL-HELPERTEXT" class="helper_text"></span>
+</div>
+<div hidden="true"><input type="hidden" name="tags" value="7232948"></div>
+    <div id="mce-responses" class="clear foot">
+        <div class="response" id="mce-error-response" style="display:none"></div>
+        <div class="response" id="mce-success-response" style="display:none"></div>
+    </div>    <!-- real people should not fill this in and expect good things - do not remove this or risk form bot signups-->
+    <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_e847230346a7c78d4745ae796_7a63b2b273" tabindex="-1" value=""></div>
+        <div class="optionalParent">
+            <div class="clear foot">
+                <input type="submit" value="Subscribe" name="subscribe" id="mc-embedded-subscribe" class="button">
+                <p class="brandingLogo"><a href="http://eepurl.com/il3baM" title="Mailchimp - email marketing made easy and fun"><img src="https://eep.io/mc-cdn-images/template_images/branding_logo_text_dark_dtp.svg"></a></p>
+            </div>
+        </div>
+    </div>
+</form>
+</div><script type="text/javascript">(function($) {window.fnames = new Array(); window.ftypes = new Array();fnames[0]='EMAIL';ftypes[0]='email';fnames[1]='FNAME';ftypes[1]='text';fnames[2]='LNAME';ftypes[2]='text';fnames[3]='ADDRESS';ftypes[3]='address';fnames[4]='PHONE';ftypes[4]='phone';fnames[5]='BIRTHDAY';ftypes[5]='birthday';}(jQuery));var $mcj = jQuery.noConflict(true);</script></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
