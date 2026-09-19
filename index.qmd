@@ -3,10 +3,10 @@ listing:
   contents: posts
   sort: "date desc"
   type: default
-  categories: true
+  categories: false
   sort-ui: false
   filter-ui: false
-  fields: [date, title, description, categories]
+  fields: [date, title, description, categories, image]
   feed: true
   date-format: "MMM DD, YYYY"
   page-size: 100

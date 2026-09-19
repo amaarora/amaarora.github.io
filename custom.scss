@@ -78,24 +78,23 @@ code {
   padding: 2rem 0 !important;
   margin-bottom: 2rem;
   
-  /* "Featured" label simulation */
-  &::before {
-    content: "Featured";
-    display: block;
-    font-family: system-ui, -apple-system, sans-serif;
-    font-size: 0.9rem;
-    font-weight: 500;
-    color: #191918;
-    margin-bottom: 0.75rem;
-    text-transform: none;
-    background: none;
-    padding: 0;
-    order: -1; /* Ensure it's first */
-  }
-
   /* Content wrapper adjustment if needed */
   .body {
     width: 100%;
+  }
+
+  /* Give the newest post a visual preview, not just a larger title. */
+  .thumbnail {
+    width: min(100%, 920px);
+    margin: 0 0 1.75rem;
+    order: -1;
+
+    img {
+      width: 100%;
+      max-height: 460px;
+      object-fit: cover;
+      border-radius: 12px;
+    }
   }
 
   .listing-title {
@@ -120,8 +119,12 @@ code {
     font-size: 1.25rem;
     line-height: 1.5;
     color: #333 !important;
-    max-width: 800px;
+    max-width: 900px;
     order: 1;
+
+    p {
+      margin-bottom: 0;
+    }
   }
 
   .listing-date {
@@ -140,9 +143,14 @@ code {
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: row;
-  align-items: center; /* Center vertically */
+  align-items: flex-start;
   justify-content: space-between;
   gap: 3rem; /* Wider gap between title and date */
+}
+
+.quarto-listing-default > div:not(:first-child) .body {
+  flex: 1;
+  min-width: 0;
 }
 
 /* Title styling for list */
@@ -151,7 +159,7 @@ code {
   font-size: 1.35rem !important;
   font-weight: 800 !important; /* Extra bold like Anthropic */
   color: #000 !important; /* Pure black */
-  margin-bottom: 0;
+  margin-bottom: 0.65rem;
   line-height: 1.3;
   letter-spacing: -0.02em;
   flex: 1;
@@ -164,10 +172,27 @@ code {
   font-weight: 800 !important;
 }
 
-/* Hide description & categories for list items */
-.quarto-listing-default > div:not(:first-child) .listing-description,
+/* Keep the index calm by hiding category badges and repeated thumbnails. */
 .quarto-listing-default > div:not(:first-child) .listing-category {
   display: none !important;
+}
+
+.quarto-listing-default > div:not(:first-child) .thumbnail {
+  display: none !important;
+}
+
+/* Show one useful paragraph beneath every post title. */
+.quarto-listing-default > div:not(:first-child) .listing-description {
+  display: block !important;
+  max-width: 760px;
+  font-family: "Georgia", serif;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #444 !important;
+
+  p {
+    margin-bottom: 0;
+  }
 }
 
 /* Date styling for list */
@@ -181,6 +206,22 @@ code {
   flex-shrink: 0;
   text-align: right;
   min-width: 120px; /* Ensure space */
+}
+
+@media (max-width: 767px) {
+  .quarto-listing-default > div:first-child .listing-title {
+    font-size: 2.25rem !important;
+  }
+
+  .quarto-listing-default > div:not(:first-child) {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .quarto-listing-default > div:not(:first-child) .listing-date {
+    text-align: left;
+    min-width: 0;
+  }
 }
 
 /* Categories sidebar styling */
