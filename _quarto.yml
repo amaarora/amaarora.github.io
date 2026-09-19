@@ -3,6 +3,8 @@ project:
   output-dir: docs
 
 website:
+  site-url: https://amaarora.github.io
+  open-graph: true
   favicon: ./images/logo.png
   google-analytics: "UA-158677010-1"
   navbar:

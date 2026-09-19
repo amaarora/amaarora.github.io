@@ -11,3 +11,8 @@ nbs/
 /.quarto/
 
 **/*.quarto_ipynb
+
+# Local secrets
+.env
+.env.local
+.env.*.local
