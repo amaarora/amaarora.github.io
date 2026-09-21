@@ -14,10 +14,10 @@ about:
       href: https://github.com/amaarora
 ---
 
-I’m Aman. I write about AI agents, large language models, and building reliable, scalable agentic systems that actually work in production.
+I’m Aman. I write about AI agents, large language models, and what it takes to build reliable AI systems that work at scale.
 
 I currently work at AWS. Previously, I was a Lead AI Engineer at Relevance AI and a Data Science Lead at REA Group, where I worked on property valuation models covering 12.2 million Australian homes.
 
-I’m interested in both ends of the problem: understanding how models work from first principles, and turning that understanding into systems that are reliable, observable, and built to last. This blog is where I work through those ideas in public—usually by building something, looking under the hood, and sharing what I learn.
+I’m interested in both ends of the problem: understanding how models work from first principles, and turning that understanding into systems that are reliable, observable, and built to last. This blog is where I work through those ideas in public, usually by building something, looking under the hood, and sharing what I learn.
 
 I write here in a personal capacity. The views expressed are my own and do not represent my employer.
