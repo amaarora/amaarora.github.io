@@ -10,7 +10,7 @@
 <meta name="dcterms.date" content="2025-09-10">
 <meta name="description" content="A hands-on exploration of Claude’s new file creation and spreadsheet analysis capabilities, with real-world testing results and insights">
 
-<title>Claude’s New File Capabilities - My Notes and Reflections</title>
+<title>Claude’s New File Capabilities - My Notes and Reflections – Aman Arora's Blog</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -99,7 +99,7 @@ div.csl-indent {
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-aa0b4a074e937aed09d324d59456e594.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-e2fb621e574a4c4ef41e023a6c7dc531.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -143,9 +143,17 @@ ga('send', {
 </script>
 
 
-<meta name="twitter:title" content="Claude’s New File Capabilities - My Notes and Reflections">
+<meta property="og:title" content="Claude’s New File Capabilities - My Notes and Reflections – Aman Arora’s Blog">
+<meta property="og:description" content="A hands-on exploration of Claude’s new file creation and spreadsheet analysis capabilities, with real-world testing results and insights">
+<meta property="og:image" content="https://amaarora.github.io/images/claude-files.png">
+<meta property="og:site_name" content="Aman Arora's Blog">
+<meta property="og:image:height" content="585">
+<meta property="og:image:width" content="1024">
+<meta name="twitter:title" content="Claude’s New File Capabilities - My Notes and Reflections – Aman Arora’s Blog">
 <meta name="twitter:description" content="A hands-on exploration of Claude’s new file creation and spreadsheet analysis capabilities, with real-world testing results and insights">
-<meta name="twitter:image" content="../images/claude-files.png">
+<meta name="twitter:image" content="https://amaarora.github.io/images/claude-files.png">
+<meta name="twitter:image-height" content="585">
+<meta name="twitter:image-width" content="1024">
 <meta name="twitter:card" content="summary_large_image">
 </head>
 
@@ -171,7 +179,7 @@ ga('send', {
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="../technical-writings.html"> 
-<span class="menu-text">Technical Writings</span></a>
+<span class="menu-text">Archive</span></a>
   </li>  
 </ul>
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
@@ -187,6 +195,11 @@ ga('send', {
   </li>  
   <li class="nav-item compact">
     <a class="nav-link" href="https://www.linkedin.com/in/aroraaman/"> <i class="bi bi-linkedin" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="../index.xml"> <i class="bi bi-rss" role="img" aria-label="RSS feed">
 </i> 
 <span class="menu-text"></span></a>
   </li>  
@@ -316,7 +329,7 @@ Figure&nbsp;3: Taking a peek under the hood of Claude’s new file analysis capa
 <section id="data-analysis-with-python" class="level3" data-number="1.1">
 <h3 data-number="1.1" class="anchored" data-anchor-id="data-analysis-with-python"><span class="header-section-number">1.1</span> Data Analysis with Python</h3>
 <p>Here is the Python script Claude generated for analysis (<a href="https://gist.github.com/amaarora/5be79c36ae75c326d63ab9db2854e0d0#file-analyze_nsw_property_data-py">view full script on GitHub</a>):</p>
-<div id="083257d6" class="cell" data-execution_count="1">
+<div id="6ae58781" class="cell">
 <details class="code-fold">
 <summary>Data processing logic</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Key excerpt: How Claude parses the .dat files</span></span>
@@ -355,7 +368,7 @@ Figure&nbsp;3: Taking a peek under the hood of Claude’s new file analysis capa
 <span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> pd.DataFrame(all_sales)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
-<div id="1d13573e" class="cell" data-execution_count="2">
+<div id="fd39f6a4" class="cell">
 <details class="code-fold">
 <summary>Growth analysis calculation</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Key excerpt: How Claude calculates growth rates</span></span>
@@ -384,7 +397,7 @@ Figure&nbsp;3: Taking a peek under the hood of Claude’s new file analysis capa
 <span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> pd.DataFrame(growth_analysis)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
-<div id="f3832afb" class="cell" data-execution_count="3">
+<div id="386145b6" class="cell">
 <details class="code-fold">
 <summary>Visualization generation</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Key excerpt: How Claude creates the visualizations</span></span>
@@ -420,7 +433,7 @@ Figure&nbsp;3: Taking a peek under the hood of Claude’s new file analysis capa
 <section id="document-generation-with-node.js" class="level3" data-number="1.2">
 <h3 data-number="1.2" class="anchored" data-anchor-id="document-generation-with-node.js"><span class="header-section-number">1.2</span> Document Generation with Node.js</h3>
 <p>For document generation, Claude leveraged Node.js with the <code>docx</code> package (<a href="https://gist.github.com/amaarora/5be79c36ae75c326d63ab9db2854e0d0#file-create_simple_report-js">view full script on GitHub</a>):</p>
-<div id="995c7973" class="cell" data-execution_count="4">
+<div id="dcca8d01" class="cell">
 <details class="code-fold">
 <summary>Document structure setup</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="op">//</span> Key excerpt: How Claude sets up the Word document structure</span>
@@ -476,7 +489,7 @@ Figure&nbsp;3: Taking a peek under the hood of Claude’s new file analysis capa
 <span id="cb4-51"><a href="#cb4-51" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
-<div id="452ea6b1" class="cell" data-execution_count="5">
+<div id="6e472aa7" class="cell">
 <details class="code-fold">
 <summary>Table generation with formatting</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="op">//</span> Key excerpt: How Claude creates formatted tables <span class="cf">with</span> data</span>
@@ -528,7 +541,7 @@ Figure&nbsp;3: Taking a peek under the hood of Claude’s new file analysis capa
 <span id="cb5-47"><a href="#cb5-47" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
-<div id="beff3483" class="cell" data-execution_count="6">
+<div id="667aeebd" class="cell">
 <details class="code-fold">
 <summary>Report content generation</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="op">//</span> Key excerpt: How Claude structures the report content</span>
@@ -720,7 +733,7 @@ NSW Valuer General. 2025. <span>“Property Sales Information.”</span> <a href
     }
       var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
       var mailtoRegex = new RegExp(/^mailto:/);
-        var filterRegex = new RegExp('/' + window.location.host + '/');
+        var filterRegex = new RegExp("https:\/\/amaarora\.github\.io");
       var isInternal = (href) => {
           return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
       }

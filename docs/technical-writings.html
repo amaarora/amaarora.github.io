@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Technical Writings</title>
+<title>Archive – Aman Arora’s Blog</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -31,6 +31,8 @@ ul.task-list li input[type="checkbox"] {
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
 <link href="././images/logo.png" rel="icon" type="image/png">
+<script src="site_libs/quarto-listing/list.min.js"></script>
+<script src="site_libs/quarto-listing/quarto-listing.js"></script>
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="site_libs/quarto-html/axe/axe-check.js" type="module"></script>
@@ -41,7 +43,7 @@ ul.task-list li input[type="checkbox"] {
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-aa0b4a074e937aed09d324d59456e594.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-e2fb621e574a4c4ef41e023a6c7dc531.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -69,6 +71,36 @@ ul.task-list li input[type="checkbox"] {
     "search-label": "Search"
   }
 }</script>
+<script>
+
+  window.document.addEventListener("DOMContentLoaded", function (_event) {
+    const listingTargetEl = window.document.querySelector('#listing-blog-archive .list');
+    if (!listingTargetEl) {
+      // No listing discovered, do not attach.
+      return; 
+    }
+
+    const options = {
+      valueNames: ['listing-project','listing-website','listing-format','listing-language','listing-title','listing-subtitle','listing-description','listing-categories','listing-author','listing-date','listing-toc','listing-number-sections','listing-title-block-banner','listing-bibliography','listing-reference-location','listing-citation-location','listing-code-fold','listing-image','listing-path','listing-outputHref','listing-date-modified','listing-filename','listing-file-modified','listing-reading-time','listing-word-count','listing-toc-location','listing-toc-depth','listing-toc-title','listing-twitter-card','listing-tags',{ data: ['index'] },{ data: ['categories'] },{ data: ['listing-date-sort'] },{ data: ['listing-date-modified-sort'] },{ data: ['listing-file-modified-sort'] },{ data: ['listing-reading-time-sort'] },{ data: ['listing-word-count-sort'] }],
+      page: 25,
+    pagination: { item: "<li class='page-item'><a class='page page-link' href='#'></a></li>" },
+      searchColumns: ["listing-project","listing-website","listing-format","listing-language","listing-title","listing-subtitle","listing-description","listing-categories","listing-author","listing-date","listing-toc","listing-number-sections","listing-title-block-banner","listing-bibliography","listing-reference-location","listing-citation-location","listing-code-fold","listing-image","listing-path","listing-outputHref","listing-date-modified","listing-filename","listing-file-modified","listing-reading-time","listing-word-count","listing-toc-location","listing-toc-depth","listing-toc-title","listing-twitter-card","listing-tags"],
+    };
+
+    window['quarto-listings'] = window['quarto-listings'] || {};
+    window['quarto-listings']['listing-blog-archive'] = new List('listing-blog-archive', options);
+
+    if (window['quarto-listing-loaded']) {
+      window['quarto-listing-loaded']();
+    }
+  });
+
+  window.addEventListener('hashchange',() => {
+    if (window['quarto-listing-loaded']) {
+      window['quarto-listing-loaded']();
+    }
+  })
+  </script>
 
 <script type="text/javascript">
 
@@ -84,9 +116,41 @@ ga('send', {
 });
 </script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
-<meta name="twitter:title" content="Technical Writings">
-<meta name="twitter:description" content="">
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<meta property="og:title" content="Archive – Aman Arora’s Blog">
+<meta property="og:description" content="Technical writing on AI agents, large language models, and reliable, scalable agentic systems.">
+<meta property="og:site_name" content="Aman Arora's Blog">
+<meta name="twitter:title" content="Archive – Aman Arora’s Blog">
+<meta name="twitter:description" content="Technical writing on AI agents, large language models, and reliable, scalable agentic systems.">
 <meta name="twitter:card" content="summary">
 </head>
 
@@ -112,7 +176,7 @@ ga('send', {
   </li>  
   <li class="nav-item">
     <a class="nav-link active" href="./technical-writings.html" aria-current="page"> 
-<span class="menu-text">Technical Writings</span></a>
+<span class="menu-text">Archive</span></a>
   </li>  
 </ul>
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
@@ -128,6 +192,11 @@ ga('send', {
   </li>  
   <li class="nav-item compact">
     <a class="nav-link" href="https://www.linkedin.com/in/aroraaman/"> <i class="bi bi-linkedin" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="./index.xml"> <i class="bi bi-rss" role="img" aria-label="RSS feed">
 </i> 
 <span class="menu-text"></span></a>
   </li>  
@@ -148,7 +217,7 @@ ga('send', {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Technical Writings</h1>
+<h1 class="title">Archive</h1>
 </div>
 
 
@@ -165,42 +234,267 @@ ga('send', {
 </header>
 
 
-<p>A collection of my technical blog posts and articles published across various platforms.</p>
-<section id="blog-posts-amaarora.github.io" class="level2">
-<h2 class="anchored" data-anchor-id="blog-posts-amaarora.github.io">Blog Posts (amaarora.github.io)</h2>
-<ol type="1">
-<li><a href="https://amaarora.github.io/posts/2025-09-25-qwen3guard-guardrails.html">An Introduction to Real-Time Guardrails &amp; Qwen3Guard</a>: A comprehensive technical review and introduction to Qwen3Guard, exploring how it addresses critical limitations in existing guardrail models through controversial classification, real-time streaming detection, and multilingual safety moderation across 119 languages.</li>
-<li><a href="https://amaarora.github.io/posts/2025-09-21-rope-context-extension.html">How LLMs Scaled from 512 to 2M Context: A Technical Deep Dive</a>: A comprehensive technical guide through the evolution of positional encodings such as APE, RoPE, Position Interpolation, NTK-Aware Scaling, Dynamic Scaling, and YaRN in Large Language Models.</li>
-<li><a href="https://amaarora.github.io/posts/2025-09-14-llms-agentic.html">What Makes Modern Day LLMs Agentic</a>: Demystifying tool calling in LLMs - how special tokens and training patterns create the illusion of agency, when it’s really just next token prediction with clever scaffolding.</li>
-<li><a href="https://amaarora.github.io/posts/2025-09-10-claude-file-capabilities.html">Claude’s New File Capabilities - My Notes and Reflections</a>: Exploring Claude’s new file handling features and their implications for AI-assisted development.</li>
-<li><a href="https://amaarora.github.io/posts/2025-09-08-agent-frameworks-more-than-loops.html">Agent Frameworks Are So Much More Than For Loops</a>: A deep dive into what makes modern agent frameworks powerful beyond simple iteration.</li>
-<li><a href="https://amaarora.github.io/posts/2023-07-25-llmchain.html">Deciphering LangChain: A Deep Dive into Code Complexity</a>: An analysis of LangChain’s architecture and code complexity.</li>
-<li><a href="https://amaarora.github.io/posts/2023-04-30_LaMini-LM.html">Paper Review - ‘LaMini-LM’</a>: A review of the paper “LaMini-LM - A Diverse Herd of Distilled Models from Large-Scale Instructions”.</li>
-<li><a href="https://amaarora.github.io/posts/2023-03-11_Understanding_CLIP_part_2.html">The Annotated CLIP (Part-2)</a>: A detailed explanation of the PyTorch code behind CLIP for model building and training.</li>
-<li><a href="https://amaarora.github.io/posts/2023-03-06_Understanding_CLIP.html">The Annotated CLIP (Part-1)</a>: An introduction to CLIP, comparing it to other research papers and discussing the inspiration behind it.</li>
-<li><a href="https://amaarora.github.io/posts/2022-07-04-swintransformerv1.html">Swin Transformer</a>: Explanation and PyTorch implementation of the Swin Transformer Model Architecture.</li>
-<li><a href="https://amaarora.github.io/posts/2021-07-26-annotateddetr.html">The Annotated DETR</a>: Explanation and PyTorch implementation of the DETR Model Architecture for end-to-end object detection.</li>
-<li><a href="https://amaarora.github.io/posts/2021-05-15-jh-meetup.html">The sad state of AI and tech startups in Australia today and what can we do about it</a>: A discussion on the current state of AI and tech startups in Australia.</li>
-<li><a href="https://amaarora.github.io/posts/2021-03-13-optimizers.html">Adam and friends</a>: Implementation of basic optimizers like Adam, SGD, RMSProp from scratch in PyTorch.</li>
-<li><a href="https://amaarora.github.io/posts/2021-01-18-ViT.html">Vision Transformer</a>: Detailed look at the Vision Transformer architectures and their re-implementation in PyTorch from scratch.</li>
-<li><a href="https://amaarora.github.io/posts/2021-01-13-efficientdet-pytorch.html">The EfficientDet Architecture in PyTorch</a>: A guide on how to implement the EfficientDet architecture in PyTorch from scratch.</li>
-<li><a href="https://amaarora.github.io/posts/2021-01-11-efficientdet.html">EfficientDet - Scalable and Efficient Object Detection</a>: Explanation of how EfficientDets work step-by-step.</li>
-<li><a href="https://amaarora.github.io/posts/2020-09-13-unet.html">U-Net A PyTorch Implementation in 60 lines of Code</a>: Implementation of the U-Net architecture in PyTorch in 60 lines of code.</li>
-<li><a href="https://amaarora.github.io/posts/2020-09-06-siimacr.html">Top 100 solution - SIIM-ACR Pneumothorax Segmentation</a>: A solution for Image Segmentation based problem in Pytorch with SIIM-ACR Pneumothorax Segmentation competition.</li>
-<li><a href="https://amaarora.github.io/posts/2020-08-30-gempool.html">GeM Pooling Explained with PyTorch Implementation and Introduction to Image Retrieval</a>: Explanation of GeM pooling and implementation from scratch in PyTorch.</li>
-<li><a href="https://amaarora.github.io/posts/2020-08-23-siimisic.html">SIIM-ISIC Melanoma Classification - my journey to a top 5% solution and first silver medal on Kaggle</a>: Sharing of winning solution for SIIM-ISIC Melanoma Classification Kaggle Competition.</li>
-<li><a href="https://amaarora.github.io/posts/2020-08-13-efficientnet.html">EfficientNet</a>: A look at the current SOTA, with top-1 accuracy of 88.5% on ImageNet.</li>
-<li><a href="https://amaarora.github.io/posts/2020-08-09-groupnorm.html">Group Normalization</a>: A look at Group Normalization research paper and implementation in PyTorch from scratch.</li>
-<li><a href="https://amaarora.github.io/posts/2020-08-02-densenets.html">DenseNet Architecture Explained with PyTorch Implementation from TorchVision</a>: Introduction to dense blocks, transition layers and the TorchVision implementation of DenseNet step-by-step.</li>
-<li><a href="https://amaarora.github.io/posts/2020-07-24-SeNet.html">Squeeze and Excitation Networks Explained with PyTorch Implementation</a>: Re-implementation of the Squeeze-and-Excitation networks in PyTorch step-by-step with very minor updates to ResNet implementation.</li>
-<li><a href="https://amaarora.github.io/posts/2020-07-18-label-smoothing.html">Label Smoothing Explained using Microsoft Excel</a>: Re-implementation of Label Smoothing in Microsoft Excel step by step.</li>
-<li><a href="https://amaarora.github.io/posts/2020-07-12-oganized-pytorch.html">An introduction to PyTorch Lightning with comparisons to PyTorch</a>: An introduction to Pytorch Lightning and implementation of all the cool tricks like - Gradient Accumulation, 16-bit precision training, and also add TPU/multi-gpu support - all in a few lines of code.</li>
-<li><a href="https://amaarora.github.io/posts/2020-06-29-FocalLoss.html">What is Focal Loss and when should you use it?</a>: Understanding what Focal Loss is and when it is used, including a deep dive into its math and step-by-step implementation in PyTorch.</li>
-<li><a href="https://amaarora.github.io/posts/2020-02-18-The_Annotated_GPT-2.html">The Annotated GPT-2</a>: An annotated version of the GPT-2 paper in the form of a line-by-line implementation in PyTorch.</li>
-</ol>
-</section>
-<section id="external-publications-weights-biases-reports" class="level2">
-<h2 class="anchored" data-anchor-id="external-publications-weights-biases-reports">External Publications (Weights &amp; Biases Reports)</h2>
+<p>A chronological archive of everything published on this site.</p>
+<div id="listing-blog-archive" class="quarto-listing quarto-listing-container-custom">
+<div class="archive-list">
+
+  <section class="archive-year">
+    <h2 class="anchored">2026</h2>
+    <div class="archive-items">
+
+      <article class="archive-item" data-index="0" data-listing-date-sort="1789912800000" data-listing-file-modified-sort="1789985941475" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="13" data-listing-word-count-sort="2574">
+        <time class="archive-date listing-date" datetime="Sep 21, 2026">21 Sep</time>
+        <a class="archive-title listing-title" href="./posts/2026-21-09-oss-jev-interface.html">Jev: Looking under the hood and building a Jev-like API from scratch with Qwen3-0.6B as the backbone</a>
+      </article>
+
+      <article class="archive-item" data-index="1" data-listing-date-sort="1789740000000" data-listing-file-modified-sort="1789957346018" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="11" data-listing-word-count-sort="2003">
+        <time class="archive-date listing-date" datetime="Sep 19, 2026">19 Sep</time>
+        <a class="archive-title listing-title" href="./posts/2026-19-09-jev-intro.html">Jev: A New Way to Make Probabilistic Decisions</a>
+      </article>
+
+      <article class="archive-item" data-index="2" data-categories="QUklMjBBZ2VudHM=" data-listing-date-sort="1769864400000" data-listing-file-modified-sort="1769903173442" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="25" data-listing-word-count-sort="4812">
+        <time class="archive-date listing-date" datetime="Feb 1, 2026">01 Feb</time>
+        <a class="archive-title listing-title" href="./posts/2026-01-31-trustworthy-agents.html">AI Agents: Beyond a Demo</a>
+      </article>
+
+    </div>
+  </section>
+
+  <section class="archive-year">
+    <h2 class="anchored">2025</h2>
+    <div class="archive-items">
+
+      <article class="archive-item" data-index="3" data-categories="QUklMjBBZ2VudHM=" data-listing-date-sort="1765717200000" data-listing-file-modified-sort="1769723013083" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="15" data-listing-word-count-sort="2945">
+        <time class="archive-date listing-date" datetime="Dec 15, 2025">15 Dec</time>
+        <a class="archive-title listing-title" href="./posts/2025-12-15-gdpval-review.html">GDPVAL: Evaluating AI Model Performance on Real-World Economically Valuable Tasks</a>
+      </article>
+
+      <article class="archive-item" data-index="4" data-categories="QUklMjBBZ2VudHM=" data-listing-date-sort="1765371600000" data-listing-file-modified-sort="1769723013083" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="16" data-listing-word-count-sort="3181">
+        <time class="archive-date listing-date" datetime="Dec 11, 2025">11 Dec</time>
+        <a class="archive-title listing-title" href="./posts/2025-09-26-ai-agents-world.html">2025: When AI Agents Went to Work</a>
+      </article>
+
+      <article class="archive-item" data-index="5" data-categories="TGFyZ2UlMjBMYW5ndWFnZSUyME1vZGVscw==" data-listing-date-sort="1759068000000" data-listing-file-modified-sort="1769723013083" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="11" data-listing-word-count-sort="2083">
+        <time class="archive-date listing-date" datetime="Sep 29, 2025">29 Sep</time>
+        <a class="archive-title listing-title" href="./posts/2025-09-25-qwen3guard-guardrails.html">An Introduction to Real-Time Guardrails using Qwen3Guard</a>
+      </article>
+
+      <article class="archive-item" data-index="6" data-categories="TGFyZ2UlMjBMYW5ndWFnZSUyME1vZGVscw==" data-listing-date-sort="1758463200000" data-listing-file-modified-sort="1769723013082" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="60" data-listing-word-count-sort="11992">
+        <time class="archive-date listing-date" datetime="Sep 22, 2025">22 Sep</time>
+        <a class="archive-title listing-title" href="./posts/2025-09-21-rope-context-extension.html">How LLMs Scaled from 512 to 2M Context: A Technical Deep Dive</a>
+      </article>
+
+      <article class="archive-item" data-index="7" data-categories="QUklMjBBZ2VudHMlMkNQcm9ncmFtbWluZw==" data-listing-date-sort="1758031200000" data-listing-file-modified-sort="1769723013082" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="12" data-listing-word-count-sort="2248">
+        <time class="archive-date listing-date" datetime="Sep 17, 2025">17 Sep</time>
+        <a class="archive-title listing-title" href="./posts/2025-09-16-voice-survey-automation.html">From Human to AI: Automating Care Facility Surveys with Voice Agents</a>
+      </article>
+
+      <article class="archive-item" data-index="8" data-categories="TGFyZ2UlMjBMYW5ndWFnZSUyME1vZGVscyUyQ0FJJTIwQWdlbnRz" data-listing-date-sort="1757772000000" data-listing-file-modified-sort="1769723013082" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="13" data-listing-word-count-sort="2427">
+        <time class="archive-date listing-date" datetime="Sep 14, 2025">14 Sep</time>
+        <a class="archive-title listing-title" href="./posts/2025-09-14-llms-agentic.html">What Makes Modern Day LLMs Agentic</a>
+      </article>
+
+      <article class="archive-item" data-index="9" data-categories="QUk=" data-listing-date-sort="1757426400000" data-listing-file-modified-sort="1769723013082" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="23" data-listing-word-count-sort="4546">
+        <time class="archive-date listing-date" datetime="Sep 10, 2025">10 Sep</time>
+        <a class="archive-title listing-title" href="./posts/2025-09-10-claude-file-capabilities.html">Claude's New File Capabilities - My Notes and Reflections</a>
+      </article>
+
+      <article class="archive-item" data-index="10" data-categories="QUklMjBBZ2VudHMlMkNQcm9ncmFtbWluZw==" data-listing-date-sort="1757253600000" data-listing-file-modified-sort="1769723013082" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="16" data-listing-word-count-sort="3013">
+        <time class="archive-date listing-date" datetime="Sep 8, 2025">08 Sep</time>
+        <a class="archive-title listing-title" href="./posts/2025-09-08-agent-frameworks-more-than-loops.html">Agent Frameworks Are So Much More Than For Loops</a>
+      </article>
+
+    </div>
+  </section>
+
+  <section class="archive-year">
+    <h2 class="anchored">2024</h2>
+    <div class="archive-items">
+
+      <article class="archive-item" data-index="11" data-categories="TGFyZ2UlMjBMYW5ndWFnZSUyME1vZGVscyUyQ0FJJTIwQWdlbnRz" data-listing-date-sort="1722088800000" data-listing-file-modified-sort="1789957346018" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="8" data-listing-word-count-sort="1542">
+        <time class="archive-date listing-date" datetime="Jul 28, 2024">28 Jul</time>
+        <a class="archive-title listing-title" href="./posts/2024-07-28 hindu-temple.html">Building a user facing not-for-profit chatbot for a Hindu Temple</a>
+      </article>
+
+      <article class="archive-item" data-index="12" data-categories="TGFyZ2UlMjBMYW5ndWFnZSUyME1vZGVscw==" data-listing-date-sort="1720447200000" data-listing-file-modified-sort="1769723013082" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="12" data-listing-word-count-sort="2362">
+        <time class="archive-date listing-date" datetime="Jul 9, 2024">09 Jul</time>
+        <a class="archive-title listing-title" href="./posts/2024-07-07 Gemma.html">Gemma 2: Architecture Deep Dive with PyTorch Implementation</a>
+      </article>
+
+      <article class="archive-item" data-index="13" data-categories="TGFyZ2UlMjBMYW5ndWFnZSUyME1vZGVscw==" data-listing-date-sort="1720015200000" data-listing-file-modified-sort="1769723013082" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="5" data-listing-word-count-sort="934">
+        <time class="archive-date listing-date" datetime="Jul 4, 2024">04 Jul</time>
+        <a class="archive-title listing-title" href="./posts/2024-07-04 SWA.html">Sliding Window Attention: Longformer Explained with Animations and PyTorch</a>
+      </article>
+
+      <article class="archive-item" data-index="14" data-categories="Q29tcHV0ZXIlMjBWaXNpb24lMkNBSQ==" data-listing-date-sort="1719756000000" data-listing-file-modified-sort="1769723013082" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="17" data-listing-word-count-sort="3375">
+        <time class="archive-date listing-date" datetime="Jul 1, 2024">01 Jul</time>
+        <a class="archive-title listing-title" href="./posts/2024-06-28 ml-4M.html">Image retrieval app using Apple's 4M-21 any-to-any vision model</a>
+      </article>
+
+      <article class="archive-item" data-index="15" data-categories="TGFyZ2UlMjBMYW5ndWFnZSUyME1vZGVscyUyQ0FJJTIwQWdlbnRz" data-listing-date-sort="1718978400000" data-listing-file-modified-sort="1769723013082" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="9" data-listing-word-count-sort="1722">
+        <time class="archive-date listing-date" datetime="Jun 22, 2024">22 Jun</time>
+        <a class="archive-title listing-title" href="./posts/2024-06-22 Support bot.html">Support bot with Claude 3.5 Sonnet using Claudette and Slack-SDK</a>
+      </article>
+
+    </div>
+  </section>
+
+  <section class="archive-year">
+    <h2 class="anchored">2023</h2>
+    <div class="archive-items">
+
+      <article class="archive-item" data-index="16" data-categories="QUklMjBBZ2VudHMlMkNMYXJnZSUyMExhbmd1YWdlJTIwTW9kZWxz" data-listing-date-sort="1690466400000" data-listing-file-modified-sort="1769723013081" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="16" data-listing-word-count-sort="3073">
+        <time class="archive-date listing-date" datetime="Jul 28, 2023">28 Jul</time>
+        <a class="archive-title listing-title" href="./posts/2023-07-27_Document_Question_Answering_with_LangChain.html">Demystifying Document Question-Answering Chatbot - A Comprehensive Step-by-Step Tutorial with LangChain</a>
+      </article>
+
+      <article class="archive-item" data-index="17" data-categories="QUklMjBBZ2VudHMlMkNQcm9ncmFtbWluZw==" data-listing-date-sort="1690207200000" data-listing-file-modified-sort="1769723013081" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="22" data-listing-word-count-sort="4269">
+        <time class="archive-date listing-date" datetime="Jul 25, 2023">25 Jul</time>
+        <a class="archive-title listing-title" href="./posts/2023-07-25-llmchain.html">Deciphering LangChain: A Deep Dive into Code Complexity</a>
+      </article>
+
+      <article class="archive-item" data-index="18" data-categories="TGFyZ2UlMjBMYW5ndWFnZSUyME1vZGVscyUyQ0FJ" data-listing-date-sort="1682863200000" data-listing-file-modified-sort="1769723013081" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="23" data-listing-word-count-sort="4458">
+        <time class="archive-date listing-date" datetime="May 1, 2023">01 May</time>
+        <a class="archive-title listing-title" href="./posts/2023-04-30_LaMini-LM.html">LaMini-LM: Distilling Large Language Models with 2.58M Instructions</a>
+      </article>
+
+      <article class="archive-item" data-index="19" data-categories="Q29tcHV0ZXIlMjBWaXNpb24lMkNBSQ==" data-listing-date-sort="1678453200000" data-listing-file-modified-sort="1769723013081" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="18" data-listing-word-count-sort="3600">
+        <time class="archive-date listing-date" datetime="Mar 11, 2023">11 Mar</time>
+        <a class="archive-title listing-title" href="./posts/2023-03-11_Understanding_CLIP_part_2.html">The Annotated CLIP (Part-2): PyTorch Implementation from Scratch</a>
+      </article>
+
+      <article class="archive-item" data-index="20" data-categories="Q29tcHV0ZXIlMjBWaXNpb24lMkNBSQ==" data-listing-date-sort="1677762000000" data-listing-file-modified-sort="1769723013080" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="9" data-listing-word-count-sort="1627">
+        <time class="archive-date listing-date" datetime="Mar 3, 2023">03 Mar</time>
+        <a class="archive-title listing-title" href="./posts/2023-03-06_Understanding_CLIP.html">The Annotated CLIP (Part-1): Understanding Contrastive Language-Image Pre-training</a>
+      </article>
+
+    </div>
+  </section>
+
+  <section class="archive-year">
+    <h2 class="anchored">2022</h2>
+    <div class="archive-items">
+
+      <article class="archive-item" data-index="21" data-categories="Q29tcHV0ZXIlMjBWaXNpb24lMkNMYXJnZSUyMExhbmd1YWdlJTIwTW9kZWxz" data-listing-date-sort="1656856800000" data-listing-file-modified-sort="1769723013080" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="25" data-listing-word-count-sort="4880">
+        <time class="archive-date listing-date" datetime="Jul 4, 2022">04 Jul</time>
+        <a class="archive-title listing-title" href="./posts/2022-07-04-swintransformerv1.html">Swin Transformer Explained: Architecture and PyTorch Implementation</a>
+      </article>
+
+    </div>
+  </section>
+
+  <section class="archive-year">
+    <h2 class="anchored">2021</h2>
+    <div class="archive-items">
+
+      <article class="archive-item" data-index="22" data-categories="Q29tcHV0ZXIlMjBWaXNpb24lMkNMYXJnZSUyMExhbmd1YWdlJTIwTW9kZWxz" data-listing-date-sort="1627221600000" data-listing-file-modified-sort="1769723013080" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="43" data-listing-word-count-sort="8444">
+        <time class="archive-date listing-date" datetime="Jul 26, 2021">26 Jul</time>
+        <a class="archive-title listing-title" href="./posts/2021-07-26-annotateddetr.html">The Annotated DETR: End-to-End Object Detection with Transformers</a>
+      </article>
+
+      <article class="archive-item" data-index="23" data-categories="QUk=" data-listing-date-sort="1621000800000" data-listing-file-modified-sort="1769723013080" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="19" data-listing-word-count-sort="3641">
+        <time class="archive-date listing-date" datetime="May 15, 2021">15 May</time>
+        <a class="archive-title listing-title" href="./posts/2021-05-15-jh-meetup.html">The sad state of AI and tech startups in Australia today and what can we do about it</a>
+      </article>
+
+      <article class="archive-item" data-index="24" data-categories="Q29tcHV0ZXIlMjBWaXNpb24=" data-listing-date-sort="1615554000000" data-listing-file-modified-sort="1769723013080" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="23" data-listing-word-count-sort="4559">
+        <time class="archive-date listing-date" datetime="Mar 13, 2021">13 Mar</time>
+        <a class="archive-title listing-title" href="./posts/2021-03-13-optimizers.html">Understanding Optimizers: Adam, SGD, Momentum &amp; RMSprop from Scratch</a>
+      </article>
+
+      <article class="archive-item" data-index="25" data-categories="Q29tcHV0ZXIlMjBWaXNpb24lMkNMYXJnZSUyMExhbmd1YWdlJTIwTW9kZWxz" data-listing-date-sort="1610888400000" data-listing-file-modified-sort="1769723013080" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="20" data-listing-word-count-sort="3906">
+        <time class="archive-date listing-date" datetime="Jan 18, 2021">18 Jan</time>
+        <a class="archive-title listing-title" href="./posts/2021-01-18-ViT.html">Vision Transformer (ViT) Explained: An Image is Worth 16x16 Words</a>
+      </article>
+
+      <article class="archive-item" data-index="26" data-categories="Q29tcHV0ZXIlMjBWaXNpb24=" data-listing-date-sort="1610456400000" data-listing-file-modified-sort="1769723013080" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="37" data-listing-word-count-sort="7337">
+        <time class="archive-date listing-date" datetime="Jan 13, 2021">13 Jan</time>
+        <a class="archive-title listing-title" href="./posts/2021-01-13-efficientdet-pytorch.html">The EfficientDet Architecture in PyTorch</a>
+      </article>
+
+      <article class="archive-item" data-index="27" data-categories="Q29tcHV0ZXIlMjBWaXNpb24=" data-listing-date-sort="1610283600000" data-listing-file-modified-sort="1769723013080" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="15" data-listing-word-count-sort="2995">
+        <time class="archive-date listing-date" datetime="Jan 11, 2021">11 Jan</time>
+        <a class="archive-title listing-title" href="./posts/2021-01-11-efficientdet.html">EfficientDet - Scalable and Efficient Object Detection</a>
+      </article>
+
+    </div>
+  </section>
+
+  <section class="archive-year">
+    <h2 class="anchored">2020</h2>
+    <div class="archive-items">
+
+      <article class="archive-item" data-index="28" data-categories="Q29tcHV0ZXIlMjBWaXNpb24lMkNBSQ==" data-listing-date-sort="1599314400000" data-listing-file-modified-sort="1769723013080" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="18" data-listing-word-count-sort="3549">
+        <time class="archive-date listing-date" datetime="Sep 6, 2020">06 Sep</time>
+        <a class="archive-title listing-title" href="./posts/2020-09-06-siimacr.html">Medical Image Segmentation with PyTorch: A Top-100 Kaggle Solution</a>
+      </article>
+
+      <article class="archive-item" data-index="29" data-categories="Q29tcHV0ZXIlMjBWaXNpb24=" data-listing-date-sort="1598709600000" data-listing-file-modified-sort="1769723013080" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="15" data-listing-word-count-sort="2839">
+        <time class="archive-date listing-date" datetime="Aug 30, 2020">30 Aug</time>
+        <a class="archive-title listing-title" href="./posts/2020-09-13-unet.html">U-Net A PyTorch Implementation in 60 lines of Code</a>
+      </article>
+
+      <article class="archive-item" data-index="30" data-categories="Q29tcHV0ZXIlMjBWaXNpb24=" data-listing-date-sort="1598709600000" data-listing-file-modified-sort="1769723013079" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="11" data-listing-word-count-sort="2094">
+        <time class="archive-date listing-date" datetime="Aug 30, 2020">30 Aug</time>
+        <a class="archive-title listing-title" href="./posts/2020-08-30-gempool.html">GeM Pooling Explained with PyTorch Implementation and Introduction to Image Retrieval</a>
+      </article>
+
+      <article class="archive-item" data-index="31" data-categories="Q29tcHV0ZXIlMjBWaXNpb24lMkNBSQ==" data-listing-date-sort="1598104800000" data-listing-file-modified-sort="1769723013079" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="9" data-listing-word-count-sort="1682">
+        <time class="archive-date listing-date" datetime="Aug 23, 2020">23 Aug</time>
+        <a class="archive-title listing-title" href="./posts/2020-08-23-siimisic.html">Skin Cancer Detection with Deep Learning: A Top 5% Kaggle Silver Medal Solution</a>
+      </article>
+
+      <article class="archive-item" data-index="32" data-categories="Q29tcHV0ZXIlMjBWaXNpb24=" data-listing-date-sort="1597240800000" data-listing-file-modified-sort="1769723013079" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="15" data-listing-word-count-sort="2824">
+        <time class="archive-date listing-date" datetime="Aug 13, 2020">13 Aug</time>
+        <a class="archive-title listing-title" href="./posts/2020-08-13-efficientnet.html">EfficientNet Explained: Compound Scaling and Neural Architecture Search</a>
+      </article>
+
+      <article class="archive-item" data-index="33" data-categories="Q29tcHV0ZXIlMjBWaXNpb24=" data-listing-date-sort="1596895200000" data-listing-file-modified-sort="1769723013079" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="13" data-listing-word-count-sort="2450">
+        <time class="archive-date listing-date" datetime="Aug 9, 2020">09 Aug</time>
+        <a class="archive-title listing-title" href="./posts/2020-08-09-groupnorm.html">Group Normalization: A Batch Normalization Alternative with PyTorch Implementation</a>
+      </article>
+
+      <article class="archive-item" data-index="34" data-categories="Q29tcHV0ZXIlMjBWaXNpb24lMkNQcm9ncmFtbWluZw==" data-listing-date-sort="1596290400000" data-listing-file-modified-sort="1769723013079" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="20" data-listing-word-count-sort="3829">
+        <time class="archive-date listing-date" datetime="Aug 2, 2020">02 Aug</time>
+        <a class="archive-title listing-title" href="./posts/2020-08-02-densenets.html">DenseNet Architecture Explained with PyTorch Implementation from TorchVision</a>
+      </article>
+
+      <article class="archive-item" data-index="35" data-categories="Q29tcHV0ZXIlMjBWaXNpb24=" data-listing-date-sort="1595512800000" data-listing-file-modified-sort="1769723013079" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="19" data-listing-word-count-sort="3792">
+        <time class="archive-date listing-date" datetime="Jul 24, 2020">24 Jul</time>
+        <a class="archive-title listing-title" href="./posts/2020-07-24-SeNet.html">Squeeze and Excitation Networks Explained with PyTorch Implementation</a>
+      </article>
+
+      <article class="archive-item" data-index="36" data-categories="Q29tcHV0ZXIlMjBWaXNpb24=" data-listing-date-sort="1594994400000" data-listing-file-modified-sort="1769723013079" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="15" data-listing-word-count-sort="2801">
+        <time class="archive-date listing-date" datetime="Jul 18, 2020">18 Jul</time>
+        <a class="archive-title listing-title" href="./posts/2020-07-18-label-smoothing.html">Label Smoothing Explained using Microsoft Excel</a>
+      </article>
+
+      <article class="archive-item" data-index="37" data-categories="UHJvZ3JhbW1pbmc=" data-listing-date-sort="1594476000000" data-listing-file-modified-sort="1769723013078" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="14" data-listing-word-count-sort="2735">
+        <time class="archive-date listing-date" datetime="Jul 12, 2020">12 Jul</time>
+        <a class="archive-title listing-title" href="./posts/2020-07-12-oganized-pytorch.html">An introduction to PyTorch Lightning with comparisons to PyTorch</a>
+      </article>
+
+      <article class="archive-item" data-index="38" data-categories="Q29tcHV0ZXIlMjBWaXNpb24=" data-listing-date-sort="1593352800000" data-listing-file-modified-sort="1769723013078" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="8" data-listing-word-count-sort="1425">
+        <time class="archive-date listing-date" datetime="Jun 29, 2020">29 Jun</time>
+        <a class="archive-title listing-title" href="./posts/2020-06-29-FocalLoss.html">What is Focal Loss and when should you use it?</a>
+      </article>
+
+      <article class="archive-item" data-index="39" data-categories="TGFyZ2UlMjBMYW5ndWFnZSUyME1vZGVscw==" data-listing-date-sort="1581944400000" data-listing-file-modified-sort="1769723013078" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="27" data-listing-word-count-sort="5220">
+        <time class="archive-date listing-date" datetime="Feb 18, 2020">18 Feb</time>
+        <a class="archive-title listing-title" href="./posts/2020-02-18-annotatedGPT2.html">The Annotated GPT-2: Understanding Language Models with PyTorch</a>
+      </article>
+
+    </div>
+  </section>
+
+</div>
+<div class="listing-no-matching d-none">No matching items</div>
+<nav id="blog-archive-pagination" class="listing-pagination" aria-label="Page Navigation">
+  <ul class="pagination"></ul>
+</nav>
+</div>
+<section id="published-elsewhere" class="level2">
+<h2 class="anchored" data-anchor-id="published-elsewhere">Published elsewhere</h2>
 <ol type="1">
 <li><a href="https://wandb.ai/wandb_fc/pytorch-image-models/reports/An-Introduction-to-HuggingFace-s-Accelerate-Library--Vmlldzo2MzgzNzA">An Introduction to HuggingFace’s Accelerate Library</a>: An introduction to the Accelerate Library by HuggingFace.</li>
 <li><a href="https://wandb.ai/aarora/Nvidia%20NeMO/reports/Train-Optimize-Analyze-Visualize-and-Deploy-Models-for-Automatic-Speech-Recognition-with-NVIDIA-s-NeMo--VmlldzoxNzI0ODEw">Train, Optimize, Analyze, Visualize and Deploy Models for Automatic Speech Recognition with NVIDIA’s NeMo</a>: A guide on training, optimizing, analyzing, visualizing, and deploying models for Automatic Speech Recognition with NVIDIA’s NeMo.</li>
@@ -225,6 +519,7 @@ ga('send', {
 <li><a href="https://wandb.ai/amanarora/melanoma/reports/How-to-use-Weights-Biases-for-your-Kaggle-Competitions---VmlldzoxNTkzNjY3">How to use Weights &amp; Biases for your Kaggle Competitions?</a>: A guide on using Weights &amp; Biases for Kaggle competitions.</li>
 <li><a href="https://wandb.ai/amanarora/melanoma/reports/How-to-use-Weights-Biases-for-your-next-Machine-Learning-Project---VmlldzoxNTkzNjY4">How to use Weights &amp; Biases for your next Machine Learning Project?</a>: A guide on using Weights &amp; Biases for your next Machine Learning project.</li>
 </ol>
+
 
 
 </section>
@@ -328,7 +623,7 @@ ga('send', {
     }
       var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
       var mailtoRegex = new RegExp(/^mailto:/);
-        var filterRegex = new RegExp('/' + window.location.host + '/');
+        var filterRegex = new RegExp("https:\/\/amaarora\.github\.io");
       var isInternal = (href) => {
           return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
       }

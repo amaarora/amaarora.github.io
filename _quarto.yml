@@ -3,16 +3,20 @@ project:
   output-dir: docs
 
 website:
+  title: "Aman Arora's Blog"
+  description: "Technical writing on AI agents, large language models, and reliable, scalable agentic systems."
   site-url: https://amaarora.github.io
   open-graph: true
   favicon: ./images/logo.png
   google-analytics: "UA-158677010-1"
   navbar:
+    title: false
     left:
     - text: "Aman Arora's Blog"
       href: index.qmd
     - about.qmd
-    - technical-writings.qmd
+    - text: Archive
+      href: technical-writings.qmd
     right:
       - icon: github
         href: https://github.com/amaarora
@@ -20,6 +24,9 @@ website:
         href: https://twitter.com/amaarora
       - icon: linkedin
         href: https://www.linkedin.com/in/aroraaman/
+      - icon: rss
+        href: index.xml
+        aria-label: RSS feed
   twitter-card: true
   # (additional metadata excluded for brevity)
   body-footer: subscribe.html

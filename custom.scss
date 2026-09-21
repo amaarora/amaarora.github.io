@@ -285,3 +285,74 @@ a {
   color: #000 !important; /* Darker on hover */
   text-decoration-color: #000;
 }
+
+/* Compact, year-grouped writing archive */
+.archive-list {
+  max-width: 920px;
+  margin: 2.5rem 0 4rem;
+}
+
+.archive-year {
+  display: grid;
+  grid-template-columns: 90px minmax(0, 1fr);
+  gap: 2rem;
+  padding: 1.75rem 0;
+  border-top: 1px solid rgba(25, 25, 24, 0.18);
+}
+
+.archive-year:last-child {
+  border-bottom: 1px solid rgba(25, 25, 24, 0.18);
+}
+
+.archive-year > h2 {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 1.35rem;
+  line-height: 1.4;
+  letter-spacing: -0.02em;
+}
+
+.archive-items {
+  min-width: 0;
+}
+
+.archive-item {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr);
+  gap: 1rem;
+  align-items: baseline;
+  padding: 0.48rem 0;
+}
+
+.archive-date {
+  color: #6b6963;
+  font-size: 0.86rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.archive-title {
+  color: #191918 !important;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.4;
+  text-decoration: none !important;
+}
+
+.archive-title:hover {
+  text-decoration: underline !important;
+  text-underline-offset: 3px;
+  opacity: 1;
+}
+
+@media (max-width: 640px) {
+  .archive-year {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .archive-item {
+    grid-template-columns: 52px minmax(0, 1fr);
+  }
+}
