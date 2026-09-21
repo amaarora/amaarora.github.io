@@ -203,7 +203,7 @@ Bender, Emily M., Timnit Gebru, Angelina McMillan-Major, and Shmargaret Shmitche
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>In my previous blog post from 2020, <a href="https://amaarora.github.io/2020/06/29/FocalLoss.html">What is Focal Loss and when should you use it?</a>, I also discussed how a model trained with cross-entropy loss can become overconfident.</p>
+<p>In my previous blog post from 2020, <a href="https://amaarora.github.io/posts/2020-06-29-FocalLoss.html">What is Focal Loss and when should you use it?</a>, I also discussed how a model trained with cross-entropy loss can become overconfident.</p>
 </div>
 </div>
 <p>Let’s see how we can get Qwen base model to predict token probabilities.</p>
@@ -306,7 +306,7 @@ font-style: inherit;">"pt"</span>,</span>
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>To understand how softmax converts logits into probabilities, refer to my previous blog post, <a href="https://amaarora.github.io/2020/06/29/FocalLoss.html">What is Focal Loss and when should you use it?</a>.</p>
+<p>To understand how softmax converts logits into probabilities, refer to my previous blog post, <a href="https://amaarora.github.io/posts/2020-06-29-FocalLoss.html">What is Focal Loss and when should you use it?</a>.</p>
 </div>
 </div>
 <div id="42cc2292" class="cell" data-execution_count="3">
@@ -4144,7 +4144,7 @@ Figure&nbsp;3: GDPVal win rate with Opus4.1 as the strongest performing model
 <section id="task-1-anti-financial-crime-risk-audit-accountants-auditors" class="level3" data-number="2.1">
 <h3 data-number="2.1" class="anchored" data-anchor-id="task-1-anti-financial-crime-risk-audit-accountants-auditors"><span class="header-section-number">2.1</span> Task 1: Anti-Financial Crime Risk Audit (Accountants &amp; Auditors)</h3>
 <p>To further understand the dataset, let’s deep dive into the first task.</p>
-<div id="dd4304b3" class="cell">
+<div id="5b4df991" class="cell">
 <details class="code-fold">
 <summary>Read tasks dataset</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
@@ -4174,7 +4174,7 @@ font-style: inherit;">"/data/train-00000-of-00001.parquet"</span>)</span>
 </details>
 </div>
 <p>Now, having read the tasks dataset, let’s start exploring the first task. We will start by looking at the sector and occupation that this task is from.</p>
-<div id="3acfdc71" class="cell">
+<div id="9f654754" class="cell">
 <details class="code-fold">
 <summary>Exploring first task’s sector and occupation</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1">df.sector[<span class="dv" style="color: #AD0000;
@@ -4185,7 +4185,7 @@ font-style: inherit;">0</span>]</span></code></pre></div></div>
 </details>
 </div>
 <p>Ok, so now we know the task is from sector - <strong>‘Professional, Scientific, and Technical Services’</strong> belonging to <strong>‘Accountants and Auditors’</strong> occupation. Let’s also read the accompanying prompt and reference files available.</p>
-<div id="06c72c54" class="cell">
+<div id="933edb11" class="cell">
 <details class="code-fold">
 <summary>Read first task’s prompt and its reference files</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><span class="bu" style="color: null;
@@ -4200,7 +4200,7 @@ font-style: inherit;">0</span>]</span></code></pre></div></div>
 </div>
 <p>So the task requires an auditor to analyze Anti-Financial Crime Risk Metrics, select a representative sample based on specific risk criteria, and deliver the results in a new spreadsheet titled ‘Sample’ with supporting workings. The key question that GDPVal benchmark tries to answer: <strong>“Can this task be automated and to what accuracy?”</strong></p>
 <p>Let’s dig a bit deeper into the provided spreadsheet as well.</p>
-<div id="d1f4af45" class="cell">
+<div id="65055a5a" class="cell">
 <details class="code-fold">
 <summary>Preview first task’s reference file</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><span class="im" style="color: #00769E;
@@ -4240,7 +4240,7 @@ font-style: inherit;">=</span> pd.read_excel(reference_fpath)</span>
 <section id="task-2-iem-system-design-audio-video-technicians" class="level3" data-number="2.2">
 <h3 data-number="2.2" class="anchored" data-anchor-id="task-2-iem-system-design-audio-video-technicians"><span class="header-section-number">2.2</span> Task 2: IEM System Design (Audio &amp; Video Technicians)</h3>
 <p>Let’s also look at the another task in the same detail as we did with the first one. We start with the sector and occupation. I chose arbitrary index as 10.</p>
-<div id="480dac3d" class="cell">
+<div id="90656bad" class="cell">
 <details class="code-fold">
 <summary>Exploring second task’s sector and occupation</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1">df.sector[<span class="dv" style="color: #AD0000;
@@ -4252,7 +4252,7 @@ font-style: inherit;">10</span>]</span></code></pre></div></div>
 </div>
 <p>This time, we have the sector as ‘Information’ and the occupation as ‘Audio and Video Technicians’.</p>
 <p>Let’s look at the prompt &amp; reference files.</p>
-<div id="22ed2671" class="cell">
+<div id="066131cd" class="cell">
 <details class="code-fold">
 <summary>Read second task’s prompt and its reference files</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><span class="bu" style="color: null;
@@ -4275,7 +4275,7 @@ font-style: inherit;">10</span>]</span></code></pre></div></div>
 <blockquote class="blockquote">
 <p>Ideally, I should have just written a simple “explore_task” function that accepts an index and returns occupation, sector, prompt and so on. But as part of this blog post, I think its okay to focus on each task and add commentary and not focus on writing efficient code.</p>
 </blockquote>
-<div id="d39af3f8" class="cell">
+<div id="7e8b0da7" class="cell">
 <details class="code-fold">
 <summary>Exploring third task’s sector and occupation</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1">df.sector[<span class="dv" style="color: #AD0000;
@@ -4287,7 +4287,7 @@ font-style: inherit;">21</span>]</span></code></pre></div></div>
 </div>
 <p>Interesting, we are now looking at a task from sector - ‘Government’ with occupation ‘Child, Family, and School Social Workers’.</p>
 <p>Let’s look at the prompt and reference files provided (if any).</p>
-<div id="78a40835" class="cell">
+<div id="d0e80377" class="cell">
 <details class="code-fold">
 <summary>Read third task’s prompt and its reference files</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><span class="bu" style="color: null;
@@ -4306,7 +4306,7 @@ font-style: inherit;">21</span>]</span></code></pre></div></div>
 <section id="task-4-robot-fleet-data-management-api-software-developers" class="level3" data-number="2.4">
 <h3 data-number="2.4" class="anchored" data-anchor-id="task-4-robot-fleet-data-management-api-software-developers"><span class="header-section-number">2.4</span> Task 4: Robot Fleet Data Management API (Software Developers)</h3>
 <p>Let’s look at another task in detail, and this one will be the last one as part of our exploration. Taking index 219 (or the last task) as the random task to explore.</p>
-<div id="609ccfdc" class="cell">
+<div id="9640d923" class="cell">
 <details class="code-fold">
 <summary>Exploring fourth task’s sector and occupation</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1">df.sector[<span class="dv" style="color: #AD0000;
@@ -4318,7 +4318,7 @@ font-style: inherit;">219</span>]</span></code></pre></div></div>
 </div>
 <p>We are now in a sector similar to mine - ‘Professional, Scientific, and Technical Services’ and the occupation - ‘Software Developers’. Without looking at the prompt, my prediction is that most models are able to write good quality code.</p>
 <p>Let’s explore the prompt and reference files now.</p>
-<div id="0ba47ff8" class="cell">
+<div id="c929f4e8" class="cell">
 <details class="code-fold">
 <summary>Read fourth task’s prompt and its reference files</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><span class="bu" style="color: null;
@@ -4333,7 +4333,7 @@ font-style: inherit;">219</span>]</span></code></pre></div></div>
 </div>
 <p>The task requires a Software Developer to design a scalable API and data pipeline for managing robot fleet data uploads, prioritizing real-time customer-facing insight data while handling resumable transfers, variable sensor configurations, and efficient cloud processing.</p>
 <p>There is also one reference file, and it looks like an architecture diagram. Let’s preview it.</p>
-<div id="208527bb" class="cell">
+<div id="90087905" class="cell">
 <details class="code-fold">
 <summary>Preview fourth task’s reference file</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><span class="im" style="color: #00769E;
@@ -4474,7 +4474,7 @@ Note
 <section id="task-results-elder-financial-exploitation-training-customer-service-representatives" class="level3" data-number="5.1">
 <h3 data-number="5.1" class="anchored" data-anchor-id="task-results-elder-financial-exploitation-training-customer-service-representatives"><span class="header-section-number">5.1</span> Task Results: Elder Financial Exploitation Training (Customer Service Representatives)</h3>
 <p>We will focusing on the first task in the sample set.</p>
-<div id="9b5fe419" class="cell">
+<div id="34bd3ba7" class="cell">
 <details class="code-fold">
 <summary>Load sample task data</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1">sample_fpath <span class="op" style="color: #5E5E5E;
@@ -4491,7 +4491,7 @@ font-style: inherit;">=</span> pd.read_parquet(sample_fpath)</span>
 </details>
 </div>
 <p>Let’s read the prompt and task data to understand more before we look at the results from various models.</p>
-<div id="06841581" class="cell">
+<div id="3cff3dc9" class="cell">
 <details class="code-fold">
 <summary>Read elder exploitation task details</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><span class="bu" style="color: null;
@@ -4548,7 +4548,7 @@ font-style: inherit;">0</span>]</span></code></pre></div></div>
 <section id="task-results-property-manager-weekly-schedule-property-managers" class="level3" data-number="5.2">
 <h3 data-number="5.2" class="anchored" data-anchor-id="task-results-property-manager-weekly-schedule-property-managers"><span class="header-section-number">5.2</span> Task Results: Property Manager Weekly Schedule (Property Managers)</h3>
 <p>Let’s look at the second task in the sample set and compare model outputs.</p>
-<div id="49101209" class="cell">
+<div id="bdc8cfdb" class="cell">
 <details class="code-fold">
 <summary>Preview second task details</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><span class="bu" style="color: null;
@@ -5471,7 +5471,7 @@ font-style: inherit;">self</span>.dropout(x)</span></code></pre></div></div>
 <section id="visualizing-positional-encoding-frequencies" class="level3" data-number="2.1">
 <h3 data-number="2.1" class="anchored" data-anchor-id="visualizing-positional-encoding-frequencies"><span class="header-section-number">2.1</span> Visualizing Positional Encoding Frequencies</h3>
 <p>Each dimension oscillates at a different frequency. As a result, each position gets a unique encoding - think of it like a fingerprint. Lower dimensions oscillate rapidly while higher dimensions change slowly:</p>
-<div id="85223272" class="cell">
+<div id="268445cf" class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">import</span> warnings</span>
@@ -5840,7 +5840,7 @@ font-style: inherit;">=</span> example_positional()</span>
 <section id="sec-position-fingerprints" class="level3" data-number="2.2">
 <h3 data-number="2.2" class="anchored" data-anchor-id="sec-position-fingerprints"><span class="header-section-number">2.2</span> Understanding Position Fingerprints</h3>
 <p>Let’s visualize how different positions create unique encodings and how the model learns proximity:</p>
-<div id="b8446a06" class="cell">
+<div id="aa7eefb7" class="cell">
 <details class="code-fold">
 <summary>Show code for position fingerprint visualization</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><span class="im" style="color: #00769E;
@@ -6527,7 +6527,7 @@ font-style: inherit;">=</span> visualize_position_slices()</span>
 <span id="cb3-138">chart</span></code></pre></div></div>
 </details>
 </div>
-<div id="3cf58f57" class="cell">
+<div id="536cfedd" class="cell">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><span class="bu" style="color: null;
@@ -6700,7 +6700,7 @@ What is the pass key? The pass key is ___</code></pre>
 <p>The model must retrieve the 5-digit passkey buried in thousands of tokens of repetitive text. If the model can’t find it, it means it cannot effectively use that portion of its context window.</p>
 </div>
 </div>
-<div id="f3ee9f6b" class="cell">
+<div id="8cd7d25f" class="cell">
 <details class="code-fold">
 <summary>Show code for table generation</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><span class="im" style="color: #00769E;
@@ -7288,7 +7288,7 @@ Figure&nbsp;1: Implementation of Rotary Position Embedding (RoPE)
 <p>Let’s look at a complete PyTorch implementation to understand how RoPE works in practice (adapted from HuggingFace Transformers <span class="citation" data-cites="wolf-etal-2020-transformers">(Wolf et al. 2020)</span>):</p>
 <div class="no-row-height column-margin column-container"><div id="ref-wolf-etal-2020-transformers" class="csl-entry">
 Wolf, Thomas, Lysandre Debut, Victor Sanh, Julien Chaumond, Clement Delangue, Anthony Moi, Pierric Cistac, et al. 2020. <span>“Transformers: State-of-the-Art Natural Language Processing.”</span> In <em>Proceedings of the 2020 Conference on Empirical Methods in Natural Language Processing: System Demonstrations</em>, 38–45. Online: Association for Computational Linguistics. <a href="https://www.aclweb.org/anthology/2020.emnlp-demos.6">https://www.aclweb.org/anthology/2020.emnlp-demos.6</a>.
-</div></div><div id="6c2d97b7" class="cell">
+</div></div><div id="eb86583e" class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">import</span> torch</span>
@@ -8003,7 +8003,7 @@ font-style: inherit;">"</span>)</span></code></pre></div></div>
 <section id="long-term-decay-of-rope" class="level3" data-number="3.5">
 <h3 data-number="3.5" class="anchored" data-anchor-id="long-term-decay-of-rope"><span class="header-section-number">3.5</span> Long-term Decay of RoPE</h3>
 <p>Let’s recreate the long-term decay pattern of RoPE, showing how attention naturally decreases with relative distance:</p>
-<div id="8df0e311" class="cell">
+<div id="620d6227" class="cell">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><span class="im" style="color: #00769E;
@@ -8550,7 +8550,7 @@ font-weight: bold;
 font-style: inherit;">return</span> inv_freq, attention_factor</span></code></pre></div></div>
 <p>Note the clever implementation detail: instead of scaling position IDs directly, they scale the inverse frequencies by the same factor. Since the computation is <code>embs = inv_freq @ position_ids</code>, scaling inverse frequencies is mathematically equivalent but more efficient.</p>
 <p>Here’s a simplified implementation showing the core concept:</p>
-<div id="ead57bd1" class="cell">
+<div id="7a6d9576" class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-weight: bold;
@@ -10027,7 +10027,7 @@ font-style: inherit;">url</span>={https://amaarora.github.io/posts/2025-09-21-ro
 <section id="the-secret-sauce-making-ai-sound-human" class="level2" data-number="4">
 <h2 data-number="4" class="anchored" data-anchor-id="the-secret-sauce-making-ai-sound-human"><span class="header-section-number">4</span> The Secret Sauce: Making AI Sound Human</h2>
 <p>Here’s where things got interesting. The difference between a robotic survey bot and a natural conversationalist? It all comes down to the prompt.</p>
-<div id="b0330a60" class="cell">
+<div id="59bb7533" class="cell">
 <details class="code-fold">
 <summary>Riley’s personality prompt (click to expand)</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1">PROMPT <span class="op" style="color: #5E5E5E;
@@ -10179,7 +10179,7 @@ font-style: inherit;">"""</span></span></code></pre></div></div>
 <section id="the-surprisingly-simple-implementation" class="level2" data-number="5">
 <h2 data-number="5" class="anchored" data-anchor-id="the-surprisingly-simple-implementation"><span class="header-section-number">5</span> The Surprisingly Simple Implementation</h2>
 <p>About a year ago, an automation like this would take a year. Over the weekend, it took 3 hours from research to implementation. Here’s the entire implementation:</p>
-<div id="5c88354f" class="cell">
+<div id="d3a836e2" class="cell">
 <details class="code-fold">
 <summary>Complete implementation (40 lines that changed everything)</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><span class="im" style="color: #00769E;
@@ -10363,7 +10363,7 @@ font-style: inherit;">return</span> call</span></code></pre></div></div>
 <section id="survey-results-and-analysis" class="level2" data-number="7">
 <h2 data-number="7" class="anchored" data-anchor-id="survey-results-and-analysis"><span class="header-section-number">7</span> Survey Results and Analysis</h2>
 <p>The automated survey captured both quantitative metrics and qualitative feedback:</p>
-<div id="e5da332f" class="cell">
+<div id="6771eac1" class="cell">
 <details class="code-fold">
 <summary>Survey results that revealed the real issues</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1">survey_responses <span class="op" style="color: #5E5E5E;
@@ -10418,7 +10418,7 @@ font-style: inherit;">"Toilets aren't clean - cleaner only comes once a day"</sp
 <section id="performance-metrics" class="level2" data-number="8">
 <h2 data-number="8" class="anchored" data-anchor-id="performance-metrics"><span class="header-section-number">8</span> Performance Metrics</h2>
 <p>Analysis of the conversation data showed the following performance characteristics:</p>
-<div id="6f128640" class="cell">
+<div id="b943d3ef" class="cell">
 <details class="code-fold">
 <summary>Performance metrics from the live call</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1">conversation_metrics <span class="op" style="color: #5E5E5E;
@@ -10581,7 +10581,7 @@ What makes modern day LLMs “agentic” is this ability to <strong>tool-call</s
 <section id="from-gpt-2-to-gpt-5-same-generate-loop-different-tokens" class="level2" data-number="2">
 <h2 data-number="2" class="anchored" data-anchor-id="from-gpt-2-to-gpt-5-same-generate-loop-different-tokens"><span class="header-section-number">2</span> From GPT-2 to GPT-5: Same Generate Loop, Different Tokens</h2>
 <p>Back in 2020, I wrote <a href="https://amaarora.github.io/posts/2020-02-18-annotatedGPT2.html">“The Annotated GPT-2”</a>, breaking down how the model worked. In the blog from 5 years ago, I used the generate function:</p>
-<div id="76cc15be" class="cell">
+<div id="e49f1e2b" class="cell">
 <details class="code-fold">
 <summary>GPT-2 generate loop from 2020</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="kw" style="color: #003B4F;
@@ -10644,7 +10644,7 @@ font-style: inherit;">return</span> context</span></code></pre></div></div>
 <section id="prompt-completion-without-tool-calling" class="level3" data-number="2.1">
 <h3 data-number="2.1" class="anchored" data-anchor-id="prompt-completion-without-tool-calling"><span class="header-section-number">2.1</span> Prompt completion without tool calling</h3>
 <p>A typical prompt completion without tools, looks something like below:</p>
-<div id="b67d9080" class="cell">
+<div id="8f764dff" class="cell">
 <details class="code-fold">
 <summary>Basic prompt setup</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><span class="im" style="color: #00769E;
@@ -10709,7 +10709,7 @@ Hey, what's the temperature in Paris right now?&lt;|im_end|&gt;
 &lt;|im_start|&gt;assistant</code></pre>
 <p>This is what the model sees - the conversation formatted with special tokens <code>&lt;|im_start|&gt;</code> and <code>&lt;|im_end|&gt;</code> that mark the boundaries of each message.</p>
 <p>Now, to generate the model response, we could simply call <code>model.generate()</code> as shown below:</p>
-<div id="39f35fdb" class="cell">
+<div id="5e76f713" class="cell">
 <details class="code-fold">
 <summary>Model generation without tools</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1">inputs <span class="op" style="color: #5E5E5E;
@@ -10780,7 +10780,7 @@ Okay, the user is asking for the current temperature in Paris. I need to check t
 <section id="prompt-completion-with-tool-calling" class="level3" data-number="2.2">
 <h3 data-number="2.2" class="anchored" data-anchor-id="prompt-completion-with-tool-calling"><span class="header-section-number">2.2</span> Prompt completion with tool calling</h3>
 <p>Now let’s see what happens when we give the model access to tools:</p>
-<div id="56d161d8" class="cell">
+<div id="a140c5dd" class="cell">
 <details class="code-fold">
 <summary>Tool-enabled prompt setup</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><span class="im" style="color: #00769E;
@@ -10935,7 +10935,7 @@ Notice how the tools are now part of the prompt! They’re just text tokens desc
 </p>
 </div>
 <p>Now let’s generate the model’s response:</p>
-<div id="c029365c" class="cell">
+<div id="b9ea7470" class="cell">
 <details class="code-fold">
 <summary>Model generation with tools</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1">model <span class="op" style="color: #5E5E5E;
@@ -11021,7 +11021,7 @@ Okay, the user is asking for the current temperature in Paris. I need to use the
 </div>
 <p>Now that the model has predicted something with <code>&lt;tool_call&gt;</code>, in the Responses API, we see this as <code>response.output[0].function_call</code> ! But internally, behind the APIs in model inference land - it’s all still next token prediction!</p>
 <p>The LLMs themselves don’t have the capability to execute the tool call, they can only decide which tool to call and pass in the required arguments. The developer on their end makes the tool call. As in the example, the tool response is simply “22”. So, let’s update the messages with tool call and tool response.</p>
-<div id="285b8c1b" class="cell">
+<div id="30f75dff" class="cell">
 <details class="code-fold">
 <summary>Update messages with tool call and response</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1">tool_call <span class="op" style="color: #5E5E5E;
@@ -11111,7 +11111,7 @@ Hey, what's the temperature in Paris right now?&lt;|im_end|&gt;
 &lt;/tool_response&gt;&lt;|im_end|&gt;
 &lt;|im_start|&gt;assistant</code></pre>
 <p>Notice how the tool response is formatted as a user message with <code>&lt;tool_response&gt;</code> tags. Now we call prompt completion again, since the model is trained to expect tool responses and knows what to do next:</p>
-<div id="7172366d" class="cell">
+<div id="a86d1d39" class="cell">
 <details class="code-fold">
 <summary>Generate final response with tool result</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1">inputs <span class="op" style="color: #5E5E5E;
@@ -11312,7 +11312,7 @@ Figure&nbsp;3: Taking a peek under the hood of Claude’s new file analysis capa
 <section id="data-analysis-with-python" class="level3" data-number="1.1">
 <h3 data-number="1.1" class="anchored" data-anchor-id="data-analysis-with-python"><span class="header-section-number">1.1</span> Data Analysis with Python</h3>
 <p>Here is the Python script Claude generated for analysis (<a href="https://gist.github.com/amaarora/5be79c36ae75c326d63ab9db2854e0d0#file-analyze_nsw_property_data-py">view full script on GitHub</a>):</p>
-<div id="611eba22" class="cell">
+<div id="6ae58781" class="cell">
 <details class="code-fold">
 <summary>Data processing logic</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="co" style="color: #5E5E5E;
@@ -11538,7 +11538,7 @@ font-weight: bold;
 font-style: inherit;">return</span> pd.DataFrame(all_sales)</span></code></pre></div></div>
 </details>
 </div>
-<div id="b4582faa" class="cell">
+<div id="fd39f6a4" class="cell">
 <details class="code-fold">
 <summary>Growth analysis calculation</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><span class="co" style="color: #5E5E5E;
@@ -11675,7 +11675,7 @@ font-weight: bold;
 font-style: inherit;">return</span> pd.DataFrame(growth_analysis)</span></code></pre></div></div>
 </details>
 </div>
-<div id="0fd169dc" class="cell">
+<div id="386145b6" class="cell">
 <details class="code-fold">
 <summary>Visualization generation</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><span class="co" style="color: #5E5E5E;
@@ -11832,7 +11832,7 @@ font-style: inherit;">'tight'</span>)</span></code></pre></div></div>
 <section id="document-generation-with-node.js" class="level3" data-number="1.2">
 <h3 data-number="1.2" class="anchored" data-anchor-id="document-generation-with-node.js"><span class="header-section-number">1.2</span> Document Generation with Node.js</h3>
 <p>For document generation, Claude leveraged Node.js with the <code>docx</code> package (<a href="https://gist.github.com/amaarora/5be79c36ae75c326d63ab9db2854e0d0#file-create_simple_report-js">view full script on GitHub</a>):</p>
-<div id="3a36751d" class="cell">
+<div id="dcca8d01" class="cell">
 <details class="code-fold">
 <summary>Document structure setup</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><span class="op" style="color: #5E5E5E;
@@ -11953,7 +11953,7 @@ font-style: inherit;">;</span></span>
 <span id="cb4-51">}</span></code></pre></div></div>
 </details>
 </div>
-<div id="5614ff8a" class="cell">
+<div id="6e472aa7" class="cell">
 <details class="code-fold">
 <summary>Table generation with formatting</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><span class="op" style="color: #5E5E5E;
@@ -12071,7 +12071,7 @@ font-style: inherit;">;</span></span>
 <span id="cb5-47">}</span></code></pre></div></div>
 </details>
 </div>
-<div id="01ceca9b" class="cell">
+<div id="667aeebd" class="cell">
 <details class="code-fold">
 <summary>Report content generation</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><span class="op" style="color: #5E5E5E;
