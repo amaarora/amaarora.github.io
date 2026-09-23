@@ -359,7 +359,7 @@ Figure&nbsp;3: GDPVal win rate with Opus4.1 as the strongest performing model
 <section id="task-1-anti-financial-crime-risk-audit-accountants-auditors" class="level3" data-number="2.1">
 <h3 data-number="2.1" class="anchored" data-anchor-id="task-1-anti-financial-crime-risk-audit-accountants-auditors"><span class="header-section-number">2.1</span> Task 1: Anti-Financial Crime Risk Audit (Accountants &amp; Auditors)</h3>
 <p>To further understand the dataset, let’s deep dive into the first task.</p>
-<div id="5b4df991" class="cell">
+<div id="5f3f2b15" class="cell">
 <details class="code-fold">
 <summary>Read tasks dataset</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
@@ -371,14 +371,14 @@ Figure&nbsp;3: GDPVal win rate with Opus4.1 as the strongest performing model
 </details>
 </div>
 <p>Now, having read the tasks dataset, let’s start exploring the first task. We will start by looking at the sector and occupation that this task is from.</p>
-<div id="9f654754" class="cell">
+<div id="80e09714" class="cell">
 <details class="code-fold">
 <summary>Exploring first task’s sector and occupation</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>df.sector[<span class="dv">0</span>], df.occupation[<span class="dv">0</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 <p>Ok, so now we know the task is from sector - <strong>‘Professional, Scientific, and Technical Services’</strong> belonging to <strong>‘Accountants and Auditors’</strong> occupation. Let’s also read the accompanying prompt and reference files available.</p>
-<div id="933edb11" class="cell">
+<div id="f503c123" class="cell">
 <details class="code-fold">
 <summary>Read first task’s prompt and its reference files</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df.prompt[<span class="dv">0</span>]) </span>
@@ -387,7 +387,7 @@ Figure&nbsp;3: GDPVal win rate with Opus4.1 as the strongest performing model
 </div>
 <p>So the task requires an auditor to analyze Anti-Financial Crime Risk Metrics, select a representative sample based on specific risk criteria, and deliver the results in a new spreadsheet titled ‘Sample’ with supporting workings. The key question that GDPVal benchmark tries to answer: <strong>“Can this task be automated and to what accuracy?”</strong></p>
 <p>Let’s dig a bit deeper into the provided spreadsheet as well.</p>
-<div id="65055a5a" class="cell">
+<div id="3a9187b1" class="cell">
 <details class="code-fold">
 <summary>Preview first task’s reference file</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
@@ -411,7 +411,7 @@ Figure&nbsp;3: GDPVal win rate with Opus4.1 as the strongest performing model
 <section id="task-2-iem-system-design-audio-video-technicians" class="level3" data-number="2.2">
 <h3 data-number="2.2" class="anchored" data-anchor-id="task-2-iem-system-design-audio-video-technicians"><span class="header-section-number">2.2</span> Task 2: IEM System Design (Audio &amp; Video Technicians)</h3>
 <p>Let’s also look at the another task in the same detail as we did with the first one. We start with the sector and occupation. I chose arbitrary index as 10.</p>
-<div id="90656bad" class="cell">
+<div id="b9e1d617" class="cell">
 <details class="code-fold">
 <summary>Exploring second task’s sector and occupation</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>df.sector[<span class="dv">10</span>], df.occupation[<span class="dv">10</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -419,7 +419,7 @@ Figure&nbsp;3: GDPVal win rate with Opus4.1 as the strongest performing model
 </div>
 <p>This time, we have the sector as ‘Information’ and the occupation as ‘Audio and Video Technicians’.</p>
 <p>Let’s look at the prompt &amp; reference files.</p>
-<div id="066131cd" class="cell">
+<div id="d39b9de0" class="cell">
 <details class="code-fold">
 <summary>Read second task’s prompt and its reference files</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df.prompt[<span class="dv">10</span>])</span>
@@ -436,7 +436,7 @@ Figure&nbsp;3: GDPVal win rate with Opus4.1 as the strongest performing model
 <blockquote class="blockquote">
 <p>Ideally, I should have just written a simple “explore_task” function that accepts an index and returns occupation, sector, prompt and so on. But as part of this blog post, I think its okay to focus on each task and add commentary and not focus on writing efficient code.</p>
 </blockquote>
-<div id="7e8b0da7" class="cell">
+<div id="1dfda34e" class="cell">
 <details class="code-fold">
 <summary>Exploring third task’s sector and occupation</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>df.sector[<span class="dv">21</span>], df.occupation[<span class="dv">21</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -444,7 +444,7 @@ Figure&nbsp;3: GDPVal win rate with Opus4.1 as the strongest performing model
 </div>
 <p>Interesting, we are now looking at a task from sector - ‘Government’ with occupation ‘Child, Family, and School Social Workers’.</p>
 <p>Let’s look at the prompt and reference files provided (if any).</p>
-<div id="d0e80377" class="cell">
+<div id="218f6844" class="cell">
 <details class="code-fold">
 <summary>Read third task’s prompt and its reference files</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df.prompt[<span class="dv">21</span>])</span>
@@ -457,7 +457,7 @@ Figure&nbsp;3: GDPVal win rate with Opus4.1 as the strongest performing model
 <section id="task-4-robot-fleet-data-management-api-software-developers" class="level3" data-number="2.4">
 <h3 data-number="2.4" class="anchored" data-anchor-id="task-4-robot-fleet-data-management-api-software-developers"><span class="header-section-number">2.4</span> Task 4: Robot Fleet Data Management API (Software Developers)</h3>
 <p>Let’s look at another task in detail, and this one will be the last one as part of our exploration. Taking index 219 (or the last task) as the random task to explore.</p>
-<div id="9640d923" class="cell">
+<div id="d552531c" class="cell">
 <details class="code-fold">
 <summary>Exploring fourth task’s sector and occupation</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>df.sector[<span class="dv">219</span>], df.occupation[<span class="dv">219</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -465,7 +465,7 @@ Figure&nbsp;3: GDPVal win rate with Opus4.1 as the strongest performing model
 </div>
 <p>We are now in a sector similar to mine - ‘Professional, Scientific, and Technical Services’ and the occupation - ‘Software Developers’. Without looking at the prompt, my prediction is that most models are able to write good quality code.</p>
 <p>Let’s explore the prompt and reference files now.</p>
-<div id="c929f4e8" class="cell">
+<div id="8f3e20b9" class="cell">
 <details class="code-fold">
 <summary>Read fourth task’s prompt and its reference files</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df.prompt[<span class="dv">219</span>])</span>
@@ -474,7 +474,7 @@ Figure&nbsp;3: GDPVal win rate with Opus4.1 as the strongest performing model
 </div>
 <p>The task requires a Software Developer to design a scalable API and data pipeline for managing robot fleet data uploads, prioritizing real-time customer-facing insight data while handling resumable transfers, variable sensor configurations, and efficient cloud processing.</p>
 <p>There is also one reference file, and it looks like an architecture diagram. Let’s preview it.</p>
-<div id="90087905" class="cell">
+<div id="70c91eda" class="cell">
 <details class="code-fold">
 <summary>Preview fourth task’s reference file</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> PIL <span class="im">import</span> Image</span>
@@ -597,7 +597,7 @@ Note
 <section id="task-results-elder-financial-exploitation-training-customer-service-representatives" class="level3" data-number="5.1">
 <h3 data-number="5.1" class="anchored" data-anchor-id="task-results-elder-financial-exploitation-training-customer-service-representatives"><span class="header-section-number">5.1</span> Task Results: Elder Financial Exploitation Training (Customer Service Representatives)</h3>
 <p>We will focusing on the first task in the sample set.</p>
-<div id="34bd3ba7" class="cell">
+<div id="f3a305aa" class="cell">
 <details class="code-fold">
 <summary>Load sample task data</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>sample_fpath <span class="op">=</span> (DATA_DIR <span class="op">+</span> <span class="st">"/data/task_data.parquet"</span>)</span>
@@ -606,7 +606,7 @@ Note
 </details>
 </div>
 <p>Let’s read the prompt and task data to understand more before we look at the results from various models.</p>
-<div id="3cff3dc9" class="cell">
+<div id="431dd7c0" class="cell">
 <details class="code-fold">
 <summary>Read elder exploitation task details</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df.prompt[<span class="dv">0</span>])</span>
@@ -651,7 +651,7 @@ Note
 <section id="task-results-property-manager-weekly-schedule-property-managers" class="level3" data-number="5.2">
 <h3 data-number="5.2" class="anchored" data-anchor-id="task-results-property-manager-weekly-schedule-property-managers"><span class="header-section-number">5.2</span> Task Results: Property Manager Weekly Schedule (Property Managers)</h3>
 <p>Let’s look at the second task in the sample set and compare model outputs.</p>
-<div id="bdc8cfdb" class="cell">
+<div id="06cf1424" class="cell">
 <details class="code-fold">
 <summary>Preview second task details</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df.prompt[<span class="dv">1</span>])</span>
@@ -723,7 +723,19 @@ Patwardhan, Tejal, Rachel Dias, Elizabeth Proehl, Grace Kim, et al. 2025. <span>
         </div>
     </div>
 </form>
-</div><script type="text/javascript">(function($) {window.fnames = new Array(); window.ftypes = new Array();fnames[0]='EMAIL';ftypes[0]='email';fnames[1]='FNAME';ftypes[1]='text';fnames[2]='LNAME';ftypes[2]='text';fnames[3]='ADDRESS';ftypes[3]='address';fnames[4]='PHONE';ftypes[4]='phone';fnames[5]='BIRTHDAY';ftypes[5]='birthday';}(jQuery));var $mcj = jQuery.noConflict(true);</script></main> <!-- /main -->
+</div><script type="text/javascript">(function($) {window.fnames = new Array(); window.ftypes = new Array();fnames[0]='EMAIL';ftypes[0]='email';fnames[1]='FNAME';ftypes[1]='text';fnames[2]='LNAME';ftypes[2]='text';fnames[3]='ADDRESS';ftypes[3]='address';fnames[4]='PHONE';ftypes[4]='phone';fnames[5]='BIRTHDAY';ftypes[5]='birthday';}(jQuery));var $mcj = jQuery.noConflict(true);</script><div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" id="quarto-citation"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{arora2025,
+  author = {Arora, Aman},
+  title = {GDPVAL: {Evaluating} {AI} {Model} {Performance} on
+    {Real-World} {Economically} {Valuable} {Tasks}},
+  date = {2025-12-15},
+  url = {https://amaarora.github.io/posts/2025-12-15-gdpval-review.html},
+  langid = {en}
+}
+</code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-arora2025" class="csl-entry quarto-appendix-citeas" role="listitem">
+Arora, Aman. 2025. <span>“GDPVAL: Evaluating AI Model Performance on
+Real-World Economically Valuable Tasks.”</span> Aman Arora’s Blog.
+December 15, 2025. <a href="https://amaarora.github.io/posts/2025-12-15-gdpval-review.html">https://amaarora.github.io/posts/2025-12-15-gdpval-review.html</a>.
+</div></div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";
