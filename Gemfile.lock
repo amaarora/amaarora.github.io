@@ -223,7 +223,7 @@ GEM
     rouge (3.13.0)
     ruby-enum (0.7.2)
       i18n
-    rubyzip (2.0.0)
+    rubyzip (3.4.0)
     safe_yaml (1.0.5)
     sass (3.7.4)
       sass-listen (~> 4.0.0)
@@ -253,6 +253,7 @@ DEPENDENCIES
   faraday (< 1.0)
   github-pages
   jekyll-feed (~> 0.12)
+  jekyll-github-metadata
   jekyll-octicons
   minima (~> 2.5)
   tzinfo (~> 1.2)
